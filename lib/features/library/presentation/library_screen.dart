@@ -5,9 +5,6 @@ class LibraryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Library'), elevation: 0),
-      body: const Center(child: Text('Your Decks')),
-    );
+    return Scaffold(body: const Center(child: Text('Your Decks')));
   }
 }

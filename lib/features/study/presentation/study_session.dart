@@ -10,9 +10,6 @@ class StudySession extends StatefulWidget {
 class _StudySessionState extends State<StudySession> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Study'), elevation: 0),
-      body: const Center(child: Text('Study Session')),
-    );
+    return Scaffold(body: const Center(child: Text('Study Session')));
   }
 }

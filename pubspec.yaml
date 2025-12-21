@@ -13,6 +13,7 @@ dependencies:
   google_fonts: ^6.3.3
   llm_json_stream: ^0.4.7
   lucide_icons: ^0.257.0
+  flutter_displaymode: ^0.7.0
 
 dev_dependencies:
   flutter_test:
