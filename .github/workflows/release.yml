@@ -1,0 +1,306 @@
+name: Release (Main Branch)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'pubspec.yaml'
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build even if version unchanged'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  APP_NAME: project_2359
+  WINDOWS_ARCHIVE: project_2359-windows.zip
+  FLUTTER_CHANNEL: stable
+
+jobs:
+  check-version-change:
+    runs-on: ubuntu-latest
+    outputs:
+      version_changed: ${{ steps.check.outputs.changed }}
+      new_version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if version changed
+        id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//' | tr -d '[:space:]')
+          echo "Current version: $CURRENT_VERSION"
+
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.force_build }}" == "true" ]; then
+            echo "Manual trigger with force build enabled"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if git rev-parse HEAD^1 >/dev/null 2>&1; then
+            PREVIOUS_VERSION=$(git show HEAD^1:pubspec.yaml | grep '^version:' | sed 's/version: //' | sed 's/+.*//' | tr -d '[:space:]')
+            echo "Previous version: $PREVIOUS_VERSION"
+          else
+            PREVIOUS_VERSION=""
+            echo "No previous commit found (first commit)"
+          fi
+
+          if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+            echo "Version changed from $PREVIOUS_VERSION to $CURRENT_VERSION"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Version unchanged"
+          fi
+
+  build-android:
+    needs: check-version-change
+    if: needs.check-version-change.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  build-windows:
+    needs: check-version-change
+    if: needs.check-version-change.outputs.version_changed == 'true'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Create Windows archive
+        shell: pwsh
+        run: |
+          $archiveName = "${{ env.WINDOWS_ARCHIVE }}"
+          $archivePath = "build/windows/$archiveName"
+          if (Test-Path $archivePath) { Remove-Item $archivePath }
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath $archivePath
+
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: build/windows/${{ env.WINDOWS_ARCHIVE }}
+
+  build-web:
+    needs: check-version-change
+    if: needs.check-version-change.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Web
+        run: flutter build web --release --base-href /${{ github.event.repository.name }}/
+
+      - name: Upload Web Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-release
+          path: build/web
+
+  deploy-github-pages:
+    needs: [check-version-change, build-web]
+    if: needs.check-version-change.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Web Build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-release
+          path: build/web
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+          publish_branch: gh-pages
+          force_orphan: true
+
+  create-release:
+    needs:
+      - check-version-change
+      - build-android
+      - build-windows
+      - build-web
+      - deploy-github-pages
+    if: needs.check-version-change.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Android APK
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: artifacts
+
+      - name: Download Windows Build
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-release
+          path: artifacts
+
+      - name: Download Web Build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-release
+          path: artifacts/web
+
+      - name: Rename and prepare artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.check-version-change.outputs.new_version }}"
+          mv artifacts/app-release.apk "artifacts/${APP_NAME}-v${VERSION}-android.apk"
+          mv "artifacts/${{ env.WINDOWS_ARCHIVE }}" "artifacts/${APP_NAME}-v${VERSION}-windows.zip"
+          cd artifacts
+          zip -r "${APP_NAME}-v${VERSION}-web.zip" web/
+          rm -rf web
+
+      - name: Generate checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.check-version-change.outputs.new_version }}"
+          cd artifacts
+          sha256sum "${APP_NAME}-v${VERSION}-android.apk" > "${APP_NAME}-v${VERSION}-android.apk.sha256"
+          sha256sum "${APP_NAME}-v${VERSION}-windows.zip" > "${APP_NAME}-v${VERSION}-windows.zip.sha256"
+          sha256sum "${APP_NAME}-v${VERSION}-web.zip" > "${APP_NAME}-v${VERSION}-web.zip.sha256"
+          cat *.sha256 > CHECKSUMS.txt
+          cat CHECKSUMS.txt
+
+      - name: Extract changelog (optional)
+        id: changelog
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.check-version-change.outputs.new_version }}"
+          CHANGELOG=""
+          if [ -f "CHANGELOG.yaml" ]; then
+            sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            sudo chmod +x /usr/local/bin/yq
+            CHANGELOG=$(yq eval ".versions[] | select(.version == \"$VERSION\") | .changes | .[]" CHANGELOG.yaml 2>/dev/null | sed 's/^/- /' || echo "")
+          fi
+          if [ -n "$CHANGELOG" ]; then
+            {
+              echo "## What's New"
+              echo "$CHANGELOG"
+              echo
+            } > release_notes.md
+          else
+            cat > release_notes.md <<EOF
+          ## What's New
+          - Version $VERSION release
+
+          EOF
+          fi
+          cat >> release_notes.md <<EOF
+          ## Downloads
+          | Platform | File | Description |
+          |----------|------|-------------|
+          | Android | \`${APP_NAME}-v$VERSION-android.apk\` | Direct install APK |
+          | Windows | \`${APP_NAME}-v$VERSION-windows.zip\` | Portable Windows app (extract and run) |
+          | Web | \`${APP_NAME}-v$VERSION-web.zip\` | Web build archive |
+
+          ## Live Web App
+          🌐 **Try it now**: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+
+          ## Checksums (SHA256)
+          Verify your download integrity with these checksums:
+          ```
+          $(cat artifacts/CHECKSUMS.txt)
+          ```
+
+          ## How to Verify
+          - **Linux/macOS**: `sha256sum -c <filename>.sha256`
+          - **Windows PowerShell**: `Get-FileHash <filename> -Algorithm SHA256`
+          EOF
+          echo "Release notes created:"
+          cat release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.check-version-change.outputs.new_version }}
+          name: Release v${{ needs.check-version-change.outputs.new_version }}
+          body_path: release_notes.md
+          files: |
+            artifacts/${{ env.APP_NAME }}-v${{ needs.check-version-change.outputs.new_version }}-android.apk
+            artifacts/${{ env.APP_NAME }}-v${{ needs.check-version-change.outputs.new_version }}-android.apk.sha256
+            artifacts/${{ env.APP_NAME }}-v${{ needs.check-version-change.outputs.new_version }}-windows.zip
+            artifacts/${{ env.APP_NAME }}-v${{ needs.check-version-change.outputs.new_version }}-windows.zip.sha256
+            artifacts/${{ env.APP_NAME }}-v${{ needs.check-version-change.outputs.new_version }}-web.zip
+            artifacts/${{ env.APP_NAME }}-v${{ needs.check-version-change.outputs.new_version }}-web.zip.sha256
+            artifacts/CHECKSUMS.txt
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
