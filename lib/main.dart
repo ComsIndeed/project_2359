@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:project_2359/core/services/display_mode_service.dart';
 import 'package:project_2359/core/theme/app_theme.dart';
 import 'package:project_2359/core/widgets/homepage.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize high refresh rate support
+  await DisplayModeService().initialize();
+
   runApp(const MainApp());
 }
 
