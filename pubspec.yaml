@@ -1,7 +1,7 @@
 name: project_2359
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.1
+version: 0.1.2
 
 license: 'AGPL-3.0-or-later'
 
@@ -16,7 +16,7 @@ dependencies:
   llm_json_stream: ^0.4.7
   lucide_icons: ^0.257.0
   flutter_displaymode: ^0.7.0
-  file_picker: ^6.0.0
+  file_picker: ^10.3.8
   flutter_heatmap_calendar: ^1.0.5
 
 dev_dependencies:
