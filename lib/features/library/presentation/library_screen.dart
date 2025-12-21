@@ -100,13 +100,19 @@ class _LibraryScreenState extends State<LibraryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Library',
-                    style: GoogleFonts.inter(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFFEDEDED),
-                    ),
+                  Row(
+                    children: [
+                      Image.asset('assets/app_icon.png', width: 40, height: 40),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Library',
+                        style: GoogleFonts.inter(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFFEDEDED),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   // Search bar
