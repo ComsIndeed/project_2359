@@ -6,7 +6,6 @@ import 'package:project_2359/core/widgets/homepage.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize high refresh rate support
   await DisplayModeService().initialize();
 
   runApp(const MainApp());
@@ -17,6 +16,9 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(theme: AppTheme.darkTheme, home: const Homepage());
+    return MaterialApp(
+      theme: AppTheme.darkTheme,
+      home: SafeArea(child: const Homepage()),
+    );
   }
 }

@@ -32,8 +32,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1E1E1E),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: const RoundedSuperellipseBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
       ),
       builder: (context) => Container(
         padding: const EdgeInsets.all(24),
@@ -160,6 +160,22 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   onTap: () {
                     // TODO: Navigate to deck detail
                   },
+                  onRename: (newName) {
+                    setState(() {
+                      _decks[index]['title'] = newName;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Deck renamed to $newName')),
+                    );
+                  },
+                  onDelete: () {
+                    setState(() {
+                      _decks.removeAt(index);
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Deck deleted')),
+                    );
+                  },
                 ),
               );
             }, childCount: _decks.length),
@@ -185,28 +201,17 @@ class _ModalOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return ListTile(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF09090b),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFF2D2D2D)),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: const Color(0xFF00D9FF)),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFFEDEDED),
-              ),
-            ),
-          ],
+      leading: Icon(icon, color: const Color(0xFF00D9FF)),
+      tileColor: Color(0xFF09090b),
+      shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(16)),
+      title: Text(
+        label,
+        style: GoogleFonts.inter(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: const Color(0xFFEDEDED),
         ),
       ),
     );
