@@ -1,0 +1,107 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Expo / React Native
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+*.hprof
+
+# Native builds (generated)
+ios/
+android/
+.kotlin/
+
+# Build outputs
+build/
+*.apk
+*.aab
+*.ipa
+*.app
+
+# Metro bundler
+.metro-health-check*
+
+# Debug logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# macOS
+.DS_Store
+*.pem
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# IDE / Editor
+.idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vscode/settings.json
+.vscode/launch.json
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+.jest/
+
+# Native signing
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.keystore
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Flutter (for the flutter app in this monorepo)
+apps/project_2359_flutter/.dart_tool/
+apps/project_2359_flutter/.packages
+apps/project_2359_flutter/build/
+apps/project_2359_flutter/.flutter-plugins
+apps/project_2359_flutter/.flutter-plugins-dependencies
+apps/project_2359_flutter/pubspec.lock
+apps/project_2359_flutter/ios/
+apps/project_2359_flutter/android/
+apps/project_2359_flutter/web/
+apps/project_2359_flutter/windows/
+apps/project_2359_flutter/linux/
+apps/project_2359_flutter/macos/
+*.ipr
+*.iws
+
+# Drizzle
+drizzle/
+
+# SQLite
+*.db
+*.sqlite
+*.sqlite3
