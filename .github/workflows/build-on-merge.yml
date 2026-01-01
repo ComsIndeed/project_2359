@@ -1,0 +1,109 @@
+name: Build on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+    paths:
+      - 'apps/project-2359-rn/**/*.ts'
+      - 'apps/project-2359-rn/**/*.tsx'
+      - 'apps/project-2359-rn/**/*.js'
+      - 'apps/project-2359-rn/**/*.jsx'
+      - 'apps/project-2359-rn/**/*.json'
+      - '!apps/project-2359-rn/node_modules/**'
+
+jobs:
+  build-and-deploy:
+    # Only run if the PR was merged (not just closed)
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      
+    env:
+      APP_NAME: project-2359-rn
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/project-2359-rn/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/project-2359-rn
+        run: npm ci
+
+      - name: Setup Expo CLI
+        run: npm install -g expo-cli eas-cli
+
+      - name: Setup EAS
+        run: eas login --token ${{ secrets.EXPO_TOKEN }}
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      # ===============================
+      # Android APK Build
+      # ===============================
+      - name: Build Android APK (Preview)
+        working-directory: apps/project-2359-rn
+        run: eas build --platform android --profile preview --non-interactive --local
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Get current datetime
+        id: datetime
+        run: echo "datetime=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release (Automated Build)
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: auto-build-${{ github.run_number }}
+          name: "${{ env.APP_NAME }} - Automated Build on Push - ${{ steps.datetime.outputs.datetime }}"
+          body: |
+            ## Automated Build
+            
+            **Triggered by PR merge:**
+            - **PR:** #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}
+            - **Author:** @${{ github.event.pull_request.user.login }}
+            - **Merged by:** @${{ github.event.pull_request.merged_by.login }}
+            - **Link:** ${{ github.event.pull_request.html_url }}
+            
+            ---
+            
+            This is an automated build triggered by a pull request merge.
+          files: |
+            apps/project-2359-rn/build-*.apk
+          draft: false
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ===============================
+      # Web Build & Deploy
+      # ===============================
+      - name: Build Web App
+        working-directory: apps/project-2359-rn
+        run: npx expo export --platform web --output-dir dist
+
+      - name: Prepare deployment structure
+        run: |
+          mkdir -p deploy/react-native
+          mkdir -p deploy/flutter
+          mkdir -p deploy/react
+          cp -r apps/project-2359-rn/dist/* deploy/react-native/
+          # Create placeholder index for root
+          echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Project 2359</title></head><body><h1>Project 2359</h1><ul><li><a href="/react-native">React Native App</a></li><li><a href="/flutter">Flutter App</a></li><li><a href="/react">React App</a></li></ul></body></html>' > deploy/index.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy
+          destination_dir: .
+          keep_files: true
