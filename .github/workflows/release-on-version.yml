@@ -19,19 +19,28 @@ jobs:
       
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2 # v4.2.2
         with:
           fetch-depth: 2
 
       - name: Check if version changed
         id: version_check
         run: |
-          # Get current version
-          CURRENT_VERSION=$(jq -r '.version' apps/project-2359-rn/package.json)
+          # Get current version using jq with proper quoting
+          CURRENT_VERSION=$(jq -r '.version // "0.0.0"' apps/project-2359-rn/package.json)
           
-          # Get previous version
-          git show HEAD~1:apps/project-2359-rn/package.json > /tmp/old_package.json 2>/dev/null || echo '{"version":"0.0.0"}' > /tmp/old_package.json
-          PREVIOUS_VERSION=$(jq -r '.version' /tmp/old_package.json)
+          # Validate version format (semantic versioning)
+          if ! echo "$CURRENT_VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$'; then
+            echo "Error: Invalid version format: $CURRENT_VERSION"
+            exit 1
+          fi
+          
+          # Get previous version - use a secure temporary directory
+          TEMP_DIR=$(mktemp -d)
+          trap "rm -rf $TEMP_DIR" EXIT
+          
+          git show HEAD~1:apps/project-2359-rn/package.json > "$TEMP_DIR/old_package.json" 2>/dev/null || echo '{"version":"0.0.0"}' > "$TEMP_DIR/old_package.json"
+          PREVIOUS_VERSION=$(jq -r '.version // "0.0.0"' "$TEMP_DIR/old_package.json")
           
           echo "Current version: $CURRENT_VERSION"
           echo "Previous version: $PREVIOUS_VERSION"
@@ -59,10 +68,10 @@ jobs:
       
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2 # v4.2.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4.1.0 # v4.1.0
         with:
           node-version: '20'
           cache: 'npm'
@@ -77,18 +86,26 @@ jobs:
 
       - name: Setup EAS
         run: eas login --token ${{ secrets.EXPO_TOKEN }}
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Extract changelog for this version
         id: changelog
+        env:
+          VERSION: ${{ env.VERSION }}
         run: |
-          VERSION="${{ env.VERSION }}"
+          # Validate VERSION format again to prevent injection
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$'; then
+            echo "Error: Invalid version format for changelog extraction"
+            exit 1
+          fi
+          
+          # Use a secure temporary directory
+          TEMP_DIR=$(mktemp -d)
+          trap "rm -rf $TEMP_DIR" EXIT
           
           if [ -f CHANGELOG.md ]; then
             # Extract content between this version header and the next version header (or EOF)
-            # Matches ## X.Y.Z or ## vX.Y.Z patterns
-            CHANGELOG=$(awk -v ver="$VERSION" '
+            # Using awk with safe variable passing
+            awk -v ver="$VERSION" '
               BEGIN { found=0; content="" }
               /^## v?[0-9]+\.[0-9]+\.[0-9]+/ {
                 if (found) exit
@@ -97,17 +114,18 @@ jobs:
               }
               found { content = content $0 "\n" }
               END { print content }
-            ' CHANGELOG.md)
+            ' CHANGELOG.md > "$TEMP_DIR/changelog_content.txt"
             
-            if [ -z "$CHANGELOG" ]; then
-              CHANGELOG="No changelog entry found for version $VERSION"
+            # Check if changelog was found
+            if [ ! -s "$TEMP_DIR/changelog_content.txt" ]; then
+              echo "No changelog entry found for version $VERSION" > "$TEMP_DIR/changelog_content.txt"
             fi
           else
-            CHANGELOG="No CHANGELOG.md file found"
+            echo "No CHANGELOG.md file found" > "$TEMP_DIR/changelog_content.txt"
           fi
           
-          # Write to file to preserve multiline content
-          echo "$CHANGELOG" > /tmp/changelog_content.txt
+          # Copy to a known location that won't be cleaned up by trap
+          cp "$TEMP_DIR/changelog_content.txt" /tmp/changelog_content.txt
           echo "changelog_file=/tmp/changelog_content.txt" >> $GITHUB_OUTPUT
 
       # ===============================
@@ -121,12 +139,29 @@ jobs:
 
       - name: Find and rename APK
         id: find_apk
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+          VERSION: ${{ env.VERSION }}
         run: |
-          APK_PATH=$(find apps/project-2359-rn -name "*.apk" -type f | head -1)
-          if [ -n "$APK_PATH" ]; then
-            NEW_APK_PATH="apps/project-2359-rn/${{ env.APP_NAME }}-v${{ env.VERSION }}.apk"
+          # Validate VERSION format
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$'; then
+            echo "Error: Invalid version format"
+            exit 1
+          fi
+          
+          # Find APK only within the expected directory, not following symlinks
+          APK_PATH=$(find apps/project-2359-rn -maxdepth 3 -name "*.apk" -type f ! -path "*/node_modules/*" | head -1)
+          
+          if [ -n "$APK_PATH" ] && [ -f "$APK_PATH" ]; then
+            # Sanitize the filename
+            SAFE_VERSION=$(echo "$VERSION" | tr -cd '0-9a-zA-Z.-')
+            NEW_APK_PATH="apps/project-2359-rn/${APP_NAME}-v${SAFE_VERSION}.apk"
+            
             mv "$APK_PATH" "$NEW_APK_PATH"
             echo "apk_path=$NEW_APK_PATH" >> $GITHUB_OUTPUT
+          else
+            echo "Error: No APK file found"
+            exit 1
           fi
 
       # ===============================
@@ -146,7 +181,7 @@ jobs:
           echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Project 2359</title></head><body><h1>Project 2359</h1><ul><li><a href="/react-native">React Native App</a></li><li><a href="/flutter">Flutter App</a></li><li><a href="/react">React App</a></li></ul></body></html>' > deploy/index.html
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@v4.0.0 # v4.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./deploy
@@ -157,7 +192,7 @@ jobs:
       # Create Official Release
       # ===============================
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2.2.0 # v2.2.0
         with:
           tag_name: v${{ env.VERSION }}
           name: "${{ env.APP_NAME }} v${{ env.VERSION }}"
