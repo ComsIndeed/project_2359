@@ -26,10 +26,10 @@ jobs:
       
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2 # v4.2.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4.1.0 # v4.1.0
         with:
           node-version: '20'
           cache: 'npm'
@@ -44,8 +44,6 @@ jobs:
 
       - name: Setup EAS
         run: eas login --token ${{ secrets.EXPO_TOKEN }}
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       # ===============================
       # Android APK Build
@@ -60,23 +58,39 @@ jobs:
         id: datetime
         run: echo "datetime=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
 
+      - name: Prepare release body
+        id: release_body
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_MERGED_BY: ${{ github.event.pull_request.merged_by.login }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          cat << 'EOF' > /tmp/release_body.md
+          ## Automated Build
+          
+          **Triggered by PR merge:**
+          - **PR:** #${PR_NUMBER} - ${PR_TITLE}
+          - **Author:** @${PR_AUTHOR}
+          - **Merged by:** @${PR_MERGED_BY}
+          - **Link:** ${PR_URL}
+          
+          ---
+          
+          This is an automated build triggered by a pull request merge.
+          EOF
+          
+          # Expand environment variables in the template
+          envsubst < /tmp/release_body.md > /tmp/release_body_final.md
+          echo "body_file=/tmp/release_body_final.md" >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release (Automated Build)
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2.2.0 # v2.2.0
         with:
           tag_name: auto-build-${{ github.run_number }}
           name: "${{ env.APP_NAME }} - Automated Build on Push - ${{ steps.datetime.outputs.datetime }}"
-          body: |
-            ## Automated Build
-            
-            **Triggered by PR merge:**
-            - **PR:** #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}
-            - **Author:** @${{ github.event.pull_request.user.login }}
-            - **Merged by:** @${{ github.event.pull_request.merged_by.login }}
-            - **Link:** ${{ github.event.pull_request.html_url }}
-            
-            ---
-            
-            This is an automated build triggered by a pull request merge.
+          body_path: ${{ steps.release_body.outputs.body_file }}
           files: |
             apps/project-2359-rn/build-*.apk
           draft: false
@@ -101,7 +115,7 @@ jobs:
           echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Project 2359</title></head><body><h1>Project 2359</h1><ul><li><a href="/react-native">React Native App</a></li><li><a href="/flutter">Flutter App</a></li><li><a href="/react">React App</a></li></ul></body></html>' > deploy/index.html
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@v4.0.0 # v4.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./deploy
