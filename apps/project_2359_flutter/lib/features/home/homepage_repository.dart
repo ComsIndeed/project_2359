@@ -5,49 +5,47 @@ class HomepageRepository {
   List<QuickAction> getQuickActions() {
     return [
       const QuickAction(
-        title: 'Materials\nStudio',
-        subtitle: 'Generate Notes',
-        icon: Icons.auto_awesome,
-        backgroundColor: Color(0xFF1E2843),
-        iconColor: Color(0xFF2E7DFF),
+        title: 'New Material',
+        icon: Icons.add,
+        color: Color(0xFF2E7DFF),
       ),
       const QuickAction(
-        title: 'Study Session',
-        subtitle: 'Focus Mode',
-        icon: Icons.timer_outlined,
-        backgroundColor: Color(0xFF2A211D),
-        iconColor: Color(0xFFFF7D33),
-      ),
-      const QuickAction(
-        title: 'Scores',
-        subtitle: 'Analytics',
-        icon: Icons.bar_chart_rounded,
-        backgroundColor: Color(0xFF1B2A23),
-        iconColor: Color(0xFF4ADE80),
+        title: 'Start Quiz',
+        icon: Icons.quiz,
+        color: Color(0xFFEC4899),
       ),
       const QuickAction(
         title: 'Sources',
-        subtitle: 'File Manager',
-        icon: Icons.folder_open_rounded,
-        backgroundColor: Color(0xFF231B32),
-        iconColor: Color(0xFFA855F7),
+        icon: Icons.folder,
+        color: Color(0xFF06B6D4),
+      ),
+      const QuickAction(
+        title: 'History',
+        icon: Icons.history,
+        color: Color(0xFFEAB308),
       ),
     ];
   }
 
-  List<UpNextTask> getUpNextTasks() {
+  List<StudyStat> getStudyStats() {
     return [
-      const UpNextTask(
-        title: 'Calculus III Final',
-        dueText: 'Due Tomorrow, 11:59 PM',
-        tag: 'URGENT',
-        tagColor: Colors.redAccent,
+      const StudyStat(
+        title: 'Generated',
+        value: '12 Sets',
+        icon: Icons.check_circle,
+        color: Color(0xFF4ADE80),
       ),
-      const UpNextTask(
-        title: 'Modern History',
-        dueText: 'Draft Due in 2 Days',
-        tag: 'DRAFT',
-        tagColor: Colors.orangeAccent,
+      const StudyStat(
+        title: 'Avg. Score',
+        value: '88%',
+        icon: Icons.trending_up,
+        color: Color(0xFFFB923C),
+      ),
+      const StudyStat(
+        title: 'Study Time',
+        value: '4h 20m',
+        icon: Icons.access_time,
+        color: Color(0xFFA855F7),
       ),
     ];
   }
@@ -55,12 +53,28 @@ class HomepageRepository {
   List<RecentActivity> getRecentActivities() {
     return [
       const RecentActivity(
-        title: 'Biology Chapter 4',
-        score: '85%',
+        title: 'European History: The Cold War',
+        type: 'Quiz',
+        info: 'Score: 92%',
         timeAgo: '2h ago',
-        icon: Icons.help_outline,
-        iconColor: Colors.blueAccent,
-        backgroundColor: Color(0xFF1E2843),
+        imageUrl:
+            'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=2066&auto=format&fit=crop',
+      ),
+      const RecentActivity(
+        title: 'Calculus II: Integrals',
+        type: 'Flashcards',
+        info: '24 Cards',
+        timeAgo: '5h ago',
+        imageUrl:
+            'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070&auto=format&fit=crop',
+      ),
+      const RecentActivity(
+        title: 'CS 101: Python Basics',
+        type: 'Notes',
+        info: 'Viewed',
+        timeAgo: '1d ago',
+        imageUrl:
+            'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=2069&auto=format&fit=crop',
       ),
     ];
   }

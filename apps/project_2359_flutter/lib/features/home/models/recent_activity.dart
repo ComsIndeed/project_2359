@@ -1,19 +1,15 @@
-import 'package:flutter/material.dart';
-
 class RecentActivity {
   final String title;
-  final String score;
+  final String type;
+  final String info;
   final String timeAgo;
-  final IconData icon;
-  final Color iconColor;
-  final Color backgroundColor;
+  final String imageUrl;
 
   const RecentActivity({
     required this.title,
-    required this.score,
+    required this.type,
+    required this.info,
     required this.timeAgo,
-    required this.icon,
-    required this.iconColor,
-    required this.backgroundColor,
+    required this.imageUrl,
   });
 }
