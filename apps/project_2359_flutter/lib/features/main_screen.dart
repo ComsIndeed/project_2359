@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home/homepage.dart';
 import 'materials/materials_page.dart';
 import 'sources/sources_page.dart';
+import 'settings/settings_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -20,9 +21,7 @@ class _MainScreenState extends State<MainScreen> {
       child: Text('Study Session', style: TextStyle(color: Colors.white)),
     ),
     const SourcesPage(),
-    const Center(
-      child: Text('Profile', style: TextStyle(color: Colors.white)),
-    ),
+    const SettingsPage(),
   ];
 
   void _onItemTapped(int index) {
