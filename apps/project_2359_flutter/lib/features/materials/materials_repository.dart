@@ -8,29 +8,25 @@ class MaterialsRepository {
         title: 'Scan Doc',
         subtitle: 'Camera Input',
         icon: Icons.document_scanner_outlined,
-        backgroundImage:
-            'https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?q=80&w=2070&auto=format&fit=crop',
+        backgroundImage: 'assets/images/hero_biology.png',
       ),
       const SourceItem(
         title: 'Upload PDF',
         subtitle: 'File system',
         icon: Icons.upload_file_outlined,
-        backgroundImage:
-            'https://images.unsplash.com/photo-1568667256549-094345857637?q=80&w=2030&auto=format&fit=crop',
+        backgroundImage: 'assets/images/source_macroeconomics.png',
       ),
       const SourceItem(
         title: 'Paste Text',
         subtitle: 'Clipboard',
         icon: Icons.assignment_outlined,
-        backgroundImage:
-            'https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=2070&auto=format&fit=crop',
+        backgroundImage: 'assets/images/source_chemistry.png',
       ),
       const SourceItem(
         title: 'Library',
         subtitle: 'Saved sources',
         icon: Icons.folder_outlined,
-        backgroundImage:
-            'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=2056&auto=format&fit=crop',
+        backgroundImage: 'assets/images/hero_biology.png',
       ),
     ];
   }

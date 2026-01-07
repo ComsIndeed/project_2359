@@ -184,7 +184,7 @@ class MaterialsPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         image: item.backgroundImage != null
             ? DecorationImage(
-                image: NetworkImage(item.backgroundImage!),
+                image: _getImageProvider(item.backgroundImage!),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(0.7),
@@ -193,36 +193,43 @@ class MaterialsPage extends StatelessWidget {
               )
             : null,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(item.icon, color: Colors.white, size: 20),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(item.icon, color: Colors.white, size: 20),
+                ),
+                const Spacer(),
+                Text(
+                  item.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  item.subtitle,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.5),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
-            const Spacer(),
-            Text(
-              item.title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              item.subtitle,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
-                fontSize: 12,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -249,28 +256,37 @@ class MaterialsPage extends StatelessWidget {
                   ? Border.all(color: const Color(0xFF2E7DFF), width: 1.5)
                   : null,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  format.icon,
-                  color: isSelected ? const Color(0xFF2E7DFF) : Colors.white54,
-                  size: 24,
+            clipBehavior: Clip.antiAlias,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {},
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      format.icon,
+                      color: isSelected
+                          ? const Color(0xFF2E7DFF)
+                          : Colors.white54,
+                      size: 24,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      format.title,
+                      style: TextStyle(
+                        color: isSelected
+                            ? const Color(0xFF2E7DFF)
+                            : Colors.white54,
+                        fontSize: 10,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  format.title,
-                  style: TextStyle(
-                    color: isSelected
-                        ? const Color(0xFF2E7DFF)
-                        : Colors.white54,
-                    fontSize: 10,
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
-                ),
-              ],
+              ),
             ),
           );
         },
@@ -287,47 +303,56 @@ class MaterialsPage extends StatelessWidget {
   Widget _buildRecentItem(RecentGeneration item) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF161B22),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: item.iconColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(item.icon, color: item.iconColor, size: 20),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               children: [
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: item.iconColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(item.icon, color: item.iconColor, size: 20),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        item.subtitle,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.4),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  item.subtitle,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
-                    fontSize: 12,
-                  ),
-                ),
+                const Icon(Icons.chevron_right, color: Colors.white24),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.white24),
-        ],
+        ),
       ),
     );
   }
@@ -354,5 +379,12 @@ class MaterialsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  ImageProvider _getImageProvider(String url) {
+    if (url.startsWith('assets/')) {
+      return AssetImage(url);
+    }
+    return NetworkImage(url);
   }
 }

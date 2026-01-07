@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../common/project_image.dart';
 import 'models/home_models.dart';
 import 'homepage_repository.dart';
 
@@ -131,9 +132,7 @@ class Homepage extends StatelessWidget {
         color: const Color(0xFF161B22),
         borderRadius: BorderRadius.circular(24),
         image: DecorationImage(
-          image: const NetworkImage(
-            'https://images.unsplash.com/photo-1507413245164-6160d8298b31?q=80&w=2070&auto=format&fit=crop',
-          ),
+          image: _getImageProvider('assets/images/hero_biology.png'),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
             Colors.black.withOpacity(0.6),
@@ -141,97 +140,109 @@ class Homepage extends StatelessWidget {
           ),
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2E7DFF),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                'RESUME NOW',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(height: 40),
-            const Text(
-              'LAST SESSION',
-              style: TextStyle(
-                color: Colors.white54,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Biology 101: Cellular Respiration',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: const LinearProgressIndicator(
-                value: 0.65,
-                backgroundColor: Colors.white12,
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2E7DFF)),
-                minHeight: 6,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '65% Complete',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2E7DFF),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'RESUME NOW',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
                     ),
-                    Text(
-                      'Last accessed 20m ago',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
-                        fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                const Text(
+                  'LAST SESSION',
+                  style: TextStyle(
+                    color: Colors.white54,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Biology 101: Cellular Respiration',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: const LinearProgressIndicator(
+                    value: 0.65,
+                    backgroundColor: Colors.white12,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF2E7DFF),
+                    ),
+                    minHeight: 6,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '65% Complete',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Last accessed 20m ago',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.5),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.play_arrow, size: 18),
+                      label: const Text('Resume'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E7DFF),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.play_arrow, size: 18),
-                  label: const Text('Resume'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E7DFF),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
-                ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -302,20 +313,27 @@ class Homepage extends StatelessWidget {
         color: const Color(0xFF161B22),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(action.icon, color: action.color, size: 28),
-          const SizedBox(height: 12),
-          Text(
-            action.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {},
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(action.icon, color: action.color, size: 28),
+              const SizedBox(height: 12),
+              Text(
+                action.title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -331,77 +349,92 @@ class Homepage extends StatelessWidget {
   Widget _buildActivityItem(RecentActivity activity) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: const Color(0xFF161B22),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              activity.imageUrl,
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
               children: [
-                Text(
-                  activity.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: ProjectImage(
+                    imageUrl: activity.imageUrl,
+                    width: 60,
+                    height: 60,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        activity.type,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 10,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        activity.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      activity.info,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
-                        fontSize: 12,
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              activity.type,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            activity.info,
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.5),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ),
+                Text(
+                  activity.timeAgo,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.4),
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
           ),
-          Text(
-            activity.timeAgo,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.4),
-              fontSize: 12,
-            ),
-          ),
-        ],
+        ),
       ),
     );
+  }
+
+  ImageProvider _getImageProvider(String url) {
+    if (url.startsWith('assets/')) {
+      return AssetImage(url);
+    }
+    return NetworkImage(url);
   }
 }

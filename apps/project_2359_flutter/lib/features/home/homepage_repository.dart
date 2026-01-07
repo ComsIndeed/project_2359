@@ -57,24 +57,21 @@ class HomepageRepository {
         type: 'Quiz',
         info: 'Score: 92%',
         timeAgo: '2h ago',
-        imageUrl:
-            'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=2066&auto=format&fit=crop',
+        imageUrl: 'assets/images/hero_biology.png',
       ),
       const RecentActivity(
         title: 'Calculus II: Integrals',
         type: 'Flashcards',
         info: '24 Cards',
         timeAgo: '5h ago',
-        imageUrl:
-            'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070&auto=format&fit=crop',
+        imageUrl: 'assets/images/source_macroeconomics.png',
       ),
       const RecentActivity(
         title: 'CS 101: Python Basics',
         type: 'Notes',
         info: 'Viewed',
         timeAgo: '1d ago',
-        imageUrl:
-            'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=2069&auto=format&fit=crop',
+        imageUrl: 'assets/images/source_chemistry.png',
       ),
     ];
   }
