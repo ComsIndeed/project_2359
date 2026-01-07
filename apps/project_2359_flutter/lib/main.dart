@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:project_2359_flutter/features/home/homepage.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Enable high refresh rate for supported devices
+  try {
+    await FlutterDisplayMode.setHighRefreshRate();
+  } catch (e) {
+    debugPrint('Failed to set high refresh rate: $e');
+  }
+
   runApp(const MainApp());
 }
 
