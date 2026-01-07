@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:project_2359_flutter/features/home/homepage.dart';
+import 'package:project_2359_flutter/features/main_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +24,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       darkTheme: ThemeData.dark(),
       themeMode: ThemeMode.dark,
-      routes: {'/': (context) => const Homepage()},
+      routes: {'/': (context) => const MainScreen()},
     );
   }
 }

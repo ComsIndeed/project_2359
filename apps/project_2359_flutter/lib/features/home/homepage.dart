@@ -64,7 +64,6 @@ class Homepage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
@@ -403,75 +402,6 @@ class Homepage extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBottomNavBar() {
-    return Container(
-      height: 90,
-      decoration: BoxDecoration(
-        color: const Color(0xFF0B0E14).withOpacity(0.95),
-        border: const Border(
-          top: BorderSide(color: Colors.white10, width: 0.5),
-        ),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(Icons.grid_view_rounded, 'Home', true),
-              _buildNavItem(Icons.folder_rounded, 'Materials', false),
-              const SizedBox(width: 60), // Space for the center button
-              _buildNavItem(Icons.bar_chart_rounded, 'Stats', false),
-              _buildNavItem(Icons.person_rounded, 'Profile', false),
-            ],
-          ),
-          Positioned(
-            top: -20,
-            child: Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2E7DFF),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF2E7DFF).withOpacity(0.4),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.school, color: Colors.white, size: 32),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          icon,
-          color: isActive ? const Color(0xFF2E7DFF) : Colors.white24,
-          size: 24,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: isActive ? const Color(0xFF2E7DFF) : Colors.white24,
-            fontSize: 10,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-      ],
     );
   }
 }
