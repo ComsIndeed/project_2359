@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'models/home_models.dart';
+import 'homepage_repository.dart';
 
 class Homepage extends StatelessWidget {
   const Homepage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final repository = HomepageRepository();
+    final quickActions = repository.getQuickActions();
+    final upNextTasks = repository.getUpNextTasks();
+    final recentActivities = repository.getRecentActivities();
+
     return Scaffold(
       backgroundColor: const Color(0xFF0D0F14),
       body: SafeArea(
@@ -16,11 +23,11 @@ class Homepage extends StatelessWidget {
               const SizedBox(height: 24),
               _buildHeader(),
               const SizedBox(height: 32),
-              _buildQuickActions(),
+              _buildQuickActions(quickActions),
               const SizedBox(height: 32),
-              _buildUpNextSection(),
+              _buildUpNextSection(upNextTasks),
               const SizedBox(height: 32),
-              _buildRecentActivity(),
+              _buildRecentActivity(recentActivities),
               const SizedBox(height: 100), // Space for FAB and Bottom Nav
             ],
           ),
@@ -72,7 +79,7 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActions() {
+  Widget _buildQuickActions(List<QuickAction> actions) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -80,46 +87,11 @@ class Homepage extends StatelessWidget {
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
       childAspectRatio: 1.1,
-      children: [
-        _buildActionCard(
-          'Materials\nStudio',
-          'Generate Notes',
-          Icons.auto_awesome,
-          const Color(0xFF1E2843),
-          const Color(0xFF2E7DFF),
-        ),
-        _buildActionCard(
-          'Study Session',
-          'Focus Mode',
-          Icons.timer_outlined,
-          const Color(0xFF2A211D),
-          const Color(0xFFFF7D33),
-        ),
-        _buildActionCard(
-          'Scores',
-          'Analytics',
-          Icons.bar_chart_rounded,
-          const Color(0xFF1B2A23),
-          const Color(0xFF4ADE80),
-        ),
-        _buildActionCard(
-          'Sources',
-          'File Manager',
-          Icons.folder_open_rounded,
-          const Color(0xFF231B32),
-          const Color(0xFFA855F7),
-        ),
-      ],
+      children: actions.map((action) => _buildActionCard(action)).toList(),
     );
   }
 
-  Widget _buildActionCard(
-    String title,
-    String subtitle,
-    IconData icon,
-    Color bgColor,
-    Color iconColor,
-  ) {
+  Widget _buildActionCard(QuickAction action) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -133,16 +105,16 @@ class Homepage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: bgColor,
+              color: action.backgroundColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: iconColor, size: 24),
+            child: Icon(action.icon, color: action.iconColor, size: 24),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
+                action.title,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -151,7 +123,7 @@ class Homepage extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                subtitle,
+                action.subtitle,
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.5),
                   fontSize: 12,
@@ -164,7 +136,7 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  Widget _buildUpNextSection() {
+  Widget _buildUpNextSection(List<UpNextTask> tasks) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -191,35 +163,18 @@ class Homepage extends StatelessWidget {
         const SizedBox(height: 12),
         SizedBox(
           height: 180,
-          child: ListView(
+          child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            children: [
-              _buildUpNextCard(
-                'Calculus III Final',
-                'Due Tomorrow, 11:59 PM',
-                'URGENT',
-                Colors.redAccent,
-              ),
-              const SizedBox(width: 16),
-              _buildUpNextCard(
-                'Modern History',
-                'Draft Due in 2 Days',
-                'DRAFT',
-                Colors.orangeAccent,
-              ),
-            ],
+            itemCount: tasks.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 16),
+            itemBuilder: (context, index) => _buildUpNextCard(tasks[index]),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildUpNextCard(
-    String title,
-    String due,
-    String tag,
-    Color tagColor,
-  ) {
+  Widget _buildUpNextCard(UpNextTask task) {
     return Container(
       width: 280,
       decoration: BoxDecoration(
@@ -237,13 +192,13 @@ class Homepage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: tagColor.withOpacity(0.2),
+              color: task.tagColor.withOpacity(0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              tag,
+              task.tag,
               style: TextStyle(
-                color: tagColor,
+                color: task.tagColor,
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
@@ -251,7 +206,7 @@ class Homepage extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            title,
+            task.title,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -264,7 +219,7 @@ class Homepage extends StatelessWidget {
               const Icon(Icons.access_time, color: Colors.white54, size: 14),
               const SizedBox(width: 6),
               Text(
-                due,
+                task.dueText,
                 style: const TextStyle(color: Colors.white54, fontSize: 12),
               ),
             ],
@@ -274,7 +229,7 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentActivity() {
+  Widget _buildRecentActivity(List<RecentActivity> activities) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -287,49 +242,54 @@ class Homepage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF161B22),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E2843),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.help_outline, color: Colors.blueAccent),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Biology Chapter 4',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Score: 85% • 2h ago',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        ...activities.map((activity) => _buildActivityItem(activity)),
       ],
+    );
+  }
+
+  Widget _buildActivityItem(RecentActivity activity) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF161B22),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: activity.backgroundColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(activity.icon, color: activity.iconColor),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  activity.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Score: ${activity.score} • ${activity.timeAgo}',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.5),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
