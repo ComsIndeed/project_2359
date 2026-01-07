@@ -2,9 +2,48 @@ import 'package:flutter/material.dart';
 import '../common/project_image.dart';
 import 'models/settings_models.dart';
 import 'settings_repository.dart';
+import 'pages/appearance_page.dart';
+import 'pages/credit_system_page.dart';
+import 'pages/personal_details_page.dart';
+import 'pages/synced_devices_page.dart';
+import 'pages/manage_sources_page.dart';
+import 'pages/help_center_page.dart';
+import 'pages/privacy_policy_page.dart';
+import 'pages/settings_boilerplate_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
+
+  void _navigateTo(BuildContext context, String id, String title) {
+    Widget page;
+    switch (id) {
+      case 'appearance':
+        page = const AppearancePage();
+        break;
+      case 'credits':
+        page = const CreditSystemPage();
+        break;
+      case 'personal_details':
+        page = const PersonalDetailsPage();
+        break;
+      case 'synced_devices':
+        page = const SyncedDevicesPage();
+        break;
+      case 'manage_sources':
+        page = const ManageSourcesPage();
+        break;
+      case 'help_center':
+        page = const HelpCenterPage();
+        break;
+      case 'privacy_policy':
+        page = const PrivacyPolicyPage();
+        break;
+      default:
+        page = SettingsBoilerplatePage(title: title);
+    }
+
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => page));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +87,9 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            _buildProfileHeader(profile),
+            _buildProfileHeader(context, profile),
             const SizedBox(height: 32),
-            ...sections.map((section) => _buildSection(section)),
+            ...sections.map((section) => _buildSection(context, section)),
             const SizedBox(height: 24),
             _buildLogOutButton(),
             const SizedBox(height: 24),
@@ -65,7 +104,7 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader(UserProfile profile) {
+  Widget _buildProfileHeader(BuildContext context, UserProfile profile) {
     return Column(
       children: [
         Stack(
@@ -151,7 +190,8 @@ class SettingsPage extends StatelessWidget {
             ],
           ),
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () =>
+                _navigateTo(context, 'edit_profile', 'Edit Profile'),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF161B22),
               foregroundColor: const Color(0xFF2E7DFF),
@@ -171,7 +211,7 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(SettingSection section) {
+  Widget _buildSection(BuildContext context, SettingSection section) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
       child: Column(
@@ -207,7 +247,7 @@ class SettingsPage extends StatelessWidget {
 
                 return Column(
                   children: [
-                    _buildSettingItem(item),
+                    _buildSettingItem(context, item),
                     if (!isLast)
                       Divider(
                         color: Colors.white.withOpacity(0.05),
@@ -225,11 +265,13 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingItem(SettingItem item) {
+  Widget _buildSettingItem(BuildContext context, SettingItem item) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: item.type == SettingItemType.navigation ? () {} : null,
+        onTap: item.type == SettingItemType.navigation
+            ? () => _navigateTo(context, item.id, item.title)
+            : null,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(

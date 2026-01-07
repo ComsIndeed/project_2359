@@ -15,6 +15,7 @@ class UserProfile {
 enum SettingItemType { toggle, navigation }
 
 class SettingItem {
+  final String id;
   final String title;
   final String? value;
   final IconData icon;
@@ -24,6 +25,7 @@ class SettingItem {
   final String? badge;
 
   const SettingItem({
+    required this.id,
     required this.title,
     this.value,
     required this.icon,

@@ -16,6 +16,7 @@ class SettingsRepository {
         title: 'GENERAL',
         items: [
           SettingItem(
+            id: 'notifications',
             title: 'Notifications',
             icon: Icons.notifications,
             iconBackgroundColor: Color(0xFF2E7DFF),
@@ -23,12 +24,14 @@ class SettingsRepository {
             toggleValue: true,
           ),
           SettingItem(
+            id: 'study_timer',
             title: 'Study Timer Default',
             value: '25 min',
             icon: Icons.timer,
             iconBackgroundColor: Color(0xFF2E7DFF),
           ),
           SettingItem(
+            id: 'appearance',
             title: 'Appearance',
             value: 'Dark',
             icon: Icons.dark_mode,
@@ -40,17 +43,20 @@ class SettingsRepository {
         title: 'ACCOUNT',
         items: [
           SettingItem(
-            title: 'Membership',
-            badge: 'PRO',
-            icon: Icons.credit_card,
+            id: 'credits',
+            title: 'Credit System',
+            value: '1,250',
+            icon: Icons.account_balance_wallet,
             iconBackgroundColor: Color(0xFF2E7DFF),
           ),
           SettingItem(
+            id: 'personal_details',
             title: 'Personal Details',
             icon: Icons.person,
             iconBackgroundColor: Color(0xFF2E7DFF),
           ),
           SettingItem(
+            id: 'synced_devices',
             title: 'Synced Devices',
             value: '2',
             icon: Icons.devices,
@@ -62,11 +68,13 @@ class SettingsRepository {
         title: 'DATA & STORAGE',
         items: [
           SettingItem(
+            id: 'manage_sources',
             title: 'Manage Sources',
             icon: Icons.folder,
             iconBackgroundColor: Color(0xFF2E7DFF),
           ),
           SettingItem(
+            id: 'clear_cache',
             title: 'Clear Cache',
             icon: Icons.delete,
             iconBackgroundColor: Color(0xFF2E7DFF),
@@ -77,11 +85,13 @@ class SettingsRepository {
         title: 'SUPPORT',
         items: [
           SettingItem(
+            id: 'help_center',
             title: 'Help Center',
             icon: Icons.help,
             iconBackgroundColor: Color(0xFF2E7DFF),
           ),
           SettingItem(
+            id: 'privacy_policy',
             title: 'Privacy Policy',
             icon: Icons.security,
             iconBackgroundColor: Color(0xFF2E7DFF),
