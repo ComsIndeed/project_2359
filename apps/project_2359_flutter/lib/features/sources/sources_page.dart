@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_2359_flutter/features/sources/components/add_modal.dart';
 import '../common/project_image.dart';
 import 'models/sources_models.dart';
 import 'sources_repository.dart';
@@ -342,7 +343,12 @@ class _SourcesPageState extends State<SourcesPage> {
         ],
       ),
       child: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => const AddModal(),
+        ),
         backgroundColor: const Color(0xFF2E7DFF),
         child: const Icon(Icons.add, color: Colors.white, size: 32),
       ),

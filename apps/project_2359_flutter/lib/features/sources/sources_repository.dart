@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'models/sources_models.dart';
 
-class SourcesRepository {
+class SourcesRepository extends ChangeNotifier {
   List<SourceCategory> getCategories() {
     return const [
       SourceCategory(title: 'All', icon: Icons.check),
