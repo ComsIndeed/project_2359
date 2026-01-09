@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import '../common/project_image.dart';
-import 'models/home_models.dart';
-import 'homepage_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Homepage extends StatelessWidget {
+import '../common/project_image.dart';
+import 'home_providers.dart';
+
+class Homepage extends ConsumerWidget {
   const Homepage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final repository = HomepageRepository();
-    final quickActions = repository.getQuickActions();
-    final studyStats = repository.getStudyStats();
-    final recentActivities = repository.getRecentActivities();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final studyStatsAsync = ref.watch(studyStatsProvider);
+    final recentActivityAsync = ref.watch(recentActivityProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B0E14),
@@ -26,7 +25,14 @@ class Homepage extends StatelessWidget {
               const SizedBox(height: 24),
               _buildHeroCard(),
               const SizedBox(height: 24),
-              _buildStatsRow(studyStats),
+              studyStatsAsync.when(
+                data: (stats) => _buildStatsRow(stats),
+                loading: () => const SizedBox(
+                  height: 100,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (e, _) => Text('Error: $e'),
+              ),
               const SizedBox(height: 32),
               const Text(
                 'Quick Actions',
@@ -37,7 +43,7 @@ class Homepage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildQuickActionsGrid(quickActions),
+              _buildQuickActionsGrid(),
               const SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -59,7 +65,11 @@ class Homepage extends StatelessWidget {
                   ),
                 ],
               ),
-              _buildRecentActivityList(recentActivities),
+              recentActivityAsync.when(
+                data: (activities) => _buildRecentActivityList(activities),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Text('Error: $e'),
+              ),
               const SizedBox(height: 100),
             ],
           ),
@@ -106,11 +116,11 @@ class Homepage extends StatelessWidget {
             color: const Color(0xFF161B22),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Column(
+          child: const Column(
             children: [
-              const Text('🔥', style: TextStyle(fontSize: 20)),
-              const SizedBox(height: 4),
-              const Text(
+              Text('🔥', style: TextStyle(fontSize: 20)),
+              SizedBox(height: 4),
+              Text(
                 '12 Days',
                 style: TextStyle(
                   color: Colors.white,
@@ -248,11 +258,14 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsRow(List<StudyStat> stats) {
+  Widget _buildStatsRow(List<StudyStatUI> stats) {
+    if (stats.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Row(children: stats.map((stat) => _buildStatCard(stat)).toList());
   }
 
-  Widget _buildStatCard(StudyStat stat) {
+  Widget _buildStatCard(StudyStatUI stat) {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -295,7 +308,7 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActionsGrid(List<QuickAction> actions) {
+  Widget _buildQuickActionsGrid() {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -303,7 +316,7 @@ class Homepage extends StatelessWidget {
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
       childAspectRatio: 1.4,
-      children: actions.map((action) => _buildActionCard(action)).toList(),
+      children: quickActions.map((action) => _buildActionCard(action)).toList(),
     );
   }
 
@@ -338,7 +351,19 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentActivityList(List<RecentActivity> activities) {
+  Widget _buildRecentActivityList(List<RecentActivityUI> activities) {
+    if (activities.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Text(
+            'No recent activity',
+            style: TextStyle(color: Colors.white54),
+          ),
+        ),
+      );
+    }
+
     return Column(
       children: activities
           .map((activity) => _buildActivityItem(activity))
@@ -346,7 +371,7 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  Widget _buildActivityItem(RecentActivity activity) {
+  Widget _buildActivityItem(RecentActivityUI activity) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(

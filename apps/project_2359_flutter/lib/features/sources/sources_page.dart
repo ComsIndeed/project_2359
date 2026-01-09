@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:project_2359_flutter/features/sources/components/add_modal.dart';
-import '../common/project_image.dart';
-import 'models/sources_models.dart';
-import 'sources_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SourcesPage extends StatefulWidget {
+import '../../core/core.dart';
+import '../common/project_image.dart';
+import 'components/add_modal.dart';
+import 'sources_providers.dart';
+
+class SourcesPage extends ConsumerStatefulWidget {
   const SourcesPage({super.key});
 
   @override
-  State<SourcesPage> createState() => _SourcesPageState();
+  ConsumerState<SourcesPage> createState() => _SourcesPageState();
 }
 
-class _SourcesPageState extends State<SourcesPage> {
-  final SourcesRepository _repository = SourcesRepository();
-  String _selectedCategory = 'All';
+class _SourcesPageState extends ConsumerState<SourcesPage> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final categories = _repository.getCategories();
-    final recentSources = _repository.getRecentSources();
-    final allMaterials = _repository.getAllMaterials();
+    final selectedCategory = ref.watch(selectedCategoryProvider);
+    final recentSourcesAsync = ref.watch(recentSourcesProvider);
+    final filteredSourcesAsync = ref.watch(filteredSourcesProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B0E14),
@@ -42,11 +49,18 @@ class _SourcesPageState extends State<SourcesPage> {
                 const SizedBox(height: 20),
                 _buildSearchBar(),
                 const SizedBox(height: 20),
-                _buildCategories(categories),
+                _buildCategories(selectedCategory),
                 const SizedBox(height: 32),
                 _buildSectionHeader('Recent', onSeeAll: () {}),
                 const SizedBox(height: 16),
-                _buildRecentList(recentSources),
+                recentSourcesAsync.when(
+                  data: (sources) => _buildRecentList(sources),
+                  loading: () => const SizedBox(
+                    height: 200,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (e, _) => Text('Error: $e'),
+                ),
                 const SizedBox(height: 32),
                 const Text(
                   'All Materials',
@@ -57,7 +71,12 @@ class _SourcesPageState extends State<SourcesPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildMaterialsList(allMaterials),
+                filteredSourcesAsync.when(
+                  data: (sources) => _buildMaterialsList(sources),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Text('Error: $e'),
+                ),
                 const SizedBox(height: 100),
               ],
             ),
@@ -75,32 +94,40 @@ class _SourcesPageState extends State<SourcesPage> {
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: const TextField(
-        style: TextStyle(color: Colors.white),
-        decoration: InputDecoration(
+      child: TextField(
+        controller: _searchController,
+        style: const TextStyle(color: Colors.white),
+        decoration: const InputDecoration(
           icon: Icon(Icons.search, color: Colors.white54),
           hintText: 'Search notes, PDFs, links...',
           hintStyle: TextStyle(color: Colors.white54),
           border: InputBorder.none,
         ),
+        onChanged: (value) {
+          ref.read(sourceSearchQueryProvider.notifier).setQuery(value);
+        },
       ),
     );
   }
 
-  Widget _buildCategories(List<SourceCategory> categories) {
+  Widget _buildCategories(SourceType? selectedCategory) {
     return SizedBox(
       height: 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
+        itemCount: sourceCategories.length,
         separatorBuilder: (context, index) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
-          final category = categories[index];
-          final isSelected = _selectedCategory == category.title;
+          final category = sourceCategories[index];
+          final isSelected = selectedCategory == category.type;
           return Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => setState(() => _selectedCategory = category.title),
+              onTap: () {
+                ref
+                    .read(selectedCategoryProvider.notifier)
+                    .select(category.type);
+              },
               borderRadius: BorderRadius.circular(10),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -161,7 +188,19 @@ class _SourcesPageState extends State<SourcesPage> {
     );
   }
 
-  Widget _buildRecentList(List<SourceMaterial> sources) {
+  Widget _buildRecentList(List<Source> sources) {
+    if (sources.isEmpty) {
+      return const SizedBox(
+        height: 200,
+        child: Center(
+          child: Text(
+            'No recent sources',
+            style: TextStyle(color: Colors.white54),
+          ),
+        ),
+      );
+    }
+
     return SizedBox(
       height: 200,
       child: ListView.separated(
@@ -180,7 +219,12 @@ class _SourcesPageState extends State<SourcesPage> {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {},
+                onTap: () {
+                  // Mark as accessed and navigate
+                  ref
+                      .read(sourcesDatasourceProvider)
+                      .markSourceAccessed(source.id);
+                },
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -188,9 +232,9 @@ class _SourcesPageState extends State<SourcesPage> {
                       flex: 3,
                       child: Stack(
                         children: [
-                          if (source.imageUrl != null)
+                          if (source.thumbnailPath != null)
                             ProjectImage(
-                              imageUrl: source.imageUrl!,
+                              imageUrl: source.thumbnailPath!,
                               width: double.infinity,
                             ),
                           Positioned(
@@ -202,7 +246,7 @@ class _SourcesPageState extends State<SourcesPage> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: _getTypeColor(source.type),
+                                color: source.typeColor,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -258,7 +302,19 @@ class _SourcesPageState extends State<SourcesPage> {
     );
   }
 
-  Widget _buildMaterialsList(List<SourceMaterial> materials) {
+  Widget _buildMaterialsList(List<Source> materials) {
+    if (materials.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Text(
+            'No materials found',
+            style: TextStyle(color: Colors.white54),
+          ),
+        ),
+      );
+    }
+
     return Column(
       children: materials
           .map((material) => _buildMaterialItem(material))
@@ -266,7 +322,7 @@ class _SourcesPageState extends State<SourcesPage> {
     );
   }
 
-  Widget _buildMaterialItem(SourceMaterial material) {
+  Widget _buildMaterialItem(Source material) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -277,7 +333,9 @@ class _SourcesPageState extends State<SourcesPage> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            ref.read(sourcesDatasourceProvider).markSourceAccessed(material.id);
+          },
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -285,12 +343,12 @@ class _SourcesPageState extends State<SourcesPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: _getTypeColor(material.type).withOpacity(0.1),
+                    color: material.typeColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    _getTypeIcon(material.type),
-                    color: _getTypeColor(material.type),
+                    material.icon,
+                    color: material.typeColor,
                     size: 24,
                   ),
                 ),
@@ -353,27 +411,5 @@ class _SourcesPageState extends State<SourcesPage> {
         child: const Icon(Icons.add, color: Colors.white, size: 32),
       ),
     );
-  }
-
-  Color _getTypeColor(SourceType type) {
-    switch (type) {
-      case SourceType.pdf:
-        return const Color(0xFFFF4B4B);
-      case SourceType.link:
-        return const Color(0xFF2E7DFF);
-      case SourceType.note:
-        return const Color(0xFF9C27B0);
-    }
-  }
-
-  IconData _getTypeIcon(SourceType type) {
-    switch (type) {
-      case SourceType.pdf:
-        return Icons.picture_as_pdf;
-      case SourceType.link:
-        return Icons.link;
-      case SourceType.note:
-        return Icons.description;
-    }
   }
 }
