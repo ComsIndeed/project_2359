@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:project_2359_flutter/core/data/config/app_config.dart';
 import 'package:project_2359_flutter/features/main_screen.dart';
 
 Future<void> main() async {
@@ -12,7 +14,15 @@ Future<void> main() async {
     debugPrint('Failed to set high refresh rate: $e');
   }
 
-  runApp(const MainApp());
+  // Log current data mode
+  debugPrint(
+    '🚀 Project 2359 starting in ${kTestMode ? "TEST" : "PRODUCTION"} mode',
+  );
+
+  runApp(
+    // Wrap with ProviderScope for Riverpod
+    const ProviderScope(child: MainApp()),
+  );
 }
 
 class MainApp extends StatelessWidget {
