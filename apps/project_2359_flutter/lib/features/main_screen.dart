@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'home/homepage.dart';
 import 'materials/materials_page.dart';
 import 'sources/sources_page.dart';
+import 'materials/components/material_generation_modal.dart';
+import 'sources/components/add_modal.dart';
 import 'settings/settings_page.dart';
 
 class MainScreen extends StatefulWidget {
@@ -66,7 +68,27 @@ class _MainScreenState extends State<MainScreen> {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => _onItemTapped(2),
+                onTap: () {
+                  if (_selectedIndex == 1) {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      barrierColor: Colors.black.withOpacity(0.8),
+                      builder: (_) => const MaterialGenerationModal(),
+                    );
+                  } else if (_selectedIndex == 3) {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      barrierColor: Colors.black.withOpacity(0.8),
+                      builder: (_) => const AddModal(),
+                    );
+                  } else {
+                    _onItemTapped(2);
+                  }
+                },
                 customBorder: const CircleBorder(),
                 child: Container(
                   width: 64,
@@ -86,17 +108,43 @@ class _MainScreenState extends State<MainScreen> {
                       width: 4,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.school,
-                    color: Colors.white,
-                    size: 32,
-                  ),
+                  child: _buildCenterIcon(),
                 ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCenterIcon() {
+    Widget icon;
+    if (_selectedIndex == 1 || _selectedIndex == 3) {
+      icon = const Icon(
+        Icons.add,
+        key: ValueKey('add_icon'),
+        color: Colors.white,
+        size: 32,
+      );
+    } else {
+      icon = const Icon(
+        Icons.school,
+        key: ValueKey('school_icon'),
+        color: Colors.white,
+        size: 32,
+      );
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return ScaleTransition(
+          scale: animation,
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+      child: icon,
     );
   }
 

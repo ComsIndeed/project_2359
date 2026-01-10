@@ -8,7 +8,6 @@ class MaterialsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repository = MaterialsRepository();
-    final sourceItems = repository.getSourceItems();
     final outputFormats = repository.getOutputFormats();
     final recentGenerations = repository.getRecentGenerations();
 
@@ -39,18 +38,6 @@ class MaterialsPage extends StatelessWidget {
                   fontSize: 16,
                 ),
               ),
-              const SizedBox(height: 32),
-              const Text(
-                'SOURCE',
-                style: TextStyle(
-                  color: Colors.white54,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildSourceGrid(sourceItems),
               const SizedBox(height: 32),
               const Text(
                 'OUTPUT FORMAT',
@@ -91,7 +78,6 @@ class MaterialsPage extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: _buildQuickGenerateButton(),
     );
   }
 
@@ -162,76 +148,6 @@ class MaterialsPage extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildSourceGrid(List<SourceItem> items) {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.3,
-      children: items.map((item) => _buildSourceCard(item)).toList(),
-    );
-  }
-
-  Widget _buildSourceCard(SourceItem item) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
-        borderRadius: BorderRadius.circular(20),
-        image: item.backgroundImage != null
-            ? DecorationImage(
-                image: _getImageProvider(item.backgroundImage!),
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(0.7),
-                  BlendMode.darken,
-                ),
-              )
-            : null,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {},
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(item.icon, color: Colors.white, size: 20),
-                ),
-                const Spacer(),
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  item.subtitle,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -355,36 +271,5 @@ class MaterialsPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Widget _buildQuickGenerateButton() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: ElevatedButton.icon(
-        onPressed: () {},
-        icon: const Icon(Icons.auto_awesome, size: 20),
-        label: const Text(
-          'Quick Generate',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2E7DFF),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-          elevation: 8,
-          shadowColor: const Color(0xFF2E7DFF).withOpacity(0.5),
-        ),
-      ),
-    );
-  }
-
-  ImageProvider _getImageProvider(String url) {
-    if (url.startsWith('assets/')) {
-      return AssetImage(url);
-    }
-    return NetworkImage(url);
   }
 }

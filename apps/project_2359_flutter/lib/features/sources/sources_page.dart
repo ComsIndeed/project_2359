@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/core.dart';
 import '../common/project_image.dart';
-import 'components/add_modal.dart';
+
 import 'sources_providers.dart';
 
 class SourcesPage extends ConsumerStatefulWidget {
@@ -83,7 +83,6 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
           ),
         ),
       ),
-      floatingActionButton: _buildFAB(),
     );
   }
 
@@ -384,31 +383,6 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildFAB() {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2E7DFF).withOpacity(0.4),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: FloatingActionButton(
-        onPressed: () => showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (_) => const AddModal(),
-        ),
-        backgroundColor: const Color(0xFF2E7DFF),
-        child: const Icon(Icons.add, color: Colors.white, size: 32),
       ),
     );
   }
