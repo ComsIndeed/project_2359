@@ -13,7 +13,7 @@ import 'mock_data.dart';
 class MockStudyDatasource implements StudyDatasource {
   late List<Flashcard> _flashcards;
   late List<QuizQuestion> _quizQuestions;
-  late List<FreeFormQuestion> _freeFormQuestions;
+  late List<IdentificationQuestion> _identificationQuestions;
   late List<ImageOcclusion> _imageOcclusions;
   late List<MatchingSet> _matchingSets;
 
@@ -24,7 +24,7 @@ class MockStudyDatasource implements StudyDatasource {
     // Clone mock data
     _flashcards = List.from(mockFlashcards);
     _quizQuestions = List.from(mockQuizQuestions);
-    _freeFormQuestions = List.from(mockFreeFormQuestions);
+    _identificationQuestions = List.from(mockIdentificationQuestions);
     _imageOcclusions = List.from(mockImageOcclusions);
     _matchingSets = List.from(mockMatchingSets);
   }
@@ -112,32 +112,40 @@ class MockStudyDatasource implements StudyDatasource {
     });
   }
 
-  // ==================== Free-form Questions ====================
+  // ==================== Identification Questions ====================
 
   @override
-  Future<List<FreeFormQuestion>> getFreeFormQuestions({
+  Future<List<IdentificationQuestion>> getIdentificationQuestions({
     String? sourceId,
   }) async {
-    if (sourceId == null) return List.unmodifiable(_freeFormQuestions);
-    return _freeFormQuestions.where((q) => q.sourceId == sourceId).toList();
+    if (sourceId == null) return List.unmodifiable(_identificationQuestions);
+    return _identificationQuestions
+        .where((q) => q.sourceId == sourceId)
+        .toList();
   }
 
   @override
-  Future<void> addFreeFormQuestion(FreeFormQuestion question) async {
-    _freeFormQuestions.add(question);
+  Future<void> addIdentificationQuestion(
+    IdentificationQuestion question,
+  ) async {
+    _identificationQuestions.add(question);
   }
 
   @override
-  Future<void> updateFreeFormQuestion(FreeFormQuestion question) async {
-    final index = _freeFormQuestions.indexWhere((q) => q.id == question.id);
+  Future<void> updateIdentificationQuestion(
+    IdentificationQuestion question,
+  ) async {
+    final index = _identificationQuestions.indexWhere(
+      (q) => q.id == question.id,
+    );
     if (index != -1) {
-      _freeFormQuestions[index] = question;
+      _identificationQuestions[index] = question;
     }
   }
 
   @override
-  Future<void> deleteFreeFormQuestion(String id) async {
-    _freeFormQuestions.removeWhere((q) => q.id == id);
+  Future<void> deleteIdentificationQuestion(String id) async {
+    _identificationQuestions.removeWhere((q) => q.id == id);
   }
 
   // ==================== Image Occlusions ====================

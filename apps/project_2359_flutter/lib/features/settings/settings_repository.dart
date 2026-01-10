@@ -68,6 +68,12 @@ class SettingsRepository {
         title: 'DATA & STORAGE',
         items: [
           SettingItem(
+            id: 'storage',
+            title: 'Storage',
+            icon: Icons.storage,
+            iconBackgroundColor: Color(0xFF2E7DFF),
+          ),
+          SettingItem(
             id: 'manage_sources',
             title: 'Manage Sources',
             icon: Icons.folder,

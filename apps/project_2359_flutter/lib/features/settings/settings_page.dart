@@ -10,6 +10,7 @@ import 'pages/manage_sources_page.dart';
 import 'pages/help_center_page.dart';
 import 'pages/privacy_policy_page.dart';
 import 'pages/settings_boilerplate_page.dart';
+import 'pages/storage_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -31,6 +32,9 @@ class SettingsPage extends StatelessWidget {
         break;
       case 'manage_sources':
         page = const ManageSourcesPage();
+        break;
+      case 'storage':
+        page = const StoragePage();
         break;
       case 'help_center':
         page = const HelpCenterPage();

@@ -51,19 +51,21 @@ abstract class StudyDatasource {
   /// Watch quiz questions (reactive)
   Stream<List<QuizQuestion>> watchQuizQuestions({String? sourceId});
 
-  // ==================== Free-form Questions ====================
+  // ==================== Identification Questions ====================
 
-  /// Get free-form Socratic questions
-  Future<List<FreeFormQuestion>> getFreeFormQuestions({String? sourceId});
+  /// Get identification questions
+  Future<List<IdentificationQuestion>> getIdentificationQuestions({
+    String? sourceId,
+  });
 
-  /// Add a free-form question
-  Future<void> addFreeFormQuestion(FreeFormQuestion question);
+  /// Add an identification question
+  Future<void> addIdentificationQuestion(IdentificationQuestion question);
 
-  /// Update a free-form question
-  Future<void> updateFreeFormQuestion(FreeFormQuestion question);
+  /// Update an identification question
+  Future<void> updateIdentificationQuestion(IdentificationQuestion question);
 
-  /// Delete a free-form question
-  Future<void> deleteFreeFormQuestion(String id);
+  /// Delete an identification question
+  Future<void> deleteIdentificationQuestion(String id);
 
   // ==================== Image Occlusions ====================
 

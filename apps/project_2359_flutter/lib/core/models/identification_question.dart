@@ -1,12 +1,13 @@
-/// Free-form question domain model for Project 2359
+/// Identification question domain model for Project 2359
 ///
-/// Represents Socratic-style open-ended questions for deeper learning.
+/// Represents identification-style questions where users identify
+/// a term or concept from its definition/description.
 library;
 
 import 'source_reference.dart';
 
-/// A free-form Socratic question for open-ended learning.
-class FreeFormQuestion {
+/// An identification question for term/concept recognition.
+class IdentificationQuestion {
   final String id;
   final String sourceId;
   final String question;
@@ -32,7 +33,7 @@ class FreeFormQuestion {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  const FreeFormQuestion({
+  const IdentificationQuestion({
     required this.id,
     required this.sourceId,
     required this.question,
@@ -46,7 +47,7 @@ class FreeFormQuestion {
     required this.updatedAt,
   });
 
-  FreeFormQuestion copyWith({
+  IdentificationQuestion copyWith({
     String? id,
     String? sourceId,
     String? question,
@@ -59,7 +60,7 @@ class FreeFormQuestion {
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return FreeFormQuestion(
+    return IdentificationQuestion(
       id: id ?? this.id,
       sourceId: sourceId ?? this.sourceId,
       question: question ?? this.question,

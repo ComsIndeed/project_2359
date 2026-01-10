@@ -8,6 +8,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/app_config.dart';
 import '../datasources/interfaces/interfaces.dart';
 import '../datasources/mock/mock.dart';
+import '../datasources/drift/drift.dart';
+
+/// Provider for the Drift database instance.
+///
+/// Singleton pattern ensures only one database connection is used.
+final appDatabaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase();
+  ref.onDispose(() => db.close());
+  return db;
+});
 
 /// Provider for [SourcesDatasource].
 ///
@@ -16,8 +26,8 @@ final sourcesDatasourceProvider = Provider<SourcesDatasource>((ref) {
   if (kTestMode) {
     return MockSourcesDatasource();
   }
-  // TODO: Return DriftSourcesDatasource when implemented
-  return MockSourcesDatasource();
+  final db = ref.watch(appDatabaseProvider);
+  return DriftSourcesDatasource(db);
 });
 
 /// Provider for [StudyDatasource].
@@ -25,8 +35,8 @@ final studyDatasourceProvider = Provider<StudyDatasource>((ref) {
   if (kTestMode) {
     return MockStudyDatasource();
   }
-  // TODO: Return DriftStudyDatasource when implemented
-  return MockStudyDatasource();
+  final db = ref.watch(appDatabaseProvider);
+  return DriftStudyDatasource(db);
 });
 
 /// Provider for [UserDatasource].
@@ -34,6 +44,6 @@ final userDatasourceProvider = Provider<UserDatasource>((ref) {
   if (kTestMode) {
     return MockUserDatasource();
   }
-  // TODO: Return DriftUserDatasource when implemented
-  return MockUserDatasource();
+  final db = ref.watch(appDatabaseProvider);
+  return DriftUserDatasource(db);
 });

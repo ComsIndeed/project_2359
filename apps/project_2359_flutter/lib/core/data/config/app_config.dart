@@ -15,7 +15,7 @@ library;
 /// - Uses Drift (SQLite) for persistent local storage
 /// - Data persists across app restarts
 /// - Ready for Supabase cloud sync integration
-const bool kTestMode = true;
+const bool kTestMode = false;
 
 /// App name for database and storage paths
 const String kAppName = 'project_2359';

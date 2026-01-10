@@ -211,9 +211,9 @@ final List<QuizQuestion> mockQuizQuestions = [
   ),
 ];
 
-/// Predefined free-form questions for test mode
-final List<FreeFormQuestion> mockFreeFormQuestions = [
-  FreeFormQuestion(
+/// Predefined identification questions for test mode
+final List<IdentificationQuestion> mockIdentificationQuestions = [
+  IdentificationQuestion(
     id: 'ff_001',
     sourceId: 'src_001',
     question: 'Explain how monetary policy affects economic growth.',
@@ -225,7 +225,7 @@ final List<FreeFormQuestion> mockFreeFormQuestions = [
     createdAt: DateTime.now().subtract(const Duration(days: 3)),
     updatedAt: DateTime.now().subtract(const Duration(days: 3)),
   ),
-  FreeFormQuestion(
+  IdentificationQuestion(
     id: 'ff_002',
     sourceId: 'src_005',
     question:

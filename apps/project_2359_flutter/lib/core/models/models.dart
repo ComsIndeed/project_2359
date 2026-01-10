@@ -7,7 +7,7 @@ export 'source.dart';
 export 'source_reference.dart';
 export 'flashcard.dart';
 export 'quiz_question.dart';
-export 'free_form_question.dart';
+export 'identification_question.dart';
 export 'image_occlusion.dart';
 export 'matching_set.dart';
 export 'user.dart';
