@@ -10,6 +10,7 @@ environment:
 dependencies:
   collection: ^1.19.1
   drift: ^2.30.0
+  file_picker: ^8.1.7
   flutter:
     sdk: flutter
   flutter_displaymode: ^0.7.0

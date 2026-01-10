@@ -5,6 +5,7 @@ library;
 
 export 'source.dart';
 export 'source_reference.dart';
+export 'index_item.dart';
 export 'flashcard.dart';
 export 'quiz_question.dart';
 export 'identification_question.dart';

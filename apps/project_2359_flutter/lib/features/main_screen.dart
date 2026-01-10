@@ -3,7 +3,7 @@ import 'home/homepage.dart';
 import 'materials/materials_page.dart';
 import 'sources/sources_page.dart';
 import 'materials/components/material_generation_modal.dart';
-import 'sources/components/add_modal.dart';
+import 'sources/components/add_source_modal.dart';
 import 'settings/settings_page.dart';
 
 class MainScreen extends StatefulWidget {
@@ -83,7 +83,7 @@ class _MainScreenState extends State<MainScreen> {
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
                       barrierColor: Colors.black.withOpacity(0.8),
-                      builder: (_) => const AddModal(),
+                      builder: (_) => const AddSourceModal(),
                     );
                   } else {
                     _onItemTapped(2);

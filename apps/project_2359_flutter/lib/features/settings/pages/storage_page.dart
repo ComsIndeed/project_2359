@@ -1,6 +1,6 @@
 /// Storage page for Project 2359
 ///
-/// Shows database statistics including item counts and file storage usage.
+/// Shows database statistics, file storage usage, and allows file management.
 library;
 
 import 'package:flutter/material.dart';
@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/data/providers/datasource_providers.dart';
 import '../../../core/data/config/app_config.dart';
+import '../../../core/services/source_storage_service.dart';
 
 class StoragePage extends ConsumerStatefulWidget {
   const StoragePage({super.key});
@@ -20,6 +21,9 @@ class _StoragePageState extends ConsumerState<StoragePage> {
   Map<String, int>? _stats;
   int? _totalFileSize;
   bool _loading = true;
+  List<StoredFileInfo> _storedFiles = [];
+  bool _showFiles = false;
+  final _storageService = SourceStorageService();
 
   @override
   void initState() {
@@ -28,32 +32,42 @@ class _StoragePageState extends ConsumerState<StoragePage> {
   }
 
   Future<void> _loadStats() async {
+    setState(() => _loading = true);
+
+    // Load stored files info
+    try {
+      _storedFiles = await _storageService.listStoredFiles();
+      _totalFileSize = await _storageService.getTotalStorageSize();
+    } catch (e) {
+      _storedFiles = [];
+      _totalFileSize = 0;
+    }
+
     if (kTestMode) {
       // In test mode, show mock data counts
-      setState(() {
-        _stats = {
-          'sources': 6,
-          'flashcards': 5,
-          'quizQuestions': 3,
-          'identificationQuestions': 2,
-          'imageOcclusions': 0,
-          'matchingSets': 2,
-        };
-        _totalFileSize = 0;
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _stats = {
+            'sources': 6,
+            'flashcards': 5,
+            'quizQuestions': 3,
+            'identificationQuestions': 2,
+            'imageOcclusions': 0,
+            'matchingSets': 2,
+          };
+          _loading = false;
+        });
+      }
       return;
     }
 
     // In production mode, query the database
     final db = ref.read(appDatabaseProvider);
     final stats = await db.getStorageStats();
-    final fileSize = await db.getTotalSourceFilesSize();
 
     if (mounted) {
       setState(() {
         _stats = stats;
-        _totalFileSize = fileSize;
         _loading = false;
       });
     }
@@ -66,6 +80,84 @@ class _StoragePageState extends ConsumerState<StoragePage> {
       return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     }
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
+  }
+
+  Future<void> _deleteFile(StoredFileInfo file) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF161B22),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Delete File?',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'Delete "${file.name}"? This cannot be undone.',
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _storageService.deleteFile(file.path);
+      await _loadStats();
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Deleted ${file.name}')));
+      }
+    }
+  }
+
+  Future<void> _clearAllStorage() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF161B22),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Clear All Storage?',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'This will delete ALL stored source files. Your database records will remain but file references will be broken. This cannot be undone.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete All Files'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _storageService.clearAllStorage();
+      await _loadStats();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('All stored files deleted')),
+        );
+      }
+    }
   }
 
   @override
@@ -82,6 +174,13 @@ class _StoragePageState extends ConsumerState<StoragePage> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white70),
+            onPressed: _loadStats,
+            tooltip: 'Refresh',
+          ),
+        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -122,7 +221,7 @@ class _StoragePageState extends ConsumerState<StoragePage> {
                     ),
                   ]),
                   const SizedBox(height: 24),
-                  _buildSectionHeader('Sources'),
+                  _buildSectionHeader('Source Files'),
                   const SizedBox(height: 12),
                   _buildStatsCard([
                     _buildStatRow(
@@ -136,9 +235,18 @@ class _StoragePageState extends ConsumerState<StoragePage> {
                       null,
                       suffix: _formatBytes(_totalFileSize ?? 0),
                     ),
+                    _buildStatRow(
+                      Icons.insert_drive_file,
+                      'Stored Files',
+                      _storedFiles.length,
+                    ),
                   ]),
+                  if (_storedFiles.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _buildFileManager(),
+                  ],
                   const SizedBox(height: 32),
-                  if (!kTestMode) ...[_buildDangerZone()],
+                  _buildDangerZone(),
                 ],
               ),
             ),
@@ -273,6 +381,163 @@ class _StoragePageState extends ConsumerState<StoragePage> {
     );
   }
 
+  Widget _buildFileManager() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => setState(() => _showFiles = !_showFiles),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF161B22),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.05)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _showFiles ? Icons.folder_open : Icons.folder,
+                    color: Colors.white54,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _showFiles ? 'Hide Files' : 'Browse Files',
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                  ),
+                  Icon(
+                    _showFiles ? Icons.expand_less : Icons.expand_more,
+                    color: Colors.white38,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          child: _showFiles
+              ? Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF161B22),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white.withOpacity(0.05)),
+                  ),
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: _storedFiles.length,
+                    separatorBuilder: (_, __) => Divider(
+                      color: Colors.white.withOpacity(0.05),
+                      height: 1,
+                      indent: 56,
+                    ),
+                    itemBuilder: (context, index) {
+                      final file = _storedFiles[index];
+                      return ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: _getTypeColor(file.type).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            _getTypeIcon(file.type),
+                            color: _getTypeColor(file.type),
+                            size: 18,
+                          ),
+                        ),
+                        title: Text(
+                          file.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          '${file.type?.name.toUpperCase() ?? 'Unknown'} • ${file.formattedSize}',
+                          style: const TextStyle(
+                            color: Colors.white38,
+                            fontSize: 11,
+                          ),
+                        ),
+                        trailing: Material(
+                          color: Colors.transparent,
+                          shape: const CircleBorder(),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () => _deleteFile(file),
+                            child: const Padding(
+                              padding: EdgeInsets.all(8),
+                              child: Icon(
+                                Icons.delete_outline,
+                                color: Colors.redAccent,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
+  IconData _getTypeIcon(dynamic type) {
+    if (type == null) return Icons.insert_drive_file;
+    final name = type.toString().split('.').last;
+    switch (name) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'audio':
+        return Icons.audio_file;
+      case 'video':
+        return Icons.video_file;
+      case 'image':
+        return Icons.image;
+      case 'note':
+        return Icons.description;
+      case 'link':
+        return Icons.link;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+
+  Color _getTypeColor(dynamic type) {
+    if (type == null) return Colors.grey;
+    final name = type.toString().split('.').last;
+    switch (name) {
+      case 'pdf':
+        return Colors.redAccent;
+      case 'audio':
+        return Colors.purpleAccent;
+      case 'video':
+        return Colors.tealAccent;
+      case 'image':
+        return Colors.pinkAccent;
+      case 'note':
+        return Colors.orangeAccent;
+      case 'link':
+        return Colors.blueAccent;
+      default:
+        return Colors.grey;
+    }
+  }
+
   Widget _buildDangerZone() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,60 +551,129 @@ class _StoragePageState extends ConsumerState<StoragePage> {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFFF4B4B).withOpacity(0.2)),
           ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () => _showClearDataDialog(),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF4B4B).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.delete_forever,
-                        color: Color(0xFFFF4B4B),
-                        size: 18,
-                      ),
+          child: Column(
+            children: [
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
+                  onTap: _clearAllStorage,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFF4B4B).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.folder_delete,
+                            color: Color(0xFFFF4B4B),
+                            size: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Clear File Storage',
+                                style: TextStyle(
+                                  color: Color(0xFFFF4B4B),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Delete all stored source files',
+                                style: TextStyle(
+                                  color: Colors.white38,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.white24,
+                          size: 14,
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 16),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                ),
+              ),
+              if (!kTestMode) ...[
+                Divider(
+                  color: const Color(0xFFFF4B4B).withOpacity(0.1),
+                  height: 1,
+                ),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(16),
+                    ),
+                    onTap: _showClearDataDialog,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
                         children: [
-                          Text(
-                            'Clear All Data',
-                            style: TextStyle(
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF4B4B).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.delete_forever,
                               color: Color(0xFFFF4B4B),
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
+                              size: 18,
                             ),
                           ),
-                          SizedBox(height: 2),
-                          Text(
-                            'Permanently delete all stored data',
-                            style: TextStyle(
-                              color: Colors.white38,
-                              fontSize: 12,
+                          const SizedBox(width: 16),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Clear All Data',
+                                  style: TextStyle(
+                                    color: Color(0xFFFF4B4B),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'Delete database and all files',
+                                  style: TextStyle(
+                                    color: Colors.white38,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
+                          ),
+                          const Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.white24,
+                            size: 14,
                           ),
                         ],
                       ),
                     ),
-                    const Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.white24,
-                      size: 14,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+              ],
+            ],
           ),
         ),
       ],
@@ -366,14 +700,21 @@ class _StoragePageState extends ConsumerState<StoragePage> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Implement data clearing
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Data clearing not yet implemented'),
-                ),
-              );
+              // Clear storage first
+              await _storageService.clearAllStorage();
+              // TODO: Clear database tables
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Storage cleared. Database clearing not yet implemented.',
+                    ),
+                  ),
+                );
+                _loadStats();
+              }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete Everything'),
