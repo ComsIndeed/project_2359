@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 import 'models/materials_models.dart';
 import 'materials_repository.dart';
 
-class MaterialsPage extends StatelessWidget {
+class MaterialsPage extends StatefulWidget {
   const MaterialsPage({super.key});
+
+  @override
+  State<MaterialsPage> createState() => _MaterialsPageState();
+}
+
+class _MaterialsPageState extends State<MaterialsPage> {
+  bool _showPromo = true;
 
   @override
   Widget build(BuildContext context) {
     final repository = MaterialsRepository();
-    final outputFormats = repository.getOutputFormats();
-    final recentGenerations = repository.getRecentGenerations();
+    final allMaterials = repository.getRecentGenerations();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B0E14),
@@ -21,26 +27,13 @@ class MaterialsPage extends StatelessWidget {
             children: [
               const SizedBox(height: 20),
               _buildHeader(),
+              if (_showPromo) ...[
+                const SizedBox(height: 24),
+                _buildPromoCard(),
+              ],
               const SizedBox(height: 32),
               const Text(
-                'Create study assets',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Select a source to begin generation.',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 32),
-              const Text(
-                'OUTPUT FORMAT',
+                'MATERIALS',
                 style: TextStyle(
                   color: Colors.white54,
                   fontSize: 12,
@@ -49,30 +42,7 @@ class MaterialsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildOutputFormats(outputFormats),
-              const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'RECENT',
-                    style: TextStyle(
-                      color: Colors.white54,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      'View all',
-                      style: TextStyle(color: Color(0xFF2E7DFF), fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-              _buildRecentList(recentGenerations),
+              _buildMaterialsList(allMaterials),
               const SizedBox(height: 100),
             ],
           ),
@@ -104,10 +74,10 @@ class MaterialsPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Materials Studio',
+                  'Materials',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -151,72 +121,92 @@ class MaterialsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildOutputFormats(List<OutputFormat> formats) {
-    return SizedBox(
-      height: 100,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: formats.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final format = formats[index];
-          final isSelected = index == 0; // Just for demo
-          return Container(
-            width: 90,
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? const Color(0xFF1E2843)
-                  : const Color(0xFF161B22),
-              borderRadius: BorderRadius.circular(16),
-              border: isSelected
-                  ? Border.all(color: const Color(0xFF2E7DFF), width: 1.5)
-                  : null,
+  Widget _buildPromoCard() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2E7DFF), Color(0xFF1E2843)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2E7DFF).withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Positioned(
+            right: -30,
+            top: -30,
+            child: Icon(
+              Icons.auto_awesome,
+              size: 140,
+              color: Colors.white.withOpacity(0.1),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {},
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      format.icon,
-                      color: isSelected
-                          ? const Color(0xFF2E7DFF)
-                          : Colors.white54,
-                      size: 24,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      format.title,
-                      style: TextStyle(
-                        color: isSelected
-                            ? const Color(0xFF2E7DFF)
-                            : Colors.white54,
-                        fontSize: 10,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Generate Materials',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      Text(
+                        'Create flashcards, quizzes, and more from your uploaded sources.',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(width: 16),
+                Material(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: () => setState(() => _showPromo = false),
+                    borderRadius: BorderRadius.circular(12),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(Icons.close, color: Colors.white, size: 18),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildRecentList(List<RecentGeneration> items) {
+  Widget _buildMaterialsList(List<RecentGeneration> items) {
     return Column(
-      children: items.map((item) => _buildRecentItem(item)).toList(),
+      children: items.map((item) => _buildMaterialItem(item)).toList(),
     );
   }
 
-  Widget _buildRecentItem(RecentGeneration item) {
+  Widget _buildMaterialItem(RecentGeneration item) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
