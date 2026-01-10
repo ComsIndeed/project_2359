@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:project_2359_flutter/core/data/config/app_config.dart';
-import 'package:project_2359_flutter/features/main_screen.dart';
+import 'package:project_2359/core/core.dart';
+import 'package:project_2359/features/main_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
