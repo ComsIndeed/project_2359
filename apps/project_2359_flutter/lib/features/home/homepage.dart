@@ -9,7 +9,6 @@ class Homepage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final studyStatsAsync = ref.watch(studyStatsProvider);
     final recentActivityAsync = ref.watch(recentActivityProvider);
 
     return Scaffold(
@@ -21,29 +20,9 @@ class Homepage extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              _buildFocusHeader(),
+              _buildHeader(),
               const SizedBox(height: 24),
               _buildHeroCard(),
-              const SizedBox(height: 24),
-              studyStatsAsync.when(
-                data: (stats) => _buildStatsRow(stats),
-                loading: () => const SizedBox(
-                  height: 100,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (e, _) => Text('Error: $e'),
-              ),
-              const SizedBox(height: 32),
-              const Text(
-                'Quick Actions',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildQuickActionsGrid(),
               const SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -78,58 +57,71 @@ class Homepage extends ConsumerWidget {
     );
   }
 
-  Widget _buildFocusHeader() {
+  Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Row(
           children: [
-            Row(
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: const BoxDecoration(
+                color: Color(0xFF161B22),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.dashboard_rounded,
+                color: Color(0xFF2E7DFF),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.bolt, color: Colors.white54, size: 16),
-                const SizedBox(width: 4),
-                Text(
-                  'Focus Mode: Active',
+                const Text(
+                  'PROJECT 2359',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 14,
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'HOME',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.4),
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            const Text(
-              "It's 23:00.\nLet's finish this.",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                height: 1.2,
+          ],
+        ),
+        Stack(
+          children: [
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.notifications_outlined,
+                color: Colors.white54,
+              ),
+            ),
+            Positioned(
+              right: 12,
+              top: 12,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Colors.redAccent,
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ],
-        ),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF161B22),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Column(
-            children: [
-              Text('🔥', style: TextStyle(fontSize: 20)),
-              SizedBox(height: 4),
-              Text(
-                '12 Days',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
         ),
       ],
     );
@@ -252,99 +244,6 @@ class Homepage extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatsRow(List<StudyStatUI> stats) {
-    if (stats.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    return Row(children: stats.map((stat) => _buildStatCard(stat)).toList());
-  }
-
-  Widget _buildStatCard(StudyStatUI stat) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF161B22),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: stat.color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(stat.icon, color: stat.color, size: 16),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              stat.title,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
-                fontSize: 12,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              stat.value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickActionsGrid() {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.4,
-      children: quickActions.map((action) => _buildActionCard(action)).toList(),
-    );
-  }
-
-  Widget _buildActionCard(QuickAction action) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {},
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(action.icon, color: action.color, size: 28),
-              const SizedBox(height: 12),
-              Text(
-                action.title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
           ),
         ),
       ),
