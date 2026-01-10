@@ -53,52 +53,44 @@ class SettingsPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B0E14),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Settings',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text(
-              'Done',
-              style: TextStyle(
-                color: Color(0xFF2E7DFF),
-                fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              _buildTopHeader(),
+              const SizedBox(height: 32),
+              Center(child: _buildProfileHeader(context, profile)),
+              const SizedBox(height: 32),
+              ...sections.map((section) => _buildSection(context, section)),
+              const SizedBox(height: 24),
+              _buildLogOutButton(),
+              const SizedBox(height: 24),
+              const Center(
+                child: Text(
+                  'Project 2359 v1.2.4',
+                  style: TextStyle(color: Colors.white24, fontSize: 12),
+                ),
               ),
-            ),
+              const SizedBox(height: 48),
+            ],
           ),
-        ],
+        ),
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            _buildProfileHeader(context, profile),
-            const SizedBox(height: 32),
-            ...sections.map((section) => _buildSection(context, section)),
-            const SizedBox(height: 24),
-            _buildLogOutButton(),
-            const SizedBox(height: 24),
-            const Text(
-              'Project 2359 v1.2.4',
-              style: TextStyle(color: Colors.white24, fontSize: 12),
-            ),
-            const SizedBox(height: 48),
-          ],
+    );
+  }
+
+  Widget _buildTopHeader() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.0),
+      child: Text(
+        'Profile',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          letterSpacing: -1,
         ),
       ),
     );
@@ -213,12 +205,12 @@ class SettingsPage extends StatelessWidget {
 
   Widget _buildSection(BuildContext context, SettingSection section) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+            padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
             child: Text(
               section.title,
               style: TextStyle(
@@ -350,7 +342,7 @@ class SettingsPage extends StatelessWidget {
 
   Widget _buildLogOutButton() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
