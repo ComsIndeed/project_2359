@@ -1,0 +1,40 @@
+# Flutter Launcher Icons Configuration
+# Run: dart run flutter_launcher_icons
+
+flutter_launcher_icons:
+  # Android Configuration
+  android: true
+  ios: true
+  
+  # Default icon (used as fallback and for platforms that don't support adaptive icons)
+  image_path: "assets/images/app_icon.png"
+  
+  # Android Adaptive Icons (Android 8.0+)
+  # These allow the icon to adapt to different launcher shapes (circle, squircle, etc.)
+  adaptive_icon_foreground: "assets/images/app_icon_nobg.png"
+  adaptive_icon_background: "#0B0E14"
+  
+  # Android Themed/Monochrome Icons (Android 13+)
+  # This icon will be tinted by the system to match the device theme
+  adaptive_icon_monochrome: "assets/images/app_icon_nobg.png"
+  
+  # Remove alpha channel for iOS (required - iOS doesn't support transparency)
+  remove_alpha_ios: true
+  
+  # Web favicon
+  web:
+    generate: true
+    image_path: "assets/images/app_icon.png"
+    background_color: "#0B0E14"
+    theme_color: "#2E7DFF"
+  
+  # Windows
+  windows:
+    generate: true
+    image_path: "assets/images/app_icon.png"
+    icon_size: 48
+  
+  # macOS
+  macos:
+    generate: true
+    image_path: "assets/images/app_icon.png"
