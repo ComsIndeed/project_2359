@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../core/core.dart';
 import '../common/project_image.dart';
+import '../common/app_list_tile.dart';
+import '../common/app_header.dart';
 import 'models/settings_models.dart';
 import 'settings_repository.dart';
 import 'pages/appearance_page.dart';
@@ -56,25 +59,27 @@ class SettingsPage extends StatelessWidget {
     final sections = repository.getSettingsSections();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0E14),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              _buildTopHeader(),
+              _buildTopHeader(context),
               const SizedBox(height: 32),
               Center(child: _buildProfileHeader(context, profile)),
               const SizedBox(height: 32),
               ...sections.map((section) => _buildSection(context, section)),
               const SizedBox(height: 24),
-              _buildLogOutButton(),
+              _buildLogOutButton(context),
               const SizedBox(height: 24),
-              const Center(
+              Center(
                 child: Text(
                   'Project 2359 v1.2.4',
-                  style: TextStyle(color: Colors.white24, fontSize: 12),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
                 ),
               ),
               const SizedBox(height: 48),
@@ -85,16 +90,20 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTopHeader() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.0),
-      child: Text(
-        'Profile',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          letterSpacing: -1,
+  Widget _buildTopHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: AppPageHeader(
+        title: 'Profile',
+        subtitle: 'PROJECT 2359',
+        icon: Container(
+          width: 48,
+          height: 48,
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.person, color: AppColors.primary, size: 24),
         ),
       ),
     );
@@ -111,7 +120,7 @@ class SettingsPage extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
                   colors: [
-                    const Color(0xFF2E7DFF).withOpacity(0.5),
+                    AppColors.primary.withValues(alpha: 0.5),
                     Colors.transparent,
                   ],
                   begin: Alignment.topLeft,
@@ -121,7 +130,7 @@ class SettingsPage extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF0B0E14), width: 4),
+                  border: Border.all(color: AppColors.background, width: 4),
                 ),
                 child: ClipOval(
                   child: ProjectImage(
@@ -138,12 +147,12 @@ class SettingsPage extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2E7DFF),
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF0B0E14), width: 3),
+                  border: Border.all(color: AppColors.background, width: 3),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -155,23 +164,13 @@ class SettingsPage extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        Text(
-          profile.name,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            letterSpacing: -0.5,
-          ),
-        ),
+        Text(profile.name, style: Theme.of(context).textTheme.displaySmall),
         const SizedBox(height: 6),
         Text(
           profile.subtitle,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 20),
         Container(
@@ -179,7 +178,7 @@ class SettingsPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF2E7DFF).withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 4),
               ),
@@ -189,17 +188,20 @@ class SettingsPage extends StatelessWidget {
             onPressed: () =>
                 _navigateTo(context, 'edit_profile', 'Edit Profile'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF161B22),
-              foregroundColor: const Color(0xFF2E7DFF),
+              backgroundColor: AppColors.surface,
+              foregroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
               elevation: 0,
             ),
-            child: const Text(
+            child: Text(
               'Edit Profile',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -213,147 +215,71 @@ class SettingsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
-            child: Text(
-              section.title,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.4),
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
-              ),
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF161B22),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.05),
-                width: 1,
-              ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: section.items.asMap().entries.map((entry) {
-                final index = entry.key;
-                final item = entry.value;
-                final isLast = index == section.items.length - 1;
-
-                return Column(
-                  children: [
-                    _buildSettingItem(context, item),
-                    if (!isLast)
-                      Divider(
-                        color: Colors.white.withOpacity(0.05),
-                        height: 1,
-                        indent: 60,
-                        endIndent: 16,
-                      ),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
+          AppSectionHeader(title: section.title),
+          const SizedBox(height: 12),
+          ...section.items.map((item) => _buildSettingItem(context, item)),
         ],
       ),
     );
   }
 
   Widget _buildSettingItem(BuildContext context, SettingItem item) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: item.type == SettingItemType.navigation
-            ? () => _navigateTo(context, item.id, item.title)
-            : null,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: item.iconBackgroundColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  item.icon,
-                  color: item.iconBackgroundColor,
-                  size: 20,
+    return AppListTile(
+      title: item.title,
+      subtitle: item.value,
+      icon: item.icon,
+      iconColor: item.iconBackgroundColor,
+      onTap: item.type == SettingItemType.navigation
+          ? () => _navigateTo(context, item.id, item.title)
+          : null,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (item.badge != null)
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                item.badge!,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  item.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              if (item.badge != null)
-                Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2E7DFF),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    item.badge!,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              if (item.value != null)
-                Text(
-                  item.value!,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
-                    fontSize: 14,
-                  ),
-                ),
-              const SizedBox(width: 8),
-              if (item.type == SettingItemType.toggle)
-                Switch(
-                  value: item.toggleValue,
-                  onChanged: (value) {},
-                  activeThumbColor: Colors.white,
-                  activeTrackColor: const Color(0xFF2E7DFF),
-                )
-              else
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white.withOpacity(0.2),
-                  size: 14,
-                ),
-            ],
-          ),
-        ),
+            ),
+          if (item.type == SettingItemType.toggle)
+            Switch(
+              value: item.toggleValue,
+              onChanged: (value) {},
+              activeThumbColor: Colors.white,
+              activeTrackColor: AppColors.primary,
+            )
+          else
+            const Icon(
+              Icons.chevron_right,
+              color: AppColors.textTertiary,
+              size: 20,
+            ),
+        ],
       ),
     );
   }
 
-  Widget _buildLogOutButton() {
+  Widget _buildLogOutButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: const Color(0xFF161B22),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: const Color(0xFFFF4B4B).withOpacity(0.1),
+            color: AppColors.error.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -362,16 +288,14 @@ class SettingsPage extends StatelessWidget {
           child: InkWell(
             onTap: () {},
             borderRadius: BorderRadius.circular(24),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 18),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 18),
               child: Center(
                 child: Text(
                   'Log Out',
-                  style: TextStyle(
-                    color: Color(0xFFFF4B4B),
-                    fontSize: 16,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.error,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
                   ),
                 ),
               ),

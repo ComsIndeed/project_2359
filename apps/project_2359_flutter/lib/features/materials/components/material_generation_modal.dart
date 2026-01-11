@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/core.dart';
+import '../../common/app_list_tile.dart';
 
 class MaterialGenerationModal extends StatefulWidget {
   const MaterialGenerationModal({super.key});
@@ -57,7 +59,7 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: const BoxDecoration(
-        color: Color(0xFF0B0E14),
+        color: AppColors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -76,7 +78,10 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
             child: PageView(
               controller: _pageController,
               physics: const NeverScrollableScrollPhysics(),
-              children: [_buildMainForm(), _buildSourceSelectionPage()],
+              children: [
+                _buildMainForm(context),
+                _buildSourceSelectionPage(context),
+              ],
             ),
           ),
         ],
@@ -84,7 +89,7 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
     );
   }
 
-  Widget _buildMainForm() {
+  Widget _buildMainForm(BuildContext context) {
     return Column(
       children: [
         Expanded(
@@ -96,13 +101,9 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Generate Materials',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.displaySmall,
                     ),
                     Material(
                       color: Colors.transparent,
@@ -113,7 +114,7 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
                           padding: EdgeInsets.all(8.0),
                           child: Icon(
                             Icons.close,
-                            color: Colors.white54,
+                            color: AppColors.textSecondary,
                             size: 24,
                           ),
                         ),
@@ -122,30 +123,30 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
                   ],
                 ),
                 const SizedBox(height: 32),
-                _buildSectionLabel('SOURCES'),
+                _buildSectionLabel(context, 'SOURCES'),
                 const SizedBox(height: 12),
-                _buildSourceSelector(),
+                _buildSourceSelector(context),
                 const SizedBox(height: 32),
-                _buildSectionLabel('TYPE'),
+                _buildSectionLabel(context, 'TYPE'),
                 const SizedBox(height: 12),
-                _buildTypeSelector(),
+                _buildTypeSelector(context),
                 const SizedBox(height: 32),
-                _buildFsrsSection(),
+                _buildFsrsSection(context),
                 const SizedBox(height: 32),
-                _buildSectionLabel('ADDITIONAL NOTES'),
+                _buildSectionLabel(context, 'ADDITIONAL NOTES'),
                 const SizedBox(height: 12),
-                _buildNotesInput(),
+                _buildNotesInput(context),
                 const SizedBox(height: 40),
               ],
             ),
           ),
         ),
-        _buildBottomBar(),
+        _buildBottomBar(context),
       ],
     );
   }
 
-  Widget _buildSourceSelectionPage() {
+  Widget _buildSourceSelectionPage(BuildContext context) {
     return Column(
       children: [
         Padding(
@@ -159,13 +160,9 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
                 constraints: const BoxConstraints(),
               ),
               const SizedBox(width: 16),
-              const Text(
+              Text(
                 'Select Sources',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
             ],
           ),
@@ -179,58 +176,25 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
             itemBuilder: (context, index) {
               final source = _availableSources[index];
               final isSelected = _selectedSources.contains(source);
-              return Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF161B22),
-                  borderRadius: BorderRadius.circular(12),
-                  border: isSelected
-                      ? Border.all(color: const Color(0xFF2E7DFF))
-                      : Border.all(color: Colors.transparent),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        if (isSelected) {
-                          _selectedSources.remove(source);
-                        } else {
-                          _selectedSources.add(source);
-                        }
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          Icon(
-                            isSelected
-                                ? Icons.check_circle
-                                : Icons.radio_button_unchecked,
-                            color: isSelected
-                                ? const Color(0xFF2E7DFF)
-                                : Colors.white24,
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Text(
-                              source,
-                              style: TextStyle(
-                                color: isSelected
-                                    ? Colors.white
-                                    : Colors.white70,
-                                fontWeight: isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+              return AppListTile(
+                title: source,
+                icon: isSelected
+                    ? Icons.check_circle
+                    : Icons.radio_button_unchecked,
+                iconColor: isSelected
+                    ? AppColors.primary
+                    : AppColors.textTertiary,
+                isSelected: isSelected,
+                onTap: () {
+                  setState(() {
+                    if (isSelected) {
+                      _selectedSources.remove(source);
+                    } else {
+                      _selectedSources.add(source);
+                    }
+                  });
+                },
+                trailing: const SizedBox.shrink(),
               );
             },
           ),
@@ -238,14 +202,14 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
         Container(
           padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
-            color: Color(0xFF0B0E14),
-            border: Border(top: BorderSide(color: Colors.white10)),
+            color: AppColors.background,
+            border: Border(top: BorderSide(color: AppColors.textTertiary)),
           ),
           child: SafeArea(
             child: ElevatedButton(
               onPressed: () => _goToPage(0),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2E7DFF),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -253,9 +217,11 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
+              child: Text(
                 'Done',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(color: Colors.white),
               ),
             ),
           ),
@@ -264,19 +230,11 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
     );
   }
 
-  Widget _buildSectionLabel(String label) {
-    return Text(
-      label,
-      style: const TextStyle(
-        color: Colors.white54,
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 1.2,
-      ),
-    );
+  Widget _buildSectionLabel(BuildContext context, String label) {
+    return Text(label, style: Theme.of(context).textTheme.labelSmall);
   }
 
-  Widget _buildSourceSelector() {
+  Widget _buildSourceSelector(BuildContext context) {
     String headerText;
     if (_selectedSources.isEmpty) {
       headerText = 'Select sources...';
@@ -288,9 +246,9 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: AppColors.textTertiary),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -311,10 +269,10 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
                   Expanded(
                     child: Text(
                       headerText,
-                      style: TextStyle(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: _selectedSources.isEmpty
-                            ? Colors.white54
-                            : Colors.white,
+                            ? AppColors.textSecondary
+                            : AppColors.textPrimary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -326,7 +284,7 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
             ),
           ),
           if (_selectedSources.length > 1) ...[
-            const Divider(height: 1, color: Colors.white10),
+            const Divider(height: 1, color: AppColors.textTertiary),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Column(
@@ -347,10 +305,8 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
                         Expanded(
                           child: Text(
                             source,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 13,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppColors.textSecondary),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -386,7 +342,7 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
     );
   }
 
-  Widget _buildTypeSelector() {
+  Widget _buildTypeSelector(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = constraints.maxWidth > 600 ? 4 : 2;
@@ -417,10 +373,10 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? const Color(0xFF1E2843)
-                      : const Color(0xFF161B22),
+                      : AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: isSelected
-                      ? Border.all(color: const Color(0xFF2E7DFF), width: 1.5)
+                      ? Border.all(color: AppColors.primary, width: 1.5)
                       : Border.all(color: Colors.transparent),
                 ),
                 child: Column(
@@ -429,19 +385,18 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
                     Icon(
                       type['icon'] as IconData,
                       color: isSelected
-                          ? const Color(0xFF2E7DFF)
-                          : Colors.white54,
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
                       size: 24,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       type['label'] as String,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: isSelected
-                            ? const Color(0xFF2E7DFF)
-                            : Colors.white54,
-                        fontSize: 11,
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
                         fontWeight: isSelected
                             ? FontWeight.bold
                             : FontWeight.normal,
@@ -457,7 +412,7 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
     );
   }
 
-  Widget _buildFsrsSection() {
+  Widget _buildFsrsSection(BuildContext context) {
     return AnimatedSize(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
@@ -465,31 +420,27 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF161B22),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: _enableFsrs
-              ? Border.all(color: const Color(0xFF2E7DFF).withOpacity(0.3))
+              ? Border.all(color: AppColors.primary.withOpacity(0.3))
               : null,
         ),
         child: Column(
           children: [
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Smart Scheduling (FSRS)',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                       Text(
                         'Optimize review intervals',
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),
@@ -497,27 +448,28 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
                 Switch(
                   value: _enableFsrs,
                   onChanged: (value) => setState(() => _enableFsrs = value),
-                  activeThumbColor: const Color(0xFF2E7DFF),
+                  activeThumbColor: AppColors.primary,
                 ),
               ],
             ),
             if (_enableFsrs) ...[
               const SizedBox(height: 12),
-              const Divider(color: Colors.white10),
+              const Divider(color: AppColors.textTertiary),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Target Retention',
-                    style: TextStyle(color: Colors.white70, fontSize: 13),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   Text(
                     '${(_targetRetention * 100).toInt()}%',
-                    style: const TextStyle(
-                      color: Color(0xFF2E7DFF),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.primary,
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
                     ),
                   ),
                 ],
@@ -536,8 +488,8 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
                   value: _targetRetention,
                   min: 0.7,
                   max: 0.99,
-                  activeColor: const Color(0xFF2E7DFF),
-                  inactiveColor: Colors.white10,
+                  activeColor: AppColors.primary,
+                  inactiveColor: AppColors.textTertiary,
                   onChanged: (value) =>
                       setState(() => _targetRetention = value),
                 ),
@@ -549,16 +501,18 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
     );
   }
 
-  Widget _buildNotesInput() {
+  Widget _buildNotesInput(BuildContext context) {
     return TextField(
       controller: _notesController,
       maxLines: 3,
-      style: const TextStyle(color: Colors.white),
+      style: Theme.of(context).textTheme.bodyLarge,
       decoration: InputDecoration(
         hintText: 'E.g., Focus on key definitions and dates...',
-        hintStyle: const TextStyle(color: Colors.white24),
+        hintStyle: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: AppColors.textTertiary),
         filled: true,
-        fillColor: const Color(0xFF161B22),
+        fillColor: AppColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -569,18 +523,18 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF2E7DFF)),
+          borderSide: const BorderSide(color: AppColors.primary),
         ),
       ),
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildBottomBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
-        color: Color(0xFF0B0E14),
-        border: Border(top: BorderSide(color: Colors.white10)),
+        color: AppColors.background,
+        border: Border(top: BorderSide(color: AppColors.textTertiary)),
       ),
       child: SafeArea(
         child: ElevatedButton(
@@ -589,7 +543,7 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
             // Handle generation logic
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2E7DFF),
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -597,14 +551,16 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
             ),
             elevation: 0,
           ),
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.auto_awesome, size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.auto_awesome, size: 20),
+              const SizedBox(width: 8),
               Text(
                 'Generate',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(color: Colors.white),
               ),
             ],
           ),

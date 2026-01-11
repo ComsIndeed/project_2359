@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/core.dart';
+import '../common/app_header.dart';
 
 class Homepage extends ConsumerWidget {
   const Homepage({super.key});
@@ -7,23 +9,23 @@ class Homepage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0E14),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              _buildHeader(),
+              _buildHeader(context),
               const SizedBox(height: 24),
-              _buildDeadlineHorizon(),
+              _buildDeadlineHorizon(context),
               const SizedBox(height: 24),
-              _buildFeedTheEngine(),
+              _buildFeedTheEngine(context),
               const SizedBox(height: 24),
-              _buildAllCaughtUp(),
+              _buildAllCaughtUp(context),
               const SizedBox(height: 24),
-              _buildSubjectMastery(),
+              _buildSubjectMastery(context),
               const SizedBox(height: 100),
             ],
           ),
@@ -32,93 +34,31 @@ class Homepage extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/app_icon.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'PROJECT 2359',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                Text(
-                  'Oct 24',
-                  style: TextStyle(
-                    color: const Color(0xFF2E7DFF).withOpacity(0.8),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF161B22),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white10),
-          ),
-          child: IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.notifications,
-              color: Colors.white,
-              size: 20,
-            ),
+  Widget _buildHeader(BuildContext context) {
+    return AppPageHeader(
+      title: 'PROJECT 2359',
+      subtitle: 'Oct 24',
+      icon: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          image: const DecorationImage(
+            image: AssetImage('assets/images/app_icon.png'),
+            fit: BoxFit.cover,
           ),
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildDeadlineHorizon() {
+  Widget _buildDeadlineHorizon(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Deadlines',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                'SEE ALL',
-                style: TextStyle(
-                  color: Color(0xFF2E7DFF),
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
+        AppSectionHeader(
+          title: 'Deadlines',
+          actionLabel: 'SEE ALL',
+          onActionTap: () {},
         ),
         SizedBox(
           height: 160,
@@ -126,6 +66,7 @@ class Homepage extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             children: [
               _buildDeadlineItem(
+                context,
                 'Calculus II Midterm',
                 'Science Hall, Room 304',
                 '02d 14h',
@@ -134,6 +75,7 @@ class Homepage extends ConsumerWidget {
               ),
               const SizedBox(width: 12),
               _buildDeadlineItem(
+                context,
                 'History Essay',
                 'Online Submission',
                 '05d 08h',
@@ -142,6 +84,7 @@ class Homepage extends ConsumerWidget {
               ),
               const SizedBox(width: 12),
               _buildDeadlineItem(
+                context,
                 'Physics Lab',
                 'Lab 402',
                 '01d 22h',
@@ -156,6 +99,7 @@ class Homepage extends ConsumerWidget {
   }
 
   Widget _buildDeadlineItem(
+    BuildContext context,
     String title,
     String location,
     String time,
@@ -169,11 +113,11 @@ class Homepage extends ConsumerWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [color, color.withOpacity(0.8)],
+          colors: [color, color.withValues(alpha: 0.8)],
         ),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -189,7 +133,7 @@ class Homepage extends ConsumerWidget {
               child: Icon(
                 icon,
                 size: 100,
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
               ),
             ),
             Padding(
@@ -203,7 +147,7 @@ class Homepage extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(icon, color: Colors.white, size: 16),
@@ -214,16 +158,14 @@ class Homepage extends ConsumerWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           time,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelSmall?.copyWith(color: Colors.white),
                         ),
                       ),
                     ],
@@ -233,11 +175,9 @@ class Homepage extends ConsumerWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineSmall?.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -253,10 +193,10 @@ class Homepage extends ConsumerWidget {
                           location,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 12,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
                         ),
                       ),
                     ],
@@ -270,34 +210,33 @@ class Homepage extends ConsumerWidget {
     );
   }
 
-  Widget _buildFeedTheEngine() {
+  Widget _buildFeedTheEngine(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Feed the Engine',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        const AppSectionHeader(title: 'Feed the Engine'),
         const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
               child: _buildEngineCard(
+                context,
                 Icons.document_scanner_outlined,
                 'Scan Notes',
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildEngineCard(Icons.mic_none_rounded, 'Voice Memo'),
+              child: _buildEngineCard(
+                context,
+                Icons.mic_none_rounded,
+                'Voice Memo',
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _buildEngineCard(
+                context,
                 Icons.cloud_upload_outlined,
                 'Upload File',
               ),
@@ -308,13 +247,13 @@ class Homepage extends ConsumerWidget {
     );
   }
 
-  Widget _buildEngineCard(IconData icon, String label) {
+  Widget _buildEngineCard(BuildContext context, IconData icon, String label) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
         children: [
@@ -322,37 +261,35 @@ class Homepage extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: Colors.white),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAllCaughtUp() {
+  Widget _buildAllCaughtUp(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: const BoxDecoration(
-              color: Color(0xFF1D242C),
+              color: AppColors.secondary,
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.check_circle,
-              color: Color(0xFF4ADE80),
+              color: AppColors.success,
               size: 24,
             ),
           ),
@@ -361,20 +298,13 @@ class Homepage extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'All caught up! 🎉',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Text(
                   'Time to look ahead.',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontSize: 12,
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
             ),
@@ -382,13 +312,18 @@ class Homepage extends ConsumerWidget {
           TextButton(
             onPressed: () {},
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF2E7DFF),
+              foregroundColor: AppColors.primary,
               padding: const EdgeInsets.symmetric(horizontal: 12),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Text('Review', style: TextStyle(fontWeight: FontWeight.bold)),
-                Icon(Icons.chevron_right, size: 16),
+                Text(
+                  'Review',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(color: AppColors.primary),
+                ),
+                const Icon(Icons.chevron_right, size: 16),
               ],
             ),
           ),
@@ -397,61 +332,53 @@ class Homepage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSubjectMastery() {
+  Widget _buildSubjectMastery(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Mastery',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.more_horiz, color: Colors.white54),
-            ),
-          ],
+        AppSectionHeader(
+          title: 'Mastery',
+          actionLabel: 'More',
+          onActionTap: () {},
         ),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: const Color(0xFF161B22),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               _buildMasteryBar(
+                context,
                 'Bio',
                 0.8,
-                const Color(0xFF4ADE80),
+                AppColors.success,
                 Icons.eco_outlined,
               ),
               _buildMasteryBar(
+                context,
                 'Math',
                 0.4,
-                const Color(0xFF2E7DFF),
+                AppColors.primary,
                 Icons.calculate_outlined,
               ),
               _buildMasteryBar(
+                context,
                 'Lit',
                 0.9,
-                const Color(0xFFA855F7),
+                AppColors.accent3,
                 Icons.menu_book_outlined,
               ),
               _buildMasteryBar(
+                context,
                 'Phys',
                 0.6,
-                const Color(0xFFFB923C),
+                AppColors.accent2,
                 Icons.science_outlined,
               ),
             ],
@@ -462,6 +389,7 @@ class Homepage extends ConsumerWidget {
   }
 
   Widget _buildMasteryBar(
+    BuildContext context,
     String label,
     double progress,
     Color color,
@@ -473,7 +401,7 @@ class Homepage extends ConsumerWidget {
           width: 40,
           height: 120,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Stack(
@@ -493,11 +421,9 @@ class Homepage extends ConsumerWidget {
         const SizedBox(height: 12),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 4),
         Icon(icon, color: color, size: 16),

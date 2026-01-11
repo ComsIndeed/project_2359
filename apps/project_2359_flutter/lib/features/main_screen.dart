@@ -5,6 +5,7 @@ import 'sources/sources_page.dart';
 import 'materials/components/material_generation_modal.dart';
 import 'sources/components/add_source_modal.dart';
 import 'settings/settings_page.dart';
+import '../core/core.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -44,9 +45,9 @@ class _MainScreenState extends State<MainScreen> {
     return Container(
       height: 90,
       decoration: BoxDecoration(
-        color: const Color(0xFF0B0E14).withOpacity(0.95),
+        color: AppColors.background.withOpacity(0.95),
         border: const Border(
-          top: BorderSide(color: Colors.white10, width: 0.5),
+          top: BorderSide(color: AppColors.textTertiary, width: 0.5),
         ),
       ),
       child: Stack(
@@ -94,19 +95,16 @@ class _MainScreenState extends State<MainScreen> {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2E7DFF),
+                    color: AppColors.primary,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2E7DFF).withOpacity(0.4),
+                        color: AppColors.primary.withOpacity(0.4),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
                     ],
-                    border: Border.all(
-                      color: const Color(0xFF0B0E14),
-                      width: 4,
-                    ),
+                    border: Border.all(color: AppColors.background, width: 4),
                   ),
                   child: _buildCenterIcon(),
                 ),
@@ -163,15 +161,14 @@ class _MainScreenState extends State<MainScreen> {
             children: [
               Icon(
                 icon,
-                color: isActive ? const Color(0xFF2E7DFF) : Colors.white24,
+                color: isActive ? AppColors.primary : AppColors.textTertiary,
                 size: 24,
               ),
               const SizedBox(height: 4),
               Text(
                 label,
-                style: TextStyle(
-                  color: isActive ? const Color(0xFF2E7DFF) : Colors.white24,
-                  fontSize: 10,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: isActive ? AppColors.primary : AppColors.textTertiary,
                   fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                 ),
               ),

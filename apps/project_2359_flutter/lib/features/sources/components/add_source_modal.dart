@@ -1,9 +1,3 @@
-/// Add Source Modal for Project 2359
-///
-/// Modal for uploading and adding new source materials.
-/// Supports file picking, URL input, and various source types.
-library;
-
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -11,9 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/models/source.dart';
-import '../../../core/services/source_storage_service.dart';
-import '../../../core/services/source_indexing_service.dart';
+import '../../../core/core.dart';
+import '../../common/app_list_tile.dart';
 
 class AddSourceModal extends StatefulWidget {
   /// Callback when a source is successfully added
@@ -249,7 +242,7 @@ class _AddSourceModalState extends State<AddSourceModal> {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF0F172A),
+        color: AppColors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
@@ -274,48 +267,41 @@ class _AddSourceModalState extends State<AddSourceModal> {
               ),
             ),
             const SizedBox(height: 20),
-            _buildHeader(),
-            const Text(
+            _buildHeader(context),
+            Text(
               'Expand your knowledge base.',
-              style: TextStyle(color: Colors.white54, fontSize: 14),
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 24),
             _buildUploadArea(),
             if (_selectedFiles.isNotEmpty) ...[
               const SizedBox(height: 16),
-              _buildSelectedFiles(),
+              _buildSelectedFiles(context),
             ],
             const SizedBox(height: 24),
-            _buildUrlInput(),
+            _buildUrlInput(context),
             const SizedBox(height: 24),
-            _buildFileTypeSection(),
+            _buildFileTypeSection(context),
             if (_uploadError != null) ...[
               const SizedBox(height: 16),
-              _buildError(),
+              _buildError(context),
             ],
             const SizedBox(height: 32),
-            _buildActionButtons(),
+            _buildActionButtons(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          'Add New Source',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text('Add New Source', style: Theme.of(context).textTheme.displaySmall),
         IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.close, color: Colors.white70),
+          icon: const Icon(Icons.close, color: AppColors.textSecondary),
         ),
       ],
     );
@@ -369,11 +355,7 @@ class _AddSourceModalState extends State<AddSourceModal> {
                 _isUploading
                     ? 'Uploading... ${(_uploadProgress * 100).toInt()}%'
                     : 'Tap to Browse',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 4),
               Text(
@@ -382,7 +364,7 @@ class _AddSourceModalState extends State<AddSourceModal> {
                     : _selectedType != null
                     ? 'Select ${_selectedType!.name.toUpperCase()} files'
                     : 'PDF, Audio, Video, or Images',
-                style: const TextStyle(color: Colors.white54, fontSize: 13),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ),
@@ -391,7 +373,7 @@ class _AddSourceModalState extends State<AddSourceModal> {
     );
   }
 
-  Widget _buildSelectedFiles() {
+  Widget _buildSelectedFiles(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -400,86 +382,37 @@ class _AddSourceModalState extends State<AddSourceModal> {
           children: [
             Text(
               'Selected Files (${_selectedFiles.length})',
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(context).textTheme.labelSmall,
             ),
             TextButton(
               onPressed: () => setState(() => _selectedFiles = []),
-              child: const Text(
+              child: Text(
                 'Clear All',
-                style: TextStyle(color: Colors.redAccent, fontSize: 12),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: AppColors.error),
               ),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        Container(
-          constraints: const BoxConstraints(maxHeight: 120),
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: _selectedFiles.length,
-            itemBuilder: (context, index) {
-              final file = _selectedFiles[index];
-              return Container(
-                margin: const EdgeInsets.only(bottom: 4),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _getFileIcon(file.extension),
-                      color: Colors.white54,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        file.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Text(
-                      _formatFileSize(file.size),
-                      style: const TextStyle(
-                        color: Colors.white38,
-                        fontSize: 11,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Material(
-                      color: Colors.transparent,
-                      shape: const CircleBorder(),
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () => _removeFile(index),
-                        child: const Padding(
-                          padding: EdgeInsets.all(4),
-                          child: Icon(
-                            Icons.close,
-                            color: Colors.white38,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _selectedFiles.length,
+          itemBuilder: (context, index) {
+            final file = _selectedFiles[index];
+            return AppListTile(
+              title: file.name,
+              subtitle: _formatFileSize(file.size),
+              icon: _getFileIcon(file.extension),
+              iconColor: AppColors.primary,
+              trailing: IconButton(
+                onPressed: () => _removeFile(index),
+                icon: const Icon(Icons.close, color: Colors.white38, size: 18),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -489,11 +422,15 @@ class _AddSourceModalState extends State<AddSourceModal> {
     if (ext == null) return Icons.insert_drive_file;
     final lower = ext.toLowerCase();
     if (lower == 'pdf') return Icons.picture_as_pdf;
-    if (_fileExtensions[SourceType.audio]!.contains(lower))
+    if (_fileExtensions[SourceType.audio]!.contains(lower)) {
       return Icons.audio_file;
-    if (_fileExtensions[SourceType.video]!.contains(lower))
+    }
+    if (_fileExtensions[SourceType.video]!.contains(lower)) {
       return Icons.video_file;
-    if (_fileExtensions[SourceType.image]!.contains(lower)) return Icons.image;
+    }
+    if (_fileExtensions[SourceType.image]!.contains(lower)) {
+      return Icons.image;
+    }
     return Icons.insert_drive_file;
   }
 
@@ -503,18 +440,11 @@ class _AddSourceModalState extends State<AddSourceModal> {
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
-  Widget _buildUrlInput() {
+  Widget _buildUrlInput(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Import from Link',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        Text('Import from Link', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         TextField(
           controller: _urlController,
@@ -527,16 +457,18 @@ class _AddSourceModalState extends State<AddSourceModal> {
           },
           decoration: InputDecoration(
             hintText: 'Paste YouTube or website URL',
-            hintStyle: const TextStyle(color: Colors.white24, fontSize: 14),
+            hintStyle: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textTertiary),
             filled: true,
-            fillColor: const Color(0xFF1E293B),
-            prefixIcon: const Icon(Icons.link, color: Colors.white24),
+            fillColor: AppColors.surface,
+            prefixIcon: const Icon(Icons.link, color: AppColors.textTertiary),
             suffixIcon: Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 onPressed: _pasteFromClipboard,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1D4ED8),
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   shape: RoundedRectangleBorder(
@@ -560,18 +492,11 @@ class _AddSourceModalState extends State<AddSourceModal> {
     );
   }
 
-  Widget _buildFileTypeSection() {
+  Widget _buildFileTypeSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Choose File Type',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        Text('Choose File Type', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         GridView.count(
           shrinkWrap: true,
@@ -629,22 +554,24 @@ class _AddSourceModalState extends State<AddSourceModal> {
     );
   }
 
-  Widget _buildError() {
+  Widget _buildError(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.redAccent.withOpacity(0.1),
+        color: AppColors.error.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+        border: Border.all(color: AppColors.error.withOpacity(0.3)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: Colors.redAccent, size: 20),
+          const Icon(Icons.error_outline, color: AppColors.error, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               _uploadError!,
-              style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.error),
             ),
           ),
         ],
@@ -652,7 +579,7 @@ class _AddSourceModalState extends State<AddSourceModal> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(BuildContext context) {
     return Row(
       children: [
         Expanded(
@@ -660,7 +587,7 @@ class _AddSourceModalState extends State<AddSourceModal> {
             onPressed: _isUploading ? null : () => Navigator.pop(context),
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.white,
-              side: const BorderSide(color: Colors.white12),
+              side: const BorderSide(color: AppColors.textTertiary),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -674,14 +601,14 @@ class _AddSourceModalState extends State<AddSourceModal> {
           child: ElevatedButton(
             onPressed: _isUploading ? null : _handleImport,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               elevation: 0,
-              disabledBackgroundColor: const Color(0xFF2563EB).withOpacity(0.5),
+              disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -722,11 +649,13 @@ class _FileTypeItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
-      color: isSelected ? iconColor.withOpacity(0.15) : const Color(0xFF1E293B),
+      color: isSelected ? iconColor.withValues(alpha: 0.15) : AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected ? iconColor.withOpacity(0.5) : Colors.transparent,
+          color: isSelected
+              ? iconColor.withValues(alpha: 0.5)
+              : Colors.transparent,
           width: 2,
         ),
       ),
@@ -739,9 +668,8 @@ class _FileTypeItem extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.white70,
-                fontSize: 12,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: isSelected ? Colors.white : AppColors.textSecondary,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               ),
             ),

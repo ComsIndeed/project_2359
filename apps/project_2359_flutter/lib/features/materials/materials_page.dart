@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'models/materials_models.dart';
 import 'materials_repository.dart';
+import '../../core/core.dart';
+import '../common/app_list_tile.dart';
+import '../common/app_header.dart';
 
 class MaterialsPage extends StatefulWidget {
   const MaterialsPage({super.key});
@@ -18,31 +21,23 @@ class _MaterialsPageState extends State<MaterialsPage> {
     final allMaterials = repository.getRecentGenerations();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0E14),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              _buildHeader(),
+              _buildHeader(context),
               if (_showPromo) ...[
                 const SizedBox(height: 24),
-                _buildPromoCard(),
+                _buildPromoCard(context),
               ],
               const SizedBox(height: 32),
-              const Text(
-                'MATERIALS',
-                style: TextStyle(
-                  color: Colors.white54,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                ),
-              ),
+              const AppSectionHeader(title: 'Materials'),
               const SizedBox(height: 16),
-              _buildMaterialsList(allMaterials),
+              _buildMaterialsList(context, allMaterials),
               const SizedBox(height: 100),
             ],
           ),
@@ -51,89 +46,35 @@ class _MaterialsPageState extends State<MaterialsPage> {
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                color: Color(0xFF161B22),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.science,
-                color: Color(0xFF2E7DFF),
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Materials',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'PROJECT 2359',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ],
-            ),
-          ],
+  Widget _buildHeader(BuildContext context) {
+    return AppPageHeader(
+      title: 'Materials',
+      subtitle: 'PROJECT 2359',
+      icon: Container(
+        width: 48,
+        height: 48,
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          shape: BoxShape.circle,
         ),
-        Stack(
-          children: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(
-                Icons.notifications_outlined,
-                color: Colors.white54,
-              ),
-            ),
-            Positioned(
-              right: 12,
-              top: 12,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: Colors.redAccent,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
+        child: const Icon(Icons.science, color: AppColors.primary, size: 24),
+      ),
     );
   }
 
-  Widget _buildPromoCard() {
+  Widget _buildPromoCard(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF2E7DFF), Color(0xFF1E2843)],
+          colors: [AppColors.primary, Color(0xFF1E2843)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2E7DFF).withOpacity(0.2),
+            color: AppColors.primary.withValues(alpha: 0.2),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -148,7 +89,7 @@ class _MaterialsPageState extends State<MaterialsPage> {
             child: Icon(
               Icons.auto_awesome,
               size: 140,
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
             ),
           ),
           Padding(
@@ -159,20 +100,16 @@ class _MaterialsPageState extends State<MaterialsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Generate Materials',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(color: Colors.white),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Create flashcards, quizzes, and more from your uploaded sources.',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.8),
                           height: 1.4,
                         ),
                       ),
@@ -181,7 +118,7 @@ class _MaterialsPageState extends State<MaterialsPage> {
                 ),
                 const SizedBox(width: 16),
                 Material(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     onTap: () => setState(() => _showPromo = false),
@@ -200,66 +137,22 @@ class _MaterialsPageState extends State<MaterialsPage> {
     );
   }
 
-  Widget _buildMaterialsList(List<RecentGeneration> items) {
+  Widget _buildMaterialsList(
+    BuildContext context,
+    List<RecentGeneration> items,
+  ) {
     return Column(
-      children: items.map((item) => _buildMaterialItem(item)).toList(),
+      children: items.map((item) => _buildMaterialItem(context, item)).toList(),
     );
   }
 
-  Widget _buildMaterialItem(RecentGeneration item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {},
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: item.iconColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(item.icon, color: item.iconColor, size: 20),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.subtitle,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.4),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.chevron_right, color: Colors.white24),
-              ],
-            ),
-          ),
-        ),
-      ),
+  Widget _buildMaterialItem(BuildContext context, RecentGeneration item) {
+    return AppListTile(
+      title: item.title,
+      subtitle: item.subtitle,
+      icon: item.icon,
+      iconColor: item.iconColor,
+      onTap: () {},
     );
   }
 }
