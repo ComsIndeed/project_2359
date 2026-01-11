@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/core.dart';
 import '../common/project_image.dart';
-import '../common/app_list_tile.dart';
-import '../common/app_header.dart';
 import 'models/settings_models.dart';
 import 'settings_repository.dart';
 import 'pages/appearance_page.dart';
@@ -93,19 +91,7 @@ class SettingsPage extends StatelessWidget {
   Widget _buildTopHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: AppPageHeader(
-        title: 'Profile',
-        subtitle: 'PROJECT 2359',
-        icon: Container(
-          width: 48,
-          height: 48,
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.person, color: AppColors.primary, size: 24),
-        ),
-      ),
+      child: Text('Profile', style: Theme.of(context).textTheme.displayMedium),
     );
   }
 
@@ -215,57 +201,120 @@ class SettingsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppSectionHeader(title: section.title),
-          const SizedBox(height: 12),
-          ...section.items.map((item) => _buildSettingItem(context, item)),
+          Padding(
+            padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
+            child: Text(
+              section.title,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppColors.textTertiary, width: 1),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: section.items.asMap().entries.map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                final isLast = index == section.items.length - 1;
+
+                return Column(
+                  children: [
+                    _buildSettingItem(context, item),
+                    if (!isLast)
+                      const Divider(
+                        color: AppColors.textTertiary,
+                        height: 1,
+                        indent: 60,
+                        endIndent: 16,
+                      ),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildSettingItem(BuildContext context, SettingItem item) {
-    return AppListTile(
-      title: item.title,
-      subtitle: item.value,
-      icon: item.icon,
-      iconColor: item.iconBackgroundColor,
-      onTap: item.type == SettingItemType.navigation
-          ? () => _navigateTo(context, item.id, item.title)
-          : null,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (item.badge != null)
-            Container(
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                item.badge!,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: item.type == SettingItemType.navigation
+            ? () => _navigateTo(context, item.id, item.title)
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: item.iconBackgroundColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  item.icon,
+                  color: item.iconBackgroundColor,
+                  size: 20,
                 ),
               ),
-            ),
-          if (item.type == SettingItemType.toggle)
-            Switch(
-              value: item.toggleValue,
-              onChanged: (value) {},
-              activeThumbColor: Colors.white,
-              activeTrackColor: AppColors.primary,
-            )
-          else
-            const Icon(
-              Icons.chevron_right,
-              color: AppColors.textTertiary,
-              size: 20,
-            ),
-        ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  item.title,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              if (item.badge != null)
+                Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    item.badge!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              if (item.value != null)
+                Text(
+                  item.value!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              const SizedBox(width: 8),
+              if (item.type == SettingItemType.toggle)
+                Switch(
+                  value: item.toggleValue,
+                  onChanged: (value) {},
+                  activeThumbColor: Colors.white,
+                  activeTrackColor: AppColors.primary,
+                )
+              else
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: AppColors.textTertiary,
+                  size: 14,
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

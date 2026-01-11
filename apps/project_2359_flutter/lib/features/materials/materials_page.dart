@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'models/materials_models.dart';
 import 'materials_repository.dart';
 import '../../core/core.dart';
-import '../common/app_list_tile.dart';
-import '../common/app_header.dart';
 
 class MaterialsPage extends StatefulWidget {
   const MaterialsPage({super.key});
@@ -24,7 +22,7 @@ class _MaterialsPageState extends State<MaterialsPage> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -35,7 +33,10 @@ class _MaterialsPageState extends State<MaterialsPage> {
                 _buildPromoCard(context),
               ],
               const SizedBox(height: 32),
-              const AppSectionHeader(title: 'Materials'),
+              Text(
+                'Materials',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
               const SizedBox(height: 16),
               _buildMaterialsList(context, allMaterials),
               const SizedBox(height: 100),
@@ -47,18 +48,63 @@ class _MaterialsPageState extends State<MaterialsPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return AppPageHeader(
-      title: 'Materials',
-      subtitle: 'PROJECT 2359',
-      icon: Container(
-        width: 48,
-        height: 48,
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          shape: BoxShape.circle,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: const BoxDecoration(
+                color: AppColors.surface,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.science,
+                color: AppColors.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Materials',
+                  style: Theme.of(context).textTheme.displayMedium,
+                ),
+                Text(
+                  'PROJECT 2359',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ],
+            ),
+          ],
         ),
-        child: const Icon(Icons.science, color: AppColors.primary, size: 24),
-      ),
+        Stack(
+          children: [
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.notifications_outlined,
+                color: Colors.white54,
+              ),
+            ),
+            Positioned(
+              right: 12,
+              top: 12,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Colors.redAccent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -147,12 +193,52 @@ class _MaterialsPageState extends State<MaterialsPage> {
   }
 
   Widget _buildMaterialItem(BuildContext context, RecentGeneration item) {
-    return AppListTile(
-      title: item.title,
-      subtitle: item.subtitle,
-      icon: item.icon,
-      iconColor: item.iconColor,
-      onTap: () {},
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: item.iconColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(item.icon, color: item.iconColor, size: 20),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.title,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        item.subtitle,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/core.dart';
-import '../common/app_header.dart';
 
 class Homepage extends ConsumerWidget {
   const Homepage({super.key});
@@ -12,7 +11,7 @@ class Homepage extends ConsumerWidget {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -35,30 +34,77 @@ class Homepage extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return AppPageHeader(
-      title: 'PROJECT 2359',
-      subtitle: 'Oct 24',
-      icon: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          image: const DecorationImage(
-            image: AssetImage('assets/images/app_icon.png'),
-            fit: BoxFit.cover,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/app_icon.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'PROJECT 2359',
+                  style: Theme.of(context).textTheme.displayMedium,
+                ),
+                Text(
+                  'Oct 24',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.primary.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.textTertiary),
+          ),
+          child: IconButton(
+            onPressed: () {},
+            icon: const Icon(
+              Icons.notifications,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 
   Widget _buildDeadlineHorizon(BuildContext context) {
     return Column(
       children: [
-        AppSectionHeader(
-          title: 'Deadlines',
-          actionLabel: 'SEE ALL',
-          onActionTap: () {},
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Deadlines', style: Theme.of(context).textTheme.headlineSmall),
+            TextButton(
+              onPressed: () {},
+              child: Text(
+                'SEE ALL',
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: AppColors.primary),
+              ),
+            ),
+          ],
         ),
         SizedBox(
           height: 160,
@@ -214,7 +260,10 @@ class Homepage extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const AppSectionHeader(title: 'Feed the Engine'),
+        Text(
+          'Feed the Engine',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -336,10 +385,18 @@ class Homepage extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppSectionHeader(
-          title: 'Mastery',
-          actionLabel: 'More',
-          onActionTap: () {},
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Mastery', style: Theme.of(context).textTheme.headlineSmall),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.more_horiz,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         Container(

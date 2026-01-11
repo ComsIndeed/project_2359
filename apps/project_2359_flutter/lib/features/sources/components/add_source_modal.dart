@@ -1,3 +1,9 @@
+/// Add Source Modal for Project 2359
+///
+/// Modal for uploading and adding new source materials.
+/// Supports file picking, URL input, and various source types.
+library;
+
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -6,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/core.dart';
-import '../../common/app_list_tile.dart';
 
 class AddSourceModal extends StatefulWidget {
   /// Callback when a source is successfully added
@@ -396,23 +401,69 @@ class _AddSourceModalState extends State<AddSourceModal> {
           ],
         ),
         const SizedBox(height: 8),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _selectedFiles.length,
-          itemBuilder: (context, index) {
-            final file = _selectedFiles[index];
-            return AppListTile(
-              title: file.name,
-              subtitle: _formatFileSize(file.size),
-              icon: _getFileIcon(file.extension),
-              iconColor: AppColors.primary,
-              trailing: IconButton(
-                onPressed: () => _removeFile(index),
-                icon: const Icon(Icons.close, color: Colors.white38, size: 18),
-              ),
-            );
-          },
+        Container(
+          constraints: const BoxConstraints(maxHeight: 120),
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: _selectedFiles.length,
+            itemBuilder: (context, index) {
+              final file = _selectedFiles[index];
+              return Container(
+                margin: const EdgeInsets.only(bottom: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _getFileIcon(file.extension),
+                      color: Colors.white54,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        file.name,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Text(
+                      _formatFileSize(file.size),
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Material(
+                      color: Colors.transparent,
+                      shape: const CircleBorder(),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () => _removeFile(index),
+                        child: const Padding(
+                          padding: EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.close,
+                            color: Colors.white38,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ],
     );
@@ -649,13 +700,11 @@ class _FileTypeItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
-      color: isSelected ? iconColor.withValues(alpha: 0.15) : AppColors.surface,
+      color: isSelected ? iconColor.withOpacity(0.15) : AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected
-              ? iconColor.withValues(alpha: 0.5)
-              : Colors.transparent,
+          color: isSelected ? iconColor.withOpacity(0.5) : Colors.transparent,
           width: 2,
         ),
       ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/core.dart';
-import '../../common/app_list_tile.dart';
 
 class MaterialGenerationModal extends StatefulWidget {
   const MaterialGenerationModal({super.key});
@@ -176,25 +175,59 @@ class _MaterialGenerationModalState extends State<MaterialGenerationModal> {
             itemBuilder: (context, index) {
               final source = _availableSources[index];
               final isSelected = _selectedSources.contains(source);
-              return AppListTile(
-                title: source,
-                icon: isSelected
-                    ? Icons.check_circle
-                    : Icons.radio_button_unchecked,
-                iconColor: isSelected
-                    ? AppColors.primary
-                    : AppColors.textTertiary,
-                isSelected: isSelected,
-                onTap: () {
-                  setState(() {
-                    if (isSelected) {
-                      _selectedSources.remove(source);
-                    } else {
-                      _selectedSources.add(source);
-                    }
-                  });
-                },
-                trailing: const SizedBox.shrink(),
+              return Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: isSelected
+                      ? Border.all(color: AppColors.primary)
+                      : Border.all(color: Colors.transparent),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        if (isSelected) {
+                          _selectedSources.remove(source);
+                        } else {
+                          _selectedSources.add(source);
+                        }
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isSelected
+                                ? Icons.check_circle
+                                : Icons.radio_button_unchecked,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textTertiary,
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              source,
+                              style: Theme.of(context).textTheme.bodyLarge
+                                  ?.copyWith(
+                                    color: isSelected
+                                        ? AppColors.textPrimary
+                                        : AppColors.textSecondary,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               );
             },
           ),

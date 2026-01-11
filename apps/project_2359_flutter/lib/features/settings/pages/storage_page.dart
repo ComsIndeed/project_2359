@@ -1,12 +1,14 @@
+/// Storage page for Project 2359
+///
+/// Shows database statistics, file storage usage, and allows file management.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/data/providers/datasource_providers.dart';
 import '../../../core/data/config/app_config.dart';
 import '../../../core/services/source_storage_service.dart';
-import '../../common/app_list_tile.dart';
-import '../../common/app_header.dart';
-import '../../../core/core.dart';
 
 class StoragePage extends ConsumerStatefulWidget {
   const StoragePage({super.key});
@@ -256,13 +258,13 @@ class _StoragePageState extends ConsumerState<StoragePage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: kTestMode
-            ? Colors.amber.withValues(alpha: 0.15)
-            : Colors.green.withValues(alpha: 0.15),
+            ? Colors.amber.withOpacity(0.15)
+            : Colors.green.withOpacity(0.15),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: kTestMode
-              ? Colors.amber.withValues(alpha: 0.3)
-              : Colors.green.withValues(alpha: 0.3),
+              ? Colors.amber.withOpacity(0.3)
+              : Colors.green.withOpacity(0.3),
         ),
       ),
       child: Row(
@@ -304,7 +306,15 @@ class _StoragePageState extends ConsumerState<StoragePage> {
   }
 
   Widget _buildSectionHeader(String title) {
-    return AppSectionHeader(title: title);
+    return Text(
+      title.toUpperCase(),
+      style: TextStyle(
+        color: Colors.white.withOpacity(0.4),
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1.2,
+      ),
+    );
   }
 
   Widget _buildStatsCard(List<Widget> children) {
@@ -312,7 +322,7 @@ class _StoragePageState extends ConsumerState<StoragePage> {
       decoration: BoxDecoration(
         color: const Color(0xFF161B22),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
       ),
       child: Column(
         children: children.asMap().entries.map((entry) {
@@ -322,7 +332,7 @@ class _StoragePageState extends ConsumerState<StoragePage> {
               entry.value,
               if (!isLast)
                 Divider(
-                  color: Colors.white.withValues(alpha: 0.05),
+                  color: Colors.white.withOpacity(0.05),
                   height: 1,
                   indent: 56,
                 ),
@@ -346,7 +356,7 @@ class _StoragePageState extends ConsumerState<StoragePage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF2E7DFF).withValues(alpha: 0.15),
+              color: const Color(0xFF2E7DFF).withOpacity(0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: const Color(0xFF2E7DFF), size: 18),
@@ -361,7 +371,7 @@ class _StoragePageState extends ConsumerState<StoragePage> {
           Text(
             suffix ?? count?.toString() ?? '0',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: Colors.white.withOpacity(0.6),
               fontSize: 15,
               fontWeight: FontWeight.w500,
             ),
@@ -385,7 +395,7 @@ class _StoragePageState extends ConsumerState<StoragePage> {
               decoration: BoxDecoration(
                 color: const Color(0xFF161B22),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                border: Border.all(color: Colors.white.withOpacity(0.05)),
               ),
               child: Row(
                 children: [
@@ -418,9 +428,7 @@ class _StoragePageState extends ConsumerState<StoragePage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFF161B22),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.05),
-                    ),
+                    border: Border.all(color: Colors.white.withOpacity(0.05)),
                   ),
                   constraints: const BoxConstraints(maxHeight: 300),
                   child: ListView.separated(
@@ -428,24 +436,54 @@ class _StoragePageState extends ConsumerState<StoragePage> {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     itemCount: _storedFiles.length,
                     separatorBuilder: (_, __) => Divider(
-                      color: Colors.white.withValues(alpha: 0.05),
+                      color: Colors.white.withOpacity(0.05),
                       height: 1,
                       indent: 56,
                     ),
                     itemBuilder: (context, index) {
                       final file = _storedFiles[index];
-                      return AppListTile(
-                        title: file.name,
-                        subtitle:
-                            '${file.type?.name.toUpperCase() ?? 'Unknown'} • ${file.formattedSize}',
-                        icon: _getTypeIcon(file.type),
-                        iconColor: _getTypeColor(file.type),
-                        trailing: IconButton(
-                          onPressed: () => _deleteFile(file),
-                          icon: const Icon(
-                            Icons.delete_outline,
-                            color: Colors.redAccent,
-                            size: 20,
+                      return ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: _getTypeColor(file.type).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            _getTypeIcon(file.type),
+                            color: _getTypeColor(file.type),
+                            size: 18,
+                          ),
+                        ),
+                        title: Text(
+                          file.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          '${file.type?.name.toUpperCase() ?? 'Unknown'} • ${file.formattedSize}',
+                          style: const TextStyle(
+                            color: Colors.white38,
+                            fontSize: 11,
+                          ),
+                        ),
+                        trailing: Material(
+                          color: Colors.transparent,
+                          shape: const CircleBorder(),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () => _deleteFile(file),
+                            child: const Padding(
+                              padding: EdgeInsets.all(8),
+                              child: Icon(
+                                Icons.delete_outline,
+                                color: Colors.redAccent,
+                                size: 20,
+                              ),
+                            ),
                           ),
                         ),
                       );
@@ -511,9 +549,7 @@ class _StoragePageState extends ConsumerState<StoragePage> {
           decoration: BoxDecoration(
             color: const Color(0xFF161B22),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0xFFFF4B4B).withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: const Color(0xFFFF4B4B).withOpacity(0.2)),
           ),
           child: Column(
             children: [
@@ -531,9 +567,7 @@ class _StoragePageState extends ConsumerState<StoragePage> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFFF4B4B,
-                            ).withValues(alpha: 0.15),
+                            color: const Color(0xFFFF4B4B).withOpacity(0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(

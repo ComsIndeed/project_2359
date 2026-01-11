@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/core.dart';
 import '../common/project_image.dart';
-import '../common/app_list_tile.dart';
-import '../common/app_header.dart';
 
 import 'sources_providers.dart';
 
@@ -34,38 +32,21 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
-                AppPageHeader(
-                  title: 'My Sources',
-                  subtitle: 'PROJECT 2359',
-                  icon: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.library_books,
-                      color: AppColors.primary,
-                      size: 24,
-                    ),
-                  ),
+                const SizedBox(height: 24),
+                Text(
+                  'My Sources',
+                  style: Theme.of(context).textTheme.displayMedium,
                 ),
                 const SizedBox(height: 20),
                 _buildSearchBar(context),
                 const SizedBox(height: 20),
                 _buildCategories(context, selectedCategory),
                 const SizedBox(height: 32),
-                AppSectionHeader(
-                  title: 'Recent',
-                  actionLabel: 'View All',
-                  onActionTap: () {},
-                ),
+                _buildSectionHeader(context, 'Recent', onSeeAll: () {}),
                 const SizedBox(height: 16),
                 recentSourcesAsync.when(
                   data: (sources) => _buildRecentList(context, sources),
@@ -76,7 +57,10 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
                   error: (e, _) => Text('Error: $e'),
                 ),
                 const SizedBox(height: 32),
-                const AppSectionHeader(title: 'All Materials'),
+                Text(
+                  'All Materials',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
                 const SizedBox(height: 16),
                 filteredSourcesAsync.when(
                   data: (sources) => _buildMaterialsList(context, sources),
@@ -169,6 +153,29 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title, {
+    VoidCallback? onSeeAll,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
+        if (onSeeAll != null)
+          TextButton(
+            onPressed: onSeeAll,
+            child: Text(
+              'View All',
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: AppColors.primary),
+            ),
+          ),
+      ],
     );
   }
 
@@ -301,17 +308,63 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
   }
 
   Widget _buildMaterialItem(BuildContext context, Source material) {
-    return AppListTile(
-      title: material.title,
-      subtitle: material.metadata,
-      icon: material.icon,
-      iconColor: material.typeColor,
-      onTap: () {
-        ref.read(sourcesDatasourceProvider).markSourceAccessed(material.id);
-      },
-      trailing: IconButton(
-        onPressed: () {},
-        icon: const Icon(Icons.more_vert, color: AppColors.textSecondary),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            ref.read(sourcesDatasourceProvider).markSourceAccessed(material.id);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: material.typeColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    material.icon,
+                    color: material.typeColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        material.title,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        material.metadata,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.more_vert,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
