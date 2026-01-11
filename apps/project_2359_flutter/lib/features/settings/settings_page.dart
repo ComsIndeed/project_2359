@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/core.dart';
 import '../common/project_image.dart';
 import 'models/settings_models.dart';
 import 'settings_repository.dart';
@@ -56,25 +57,27 @@ class SettingsPage extends StatelessWidget {
     final sections = repository.getSettingsSections();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0E14),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              _buildTopHeader(),
+              _buildTopHeader(context),
               const SizedBox(height: 32),
               Center(child: _buildProfileHeader(context, profile)),
               const SizedBox(height: 32),
               ...sections.map((section) => _buildSection(context, section)),
               const SizedBox(height: 24),
-              _buildLogOutButton(),
+              _buildLogOutButton(context),
               const SizedBox(height: 24),
-              const Center(
+              Center(
                 child: Text(
                   'Project 2359 v1.2.4',
-                  style: TextStyle(color: Colors.white24, fontSize: 12),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
                 ),
               ),
               const SizedBox(height: 48),
@@ -85,18 +88,10 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTopHeader() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.0),
-      child: Text(
-        'Profile',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          letterSpacing: -1,
-        ),
-      ),
+  Widget _buildTopHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Text('Profile', style: Theme.of(context).textTheme.displayMedium),
     );
   }
 
@@ -111,7 +106,7 @@ class SettingsPage extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
                   colors: [
-                    const Color(0xFF2E7DFF).withOpacity(0.5),
+                    AppColors.primary.withValues(alpha: 0.5),
                     Colors.transparent,
                   ],
                   begin: Alignment.topLeft,
@@ -121,7 +116,7 @@ class SettingsPage extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF0B0E14), width: 4),
+                  border: Border.all(color: AppColors.background, width: 4),
                 ),
                 child: ClipOval(
                   child: ProjectImage(
@@ -138,12 +133,12 @@ class SettingsPage extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2E7DFF),
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF0B0E14), width: 3),
+                  border: Border.all(color: AppColors.background, width: 3),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -155,23 +150,13 @@ class SettingsPage extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        Text(
-          profile.name,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            letterSpacing: -0.5,
-          ),
-        ),
+        Text(profile.name, style: Theme.of(context).textTheme.displaySmall),
         const SizedBox(height: 6),
         Text(
           profile.subtitle,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 20),
         Container(
@@ -179,7 +164,7 @@ class SettingsPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF2E7DFF).withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 4),
               ),
@@ -189,17 +174,20 @@ class SettingsPage extends StatelessWidget {
             onPressed: () =>
                 _navigateTo(context, 'edit_profile', 'Edit Profile'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF161B22),
-              foregroundColor: const Color(0xFF2E7DFF),
+              backgroundColor: AppColors.surface,
+              foregroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
               elevation: 0,
             ),
-            child: const Text(
+            child: Text(
               'Edit Profile',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -217,22 +205,14 @@ class SettingsPage extends StatelessWidget {
             padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
             child: Text(
               section.title,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.4),
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF161B22),
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.05),
-                width: 1,
-              ),
+              border: Border.all(color: AppColors.textTertiary, width: 1),
             ),
             clipBehavior: Clip.antiAlias,
             child: Column(
@@ -245,8 +225,8 @@ class SettingsPage extends StatelessWidget {
                   children: [
                     _buildSettingItem(context, item),
                     if (!isLast)
-                      Divider(
-                        color: Colors.white.withOpacity(0.05),
+                      const Divider(
+                        color: AppColors.textTertiary,
                         height: 1,
                         indent: 60,
                         endIndent: 16,
@@ -275,7 +255,7 @@ class SettingsPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: item.iconBackgroundColor.withOpacity(0.15),
+                  color: item.iconBackgroundColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -288,11 +268,7 @@ class SettingsPage extends StatelessWidget {
               Expanded(
                 child: Text(
                   item.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
               if (item.badge != null)
@@ -303,7 +279,7 @@ class SettingsPage extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2E7DFF),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -318,9 +294,8 @@ class SettingsPage extends StatelessWidget {
               if (item.value != null)
                 Text(
                   item.value!,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
-                    fontSize: 14,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                 ),
               const SizedBox(width: 8),
@@ -329,12 +304,12 @@ class SettingsPage extends StatelessWidget {
                   value: item.toggleValue,
                   onChanged: (value) {},
                   activeThumbColor: Colors.white,
-                  activeTrackColor: const Color(0xFF2E7DFF),
+                  activeTrackColor: AppColors.primary,
                 )
               else
-                Icon(
+                const Icon(
                   Icons.arrow_forward_ios,
-                  color: Colors.white.withOpacity(0.2),
+                  color: AppColors.textTertiary,
                   size: 14,
                 ),
             ],
@@ -344,16 +319,16 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildLogOutButton() {
+  Widget _buildLogOutButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: const Color(0xFF161B22),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: const Color(0xFFFF4B4B).withOpacity(0.1),
+            color: AppColors.error.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -362,16 +337,14 @@ class SettingsPage extends StatelessWidget {
           child: InkWell(
             onTap: () {},
             borderRadius: BorderRadius.circular(24),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 18),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 18),
               child: Center(
                 child: Text(
                   'Log Out',
-                  style: TextStyle(
-                    color: Color(0xFFFF4B4B),
-                    fontSize: 16,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.error,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
                   ),
                 ),
               ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../core/core.dart';
 import '../common/project_image.dart';
 
@@ -29,7 +28,7 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
     final filteredSourcesAsync = ref.watch(filteredSourcesProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0E14),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -38,23 +37,19 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'My Sources',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.displayMedium,
                 ),
                 const SizedBox(height: 20),
-                _buildSearchBar(),
+                _buildSearchBar(context),
                 const SizedBox(height: 20),
-                _buildCategories(selectedCategory),
+                _buildCategories(context, selectedCategory),
                 const SizedBox(height: 32),
-                _buildSectionHeader('Recent', onSeeAll: () {}),
+                _buildSectionHeader(context, 'Recent', onSeeAll: () {}),
                 const SizedBox(height: 16),
                 recentSourcesAsync.when(
-                  data: (sources) => _buildRecentList(sources),
+                  data: (sources) => _buildRecentList(context, sources),
                   loading: () => const SizedBox(
                     height: 200,
                     child: Center(child: CircularProgressIndicator()),
@@ -62,17 +57,13 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
                   error: (e, _) => Text('Error: $e'),
                 ),
                 const SizedBox(height: 32),
-                const Text(
+                Text(
                   'All Materials',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 16),
                 filteredSourcesAsync.when(
-                  data: (sources) => _buildMaterialsList(sources),
+                  data: (sources) => _buildMaterialsList(context, sources),
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Text('Error: $e'),
@@ -86,20 +77,22 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TextField(
         controller: _searchController,
-        style: const TextStyle(color: Colors.white),
-        decoration: const InputDecoration(
-          icon: Icon(Icons.search, color: Colors.white54),
+        style: Theme.of(context).textTheme.bodyLarge,
+        decoration: InputDecoration(
+          icon: const Icon(Icons.search, color: AppColors.textSecondary),
           hintText: 'Search notes, PDFs, links...',
-          hintStyle: TextStyle(color: Colors.white54),
+          hintStyle: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
           border: InputBorder.none,
         ),
         onChanged: (value) {
@@ -109,7 +102,7 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
     );
   }
 
-  Widget _buildCategories(SourceType? selectedCategory) {
+  Widget _buildCategories(BuildContext context, SourceType? selectedCategory) {
     return SizedBox(
       height: 40,
       child: ListView.separated(
@@ -131,9 +124,7 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color(0xFF2E7DFF)
-                      : const Color(0xFF161B22),
+                  color: isSelected ? AppColors.primary : AppColors.surface,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -146,8 +137,10 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
                     const SizedBox(width: 8),
                     Text(
                       category.title,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.white54,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: isSelected
+                            ? Colors.white
+                            : AppColors.textSecondary,
                         fontWeight: isSelected
                             ? FontWeight.bold
                             : FontWeight.normal,
@@ -163,38 +156,39 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
     );
   }
 
-  Widget _buildSectionHeader(String title, {VoidCallback? onSeeAll}) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title, {
+    VoidCallback? onSeeAll,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
         if (onSeeAll != null)
           TextButton(
             onPressed: onSeeAll,
-            child: const Text(
+            child: Text(
               'View All',
-              style: TextStyle(color: Color(0xFF2E7DFF)),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: AppColors.primary),
             ),
           ),
       ],
     );
   }
 
-  Widget _buildRecentList(List<Source> sources) {
+  Widget _buildRecentList(BuildContext context, List<Source> sources) {
     if (sources.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 200,
         child: Center(
           child: Text(
             'No recent sources',
-            style: TextStyle(color: Colors.white54),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
           ),
         ),
       );
@@ -211,7 +205,7 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
           return Container(
             width: 240,
             decoration: BoxDecoration(
-              color: const Color(0xFF161B22),
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(20),
             ),
             clipBehavior: Clip.antiAlias,
@@ -250,11 +244,8 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
                               ),
                               child: Text(
                                 source.type.name.toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(color: Colors.white),
                               ),
                             ),
                           ),
@@ -271,21 +262,14 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
                           children: [
                             Text(
                               source.title,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context).textTheme.titleLarge,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               source.metadata,
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
-                                fontSize: 12,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
                         ),
@@ -301,14 +285,16 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
     );
   }
 
-  Widget _buildMaterialsList(List<Source> materials) {
+  Widget _buildMaterialsList(BuildContext context, List<Source> materials) {
     if (materials.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(32.0),
+          padding: const EdgeInsets.all(32.0),
           child: Text(
             'No materials found',
-            style: TextStyle(color: Colors.white54),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
           ),
         ),
       );
@@ -316,16 +302,16 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
 
     return Column(
       children: materials
-          .map((material) => _buildMaterialItem(material))
+          .map((material) => _buildMaterialItem(context, material))
           .toList(),
     );
   }
 
-  Widget _buildMaterialItem(Source material) {
+  Widget _buildMaterialItem(BuildContext context, Source material) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       clipBehavior: Clip.antiAlias,
@@ -342,7 +328,7 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: material.typeColor.withOpacity(0.1),
+                    color: material.typeColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -358,26 +344,22 @@ class _SourcesPageState extends ConsumerState<SourcesPage> {
                     children: [
                       Text(
                         material.title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         material.metadata,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.4),
-                          fontSize: 12,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),
                 ),
                 IconButton(
                   onPressed: () {},
-                  icon: const Icon(Icons.more_vert, color: Colors.white54),
+                  icon: const Icon(
+                    Icons.more_vert,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),

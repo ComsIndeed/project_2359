@@ -19,7 +19,7 @@ part 'app_database.g.dart';
 
 // ==================== Type Converters ====================
 
-/// Converter for List<String> stored as JSON
+/// Converter for `List<String>` stored as JSON
 class StringListConverter extends TypeConverter<List<String>, String> {
   const StringListConverter();
 
