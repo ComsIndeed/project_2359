@@ -49,13 +49,11 @@ class SourceIndexingService {
   Future<List<IndexItem>> _indexPdf(Source source) async {
     // TODO: Implement PDF text extraction using a library like:
     // - syncfusion_flutter_pdf
-    // - pdf_text (limited functionality)
-    // - Native platform channels to platform PDF libraries
     //
     // The implementation should:
     // 1. Extract text from each page
     // 2. Create IndexItem.text() for each text block
-    // 3. Extract images and run through LLM for descriptions
+    // 3. Extract images and run through LLM for descriptions (dont do this for now, put a TODO)
     // 4. Track page numbers and character offsets
 
     // Placeholder: Create a stub item indicating indexing needed
@@ -100,9 +98,27 @@ class SourceIndexingService {
   /// Indexes a video file
   Future<List<IndexItem>> _indexVideo(Source source) async {
     // TODO: Implement video indexing:
-    // 1. Extract audio track and transcribe
-    // 2. Optionally extract keyframes for visual analysis
-    // 3. Create IndexItems with timestamps
+
+    /// Requirements:
+    /// - Infos are extracted out, with timestamps
+    ///
+    /// Multiple options:
+    /// 1. Extract and transcribe audio, then extract 1 frames per second (can be optionally omitted)
+    ///   Pros: Cheap, faster
+    ///   Cons: Might miss details, though unlikely. Harder to do
+    ///   Verdict: Best option for now
+    ///   Steps:
+    ///     a. Extract audio
+    ///     b. Transcribe audio using LLMs (should be cheaper, just audio)
+    ///     c. Extract frames (1fps, or 2fps, give a slider)
+    ///     d. Use OCR to get text data and use some similary checker. Then compare each to see if there's any differences
+    ///     e. Transcribe significant frames
+    ///     f. Create IndexItems
+    ///
+    /// 2. Send the raw video to the LLM service and have that indexed
+    ///   Pros: Complete accuracy, easy
+    ///   Cons: Very expensive, slow
+    ///   Verdict: Nope.
 
     return [
       IndexItem(
@@ -120,9 +136,23 @@ class SourceIndexingService {
   /// Indexes an image file
   Future<List<IndexItem>> _indexImage(Source source) async {
     // TODO: Implement image analysis using LLM:
-    // 1. Send image to vision-capable LLM (GPT-4V, Gemini, etc.)
-    // 2. Get description/OCR text
-    // 3. Create IndexItem.imageDescription()
+
+    /// Options:
+    ///
+    /// 1. Use OCR to extract texts and use raw
+    ///     Pros: Cheap, instant
+    ///     Cons: Cant interpret non-linear data. Idk if theres good local OCR tools on all platforms
+    ///     Verdict: Probably shouldnt
+    ///
+    /// 2. Use a cheap LLM to interpret OCR texts and structure it (Deepseek API, maybe?)
+    ///     Pros: Will attempt to understand data from unstructured mess
+    ///     Cons: Might fail or be innacurate; No OCR tools may be available
+    ///     Verdict: If we got no cheap and good vision models we can access without a credit card
+    ///
+    /// 3. Use a cheap LLM to interpret the image
+    ///     Pros: Best case for proper interpretation, easiest
+    ///     Cons: Slightly more expensive
+    ///     Verdict: If we've got a good and cheap vision model we can access
 
     return [
       IndexItem(
@@ -175,6 +205,8 @@ class SourceIndexingService {
     // 1. Fetch page content
     // 2. Extract main text (using readability algorithm)
     // 3. Create IndexItems for extracted content
+
+    // Verdict: Dont do this for now. Might face other issues here. Just maybe use Url Context from Gemini? Though, expensive and requires credit card.
 
     return [
       IndexItem(
