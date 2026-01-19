@@ -9,31 +9,32 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/core.dart';
 
-class AddSourceModal extends StatefulWidget {
+class AddSourceModal extends ConsumerStatefulWidget {
   /// Callback when a source is successfully added
   final void Function(Source source)? onSourceAdded;
 
   const AddSourceModal({super.key, this.onSourceAdded});
 
   @override
-  State<AddSourceModal> createState() => _AddSourceModalState();
+  ConsumerState<AddSourceModal> createState() => _AddSourceModalState();
 }
 
-class _AddSourceModalState extends State<AddSourceModal> {
+class _AddSourceModalState extends ConsumerState<AddSourceModal> {
   static const _uuid = Uuid();
   final _urlController = TextEditingController();
   final _storageService = SourceStorageService();
-  final _indexingService = SourceIndexingService();
 
   SourceType? _selectedType;
   List<PlatformFile> _selectedFiles = [];
   bool _isUploading = false;
   String? _uploadError;
   double _uploadProgress = 0.0;
+  String _indexingStatus = '';
 
   // File type filters for each source type
   static const _fileExtensions = {
@@ -160,9 +161,18 @@ class _AddSourceModalState extends State<AddSourceModal> {
         isIndexed: false,
       );
 
-      // Index the source (this creates placeholder items for now)
-      // TODO: In the future, this will run async in background
-      await _indexingService.indexSource(source);
+      // Index the source with progress tracking
+      final indexingService = ref.read(sourceIndexingServiceProvider);
+      await indexingService.indexSource(
+        source,
+        onProgress: (progress, status) {
+          if (mounted) {
+            setState(() {
+              _indexingStatus = status;
+            });
+          }
+        },
+      );
 
       // Notify parent
       widget.onSourceAdded?.call(source);
@@ -194,8 +204,18 @@ class _AddSourceModalState extends State<AddSourceModal> {
       isIndexed: false,
     );
 
-    // Index the link (placeholder for now)
-    await _indexingService.indexSource(source);
+    // Index the link with progress tracking
+    final indexingService = ref.read(sourceIndexingServiceProvider);
+    await indexingService.indexSource(
+      source,
+      onProgress: (progress, status) {
+        if (mounted) {
+          setState(() {
+            _indexingStatus = status;
+          });
+        }
+      },
+    );
 
     widget.onSourceAdded?.call(source);
   }
@@ -365,7 +385,9 @@ class _AddSourceModalState extends State<AddSourceModal> {
               const SizedBox(height: 4),
               Text(
                 _isUploading
-                    ? 'Please wait...'
+                    ? (_indexingStatus.isNotEmpty
+                          ? _indexingStatus
+                          : 'Please wait...')
                     : _selectedType != null
                     ? 'Select ${_selectedType!.name.toUpperCase()} files'
                     : 'PDF, Audio, Video, or Images',

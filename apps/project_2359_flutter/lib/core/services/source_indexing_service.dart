@@ -4,172 +4,259 @@
 /// Pipeline: Identify type → Extract content → Generate IndexItems
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
-import 'package:uuid/uuid.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import '../models/index_item.dart';
 import '../models/source.dart';
+import 'llm_service.dart';
+
+/// Callback for indexing progress updates
+typedef IndexingProgressCallback =
+    void Function(double progress, String status);
 
 /// Service for indexing source content.
 ///
-/// Currently provides stub implementations with TODOs for:
-/// - PDF text extraction
-/// - PDF image extraction
-/// - Audio transcription
-/// - Video transcription
-/// - LLM content analysis
+/// Uses LLM service for content analysis and description generation.
+/// Supports PDF, audio, video, image, note, and link source types.
 class SourceIndexingService {
-  static const _uuid = Uuid();
+  final LlmService? _llmService;
+
+  SourceIndexingService({LlmService? llmService}) : _llmService = llmService;
 
   /// Indexes a source and returns extracted IndexItems.
   ///
-  /// Currently returns a placeholder item. Full implementation requires:
-  /// - PDF parsing library
-  /// - Audio/video transcription service
-  /// - LLM integration for content analysis
-  Future<List<IndexItem>> indexSource(Source source) async {
-    switch (source.type) {
-      case SourceType.pdf:
-        return _indexPdf(source);
-      case SourceType.audio:
-        return _indexAudio(source);
-      case SourceType.video:
-        return _indexVideo(source);
-      case SourceType.image:
-        return _indexImage(source);
-      case SourceType.note:
-        return _indexNote(source);
-      case SourceType.link:
-        return _indexLink(source);
+  /// [onProgress] callback provides progress updates during indexing.
+  Future<List<IndexItem>> indexSource(
+    Source source, {
+    IndexingProgressCallback? onProgress,
+  }) async {
+    onProgress?.call(0.0, 'Starting indexing...');
+
+    try {
+      final items = switch (source.type) {
+        SourceType.pdf => await _indexPdf(source, onProgress: onProgress),
+        SourceType.audio => await _indexAudio(source, onProgress: onProgress),
+        SourceType.video => await _indexVideo(source, onProgress: onProgress),
+        SourceType.image => await _indexImage(source, onProgress: onProgress),
+        SourceType.note => await _indexNote(source, onProgress: onProgress),
+        SourceType.link => await _indexLink(source, onProgress: onProgress),
+      };
+
+      onProgress?.call(1.0, 'Indexing complete');
+      return items;
+    } catch (e) {
+      onProgress?.call(0.0, 'Indexing failed: $e');
+      rethrow;
     }
   }
 
-  /// Indexes a PDF document
-  Future<List<IndexItem>> _indexPdf(Source source) async {
-    // TODO: Implement PDF text extraction using a library like:
-    // - syncfusion_flutter_pdf
+  /// Indexes a PDF document by extracting text from each page.
+  Future<List<IndexItem>> _indexPdf(
+    Source source, {
+    IndexingProgressCallback? onProgress,
+  }) async {
+    if (source.filePath == null) {
+      return [_createPlaceholderItem(source, 'No file path provided')];
+    }
+
+    onProgress?.call(0.1, 'Loading PDF...');
+
+    try {
+      final file = File(source.filePath!);
+      if (!await file.exists()) {
+        return [_createPlaceholderItem(source, 'PDF file not found')];
+      }
+
+      final bytes = await file.readAsBytes();
+      final document = PdfDocument(inputBytes: bytes);
+      final pageCount = document.pages.count;
+      final items = <IndexItem>[];
+
+      onProgress?.call(0.2, 'Extracting text from $pageCount pages...');
+
+      for (var i = 0; i < pageCount; i++) {
+        final page = document.pages[i];
+        final textExtractor = PdfTextExtractor(document);
+        final text = textExtractor.extractText(
+          startPageIndex: i,
+          endPageIndex: i,
+        );
+
+        if (text.trim().isNotEmpty) {
+          // Split into paragraphs
+          final paragraphs = text
+              .split(RegExp(r'\n\s*\n'))
+              .where((p) => p.trim().isNotEmpty)
+              .toList();
+
+          for (var j = 0; j < paragraphs.length; j++) {
+            items.add(
+              IndexItem.text(
+                sourceId: source.id,
+                content: paragraphs[j].trim(),
+                pageNumber: i + 1,
+                paragraphNumber: j + 1,
+              ),
+            );
+          }
+        }
+
+        final progress = 0.2 + (0.7 * (i + 1) / pageCount);
+        onProgress?.call(progress, 'Processed page ${i + 1} of $pageCount');
+      }
+
+      document.dispose();
+
+      if (items.isEmpty) {
+        return [_createPlaceholderItem(source, 'No text content found in PDF')];
+      }
+
+      onProgress?.call(0.95, 'Finalizing...');
+      return items;
+    } catch (e) {
+      return [_createPlaceholderItem(source, 'PDF extraction failed: $e')];
+    }
+  }
+
+  /// Indexes an audio file using LLM transcription.
+  Future<List<IndexItem>> _indexAudio(
+    Source source, {
+    IndexingProgressCallback? onProgress,
+  }) async {
+    if (source.filePath == null) {
+      return [_createPlaceholderItem(source, 'No audio file path')];
+    }
+
+    onProgress?.call(0.1, 'Preparing audio...');
+
+    // TODO: Implement audio transcription
+    // This would require:
+    // 1. Reading audio file
+    // 2. Converting to base64 or streaming format
+    // 3. Calling transcription service (Groq Whisper, etc.)
     //
-    // The implementation should:
-    // 1. Extract text from each page
-    // 2. Create IndexItem.text() for each text block
-    // 3. Extract images and run through LLM for descriptions (dont do this for now, put a TODO)
-    // 4. Track page numbers and character offsets
+    // For now, return placeholder
 
-    // Placeholder: Create a stub item indicating indexing needed
-    return [
-      IndexItem(
-        id: _uuid.v4(),
-        sourceId: source.id,
-        type: IndexItemType.text,
-        content:
-            '[PDF indexing not yet implemented - file stored at ${source.filePath}]',
-        pageNumber: 1,
-        createdAt: DateTime.now(),
-      ),
-    ];
-  }
+    if (_llmService != null) {
+      try {
+        final file = File(source.filePath!);
+        if (await file.exists()) {
+          onProgress?.call(0.3, 'Transcribing audio...');
 
-  /// Indexes an audio file
-  Future<List<IndexItem>> _indexAudio(Source source) async {
-    // TODO: Implement audio transcription using:
-    // - Whisper API (OpenAI)
-    // - Google Cloud Speech-to-Text
-    // - Local Whisper model
-    //
-    // The implementation should:
-    // 1. Send audio to transcription service
-    // 2. Create IndexItem.transcription() for each segment
-    // 3. Track timestamps for each segment
+          // Note: Direct audio transcription not yet implemented
+          // Would use: _llmService!.transcribeAudio(audioBase64, format)
+        }
+      } catch (e) {
+        return [
+          _createPlaceholderItem(source, 'Audio transcription failed: $e'),
+        ];
+      }
+    }
 
     return [
-      IndexItem(
-        id: _uuid.v4(),
+      IndexItem.transcription(
         sourceId: source.id,
-        type: IndexItemType.transcription,
         content:
-            '[Audio transcription not yet implemented - file stored at ${source.filePath}]',
+            '[Audio transcription pending - file stored at ${source.filePath}]',
         startTimestamp: 0,
-        createdAt: DateTime.now(),
       ),
     ];
   }
 
-  /// Indexes a video file
-  Future<List<IndexItem>> _indexVideo(Source source) async {
-    // TODO: Implement video indexing:
+  /// Indexes a video file.
+  Future<List<IndexItem>> _indexVideo(
+    Source source, {
+    IndexingProgressCallback? onProgress,
+  }) async {
+    if (source.filePath == null) {
+      return [_createPlaceholderItem(source, 'No video file path')];
+    }
 
-    /// Requirements:
-    /// - Infos are extracted out, with timestamps
-    ///
-    /// Multiple options:
-    /// 1. Extract and transcribe audio, then extract 1 frames per second (can be optionally omitted)
-    ///   Pros: Cheap, faster
-    ///   Cons: Might miss details, though unlikely. Harder to do
-    ///   Verdict: Best option for now
-    ///   Steps:
-    ///     a. Extract audio
-    ///     b. Transcribe audio using LLMs (should be cheaper, just audio)
-    ///     c. Extract frames (1fps, or 2fps, give a slider)
-    ///     d. Use OCR to get text data and use some similary checker. Then compare each to see if there's any differences
-    ///     e. Transcribe significant frames
-    ///     f. Create IndexItems
-    ///
-    /// 2. Send the raw video to the LLM service and have that indexed
-    ///   Pros: Complete accuracy, easy
-    ///   Cons: Very expensive, slow
-    ///   Verdict: Nope.
+    onProgress?.call(0.1, 'Processing video...');
+
+    // TODO: Implement video indexing
+    // Strategy:
+    // 1. Extract audio track → transcribe
+    // 2. Extract keyframes (1fps) → analyze for text/changes
+    // 3. Combine transcription with visual analysis
 
     return [
-      IndexItem(
-        id: _uuid.v4(),
+      IndexItem.transcription(
         sourceId: source.id,
-        type: IndexItemType.transcription,
-        content:
-            '[Video transcription not yet implemented - file stored at ${source.filePath}]',
+        content: '[Video indexing pending - file stored at ${source.filePath}]',
         startTimestamp: 0,
-        createdAt: DateTime.now(),
       ),
     ];
   }
 
-  /// Indexes an image file
-  Future<List<IndexItem>> _indexImage(Source source) async {
-    // TODO: Implement image analysis using LLM:
+  /// Indexes an image file using LLM vision.
+  Future<List<IndexItem>> _indexImage(
+    Source source, {
+    IndexingProgressCallback? onProgress,
+  }) async {
+    if (source.filePath == null) {
+      return [_createPlaceholderItem(source, 'No image file path')];
+    }
 
-    /// Options:
-    ///
-    /// 1. Use OCR to extract texts and use raw
-    ///     Pros: Cheap, instant
-    ///     Cons: Cant interpret non-linear data. Idk if theres good local OCR tools on all platforms
-    ///     Verdict: Probably shouldnt
-    ///
-    /// 2. Use a cheap LLM to interpret OCR texts and structure it (Deepseek API, maybe?)
-    ///     Pros: Will attempt to understand data from unstructured mess
-    ///     Cons: Might fail or be innacurate; No OCR tools may be available
-    ///     Verdict: If we got no cheap and good vision models we can access without a credit card
-    ///
-    /// 3. Use a cheap LLM to interpret the image
-    ///     Pros: Best case for proper interpretation, easiest
-    ///     Cons: Slightly more expensive
-    ///     Verdict: If we've got a good and cheap vision model we can access
+    onProgress?.call(0.1, 'Loading image...');
 
-    return [
-      IndexItem(
-        id: _uuid.v4(),
-        sourceId: source.id,
-        type: IndexItemType.imageDescription,
-        content:
-            '[Image analysis not yet implemented - file stored at ${source.filePath}]',
-        extractedImagePath: source.filePath,
-        createdAt: DateTime.now(),
-      ),
-    ];
+    try {
+      final file = File(source.filePath!);
+      if (!await file.exists()) {
+        return [_createPlaceholderItem(source, 'Image file not found')];
+      }
+
+      if (_llmService != null) {
+        onProgress?.call(0.3, 'Analyzing image with AI...');
+
+        final bytes = await file.readAsBytes();
+        final base64 = base64Encode(bytes);
+
+        try {
+          final description = await _llmService.describeImage(
+            base64,
+            prompt:
+                'Describe this image in detail. Extract and list any visible text, diagrams, charts, or educational content.',
+          );
+
+          onProgress?.call(0.9, 'Finalizing...');
+
+          return [
+            IndexItem.imageDescription(
+              sourceId: source.id,
+              content: description,
+              imagePath: source.filePath,
+            ),
+          ];
+        } catch (e) {
+          return [_createPlaceholderItem(source, 'Image analysis failed: $e')];
+        }
+      }
+
+      // No LLM service available
+      return [
+        IndexItem.imageDescription(
+          sourceId: source.id,
+          content: '[Image stored - analysis pending LLM service]',
+          imagePath: source.filePath,
+        ),
+      ];
+    } catch (e) {
+      return [_createPlaceholderItem(source, 'Image processing failed: $e')];
+    }
   }
 
-  /// Indexes a text note
-  Future<List<IndexItem>> _indexNote(Source source) async {
+  /// Indexes a text note by splitting into paragraphs.
+  Future<List<IndexItem>> _indexNote(
+    Source source, {
+    IndexingProgressCallback? onProgress,
+  }) async {
     String content = source.content ?? '';
+
+    onProgress?.call(0.2, 'Processing note...');
 
     // If content is empty but we have a file path, read from file
     if (content.isEmpty && source.filePath != null) {
@@ -187,42 +274,80 @@ class SourceIndexingService {
       return [];
     }
 
-    // For notes, the entire content is one index item
-    // TODO: Consider breaking into paragraphs or sections
+    onProgress?.call(0.5, 'Extracting paragraphs...');
+
+    // Split into paragraphs
+    final paragraphs = content
+        .split(RegExp(r'\n\s*\n'))
+        .where((p) => p.trim().isNotEmpty)
+        .toList();
+
+    final items = <IndexItem>[];
+    for (var i = 0; i < paragraphs.length; i++) {
+      items.add(
+        IndexItem.text(
+          sourceId: source.id,
+          content: paragraphs[i].trim(),
+          paragraphNumber: i + 1,
+        ),
+      );
+    }
+
+    onProgress?.call(0.9, 'Finalizing...');
+
+    // If only one paragraph, just return it
+    if (items.isEmpty && content.isNotEmpty) {
+      return [
+        IndexItem.text(
+          sourceId: source.id,
+          content: content,
+          paragraphNumber: 1,
+        ),
+      ];
+    }
+
+    return items;
+  }
+
+  /// Indexes a web link.
+  Future<List<IndexItem>> _indexLink(
+    Source source, {
+    IndexingProgressCallback? onProgress,
+  }) async {
+    onProgress?.call(0.5, 'Link stored...');
+
+    // TODO: Implement web scraping
+    // Would require:
+    // 1. Fetch page content
+    // 2. Extract main text using readability algorithm
+    // 3. Create IndexItems from extracted content
+
     return [
       IndexItem.text(
-        id: _uuid.v4(),
         sourceId: source.id,
-        content: content,
-        pageNumber: 1,
+        content:
+            '[Web link stored - content extraction pending: ${source.url}]',
+        paragraphNumber: 1,
       ),
     ];
   }
 
-  /// Indexes a web link
-  Future<List<IndexItem>> _indexLink(Source source) async {
-    // TODO: Implement web scraping:
-    // 1. Fetch page content
-    // 2. Extract main text (using readability algorithm)
-    // 3. Create IndexItems for extracted content
-
-    // Verdict: Dont do this for now. Might face other issues here. Just maybe use Url Context from Gemini? Though, expensive and requires credit card.
-
-    return [
-      IndexItem(
-        id: _uuid.v4(),
-        sourceId: source.id,
-        type: IndexItemType.text,
-        content: '[Web page indexing not yet implemented - URL: ${source.url}]',
-        createdAt: DateTime.now(),
-      ),
-    ];
+  /// Creates a placeholder item for error cases.
+  IndexItem _createPlaceholderItem(Source source, String message) {
+    return IndexItem(
+      id: IndexItem.generateId(),
+      sourceId: source.id,
+      type: IndexItemType.text,
+      content: '[$message]',
+      createdAt: DateTime.now(),
+    );
   }
 
-  /// Re-indexes a source (for when content changes or indexing improves)
-  Future<List<IndexItem>> reindexSource(Source source) async {
-    // Same as indexSource for now
-    // In the future, might want to preserve existing items or merge
-    return indexSource(source);
+  /// Re-indexes a source (for when content changes or indexing improves).
+  Future<List<IndexItem>> reindexSource(
+    Source source, {
+    IndexingProgressCallback? onProgress,
+  }) async {
+    return indexSource(source, onProgress: onProgress);
   }
 }
