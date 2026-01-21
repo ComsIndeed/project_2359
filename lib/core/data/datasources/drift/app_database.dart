@@ -5,15 +5,11 @@
 library;
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import '../../../models/models.dart';
-import '../../config/app_config.dart';
+import 'connection/connection.dart' as connection;
 
 part 'app_database.g.dart';
 
@@ -255,7 +251,7 @@ class Users extends Table {
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase() : super(connection.openConnection());
 
   @override
   int get schemaVersion => 1;
@@ -290,17 +286,4 @@ class AppDatabase extends _$AppDatabase {
     ).getSingle();
     return result.data['total'] as int;
   }
-}
-
-/// Opens a connection to the SQLite database
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, kAppName, kDatabaseName));
-
-    // Ensure directory exists
-    await file.parent.create(recursive: true);
-
-    return NativeDatabase.createInBackground(file);
-  });
 }

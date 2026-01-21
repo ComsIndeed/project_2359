@@ -20,12 +20,14 @@
         "riverpod_annotation",
         "shared_preferences",
         "sqlite3_flutter_libs",
+        "sqlite3_web",
         "supabase_flutter",
         "syncfusion_flutter_pdf",
         "uuid"
       ],
       "devDependencies": [
         "build_runner",
+        "build_web_compilers",
         "custom_lint",
         "drift_dev",
         "flutter_launcher_icons",
@@ -33,6 +35,27 @@
         "flutter_test",
         "riverpod_generator",
         "riverpod_lint"
+      ]
+    },
+    {
+      "name": "build_web_compilers",
+      "version": "4.4.7",
+      "dependencies": [
+        "analyzer",
+        "archive",
+        "bazel_worker",
+        "build",
+        "build_modules",
+        "build_runner",
+        "collection",
+        "glob",
+        "logging",
+        "path",
+        "pool",
+        "scratch_space",
+        "source_maps",
+        "source_span",
+        "stack_trace"
       ]
     },
     {
@@ -239,6 +262,16 @@
       ]
     },
     {
+      "name": "sqlite3_web",
+      "version": "0.4.1",
+      "dependencies": [
+        "meta",
+        "sqlite3",
+        "stream_channel",
+        "web"
+      ]
+    },
+    {
       "name": "sqlite3_flutter_libs",
       "version": "0.5.41",
       "dependencies": [
@@ -363,6 +396,131 @@
       "dependencies": []
     },
     {
+      "name": "stack_trace",
+      "version": "1.12.1",
+      "dependencies": [
+        "path"
+      ]
+    },
+    {
+      "name": "source_span",
+      "version": "1.10.1",
+      "dependencies": [
+        "collection",
+        "path",
+        "term_glyph"
+      ]
+    },
+    {
+      "name": "source_maps",
+      "version": "0.10.13",
+      "dependencies": [
+        "source_span"
+      ]
+    },
+    {
+      "name": "scratch_space",
+      "version": "1.2.0",
+      "dependencies": [
+        "build",
+        "crypto",
+        "path",
+        "pool"
+      ]
+    },
+    {
+      "name": "pool",
+      "version": "1.5.2",
+      "dependencies": [
+        "async",
+        "stack_trace"
+      ]
+    },
+    {
+      "name": "logging",
+      "version": "1.3.0",
+      "dependencies": []
+    },
+    {
+      "name": "glob",
+      "version": "2.1.3",
+      "dependencies": [
+        "async",
+        "collection",
+        "file",
+        "path",
+        "string_scanner"
+      ]
+    },
+    {
+      "name": "build_modules",
+      "version": "5.1.6",
+      "dependencies": [
+        "analyzer",
+        "async",
+        "bazel_worker",
+        "build",
+        "collection",
+        "crypto",
+        "file",
+        "glob",
+        "graphs",
+        "json_annotation",
+        "logging",
+        "path",
+        "scratch_space",
+        "stream_transform",
+        "uuid"
+      ]
+    },
+    {
+      "name": "build",
+      "version": "4.0.4",
+      "dependencies": [
+        "analyzer",
+        "crypto",
+        "glob",
+        "logging",
+        "package_config",
+        "path"
+      ]
+    },
+    {
+      "name": "bazel_worker",
+      "version": "1.1.5",
+      "dependencies": [
+        "async",
+        "protobuf"
+      ]
+    },
+    {
+      "name": "archive",
+      "version": "4.0.7",
+      "dependencies": [
+        "crypto",
+        "path",
+        "posix"
+      ]
+    },
+    {
+      "name": "analyzer",
+      "version": "8.4.0",
+      "dependencies": [
+        "_fe_analyzer_shared",
+        "collection",
+        "convert",
+        "crypto",
+        "glob",
+        "meta",
+        "package_config",
+        "path",
+        "pub_semver",
+        "source_span",
+        "watcher",
+        "yaml"
+      ]
+    },
+    {
       "name": "yaml",
       "version": "3.1.3",
       "dependencies": [
@@ -480,33 +638,6 @@
       ]
     },
     {
-      "name": "analyzer",
-      "version": "8.4.0",
-      "dependencies": [
-        "_fe_analyzer_shared",
-        "collection",
-        "convert",
-        "crypto",
-        "glob",
-        "meta",
-        "package_config",
-        "path",
-        "pub_semver",
-        "source_span",
-        "watcher",
-        "yaml"
-      ]
-    },
-    {
-      "name": "source_span",
-      "version": "1.10.1",
-      "dependencies": [
-        "collection",
-        "path",
-        "term_glyph"
-      ]
-    },
-    {
       "name": "riverpod_analyzer_utils",
       "version": "1.0.0-dev.8",
       "dependencies": [
@@ -592,18 +723,6 @@
       ]
     },
     {
-      "name": "build",
-      "version": "4.0.4",
-      "dependencies": [
-        "analyzer",
-        "crypto",
-        "glob",
-        "logging",
-        "package_config",
-        "path"
-      ]
-    },
-    {
       "name": "analyzer_buffer",
       "version": "0.1.11",
       "dependencies": [
@@ -667,11 +786,6 @@
       ]
     },
     {
-      "name": "logging",
-      "version": "1.3.0",
-      "dependencies": []
-    },
-    {
       "name": "stream_transform",
       "version": "2.1.1",
       "dependencies": []
@@ -727,14 +841,6 @@
       ]
     },
     {
-      "name": "pool",
-      "version": "1.5.2",
-      "dependencies": [
-        "async",
-        "stack_trace"
-      ]
-    },
-    {
       "name": "mime",
       "version": "2.0.0",
       "dependencies": []
@@ -751,17 +857,6 @@
       "version": "2.3.2",
       "dependencies": [
         "collection"
-      ]
-    },
-    {
-      "name": "glob",
-      "version": "2.1.3",
-      "dependencies": [
-        "async",
-        "collection",
-        "file",
-        "path",
-        "string_scanner"
       ]
     },
     {
@@ -860,13 +955,6 @@
       "name": "vector_math",
       "version": "2.2.0",
       "dependencies": []
-    },
-    {
-      "name": "stack_trace",
-      "version": "1.12.1",
-      "dependencies": [
-        "path"
-      ]
     },
     {
       "name": "clock",
@@ -1174,10 +1262,34 @@
       ]
     },
     {
-      "name": "custom_lint_visitor",
-      "version": "1.0.0+8.4.0",
+      "name": "term_glyph",
+      "version": "1.2.2",
+      "dependencies": []
+    },
+    {
+      "name": "file",
+      "version": "7.0.1",
       "dependencies": [
-        "analyzer"
+        "meta",
+        "path"
+      ]
+    },
+    {
+      "name": "protobuf",
+      "version": "6.0.0",
+      "dependencies": [
+        "collection",
+        "fixnum",
+        "meta"
+      ]
+    },
+    {
+      "name": "posix",
+      "version": "6.0.3",
+      "dependencies": [
+        "ffi",
+        "meta",
+        "path"
       ]
     },
     {
@@ -1188,9 +1300,11 @@
       ]
     },
     {
-      "name": "term_glyph",
-      "version": "1.2.2",
-      "dependencies": []
+      "name": "custom_lint_visitor",
+      "version": "1.0.0+8.4.0",
+      "dependencies": [
+        "analyzer"
+      ]
     },
     {
       "name": "test",
@@ -1256,23 +1370,6 @@
         "source_span",
         "string_scanner",
         "typed_data"
-      ]
-    },
-    {
-      "name": "file",
-      "version": "7.0.1",
-      "dependencies": [
-        "meta",
-        "path"
-      ]
-    },
-    {
-      "name": "archive",
-      "version": "4.0.7",
-      "dependencies": [
-        "crypto",
-        "path",
-        "posix"
       ]
     },
     {
@@ -1569,15 +1666,6 @@
       ]
     },
     {
-      "name": "posix",
-      "version": "6.0.3",
-      "dependencies": [
-        "ffi",
-        "meta",
-        "path"
-      ]
-    },
-    {
       "name": "vm_service",
       "version": "15.0.2",
       "dependencies": []
@@ -1641,13 +1729,6 @@
       "dependencies": [
         "collection",
         "hooks"
-      ]
-    },
-    {
-      "name": "source_maps",
-      "version": "0.10.13",
-      "dependencies": [
-        "source_span"
       ]
     },
     {

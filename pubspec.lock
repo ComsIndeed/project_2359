@@ -105,6 +105,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.0"
+  bazel_worker:
+    dependency: transitive
+    description:
+      name: bazel_worker
+      sha256: "87cae9150fcf9942b8057e5f51c4848a3efde1289e97411e1c8f01e350120999"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.5"
   boolean_selector:
     dependency: transitive
     description:
@@ -137,6 +145,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.1"
+  build_modules:
+    dependency: transitive
+    description:
+      name: build_modules
+      sha256: e43201140172dc448ee73b7504576c7af08f91e563447a7cab6c1a487cb2209d
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.1.6"
   build_runner:
     dependency: "direct dev"
     description:
@@ -145,6 +161,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.10.5"
+  build_web_compilers:
+    dependency: "direct dev"
+    description:
+      name: build_web_compilers
+      sha256: fd42bfa374853d80d1e1ef8a740a7a7b26fe5bd658cae1226fa67f5746b4838a
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.4.7"
   built_collection:
     dependency: transitive
     description:
@@ -816,6 +840,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.0"
+  protobuf:
+    dependency: transitive
+    description:
+      name: protobuf
+      sha256: "75ec242d22e950bdcc79ee38dd520ce4ee0bc491d7fadc4ea47694604d22bf06"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.0"
   pub_semver:
     dependency: transitive
     description:
@@ -904,6 +936,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
+  scratch_space:
+    dependency: transitive
+    description:
+      name: scratch_space
+      sha256: "3417e014d20b12cebc5bfb1c0b1f63806054177158596cc31cc4d9aaca767a60"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -1045,6 +1085,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.41"
+  sqlite3_web:
+    dependency: "direct main"
+    description:
+      name: sqlite3_web
+      sha256: "3973adf9ee74e485d5552319e1903129f4ed999fe675aa0b4b5d35d112b2aa1c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.1"
   sqlparser:
     dependency: transitive
     description:
@@ -1350,5 +1398,5 @@ packages:
     source: hosted
     version: "2.1.0"
 sdks:
-  dart: ">=3.10.3 <4.0.0"
+  dart: ">=3.10.3 <3.12.0-z"
   flutter: ">=3.38.4"

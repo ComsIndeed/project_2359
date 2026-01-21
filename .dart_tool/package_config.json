@@ -80,6 +80,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "bazel_worker",
+      "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/bazel_worker-1.1.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
       "name": "boolean_selector",
       "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/boolean_selector-2.1.2",
       "packageUri": "lib/",
@@ -104,8 +110,20 @@
       "languageVersion": "3.7"
     },
     {
+      "name": "build_modules",
+      "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/build_modules-5.1.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
       "name": "build_runner",
       "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner-2.10.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "build_web_compilers",
+      "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/build_web_compilers-4.4.7",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
@@ -620,6 +638,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "protobuf",
+      "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/protobuf-6.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
       "name": "pub_semver",
       "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/pub_semver-2.2.0",
       "packageUri": "lib/",
@@ -684,6 +708,12 @@
       "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/rxdart-0.28.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "scratch_space",
+      "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/scratch_space-1.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
     },
     {
       "name": "shared_preferences",
@@ -792,6 +822,12 @@
       "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.41",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "sqlite3_web",
+      "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/sqlite3_web-0.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
     },
     {
       "name": "sqlparser",

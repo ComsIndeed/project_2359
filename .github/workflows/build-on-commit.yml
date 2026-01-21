@@ -32,11 +32,11 @@ jobs:
           fi
 
   # ============================================================================
-  # Build Flutter Web (DISABLED - App uses native SQLite which is not web-compatible)
+  # Build Flutter Web
   # ============================================================================
   build-web:
     needs: check-trigger
-    if: false  # Disabled until web database implementation is added
+    if: needs.check-trigger.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     
     steps:
@@ -176,11 +176,10 @@ jobs:
           retention-days: 1
 
   # ============================================================================
-  # Deploy Web to GitHub Pages (DISABLED - Web build is disabled)
+  # Deploy Web to GitHub Pages
   # ============================================================================
   deploy-web:
     needs: [check-trigger, build-web]
-    if: false  # Disabled until web build is enabled
     runs-on: ubuntu-latest
     
     permissions:
@@ -213,7 +212,7 @@ jobs:
   # Create Release with All Binaries
   # ============================================================================
   create-release:
-    needs: [check-trigger, build-android, build-windows, build-linux]
+    needs: [check-trigger, build-android, build-windows, build-linux, deploy-web]
     runs-on: ubuntu-latest
     
     permissions:
@@ -315,6 +314,7 @@ jobs:
           | 🤖 **Android** | \`project_2359-android.apk\` | Release APK for Android devices |
           | 🪟 **Windows** | \`project_2359-windows.zip\` | Portable Windows executable |
           | 🐧 **Linux** | \`project_2359-linux.tar.gz\` | Linux bundle archive |
+          | 🌐 **Web** | [Open Web App](${PAGES_URL}) | Hosted on GitHub Pages |
           
           ## 🔧 Installation Instructions
           
@@ -330,6 +330,9 @@ jobs:
           ### Linux
           1. Download and extract \`project_2359-linux.tar.gz\`
           2. Run the executable: \`./project_2359\`
+          
+          ### Web
+          Simply visit: [${PAGES_URL}](${PAGES_URL})
           
           ---
           
