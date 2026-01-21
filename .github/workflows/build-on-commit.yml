@@ -1,0 +1,360 @@
+name: Build on [BUILD] Commit
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # ============================================================================
+  # Check if commit message starts with [BUILD]
+  # ============================================================================
+  check-trigger:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
+      commit_message: ${{ steps.check.outputs.commit_message }}
+    steps:
+      - name: Check commit message for [BUILD] trigger
+        id: check
+        run: |
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          echo "Commit message: $COMMIT_MSG"
+          
+          if [[ "$COMMIT_MSG" == \[BUILD\]* ]]; then
+            echo "✅ Commit starts with [BUILD] - triggering build"
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            # Extract the message after [BUILD] for release notes
+            CLEAN_MSG=$(echo "$COMMIT_MSG" | sed 's/^\[BUILD\]\s*//')
+            echo "commit_message=$CLEAN_MSG" >> $GITHUB_OUTPUT
+          else
+            echo "⏭️ Commit does not start with [BUILD] - skipping build"
+            echo "should_build=false" >> $GITHUB_OUTPUT
+          fi
+
+  # ============================================================================
+  # Build Flutter Web
+  # ============================================================================
+  build-web:
+    needs: check-trigger
+    if: needs.check-trigger.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.2'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Web
+        run: flutter build web --release
+
+      - name: Upload Web Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web/
+          retention-days: 1
+
+  # ============================================================================
+  # Build Android APK
+  # ============================================================================
+  build-android:
+    needs: check-trigger
+    if: needs.check-trigger.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.2'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 1
+
+  # ============================================================================
+  # Build Windows Desktop
+  # ============================================================================
+  build-windows:
+    needs: check-trigger
+    if: needs.check-trigger.outputs.should_build == 'true'
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.2'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Create Windows ZIP
+        run: |
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath project_2359-windows.zip
+
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: project_2359-windows.zip
+          retention-days: 1
+
+  # ============================================================================
+  # Build Linux Desktop
+  # ============================================================================
+  build-linux:
+    needs: check-trigger
+    if: needs.check-trigger.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build libgtk-3-dev libsqlite3-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.2'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Linux
+        run: flutter build linux --release
+
+      - name: Create Linux Archive
+        run: |
+          cd build/linux/x64/release/bundle
+          tar -czvf ../../../../../project_2359-linux.tar.gz *
+
+      - name: Upload Linux Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: project_2359-linux.tar.gz
+          retention-days: 1
+
+  # ============================================================================
+  # Deploy Web to GitHub Pages
+  # ============================================================================
+  deploy-web:
+    needs: [check-trigger, build-web]
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Web Build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: web-build
+
+      - name: Prepare deployment
+        run: |
+          mkdir -p deploy
+          cp -r web-build/* deploy/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy
+          destination_dir: .
+          keep_files: true
+
+  # ============================================================================
+  # Create Release with All Binaries
+  # ============================================================================
+  create-release:
+    needs: [check-trigger, build-android, build-windows, build-linux, deploy-web]
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Android APK
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: ./release-assets
+
+      - name: Download Windows Build
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: ./release-assets
+
+      - name: Download Linux Build
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-build
+          path: ./release-assets
+
+      - name: Rename APK
+        run: mv ./release-assets/app-release.apk ./release-assets/project_2359-android.apk
+
+      - name: Get build information
+        id: build_info
+        run: |
+          # Get current date and time
+          BUILD_DATE=$(date -u +'%Y-%m-%d')
+          BUILD_TIME=$(date -u +'%H:%M:%S UTC')
+          BUILD_DATETIME=$(date -u +'%Y%m%d-%H%M%S')
+          
+          # Get commit info
+          COMMIT_SHA="${{ github.sha }}"
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+          COMMIT_AUTHOR="${{ github.actor }}"
+          COMMIT_MESSAGE="${{ needs.check-trigger.outputs.commit_message }}"
+          
+          # Get Flutter version from workflow
+          FLUTTER_VERSION="3.27.2"
+          
+          # Generate unique build number
+          BUILD_NUMBER="${{ github.run_number }}"
+          
+          # Export outputs
+          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "build_datetime=$BUILD_DATETIME" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "commit_author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
+          echo "flutter_version=$FLUTTER_VERSION" >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        id: release_notes
+        env:
+          BUILD_DATE: ${{ steps.build_info.outputs.build_date }}
+          BUILD_TIME: ${{ steps.build_info.outputs.build_time }}
+          SHORT_SHA: ${{ steps.build_info.outputs.short_sha }}
+          COMMIT_AUTHOR: ${{ steps.build_info.outputs.commit_author }}
+          COMMIT_MESSAGE: ${{ needs.check-trigger.outputs.commit_message }}
+          FLUTTER_VERSION: ${{ steps.build_info.outputs.flutter_version }}
+          BUILD_NUMBER: ${{ steps.build_info.outputs.build_number }}
+          GITHUB_PAGES_URL: ${{ github.event.repository.html_url }}
+        run: |
+          # Extract repo owner and name for pages URL
+          REPO_OWNER="${{ github.repository_owner }}"
+          REPO_NAME="${{ github.event.repository.name }}"
+          PAGES_URL="https://${REPO_OWNER}.github.io/${REPO_NAME}"
+          
+          cat > release_notes.md << EOF
+          # 🚀 Automated Build #${BUILD_NUMBER}
+          
+          ## 📋 Build Information
+          
+          | Property | Value |
+          |----------|-------|
+          | 📅 **Build Date** | ${BUILD_DATE} |
+          | 🕐 **Build Time** | ${BUILD_TIME} |
+          | 🔢 **Build Number** | #${BUILD_NUMBER} |
+          | 📝 **Commit** | \`${SHORT_SHA}\` |
+          | 👤 **Triggered By** | @${COMMIT_AUTHOR} |
+          | 🦋 **Flutter Version** | ${FLUTTER_VERSION} |
+          
+          ## 💬 Commit Message
+          
+          > ${COMMIT_MESSAGE}
+          
+          ## 📦 Available Downloads
+          
+          | Platform | File | Description |
+          |----------|------|-------------|
+          | 🤖 **Android** | \`project_2359-android.apk\` | Release APK for Android devices |
+          | 🪟 **Windows** | \`project_2359-windows.zip\` | Portable Windows executable |
+          | 🐧 **Linux** | \`project_2359-linux.tar.gz\` | Linux bundle archive |
+          | 🌐 **Web** | [Open Web App](${PAGES_URL}) | Hosted on GitHub Pages |
+          
+          ## 🔧 Installation Instructions
+          
+          ### Android
+          1. Download \`project_2359-android.apk\`
+          2. Enable "Install from unknown sources" in your device settings
+          3. Open the APK file to install
+          
+          ### Windows
+          1. Download and extract \`project_2359-windows.zip\`
+          2. Run \`project_2359.exe\`
+          
+          ### Linux
+          1. Download and extract \`project_2359-linux.tar.gz\`
+          2. Run the executable: \`./project_2359\`
+          
+          ### Web
+          Simply visit: [${PAGES_URL}](${PAGES_URL})
+          
+          ---
+          
+          *This is an automated build triggered by a commit starting with \`[BUILD]\`.*
+          *Build generated on ${BUILD_DATE} at ${BUILD_TIME}*
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ steps.build_info.outputs.build_datetime }}-${{ steps.build_info.outputs.short_sha }}
+          name: "Project 2359 - Build #${{ steps.build_info.outputs.build_number }} (${{ steps.build_info.outputs.build_date }})"
+          body_path: release_notes.md
+          files: |
+            ./release-assets/project_2359-android.apk
+            ./release-assets/project_2359-windows.zip
+            ./release-assets/project_2359-linux.tar.gz
+          draft: false
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
