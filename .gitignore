@@ -10,10 +10,28 @@ web-build/
 expo-env.d.ts
 *.hprof
 
-# Native builds (generated)
-ios/
-android/
-.kotlin/
+# Native builds (ephemeral)
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+bin/
+
+# Platform specific ephemeral files
+**/android/local.properties
+**/android/key.properties
+**/android/app/google-services.json
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/flutter_podhelper.rb
+**/ios/Runner/GeneratedPluginRegistrant.[mh]
+**/linux/flutter/
+**/macos/Flutter/ephemeral/
+**/windows/flutter/
+**/web/flutter_bootstrap.js
 
 # Build outputs
 build/
@@ -82,19 +100,7 @@ coverage/
 *.temp
 .cache/
 
-# Flutter (for the flutter app in this monorepo)
-apps/project_2359_flutter/.dart_tool/
-apps/project_2359_flutter/.packages
-apps/project_2359_flutter/build/
-apps/project_2359_flutter/.flutter-plugins
-apps/project_2359_flutter/.flutter-plugins-dependencies
-apps/project_2359_flutter/pubspec.lock
-apps/project_2359_flutter/ios/
-apps/project_2359_flutter/android/
-apps/project_2359_flutter/web/
-apps/project_2359_flutter/windows/
-apps/project_2359_flutter/linux/
-apps/project_2359_flutter/macos/
+# Old monorepo ignores (cleaned up)
 *.ipr
 *.iws
 
