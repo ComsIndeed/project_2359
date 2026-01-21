@@ -9,6 +9,7 @@
       "dependencies": [
         "collection",
         "drift",
+        "file_picker",
         "flutter",
         "flutter_displaymode",
         "flutter_riverpod",
@@ -20,6 +21,7 @@
         "shared_preferences",
         "sqlite3_flutter_libs",
         "supabase_flutter",
+        "syncfusion_flutter_pdf",
         "uuid"
       ],
       "devDependencies": [
@@ -206,6 +208,19 @@
       ]
     },
     {
+      "name": "syncfusion_flutter_pdf",
+      "version": "32.1.24",
+      "dependencies": [
+        "convert",
+        "crypto",
+        "flutter",
+        "http",
+        "intl",
+        "syncfusion_flutter_core",
+        "xml"
+      ]
+    },
+    {
       "name": "supabase_flutter",
       "version": "2.12.0",
       "dependencies": [
@@ -309,6 +324,22 @@
         "meta",
         "sky_engine",
         "vector_math"
+      ]
+    },
+    {
+      "name": "file_picker",
+      "version": "10.3.8",
+      "dependencies": [
+        "cross_file",
+        "dbus",
+        "ffi",
+        "flutter",
+        "flutter_plugin_android_lifecycle",
+        "flutter_web_plugins",
+        "path",
+        "plugin_platform_interface",
+        "web",
+        "win32"
       ]
     },
     {
@@ -882,6 +913,42 @@
       "dependencies": []
     },
     {
+      "name": "syncfusion_flutter_core",
+      "version": "32.1.24",
+      "dependencies": [
+        "flutter",
+        "vector_math"
+      ]
+    },
+    {
+      "name": "http",
+      "version": "1.6.0",
+      "dependencies": [
+        "async",
+        "http_parser",
+        "meta",
+        "web"
+      ]
+    },
+    {
+      "name": "xml",
+      "version": "6.6.1",
+      "dependencies": [
+        "collection",
+        "meta",
+        "petitparser"
+      ]
+    },
+    {
+      "name": "intl",
+      "version": "0.20.2",
+      "dependencies": [
+        "clock",
+        "meta",
+        "path"
+      ]
+    },
+    {
       "name": "web",
       "version": "1.1.1",
       "dependencies": []
@@ -913,16 +980,6 @@
         "rxdart",
         "storage_client",
         "yet_another_json_isolate"
-      ]
-    },
-    {
-      "name": "http",
-      "version": "1.6.0",
-      "dependencies": [
-        "async",
-        "http_parser",
-        "meta",
-        "web"
       ]
     },
     {
@@ -1066,6 +1123,57 @@
       "dependencies": []
     },
     {
+      "name": "dbus",
+      "version": "0.7.11",
+      "dependencies": [
+        "args",
+        "ffi",
+        "meta",
+        "xml"
+      ]
+    },
+    {
+      "name": "cross_file",
+      "version": "0.3.5+1",
+      "dependencies": [
+        "meta",
+        "web"
+      ]
+    },
+    {
+      "name": "win32",
+      "version": "5.15.0",
+      "dependencies": [
+        "ffi"
+      ]
+    },
+    {
+      "name": "ffi",
+      "version": "2.1.5",
+      "dependencies": []
+    },
+    {
+      "name": "plugin_platform_interface",
+      "version": "2.1.8",
+      "dependencies": [
+        "meta"
+      ]
+    },
+    {
+      "name": "flutter_plugin_android_lifecycle",
+      "version": "2.0.33",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "flutter_web_plugins",
+      "version": "0.0.0",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
       "name": "custom_lint_visitor",
       "version": "1.0.0+8.4.0",
       "dependencies": [
@@ -1134,11 +1242,6 @@
       ]
     },
     {
-      "name": "ffi",
-      "version": "2.1.5",
-      "dependencies": []
-    },
-    {
       "name": "web_socket",
       "version": "1.0.1",
       "dependencies": [
@@ -1161,15 +1264,6 @@
       "dependencies": [
         "meta",
         "path"
-      ]
-    },
-    {
-      "name": "xml",
-      "version": "6.6.1",
-      "dependencies": [
-        "collection",
-        "meta",
-        "petitparser"
       ]
     },
     {
@@ -1207,6 +1301,14 @@
       "dependencies": [
         "source_span",
         "string_scanner"
+      ]
+    },
+    {
+      "name": "petitparser",
+      "version": "7.0.1",
+      "dependencies": [
+        "collection",
+        "meta"
       ]
     },
     {
@@ -1360,20 +1462,6 @@
       ]
     },
     {
-      "name": "flutter_web_plugins",
-      "version": "0.0.0",
-      "dependencies": [
-        "flutter"
-      ]
-    },
-    {
-      "name": "plugin_platform_interface",
-      "version": "2.1.8",
-      "dependencies": [
-        "meta"
-      ]
-    },
-    {
       "name": "platform",
       "version": "3.1.6",
       "dependencies": []
@@ -1478,14 +1566,6 @@
         "stack_trace",
         "vm_service",
         "yaml"
-      ]
-    },
-    {
-      "name": "petitparser",
-      "version": "7.0.1",
-      "dependencies": [
-        "collection",
-        "meta"
       ]
     },
     {
