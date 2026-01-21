@@ -1,12 +1,11 @@
 {
-    "name": "project_2359",
-    "short_name": "project_2359",
+    "name": "project_2359_flutter",
+    "short_name": "project_2359_flutter",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0000FF",
-    "theme_color": "#0175C2",
+    "background_color": "#0B0E14",
+    "theme_color": "#2E7DFF",
     "description": "A new Flutter project.",
-    "author": "ComsIndeed",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
