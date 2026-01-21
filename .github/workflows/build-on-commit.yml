@@ -46,7 +46,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.2'
+          flutter-version: '3.24.5'
           channel: 'stable'
           cache: true
 
@@ -84,7 +84,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.2'
+          flutter-version: '3.24.5'
           channel: 'stable'
           cache: true
 
@@ -116,7 +116,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.2'
+          flutter-version: '3.24.5'
           channel: 'stable'
           cache: true
 
@@ -157,7 +157,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.2'
+          flutter-version: '3.24.5'
           channel: 'stable'
           cache: true
 
@@ -262,7 +262,7 @@ jobs:
           COMMIT_MESSAGE="${{ needs.check-trigger.outputs.commit_message }}"
           
           # Get Flutter version from workflow
-          FLUTTER_VERSION="3.27.2"
+          FLUTTER_VERSION="3.24.5"
           
           # Generate unique build number
           BUILD_NUMBER="${{ github.run_number }}"
