@@ -338,12 +338,6 @@
       "languageVersion": "3.9"
     },
     {
-      "name": "flutter_riverpod",
-      "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_riverpod-3.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.7"
-    },
-    {
       "name": "flutter_test",
       "rootUri": "file:///C:/Users/Truly/AAA_WORKSPACE_WINDOWS/flutter/packages/flutter_test",
       "packageUri": "lib/",

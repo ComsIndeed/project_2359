@@ -12,12 +12,10 @@
         "file_picker",
         "flutter",
         "flutter_displaymode",
-        "flutter_riverpod",
         "fsrs",
         "moment_dart",
         "path",
         "path_provider",
-        "riverpod_annotation",
         "shared_preferences",
         "sqlite3_flutter_libs",
         "sqlite3_web",
@@ -292,14 +290,6 @@
       ]
     },
     {
-      "name": "riverpod_annotation",
-      "version": "4.0.0",
-      "dependencies": [
-        "meta",
-        "riverpod"
-      ]
-    },
-    {
       "name": "path_provider",
       "version": "2.1.5",
       "dependencies": [
@@ -326,18 +316,6 @@
       "version": "2.0.1",
       "dependencies": [
         "meta"
-      ]
-    },
-    {
-      "name": "flutter_riverpod",
-      "version": "3.1.0",
-      "dependencies": [
-        "collection",
-        "flutter",
-        "flutter_test",
-        "meta",
-        "riverpod",
-        "state_notifier"
       ]
     },
     {
@@ -687,6 +665,14 @@
         "pub_semver",
         "source_span",
         "yaml"
+      ]
+    },
+    {
+      "name": "riverpod_annotation",
+      "version": "4.0.0",
+      "dependencies": [
+        "meta",
+        "riverpod"
       ]
     },
     {
@@ -1187,13 +1173,6 @@
       ]
     },
     {
-      "name": "state_notifier",
-      "version": "1.0.0",
-      "dependencies": [
-        "meta"
-      ]
-    },
-    {
       "name": "sky_engine",
       "version": "0.0.0",
       "dependencies": []
@@ -1336,6 +1315,13 @@
         "web_socket_channel",
         "webkit_inspection_protocol",
         "yaml"
+      ]
+    },
+    {
+      "name": "state_notifier",
+      "version": "1.0.0",
+      "dependencies": [
+        "meta"
       ]
     },
     {
