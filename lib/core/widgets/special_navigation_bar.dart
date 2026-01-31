@@ -57,7 +57,7 @@ class SpecialNavigationBar extends StatelessWidget {
                     child: Container(
                       decoration: ShapeDecoration(
                         color: AppTheme.primary.withValues(
-                          alpha: 0.12,
+                          alpha: 0.5,
                         ), // Lowkey pill
                         shape: RoundedSuperellipseBorder(
                           borderRadius: BorderRadius.circular(18),
