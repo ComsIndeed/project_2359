@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
+import 'package:project_2359/features/homepage/homepage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,8 +22,10 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      darkTheme: ThemeData.dark(),
+      theme: ThemeData.light(),
       themeMode: ThemeMode.dark,
-      home: Scaffold(body: Center(child: Text('Hello World'))),
+      home: Homepage(),
     );
   }
 }
