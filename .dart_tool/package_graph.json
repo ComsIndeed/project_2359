@@ -13,6 +13,7 @@
         "flutter",
         "flutter_displaymode",
         "fsrs",
+        "google_fonts",
         "moment_dart",
         "path",
         "path_provider",
@@ -310,6 +311,16 @@
       "name": "moment_dart",
       "version": "5.3.0+1",
       "dependencies": []
+    },
+    {
+      "name": "google_fonts",
+      "version": "8.0.0",
+      "dependencies": [
+        "crypto",
+        "flutter",
+        "http",
+        "path_provider"
+      ]
     },
     {
       "name": "fsrs",
