@@ -74,8 +74,8 @@ class _HomepageState extends State<Homepage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 260, // Compact width
-            height: 60, // Smaller height
+            width: 260,
+            height: 60,
             padding: const EdgeInsets.all(6),
             decoration: ShapeDecoration(
               color: AppTheme.surface.withValues(alpha: 0.95),
@@ -89,20 +89,27 @@ class _HomepageState extends State<Homepage> {
             ),
             child: Stack(
               children: [
-                // Sliding Pill Background
+                // Bouncy Sliding Pill
                 AnimatedAlign(
-                  duration: const Duration(milliseconds: 350),
-                  curve: Curves.easeOutCubic,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOutBack,
                   alignment: Alignment(_selectedIndex == 0 ? -1 : 1, 0),
                   child: FractionallySizedBox(
                     widthFactor: 0.5,
                     heightFactor: 1,
                     child: Container(
                       decoration: ShapeDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.15),
+                        color: AppTheme.primary,
                         shape: RoundedSuperellipseBorder(
                           borderRadius: BorderRadius.circular(18),
                         ),
+                        shadows: [
+                          BoxShadow(
+                            color: AppTheme.primary.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -133,30 +140,35 @@ class _HomepageState extends State<Homepage> {
     );
 
     return RepaintBoundary(
-      child: InkWell(
-        onTap: () => setState(() => _selectedIndex = index),
-        customBorder: navShape,
-        splashColor: AppTheme.primary.withValues(alpha: 0.1),
-        highlightColor: Colors.transparent,
-        child: Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
-                size: 22,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                  fontSize: 14,
+      child: AnimatedScale(
+        scale: isSelected ? 1.05 : 1.0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOutBack,
+        child: InkWell(
+          onTap: () => setState(() => _selectedIndex = index),
+          customBorder: navShape,
+          splashColor: Colors.white.withValues(alpha: 0.1),
+          highlightColor: Colors.transparent,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  color: isSelected ? Colors.white : AppTheme.textSecondary,
+                  size: 22,
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : AppTheme.textSecondary,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
