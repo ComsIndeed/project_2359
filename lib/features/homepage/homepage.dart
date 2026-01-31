@@ -29,9 +29,37 @@ class _HomepageState extends State<Homepage> {
       bottomNavigationBar: SpecialNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) => setState(() => _selectedIndex = index),
-        items: const [
-          SpecialNavigationItem(icon: Icons.grid_view_rounded, label: "Home"),
-          SpecialNavigationItem(icon: Icons.school_rounded, label: "Study"),
+        items: [
+          const SpecialNavigationItem(
+            icon: Icons.grid_view_rounded,
+            label: "Home",
+          ),
+          SpecialNavigationItem(
+            icon: Icons.school_rounded,
+            label: "Study",
+            pageActions: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.add_rounded, size: 18),
+                  label: const Text("New Set"),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.settings_rounded, size: 18),
+                  color: Colors.white70,
+                  constraints: const BoxConstraints(),
+                  padding: EdgeInsets.zero,
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
