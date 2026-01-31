@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:project_2359/app_theme.dart';
 
 class SpecialSearchBar extends StatelessWidget {
   final String hintText;
