@@ -4,6 +4,7 @@ import 'package:project_2359/core/widgets/activity_list_item.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
 import 'package:project_2359/core/widgets/special_navigation_bar.dart';
+import 'package:project_2359/features/study_page/study_page_content.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -22,15 +23,7 @@ class _HomepageState extends State<Homepage> {
       body: SafeArea(
         child: IndexedStack(
           index: _selectedIndex,
-          children: [
-            _buildHomeContent(context),
-            const Center(
-              child: Text(
-                "Study Page",
-                style: TextStyle(color: Colors.white, fontSize: 24),
-              ),
-            ),
-          ],
+          children: [_buildHomeContent(context), StudyPageContent()],
         ),
       ),
       bottomNavigationBar: SpecialNavigationBar(
@@ -82,7 +75,7 @@ class _HomepageState extends State<Homepage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Time to focus, Alex",
+              "Project 2359",
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             Text("Good Evening", style: Theme.of(context).textTheme.bodyMedium),
