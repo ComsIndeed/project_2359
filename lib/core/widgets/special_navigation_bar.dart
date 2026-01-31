@@ -13,6 +13,8 @@ class SpecialNavigationItem {
   });
 }
 
+// TODO: Add ripples to the popup buttons
+
 class SpecialNavigationBar extends StatelessWidget {
   final List<SpecialNavigationItem> items;
   final int currentIndex;
@@ -58,18 +60,10 @@ class SpecialNavigationBar extends StatelessWidget {
                   maxWidth: MediaQuery.of(context).size.width - 80,
                 ),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
                   decoration: ShapeDecoration(
-                    color: AppTheme.surface.withValues(alpha: 0.98),
+                    color: Colors.transparent, // Background handled by Material
                     shape: RoundedSuperellipseBorder(
                       borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.12),
-                        width: 1,
-                      ),
                     ),
                     shadows: [
                       BoxShadow(
@@ -79,7 +73,24 @@ class SpecialNavigationBar extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: activeItem.pageActions ?? const SizedBox.shrink(),
+                  child: Material(
+                    color: AppTheme.surface.withValues(alpha: 0.98),
+                    shape: RoundedSuperellipseBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        width: 1,
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: activeItem.pageActions ?? const SizedBox.shrink(),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -166,30 +177,35 @@ class SpecialNavigationBar extends StatelessWidget {
         scale: isSelected ? 1.175 : 1.0,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOutBack,
-        child: InkWell(
-          onTap: () => onTap(index),
-          customBorder: navShape,
-          splashColor: AppTheme.primary.withValues(alpha: 0.2),
-          highlightColor: Colors.transparent,
-          child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  icon,
-                  color: isSelected ? Colors.white : AppTheme.textSecondary,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: () => onTap(index),
+            customBorder: navShape,
+            splashColor: AppTheme.primary.withValues(alpha: 0.2),
+            highlightColor: Colors.transparent,
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
                     color: isSelected ? Colors.white : AppTheme.textSecondary,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                    fontSize: 13,
+                    size: 20,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : AppTheme.textSecondary,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
