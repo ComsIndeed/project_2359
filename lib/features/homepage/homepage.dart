@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:project_2359/app_theme.dart';
 
+import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/activity_list_item.dart';
-import 'package:project_2359/core/widgets/special_search_bar.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
+import 'package:project_2359/core/widgets/special_search_bar.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -43,15 +43,10 @@ class _HomepageState extends State<Homepage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           _buildHeader(context),
           const SizedBox(height: 24),
-
-          // Search Bar
           const SpecialSearchBar(),
           const SizedBox(height: 24),
-
-          // Recent Activity
           SectionHeader(title: "Recent Activity"),
           ActivityListItem(
             icon: Icons.quiz,
@@ -73,82 +68,96 @@ class _HomepageState extends State<Homepage> {
   }
 
   Widget _buildBottomNavBar(BuildContext context) {
-    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
-
-    return Container(
-      padding: const EdgeInsets.only(bottom: 24, left: 24, right: 24, top: 12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            backgroundColor.withOpacity(0),
-            backgroundColor.withOpacity(0.9),
-            backgroundColor,
-          ],
-          stops: const [0.0, 0.4, 1.0],
-        ),
-      ),
-      child: Container(
-        height: 72,
-        decoration: BoxDecoration(
-          color: AppTheme.surface.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 32, left: 24, right: 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 260, // Compact width
+            height: 60, // Smaller height
+            padding: const EdgeInsets.all(6),
+            decoration: ShapeDecoration(
+              color: AppTheme.surface.withValues(alpha: 0.95),
+              shape: RoundedSuperellipseBorder(
+                borderRadius: BorderRadius.circular(24),
+                side: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  width: 1,
+                ),
+              ),
             ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildNavItem(0, Icons.grid_view_rounded, "Home"),
-            _buildNavItem(1, Icons.school_rounded, "Study"),
-          ],
-        ),
+            child: Stack(
+              children: [
+                // Sliding Pill Background
+                AnimatedAlign(
+                  duration: const Duration(milliseconds: 350),
+                  curve: Curves.easeOutCubic,
+                  alignment: Alignment(_selectedIndex == 0 ? -1 : 1, 0),
+                  child: FractionallySizedBox(
+                    widthFactor: 0.5,
+                    heightFactor: 1,
+                    child: Container(
+                      decoration: ShapeDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.15),
+                        shape: RoundedSuperellipseBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Navigation Items
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildNavItem(0, Icons.grid_view_rounded, "Home"),
+                    ),
+                    Expanded(
+                      child: _buildNavItem(1, Icons.school_rounded, "Study"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = _selectedIndex == index;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedIndex = index),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppTheme.primary.withOpacity(0.15)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
-              size: 24,
-            ),
-            if (isSelected) ...[
+    final navShape = RoundedSuperellipseBorder(
+      borderRadius: BorderRadius.circular(18),
+    );
+
+    return RepaintBoundary(
+      child: InkWell(
+        onTap: () => setState(() => _selectedIndex = index),
+        customBorder: navShape,
+        splashColor: AppTheme.primary.withValues(alpha: 0.1),
+        highlightColor: Colors.transparent,
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+                size: 22,
+              ),
               const SizedBox(width: 8),
               Text(
                 label,
-                style: const TextStyle(
-                  color: AppTheme.primary,
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                   fontSize: 14,
                 ),
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
