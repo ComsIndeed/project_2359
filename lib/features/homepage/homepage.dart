@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/activity_list_item.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
+import 'package:project_2359/core/widgets/special_navigation_bar.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -33,7 +33,14 @@ class _HomepageState extends State<Homepage> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(context),
+      bottomNavigationBar: SpecialNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) => setState(() => _selectedIndex = index),
+        items: const [
+          SpecialNavigationItem(icon: Icons.grid_view_rounded, label: "Home"),
+          SpecialNavigationItem(icon: Icons.school_rounded, label: "Study"),
+        ],
+      ),
     );
   }
 
@@ -63,114 +70,6 @@ class _HomepageState extends State<Homepage> {
             onTap: () {},
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBottomNavBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 32, left: 24, right: 24),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 260,
-            height: 60,
-            padding: const EdgeInsets.all(6),
-            decoration: ShapeDecoration(
-              color: AppTheme.surface.withValues(alpha: 0.95),
-              shape: RoundedSuperellipseBorder(
-                borderRadius: BorderRadius.circular(24),
-                side: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  width: 1,
-                ),
-              ),
-            ),
-            child: Stack(
-              children: [
-                // Bouncy Sliding Pill
-                AnimatedAlign(
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeInOutBack,
-                  alignment: Alignment(_selectedIndex == 0 ? -1 : 1, 0),
-                  child: FractionallySizedBox(
-                    widthFactor: 0.5,
-                    heightFactor: 1,
-                    child: Container(
-                      decoration: ShapeDecoration(
-                        color: AppTheme.primary,
-                        shape: RoundedSuperellipseBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        shadows: [
-                          BoxShadow(
-                            color: AppTheme.primary.withValues(alpha: 0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                // Navigation Items
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildNavItem(0, Icons.grid_view_rounded, "Home"),
-                    ),
-                    Expanded(
-                      child: _buildNavItem(1, Icons.school_rounded, "Study"),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(int index, IconData icon, String label) {
-    final isSelected = _selectedIndex == index;
-    final navShape = RoundedSuperellipseBorder(
-      borderRadius: BorderRadius.circular(18),
-    );
-
-    return RepaintBoundary(
-      child: AnimatedScale(
-        scale: isSelected ? 1.05 : 1.0,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOutBack,
-        child: InkWell(
-          onTap: () => setState(() => _selectedIndex = index),
-          customBorder: navShape,
-          splashColor: Colors.white.withValues(alpha: 0.1),
-          highlightColor: Colors.transparent,
-          child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  icon,
-                  color: isSelected ? Colors.white : AppTheme.textSecondary,
-                  size: 22,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : AppTheme.textSecondary,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
