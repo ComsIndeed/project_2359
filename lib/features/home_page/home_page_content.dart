@@ -40,8 +40,9 @@ class HomePageContent extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        Image.asset('assets/images/app_icon.png', height: 40),
+        SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -52,6 +53,7 @@ class HomePageContent extends StatelessWidget {
             Text("Good Evening", style: Theme.of(context).textTheme.bodyMedium),
           ],
         ),
+        Spacer(),
         const CircleAvatar(
           radius: 24,
           backgroundImage: NetworkImage(
