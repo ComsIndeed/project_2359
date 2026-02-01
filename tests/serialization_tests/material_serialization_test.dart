@@ -280,6 +280,78 @@ void main() {
         expect(restored.answer, equals(material.answer));
       });
     });
+
+    group('copyWith', () {
+      test('should create copy with updated id', () {
+        final copy = material.copyWith(id: 'new-id');
+
+        expect(copy.id, equals('new-id'));
+        expect(copy.question, equals(material.question));
+        expect(copy.options, equals(material.options));
+        expect(copy.answer, equals(material.answer));
+      });
+
+      test('should create copy with updated question', () {
+        final copy = material.copyWith(question: 'New question?');
+
+        expect(copy.id, equals(material.id));
+        expect(copy.question, equals('New question?'));
+        expect(copy.options, equals(material.options));
+        expect(copy.answer, equals(material.answer));
+      });
+
+      test('should create copy with updated options', () {
+        final newOptions = ['X', 'Y', 'Z'];
+        final copy = material.copyWith(options: newOptions);
+
+        expect(copy.id, equals(material.id));
+        expect(copy.question, equals(material.question));
+        expect(copy.options, equals(newOptions));
+        expect(copy.answer, equals(material.answer));
+      });
+
+      test('should create copy with updated answer', () {
+        final copy = material.copyWith(answer: 'new-answer');
+
+        expect(copy.id, equals(material.id));
+        expect(copy.question, equals(material.question));
+        expect(copy.options, equals(material.options));
+        expect(copy.answer, equals('new-answer'));
+      });
+
+      test('should create copy with multiple updates', () {
+        final copy = material.copyWith(
+          id: 'updated-id',
+          question: 'Updated question',
+          options: ['A', 'B'],
+          answer: 'A',
+        );
+
+        expect(copy.id, equals('updated-id'));
+        expect(copy.question, equals('Updated question'));
+        expect(copy.options, equals(['A', 'B']));
+        expect(copy.answer, equals('A'));
+      });
+
+      test('should create identical copy when no parameters provided', () {
+        final copy = material.copyWith();
+
+        expect(copy.id, equals(material.id));
+        expect(copy.question, equals(material.question));
+        expect(copy.options, equals(material.options));
+        expect(copy.answer, equals(material.answer));
+        expect(copy.materialType, equals(material.materialType));
+      });
+
+      test('should preserve materialType in copy', () {
+        final copy = material.copyWith(id: 'new-id');
+
+        expect(
+          copy.materialType,
+          equals(StudyMaterialType.multipleChoiceQuestion),
+        );
+      });
+    });
   });
 
   group('FreeTextQuestionMaterial Serialization', () {
@@ -495,6 +567,59 @@ void main() {
         expect(restored.id, equals(material.id));
         expect(restored.question, equals(material.question));
         expect(restored.answer, equals(material.answer));
+      });
+    });
+
+    group('copyWith', () {
+      test('should create copy with updated id', () {
+        final copy = material.copyWith(id: 'new-id');
+
+        expect(copy.id, equals('new-id'));
+        expect(copy.question, equals(material.question));
+        expect(copy.answer, equals(material.answer));
+      });
+
+      test('should create copy with updated question', () {
+        final copy = material.copyWith(question: 'New question?');
+
+        expect(copy.id, equals(material.id));
+        expect(copy.question, equals('New question?'));
+        expect(copy.answer, equals(material.answer));
+      });
+
+      test('should create copy with updated answer', () {
+        final copy = material.copyWith(answer: 'New answer');
+
+        expect(copy.id, equals(material.id));
+        expect(copy.question, equals(material.question));
+        expect(copy.answer, equals('New answer'));
+      });
+
+      test('should create copy with multiple updates', () {
+        final copy = material.copyWith(
+          id: 'updated-id',
+          question: 'Updated question',
+          answer: 'Updated answer',
+        );
+
+        expect(copy.id, equals('updated-id'));
+        expect(copy.question, equals('Updated question'));
+        expect(copy.answer, equals('Updated answer'));
+      });
+
+      test('should create identical copy when no parameters provided', () {
+        final copy = material.copyWith();
+
+        expect(copy.id, equals(material.id));
+        expect(copy.question, equals(material.question));
+        expect(copy.answer, equals(material.answer));
+        expect(copy.materialType, equals(material.materialType));
+      });
+
+      test('should preserve materialType in copy', () {
+        final copy = material.copyWith(id: 'new-id');
+
+        expect(copy.materialType, equals(StudyMaterialType.freeTextQuestion));
       });
     });
   });

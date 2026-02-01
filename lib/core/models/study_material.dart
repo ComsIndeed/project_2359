@@ -10,11 +10,14 @@ abstract class StudyMaterial {
   Map<String, dynamic> toMap();
   String toJson() => json.encode(toMap());
 
+  // Abstract copyWith
+  StudyMaterial copyWith({String? id});
+
   // Factory constructor to create the correct subclass from a map
   static StudyMaterial fromMap(Map<String, dynamic> map) {
     final typeString = map['type'] as String;
     final type = StudyMaterialType.values.firstWhere(
-      (e) => e.toString() == 'StudyMaterialType.$typeString',
+      (e) => e.name == typeString,
     );
 
     switch (type) {
@@ -40,7 +43,8 @@ enum StudyMaterialType {
 
 class StudyMaterialMultipleChoiceQuestion extends StudyMaterial {
   @override
-  get materialType => StudyMaterialType.multipleChoiceQuestion;
+  StudyMaterialType get materialType =>
+      StudyMaterialType.multipleChoiceQuestion;
   final String question;
   final List<String> options;
   final String answer;
@@ -78,11 +82,26 @@ class StudyMaterialMultipleChoiceQuestion extends StudyMaterial {
       StudyMaterialMultipleChoiceQuestion.fromMap(
         json.decode(source) as Map<String, dynamic>,
       );
+
+  @override
+  StudyMaterialMultipleChoiceQuestion copyWith({
+    String? id,
+    String? question,
+    List<String>? options,
+    String? answer,
+  }) {
+    return StudyMaterialMultipleChoiceQuestion(
+      id: id ?? this.id,
+      question: question ?? this.question,
+      options: options ?? this.options,
+      answer: answer ?? this.answer,
+    );
+  }
 }
 
 class StudyMaterialFreeTextQuestion extends StudyMaterial {
   @override
-  get materialType => StudyMaterialType.freeTextQuestion;
+  StudyMaterialType get materialType => StudyMaterialType.freeTextQuestion;
   final String question;
   final String answer;
 
@@ -114,4 +133,17 @@ class StudyMaterialFreeTextQuestion extends StudyMaterial {
       StudyMaterialFreeTextQuestion.fromMap(
         json.decode(source) as Map<String, dynamic>,
       );
+
+  @override
+  StudyMaterialFreeTextQuestion copyWith({
+    String? id,
+    String? question,
+    String? answer,
+  }) {
+    return StudyMaterialFreeTextQuestion(
+      id: id ?? this.id,
+      question: question ?? this.question,
+      answer: answer ?? this.answer,
+    );
+  }
 }
