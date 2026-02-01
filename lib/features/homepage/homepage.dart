@@ -40,7 +40,14 @@ class _HomepageState extends State<Homepage> {
             pageActions: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextButton(onPressed: () {}, child: const Text("Sources")),
+                TextButton(
+                  onPressed: () {
+                    print("TEST");
+                  },
+                  child: const Text("Sources"),
+                ),
+                VerticalDivider(color: Colors.white, width: 10),
+                TextButton(onPressed: () {}, child: const Text("Settings")),
               ],
             ),
           ),
