@@ -15,7 +15,7 @@ class SpecialNavigationItem {
 
 // TODO: Add ripples to the popup buttons
 
-class SpecialNavigationBar extends StatelessWidget {
+class SpecialNavigationBar extends StatefulWidget {
   final List<SpecialNavigationItem> items;
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -28,9 +28,21 @@ class SpecialNavigationBar extends StatelessWidget {
   });
 
   @override
+  State<SpecialNavigationBar> createState() => _SpecialNavigationBarState();
+}
+
+class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
+  Widget? _activeActions;
+
+  @override
   Widget build(BuildContext context) {
-    final activeItem = items[currentIndex];
+    final activeItem = widget.items[widget.currentIndex];
     final hasActions = activeItem.pageActions != null;
+
+    // Persist the last set of actions so they don't disappear instantly during animation
+    if (hasActions) {
+      _activeActions = activeItem.pageActions;
+    }
 
     return AnimatedPadding(
       duration: const Duration(milliseconds: 400),
@@ -57,49 +69,69 @@ class SpecialNavigationBar extends StatelessWidget {
           AnimatedPositioned(
             duration: const Duration(milliseconds: 500),
             curve: hasActions ? Curves.easeOutBack : Curves.easeInCubic,
-            bottom: hasActions ? 67 : 20, // Slides up from behind the bar
+            bottom: hasActions ? 72 : 30, // Tighter transition
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 300),
               opacity: hasActions ? 1.0 : 0.0,
               child: IgnorePointer(
                 ignoring: !hasActions,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minWidth: 100,
-                    maxWidth: MediaQuery.of(context).size.width - 80,
-                  ),
-                  child: Container(
-                    decoration: ShapeDecoration(
-                      color:
-                          Colors.transparent, // Background handled by Material
-                      shape: RoundedSuperellipseBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      shadows: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.4),
-                          blurRadius: 15,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                child: Container(
+                  decoration: ShapeDecoration(
+                    color: Colors.transparent,
+                    shape: RoundedSuperellipseBorder(
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Material(
-                      color: AppTheme.surface.withValues(alpha: 0.48),
-                      shape: RoundedSuperellipseBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.45),
-                          width: 1,
+                    shadows: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: AppTheme.secondarySurface.withValues(alpha: 0.9),
+                    shape: RoundedSuperellipseBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(
+                        color: AppTheme.primary.withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Theme(
+                      data: AppTheme.darkTheme.copyWith(
+                        textButtonTheme: TextButtonThemeData(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            textStyle: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
                         ),
                       ),
-                      clipBehavior: Clip.antiAlias,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 2,
+                          horizontal: 6,
+                          vertical: 6,
                         ),
-                        child:
-                            activeItem.pageActions ?? const SizedBox.shrink(),
+                        child: IntrinsicHeight(
+                          child: AnimatedScale(
+                            scale: hasActions ? 1.0 : 0.6,
+                            duration: const Duration(milliseconds: 350),
+                            curve: hasActions
+                                ? Curves.easeOutBack
+                                : Curves.easeInBack,
+                            alignment: Alignment.bottomCenter,
+                            child: _activeActions ?? const SizedBox.shrink(),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -113,7 +145,7 @@ class SpecialNavigationBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 130.0 * items.length,
+                width: 130.0 * widget.items.length,
                 height: 60,
                 padding: const EdgeInsets.all(6),
                 decoration: ShapeDecoration(
@@ -133,11 +165,13 @@ class SpecialNavigationBar extends StatelessWidget {
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.easeInOutCubic,
                       alignment: Alignment(
-                        -1.0 + (currentIndex * (2.0 / (items.length - 1))),
+                        -1.0 +
+                            (widget.currentIndex *
+                                (2.0 / (widget.items.length - 1))),
                         0,
                       ),
                       child: FractionallySizedBox(
-                        widthFactor: 1 / items.length,
+                        widthFactor: 1 / widget.items.length,
                         heightFactor: 1,
                         child: Container(
                           decoration: ShapeDecoration(
@@ -151,9 +185,9 @@ class SpecialNavigationBar extends StatelessWidget {
                     ),
                     // Navigation Items
                     Row(
-                      children: List.generate(items.length, (index) {
-                        final item = items[index];
-                        final isSelected = currentIndex == index;
+                      children: List.generate(widget.items.length, (index) {
+                        final item = widget.items[index];
+                        final isSelected = widget.currentIndex == index;
                         return Expanded(
                           child: _buildNavItem(
                             index,
@@ -192,7 +226,7 @@ class SpecialNavigationBar extends StatelessWidget {
         child: Material(
           type: MaterialType.transparency,
           child: InkWell(
-            onTap: () => onTap(index),
+            onTap: () => widget.onTap(index),
             customBorder: navShape,
             splashColor: AppTheme.primary.withValues(alpha: 0.2),
             highlightColor: Colors.transparent,

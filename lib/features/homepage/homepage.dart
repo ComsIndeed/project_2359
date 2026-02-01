@@ -74,18 +74,25 @@ class _HomepageState extends State<Homepage> {
                     pageActions: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        TextButton(
-                          onPressed: () {
-                            print("TEST"); // TODO: Connect to actual logic
-                          },
-                          child: const Text("Sources"),
-                        ),
-                        const VerticalDivider(color: Colors.white, width: 10),
-                        TextButton(
+                        TextButton.icon(
                           onPressed: () {
                             // TODO: Connect to actual logic
                           },
-                          child: const Text("Settings"),
+                          icon: const Icon(Icons.layers_rounded, size: 18),
+                          label: const Text("Sources"),
+                        ),
+                        const VerticalDivider(
+                          color: Colors.white12,
+                          width: 8,
+                          indent: 8,
+                          endIndent: 8,
+                        ),
+                        TextButton.icon(
+                          onPressed: () {
+                            // TODO: Connect to actual logic
+                          },
+                          icon: const Icon(Icons.settings_rounded, size: 18),
+                          label: const Text("Settings"),
                         ),
                       ],
                     ),
