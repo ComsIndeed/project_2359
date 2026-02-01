@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/activity_list_item.dart';
-import 'package:project_2359/features/study_page/widgets/study_page_header.dart';
 import 'package:project_2359/features/study_page/widgets/active_material_card.dart';
 
 class StudyPageContent extends StatelessWidget {
@@ -16,11 +15,6 @@ class StudyPageContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          StudyPageHeader(
-            onNewTap: () {
-              // TODO: Implement new study material creation
-            },
-          ),
           const SizedBox(height: 16),
           _buildActiveMaterialsSection(context),
           const SizedBox(height: 32),
