@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     outputs:
-      success: ${{ steps.mark_success.outputs.success }}
+      success: ${{ steps.set_success.outputs.success }}
     
     steps:
       - name: Checkout repository
@@ -65,10 +65,15 @@ jobs:
           path: build/web/
           retention-days: 1
 
-      - name: Mark build as successful
-        id: mark_success
-        if: success()
-        run: echo "success=true" >> $GITHUB_OUTPUT
+      - name: Set success status
+        id: set_success
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
 
   # ============================================================================
   # Build Android APK
@@ -79,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     outputs:
-      success: ${{ steps.mark_success.outputs.success }}
+      success: ${{ steps.set_success.outputs.success }}
     
     steps:
       - name: Checkout repository
@@ -110,10 +115,15 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 1
 
-      - name: Mark build as successful
-        id: mark_success
-        if: success()
-        run: echo "success=true" >> $GITHUB_OUTPUT
+      - name: Set success status
+        id: set_success
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
 
   # ============================================================================
   # Build Windows Desktop
@@ -124,7 +134,7 @@ jobs:
     runs-on: windows-latest
     continue-on-error: true
     outputs:
-      success: ${{ steps.mark_success.outputs.success }}
+      success: ${{ steps.set_success.outputs.success }}
     
     steps:
       - name: Checkout repository
@@ -153,10 +163,15 @@ jobs:
           path: project_2359-windows.zip
           retention-days: 1
 
-      - name: Mark build as successful
-        id: mark_success
-        if: success()
-        run: echo "success=true" >> $GITHUB_OUTPUT
+      - name: Set success status
+        id: set_success
+        if: always()
+        run: |
+          if ("${{ job.status }}" -eq "success") {
+            echo "success=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "success=false" >> $env:GITHUB_OUTPUT
+          }
 
   # ============================================================================
   # Build Linux Desktop
@@ -167,7 +182,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     outputs:
-      success: ${{ steps.mark_success.outputs.success }}
+      success: ${{ steps.set_success.outputs.success }}
     
     steps:
       - name: Checkout repository
@@ -202,10 +217,15 @@ jobs:
           path: project_2359-linux.tar.gz
           retention-days: 1
 
-      - name: Mark build as successful
-        id: mark_success
-        if: success()
-        run: echo "success=true" >> $GITHUB_OUTPUT
+      - name: Set success status
+        id: set_success
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
 
   # ============================================================================
   # Deploy Web to GitHub Pages
@@ -216,7 +236,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     outputs:
-      success: ${{ steps.mark_success.outputs.success }}
+      success: ${{ steps.set_success.outputs.success }}
     
     permissions:
       contents: write
@@ -244,10 +264,15 @@ jobs:
           destination_dir: .
           keep_files: true
 
-      - name: Mark deployment as successful
-        id: mark_success
-        if: success()
-        run: echo "success=true" >> $GITHUB_OUTPUT
+      - name: Set success status
+        id: set_success
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
 
   # ============================================================================
   # Create Release with All Binaries
@@ -333,7 +358,6 @@ jobs:
 
       - name: Download Android APK
         if: needs.build-android.outputs.success == 'true'
-        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: android-apk
@@ -341,7 +365,6 @@ jobs:
 
       - name: Download Windows Build
         if: needs.build-windows.outputs.success == 'true'
-        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: windows-build
@@ -349,7 +372,6 @@ jobs:
 
       - name: Download Linux Build
         if: needs.build-linux.outputs.success == 'true'
-        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: linux-build
@@ -357,11 +379,7 @@ jobs:
 
       - name: Rename APK
         if: needs.build-android.outputs.success == 'true'
-        continue-on-error: true
-        run: |
-          if [ -f ./release-assets/app-release.apk ]; then
-            mv ./release-assets/app-release.apk ./release-assets/project_2359-android.apk
-          fi
+        run: mv ./release-assets/app-release.apk ./release-assets/project_2359-android.apk
 
       - name: Get build information
         id: build_info
@@ -595,6 +613,8 @@ jobs:
           files: ${{ steps.release_files.outputs.files }}
           draft: false
           prerelease: true
+          # Keep fail_on_unmatched_files: false as a safety measure in case the
+          # files list contains empty lines or formatting issues from the dynamic generation
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
