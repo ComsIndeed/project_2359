@@ -46,49 +46,61 @@ class SpecialNavigationBar extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         clipBehavior: Clip.none,
         children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOutCubic,
+            height: hasActions ? 115 : 60,
+            width: double.infinity,
+          ),
+
           // Page Actions Popup
           AnimatedPositioned(
             duration: const Duration(milliseconds: 500),
             curve: hasActions ? Curves.easeOutBack : Curves.easeInCubic,
-            bottom: hasActions ? 72 : 20, // Slides up from behind the bar
+            bottom: hasActions ? 67 : 20, // Slides up from behind the bar
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 300),
               opacity: hasActions ? 1.0 : 0.0,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: 100,
-                  maxWidth: MediaQuery.of(context).size.width - 80,
-                ),
-                child: Container(
-                  decoration: ShapeDecoration(
-                    color: Colors.transparent, // Background handled by Material
-                    shape: RoundedSuperellipseBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    shadows: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        blurRadius: 15,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+              child: IgnorePointer(
+                ignoring: !hasActions,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minWidth: 100,
+                    maxWidth: MediaQuery.of(context).size.width - 80,
                   ),
-                  child: Material(
-                    color: AppTheme.surface.withValues(alpha: 0.98),
-                    shape: RoundedSuperellipseBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.12),
-                        width: 1,
+                  child: Container(
+                    decoration: ShapeDecoration(
+                      color:
+                          Colors.transparent, // Background handled by Material
+                      shape: RoundedSuperellipseBorder(
+                        borderRadius: BorderRadius.circular(20),
                       ),
+                      shadows: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.4),
+                          blurRadius: 15,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+                    child: Material(
+                      color: AppTheme.surface.withValues(alpha: 0.48),
+                      shape: RoundedSuperellipseBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.45),
+                          width: 1,
+                        ),
                       ),
-                      child: activeItem.pageActions ?? const SizedBox.shrink(),
+                      clipBehavior: Clip.antiAlias,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 2,
+                        ),
+                        child:
+                            activeItem.pageActions ?? const SizedBox.shrink(),
+                      ),
                     ),
                   ),
                 ),
