@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
 import 'package:project_2359/core/widgets/special_navigation_bar.dart';
-import 'package:project_2359/features/homepage/home_page_content.dart';
+import 'package:project_2359/features/home_page/home_page_content.dart';
 import 'package:project_2359/features/study_page/study_page_content.dart';
 
-class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<Homepage> createState() => _HomepageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomepageState extends State<Homepage> {
+class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   late PageController _pageController;
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:project_2359/features/homepage/homepage.dart';
+import 'package:project_2359/features/home_page/home_page.dart';
 import 'package:project_2359/app_theme.dart';
 
 Future<void> main() async {
@@ -26,7 +26,7 @@ class MainApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       theme: AppTheme.darkTheme,
       darkTheme: AppTheme.darkTheme,
-      home: Homepage(),
+      home: HomePage(),
     );
   }
 }
