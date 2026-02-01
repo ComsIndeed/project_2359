@@ -38,6 +38,9 @@ jobs:
     needs: check-trigger
     if: needs.check-trigger.outputs.should_build == 'true'
     runs-on: ubuntu-latest
+    continue-on-error: true
+    outputs:
+      success: ${{ steps.set_success.outputs.success }}
     
     steps:
       - name: Checkout repository
@@ -62,6 +65,16 @@ jobs:
           path: build/web/
           retention-days: 1
 
+      - name: Set success status
+        id: set_success
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
   # ============================================================================
   # Build Android APK
   # ============================================================================
@@ -69,6 +82,9 @@ jobs:
     needs: check-trigger
     if: needs.check-trigger.outputs.should_build == 'true'
     runs-on: ubuntu-latest
+    continue-on-error: true
+    outputs:
+      success: ${{ steps.set_success.outputs.success }}
     
     steps:
       - name: Checkout repository
@@ -99,6 +115,16 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 1
 
+      - name: Set success status
+        id: set_success
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
   # ============================================================================
   # Build Windows Desktop
   # ============================================================================
@@ -106,6 +132,9 @@ jobs:
     needs: check-trigger
     if: needs.check-trigger.outputs.should_build == 'true'
     runs-on: windows-latest
+    continue-on-error: true
+    outputs:
+      success: ${{ steps.set_success.outputs.success }}
     
     steps:
       - name: Checkout repository
@@ -134,6 +163,16 @@ jobs:
           path: project_2359-windows.zip
           retention-days: 1
 
+      - name: Set success status
+        id: set_success
+        if: always()
+        run: |
+          if ("${{ job.status }}" -eq "success") {
+            echo "success=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "success=false" >> $env:GITHUB_OUTPUT
+          }
+
   # ============================================================================
   # Build Linux Desktop
   # ============================================================================
@@ -141,6 +180,9 @@ jobs:
     needs: check-trigger
     if: needs.check-trigger.outputs.should_build == 'true'
     runs-on: ubuntu-latest
+    continue-on-error: true
+    outputs:
+      success: ${{ steps.set_success.outputs.success }}
     
     steps:
       - name: Checkout repository
@@ -175,12 +217,26 @@ jobs:
           path: project_2359-linux.tar.gz
           retention-days: 1
 
+      - name: Set success status
+        id: set_success
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
   # ============================================================================
   # Deploy Web to GitHub Pages
   # ============================================================================
   deploy-web:
     needs: [check-trigger, build-web]
+    if: always() && needs.check-trigger.outputs.should_build == 'true' && needs.build-web.outputs.success == 'true'
     runs-on: ubuntu-latest
+    continue-on-error: true
+    outputs:
+      success: ${{ steps.set_success.outputs.success }}
     
     permissions:
       contents: write
@@ -208,11 +264,23 @@ jobs:
           destination_dir: .
           keep_files: true
 
+      - name: Set success status
+        id: set_success
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
   # ============================================================================
   # Create Release with All Binaries
   # ============================================================================
   create-release:
     needs: [check-trigger, build-android, build-windows, build-linux, deploy-web]
+    # Always run if at least the check-trigger succeeded, even if builds failed
+    if: always() && needs.check-trigger.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     
     permissions:
@@ -222,25 +290,95 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Determine build status
+        id: build_status
+        run: |
+          # Track which builds succeeded
+          ANDROID_SUCCESS="${{ needs.build-android.outputs.success }}"
+          WINDOWS_SUCCESS="${{ needs.build-windows.outputs.success }}"
+          LINUX_SUCCESS="${{ needs.build-linux.outputs.success }}"
+          WEB_SUCCESS="${{ needs.deploy-web.outputs.success }}"
+          
+          echo "android_success=${ANDROID_SUCCESS}" >> $GITHUB_OUTPUT
+          echo "windows_success=${WINDOWS_SUCCESS}" >> $GITHUB_OUTPUT
+          echo "linux_success=${LINUX_SUCCESS}" >> $GITHUB_OUTPUT
+          echo "web_success=${WEB_SUCCESS}" >> $GITHUB_OUTPUT
+          
+          # Count successful builds
+          SUCCESS_COUNT=0
+          FAILED_BUILDS=""
+          SUCCESS_BUILDS=""
+          
+          if [ "$ANDROID_SUCCESS" == "true" ]; then
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+            SUCCESS_BUILDS="${SUCCESS_BUILDS}Android, "
+          else
+            FAILED_BUILDS="${FAILED_BUILDS}Android, "
+          fi
+          
+          if [ "$WINDOWS_SUCCESS" == "true" ]; then
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+            SUCCESS_BUILDS="${SUCCESS_BUILDS}Windows, "
+          else
+            FAILED_BUILDS="${FAILED_BUILDS}Windows, "
+          fi
+          
+          if [ "$LINUX_SUCCESS" == "true" ]; then
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+            SUCCESS_BUILDS="${SUCCESS_BUILDS}Linux, "
+          else
+            FAILED_BUILDS="${FAILED_BUILDS}Linux, "
+          fi
+          
+          if [ "$WEB_SUCCESS" == "true" ]; then
+            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+            SUCCESS_BUILDS="${SUCCESS_BUILDS}Web, "
+          else
+            FAILED_BUILDS="${FAILED_BUILDS}Web, "
+          fi
+          
+          # Remove trailing comma and space
+          SUCCESS_BUILDS="${SUCCESS_BUILDS%, }"
+          FAILED_BUILDS="${FAILED_BUILDS%, }"
+          
+          echo "success_count=${SUCCESS_COUNT}" >> $GITHUB_OUTPUT
+          echo "success_builds=${SUCCESS_BUILDS}" >> $GITHUB_OUTPUT
+          echo "failed_builds=${FAILED_BUILDS}" >> $GITHUB_OUTPUT
+          
+          # Determine release type
+          if [ $SUCCESS_COUNT -eq 4 ]; then
+            RELEASE_TYPE="Complete"
+          elif [ $SUCCESS_COUNT -eq 0 ]; then
+            RELEASE_TYPE="Failed"
+          else
+            RELEASE_TYPE="Partial"
+          fi
+          
+          echo "release_type=${RELEASE_TYPE}" >> $GITHUB_OUTPUT
+
       - name: Download Android APK
+        if: needs.build-android.outputs.success == 'true'
         uses: actions/download-artifact@v4
         with:
           name: android-apk
           path: ./release-assets
 
       - name: Download Windows Build
+        if: needs.build-windows.outputs.success == 'true'
         uses: actions/download-artifact@v4
         with:
           name: windows-build
           path: ./release-assets
 
       - name: Download Linux Build
+        if: needs.build-linux.outputs.success == 'true'
         uses: actions/download-artifact@v4
         with:
           name: linux-build
           path: ./release-assets
 
       - name: Rename APK
+        if: needs.build-android.outputs.success == 'true'
         run: mv ./release-assets/app-release.apk ./release-assets/project_2359-android.apk
 
       - name: Get build information
@@ -283,14 +421,33 @@ jobs:
           FLUTTER_VERSION: ${{ steps.build_info.outputs.flutter_version }}
           BUILD_NUMBER: ${{ steps.build_info.outputs.build_number }}
           GITHUB_PAGES_URL: ${{ github.event.repository.html_url }}
+          RELEASE_TYPE: ${{ steps.build_status.outputs.release_type }}
+          SUCCESS_BUILDS: ${{ steps.build_status.outputs.success_builds }}
+          FAILED_BUILDS: ${{ steps.build_status.outputs.failed_builds }}
+          ANDROID_SUCCESS: ${{ steps.build_status.outputs.android_success }}
+          WINDOWS_SUCCESS: ${{ steps.build_status.outputs.windows_success }}
+          LINUX_SUCCESS: ${{ steps.build_status.outputs.linux_success }}
+          WEB_SUCCESS: ${{ steps.build_status.outputs.web_success }}
         run: |
           # Extract repo owner and name for pages URL
           REPO_OWNER="${{ github.repository_owner }}"
           REPO_NAME="${{ github.event.repository.name }}"
           PAGES_URL="https://${REPO_OWNER}.github.io/${REPO_NAME}"
           
+          # Determine release emoji and title suffix
+          if [ "$RELEASE_TYPE" == "Complete" ]; then
+            RELEASE_EMOJI="✅"
+            RELEASE_SUFFIX=""
+          elif [ "$RELEASE_TYPE" == "Partial" ]; then
+            RELEASE_EMOJI="⚠️"
+            RELEASE_SUFFIX=" (Partial Build)"
+          else
+            RELEASE_EMOJI="❌"
+            RELEASE_SUFFIX=" (Failed Build)"
+          fi
+          
           cat > release_notes.md << EOF
-          # 🚀 Automated Build #${BUILD_NUMBER}
+          # 🚀 Automated Build #${BUILD_NUMBER} ${RELEASE_EMOJI}
           
           ## 📋 Build Information
           
@@ -302,55 +459,162 @@ jobs:
           | 📝 **Commit** | \`${SHORT_SHA}\` |
           | 👤 **Triggered By** | @${COMMIT_AUTHOR} |
           | 🦋 **Flutter Version** | ${FLUTTER_VERSION} |
+          | 📦 **Release Type** | **${RELEASE_TYPE}** ${RELEASE_EMOJI} |
           
           ## 💬 Commit Message
           
           > ${COMMIT_MESSAGE}
           
+          ## 🎯 Build Status
+          
+          EOF
+          
+          # Add build status section
+          if [ "$RELEASE_TYPE" != "Complete" ]; then
+            cat >> release_notes.md << EOF
+          **⚠️ Note:** This is a ${RELEASE_TYPE} release. Some builds may have failed.
+          
+          EOF
+            
+            if [ -n "$SUCCESS_BUILDS" ]; then
+              cat >> release_notes.md << EOF
+          ✅ **Successful Builds:** ${SUCCESS_BUILDS}
+          
+          EOF
+            fi
+            
+            if [ -n "$FAILED_BUILDS" ]; then
+              cat >> release_notes.md << EOF
+          ❌ **Failed Builds:** ${FAILED_BUILDS}
+          
+          EOF
+            fi
+            
+            cat >> release_notes.md << EOF
+          Please check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details on failed builds.
+          
+          EOF
+          fi
+          
+          cat >> release_notes.md << EOF
           ## 📦 Available Downloads
           
-          | Platform | File | Description |
-          |----------|------|-------------|
-          | 🤖 **Android** | \`project_2359-android.apk\` | Release APK for Android devices |
-          | 🪟 **Windows** | \`project_2359-windows.zip\` | Portable Windows executable |
-          | 🐧 **Linux** | \`project_2359-linux.tar.gz\` | Linux bundle archive |
-          | 🌐 **Web** | [Open Web App](${PAGES_URL}) | Hosted on GitHub Pages |
+          | Platform | File | Status | Description |
+          |----------|------|--------|-------------|
+          EOF
+          
+          # Android row
+          if [ "$ANDROID_SUCCESS" == "true" ]; then
+            echo "| 🤖 **Android** | \`project_2359-android.apk\` | ✅ Available | Release APK for Android devices |" >> release_notes.md
+          else
+            echo "| 🤖 **Android** | — | ❌ Build Failed | — |" >> release_notes.md
+          fi
+          
+          # Windows row
+          if [ "$WINDOWS_SUCCESS" == "true" ]; then
+            echo "| 🪟 **Windows** | \`project_2359-windows.zip\` | ✅ Available | Portable Windows executable |" >> release_notes.md
+          else
+            echo "| 🪟 **Windows** | — | ❌ Build Failed | — |" >> release_notes.md
+          fi
+          
+          # Linux row
+          if [ "$LINUX_SUCCESS" == "true" ]; then
+            echo "| 🐧 **Linux** | \`project_2359-linux.tar.gz\` | ✅ Available | Linux bundle archive |" >> release_notes.md
+          else
+            echo "| 🐧 **Linux** | — | ❌ Build Failed | — |" >> release_notes.md
+          fi
+          
+          # Web row
+          if [ "$WEB_SUCCESS" == "true" ]; then
+            echo "| 🌐 **Web** | [Open Web App](${PAGES_URL}) | ✅ Deployed | Hosted on GitHub Pages |" >> release_notes.md
+          else
+            echo "| 🌐 **Web** | — | ❌ Deploy Failed | — |" >> release_notes.md
+          fi
+          
+          cat >> release_notes.md << EOF
           
           ## 🔧 Installation Instructions
           
+          EOF
+          
+          # Only show instructions for successful builds
+          if [ "$ANDROID_SUCCESS" == "true" ]; then
+            cat >> release_notes.md << EOF
           ### Android
           1. Download \`project_2359-android.apk\`
           2. Enable "Install from unknown sources" in your device settings
           3. Open the APK file to install
           
+          EOF
+          fi
+          
+          if [ "$WINDOWS_SUCCESS" == "true" ]; then
+            cat >> release_notes.md << EOF
           ### Windows
           1. Download and extract \`project_2359-windows.zip\`
           2. Run \`project_2359.exe\`
           
+          EOF
+          fi
+          
+          if [ "$LINUX_SUCCESS" == "true" ]; then
+            cat >> release_notes.md << EOF
           ### Linux
           1. Download and extract \`project_2359-linux.tar.gz\`
           2. Run the executable: \`./project_2359\`
           
+          EOF
+          fi
+          
+          if [ "$WEB_SUCCESS" == "true" ]; then
+            cat >> release_notes.md << EOF
           ### Web
           Simply visit: [${PAGES_URL}](${PAGES_URL})
           
+          EOF
+          fi
+          
+          cat >> release_notes.md << EOF
           ---
           
           *This is an automated build triggered by a commit starting with \`[BUILD]\`.*
           *Build generated on ${BUILD_DATE} at ${BUILD_TIME}*
           EOF
 
+      - name: Prepare release files list
+        id: release_files
+        run: |
+          # Create list of files to include in release
+          FILES=""
+          
+          if [ -f ./release-assets/project_2359-android.apk ]; then
+            FILES="${FILES}./release-assets/project_2359-android.apk"$'\n'
+          fi
+          
+          if [ -f ./release-assets/project_2359-windows.zip ]; then
+            FILES="${FILES}./release-assets/project_2359-windows.zip"$'\n'
+          fi
+          
+          if [ -f ./release-assets/project_2359-linux.tar.gz ]; then
+            FILES="${FILES}./release-assets/project_2359-linux.tar.gz"$'\n'
+          fi
+          
+          # Write files list to output
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ steps.build_info.outputs.build_datetime }}-${{ steps.build_info.outputs.short_sha }}
-          name: "Project 2359 - Build #${{ steps.build_info.outputs.build_number }} (${{ steps.build_info.outputs.build_date }})"
+          name: "Project 2359 - ${{ steps.build_status.outputs.release_type }} Release - Build #${{ steps.build_info.outputs.build_number }} (${{ steps.build_info.outputs.build_date }})"
           body_path: release_notes.md
-          files: |
-            ./release-assets/project_2359-android.apk
-            ./release-assets/project_2359-windows.zip
-            ./release-assets/project_2359-linux.tar.gz
+          files: ${{ steps.release_files.outputs.files }}
           draft: false
           prerelease: true
+          # Keep fail_on_unmatched_files: false as a safety measure in case the
+          # files list contains empty lines or formatting issues from the dynamic generation
+          fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
