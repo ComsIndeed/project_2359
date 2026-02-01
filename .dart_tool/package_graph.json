@@ -9,6 +9,7 @@
       "dependencies": [
         "collection",
         "drift",
+        "drift_flutter",
         "file_picker",
         "flutter",
         "flutter_displaymode",
@@ -362,6 +363,19 @@
         "plugin_platform_interface",
         "web",
         "win32"
+      ]
+    },
+    {
+      "name": "drift_flutter",
+      "version": "0.2.8",
+      "dependencies": [
+        "drift",
+        "flutter",
+        "meta",
+        "path",
+        "path_provider",
+        "sqlite3",
+        "sqlite3_flutter_libs"
       ]
     },
     {

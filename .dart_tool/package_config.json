@@ -272,6 +272,12 @@
       "languageVersion": "3.5"
     },
     {
+      "name": "drift_flutter",
+      "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/drift_flutter-0.2.8",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
       "name": "ed25519_edwards",
       "rootUri": "file:///C:/Users/Truly/AppData/Local/Pub/Cache/hosted/pub.dev/ed25519_edwards-0.3.1",
       "packageUri": "lib/",
