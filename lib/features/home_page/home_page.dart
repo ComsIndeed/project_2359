@@ -91,8 +91,7 @@ class _HomePageState extends State<HomePage> {
                           onPressed: () {
                             // TODO: Connect to actual logic
                           },
-                          icon: const Icon(Icons.settings_rounded, size: 18),
-                          label: const Text("Settings"),
+                          label: const Text("Generate Materials"),
                         ),
                       ],
                     ),
