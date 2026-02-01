@@ -16,6 +16,7 @@ class SpecialSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SearchAnchor.bar(
       barHintText: 'Search',
+      isFullScreen: true,
       suggestionsBuilder: (_, searchController) => [],
     );
   }
