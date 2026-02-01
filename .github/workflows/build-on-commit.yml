@@ -44,12 +44,12 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@v2.18.0
         with:
-          channel: 'main'
+          channel: 'stable'
           cache: true
 
       - name: Get dependencies
@@ -59,7 +59,7 @@ jobs:
         run: flutter build web --release
 
       - name: Upload Web Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: web-build
           path: build/web/
@@ -88,7 +88,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -97,9 +97,9 @@ jobs:
           java-version: '17'
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@v2.18.0
         with:
-          channel: 'main'
+          channel: 'stable'
           cache: true
 
       - name: Get dependencies
@@ -109,7 +109,7 @@ jobs:
         run: flutter build apk --release
 
       - name: Upload Android APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
@@ -138,12 +138,12 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@v2.18.0
         with:
-          channel: 'main'
+          channel: 'stable'
           cache: true
 
       - name: Get dependencies
@@ -157,7 +157,7 @@ jobs:
           Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath project_2359-windows.zip
 
       - name: Upload Windows Build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: windows-build
           path: project_2359-windows.zip
@@ -186,7 +186,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Linux dependencies
         run: |
@@ -194,9 +194,9 @@ jobs:
           sudo apt-get install -y clang cmake ninja-build libgtk-3-dev libsqlite3-dev
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@v2.18.0
         with:
-          channel: 'main'
+          channel: 'stable'
           cache: true
 
       - name: Get dependencies
@@ -211,7 +211,7 @@ jobs:
           tar -czvf ../../../../../project_2359-linux.tar.gz *
 
       - name: Upload Linux Build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: linux-build
           path: project_2359-linux.tar.gz
@@ -243,10 +243,10 @@ jobs:
       
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Download Web Build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: web-build
           path: web-build
@@ -288,7 +288,7 @@ jobs:
       
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Determine build status
         id: build_status
@@ -358,21 +358,21 @@ jobs:
 
       - name: Download Android APK
         if: needs.build-android.outputs.success == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: android-apk
           path: ./release-assets
 
       - name: Download Windows Build
         if: needs.build-windows.outputs.success == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: windows-build
           path: ./release-assets
 
       - name: Download Linux Build
         if: needs.build-linux.outputs.success == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: linux-build
           path: ./release-assets
@@ -396,7 +396,7 @@ jobs:
           COMMIT_MESSAGE="${{ needs.check-trigger.outputs.commit_message }}"
           
           # Get Flutter version from workflow
-          FLUTTER_VERSION="main channel (latest)"
+          FLUTTER_VERSION="stable channel"
           
           # Generate unique build number
           BUILD_NUMBER="${{ github.run_number }}"
@@ -605,7 +605,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.5.0
         with:
           tag_name: build-${{ steps.build_info.outputs.build_datetime }}-${{ steps.build_info.outputs.short_sha }}
           name: "Project 2359 - ${{ steps.build_status.outputs.release_type }} Release - Build #${{ steps.build_info.outputs.build_number }} (${{ steps.build_info.outputs.build_date }})"
