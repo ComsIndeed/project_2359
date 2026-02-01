@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:project_2359/core/widgets/activity_list_item.dart';
-import 'package:project_2359/core/widgets/section_header.dart';
-import 'package:project_2359/core/widgets/special_search_bar.dart';
 import 'package:project_2359/core/widgets/special_navigation_bar.dart';
+import 'package:project_2359/features/homepage/home_page_content.dart';
 import 'package:project_2359/features/study_page/study_page_content.dart';
 
 class Homepage extends StatefulWidget {
@@ -20,93 +18,56 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      // Removed Scaffolds bottomNavigationBar to use Stack for overlay effect
       body: SafeArea(
-        child: IndexedStack(
-          index: _selectedIndex,
-          children: [_buildHomeContent(context), StudyPageContent()],
-        ),
-      ),
-      bottomNavigationBar: SpecialNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        items: [
-          const SpecialNavigationItem(
-            icon: Icons.grid_view_rounded,
-            label: "Home",
-          ),
-          SpecialNavigationItem(
-            icon: Icons.school_rounded,
-            label: "Study",
-            pageActions: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    print("TEST");
-                  },
-                  child: const Text("Sources"),
-                ),
-                VerticalDivider(color: Colors.white, width: 10),
-                TextButton(onPressed: () {}, child: const Text("Settings")),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHomeContent(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(context),
-          const SizedBox(height: 24),
-          const SpecialSearchBar(),
-          const SizedBox(height: 24),
-          SectionHeader(title: "Recent Activity"),
-          ActivityListItem(
-            icon: Icons.quiz,
-            title: "Cell Biology Quiz",
-            subtitle: "Score: 8/10 • 2h ago",
-            iconColor: Colors.blue,
-            onTap: () {},
-          ),
-          ActivityListItem(
-            icon: Icons.description,
-            title: "Lecture Notes: Week 3",
-            subtitle: "Added to Library • 5h ago",
-            iconColor: Colors.pink,
-            onTap: () {},
-          ),
-        ],
-      ),
-    );
-  }
-
-  Row _buildHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        bottom: false, // Allow content to go behind the custom nav bar area
+        child: Stack(
           children: [
-            Text(
-              "Project 2359",
-              style: Theme.of(context).textTheme.headlineMedium,
+            // Main Content Layer
+            IndexedStack(
+              index: _selectedIndex,
+              children: const [HomePageContent(), StudyPageContent()],
             ),
-            Text("Good Evening", style: Theme.of(context).textTheme.bodyMedium),
+
+            // Navigation Bar Overlay Layer
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: SpecialNavigationBar(
+                currentIndex: _selectedIndex,
+                onTap: (index) => setState(() => _selectedIndex = index),
+                items: [
+                  const SpecialNavigationItem(
+                    icon: Icons.grid_view_rounded,
+                    label: "Home",
+                  ),
+                  SpecialNavigationItem(
+                    icon: Icons.school_rounded,
+                    label: "Study",
+                    pageActions: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            print("TEST"); // TODO: Connect to actual logic
+                          },
+                          child: const Text("Sources"),
+                        ),
+                        const VerticalDivider(color: Colors.white, width: 10),
+                        TextButton(
+                          onPressed: () {
+                            // TODO: Connect to actual logic
+                          },
+                          child: const Text("Settings"),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
-        const CircleAvatar(
-          radius: 24,
-          backgroundImage: NetworkImage(
-            'https://i.pravatar.cc/150?u=a042581f4e29026704d',
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
