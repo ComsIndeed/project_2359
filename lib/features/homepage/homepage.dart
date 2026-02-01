@@ -13,6 +13,33 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
   int _selectedIndex = 0;
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _selectedIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onPageChanged(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  void _onNavBarTap(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOutCubic,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +50,10 @@ class _HomepageState extends State<Homepage> {
         bottom: false, // Allow content to go behind the custom nav bar area
         child: Stack(
           children: [
-            // Main Content Layer
-            IndexedStack(
-              index: _selectedIndex,
+            // Main Content Layer with PageView for swipe and slide animations
+            PageView(
+              controller: _pageController,
+              onPageChanged: _onPageChanged,
               children: const [HomePageContent(), StudyPageContent()],
             ),
 
@@ -34,7 +62,7 @@ class _HomepageState extends State<Homepage> {
               alignment: Alignment.bottomCenter,
               child: SpecialNavigationBar(
                 currentIndex: _selectedIndex,
-                onTap: (index) => setState(() => _selectedIndex = index),
+                onTap: _onNavBarTap,
                 items: [
                   const SpecialNavigationItem(
                     icon: Icons.grid_view_rounded,
