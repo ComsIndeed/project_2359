@@ -393,6 +393,17 @@ class $StudyMaterialItemsTable extends StudyMaterialItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _citationJsonMeta = const VerificationMeta(
+    'citationJson',
+  );
+  @override
+  late final GeneratedColumn<String> citationJson = GeneratedColumn<String>(
+    'citation_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _questionMeta = const VerificationMeta(
     'question',
   );
@@ -400,9 +411,9 @@ class $StudyMaterialItemsTable extends StudyMaterialItems
   late final GeneratedColumn<String> question = GeneratedColumn<String>(
     'question',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _optionsListJsonMeta = const VerificationMeta(
     'optionsListJson',
@@ -411,24 +422,25 @@ class $StudyMaterialItemsTable extends StudyMaterialItems
   late final GeneratedColumn<String> optionsListJson = GeneratedColumn<String>(
     'options_list_json',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _answerMeta = const VerificationMeta('answer');
   @override
   late final GeneratedColumn<String> answer = GeneratedColumn<String>(
     'answer',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     packId,
     materialType,
+    citationJson,
     question,
     optionsListJson,
     answer,
@@ -469,13 +481,20 @@ class $StudyMaterialItemsTable extends StudyMaterialItems
     } else if (isInserting) {
       context.missing(_materialTypeMeta);
     }
+    if (data.containsKey('citation_json')) {
+      context.handle(
+        _citationJsonMeta,
+        citationJson.isAcceptableOrUnknown(
+          data['citation_json']!,
+          _citationJsonMeta,
+        ),
+      );
+    }
     if (data.containsKey('question')) {
       context.handle(
         _questionMeta,
         question.isAcceptableOrUnknown(data['question']!, _questionMeta),
       );
-    } else if (isInserting) {
-      context.missing(_questionMeta);
     }
     if (data.containsKey('options_list_json')) {
       context.handle(
@@ -485,16 +504,12 @@ class $StudyMaterialItemsTable extends StudyMaterialItems
           _optionsListJsonMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_optionsListJsonMeta);
     }
     if (data.containsKey('answer')) {
       context.handle(
         _answerMeta,
         answer.isAcceptableOrUnknown(data['answer']!, _answerMeta),
       );
-    } else if (isInserting) {
-      context.missing(_answerMeta);
     }
     return context;
   }
@@ -517,18 +532,22 @@ class $StudyMaterialItemsTable extends StudyMaterialItems
         DriftSqlType.string,
         data['${effectivePrefix}material_type'],
       )!,
+      citationJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}citation_json'],
+      ),
       question: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}question'],
-      )!,
+      ),
       optionsListJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}options_list_json'],
-      )!,
+      ),
       answer: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}answer'],
-      )!,
+      ),
     );
   }
 
@@ -543,16 +562,23 @@ class StudyMaterialItem extends DataClass
   final String id;
   final String packId;
   final String materialType;
-  final String question;
-  final String optionsListJson;
-  final String answer;
+  final String? citationJson;
+
+  /// Everything else is nullable because not all types will have the same props.
+  /// MCQ: Question, choices, answer
+  /// Free-Text: Question, answer
+  /// Image Occlusion (not yet implemented; under drafting): List of {question -> answer, and their coordinates and masking values}
+  final String? question;
+  final String? optionsListJson;
+  final String? answer;
   const StudyMaterialItem({
     required this.id,
     required this.packId,
     required this.materialType,
-    required this.question,
-    required this.optionsListJson,
-    required this.answer,
+    this.citationJson,
+    this.question,
+    this.optionsListJson,
+    this.answer,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -560,9 +586,18 @@ class StudyMaterialItem extends DataClass
     map['id'] = Variable<String>(id);
     map['pack_id'] = Variable<String>(packId);
     map['material_type'] = Variable<String>(materialType);
-    map['question'] = Variable<String>(question);
-    map['options_list_json'] = Variable<String>(optionsListJson);
-    map['answer'] = Variable<String>(answer);
+    if (!nullToAbsent || citationJson != null) {
+      map['citation_json'] = Variable<String>(citationJson);
+    }
+    if (!nullToAbsent || question != null) {
+      map['question'] = Variable<String>(question);
+    }
+    if (!nullToAbsent || optionsListJson != null) {
+      map['options_list_json'] = Variable<String>(optionsListJson);
+    }
+    if (!nullToAbsent || answer != null) {
+      map['answer'] = Variable<String>(answer);
+    }
     return map;
   }
 
@@ -571,9 +606,18 @@ class StudyMaterialItem extends DataClass
       id: Value(id),
       packId: Value(packId),
       materialType: Value(materialType),
-      question: Value(question),
-      optionsListJson: Value(optionsListJson),
-      answer: Value(answer),
+      citationJson: citationJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(citationJson),
+      question: question == null && nullToAbsent
+          ? const Value.absent()
+          : Value(question),
+      optionsListJson: optionsListJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(optionsListJson),
+      answer: answer == null && nullToAbsent
+          ? const Value.absent()
+          : Value(answer),
     );
   }
 
@@ -586,9 +630,10 @@ class StudyMaterialItem extends DataClass
       id: serializer.fromJson<String>(json['id']),
       packId: serializer.fromJson<String>(json['packId']),
       materialType: serializer.fromJson<String>(json['materialType']),
-      question: serializer.fromJson<String>(json['question']),
-      optionsListJson: serializer.fromJson<String>(json['optionsListJson']),
-      answer: serializer.fromJson<String>(json['answer']),
+      citationJson: serializer.fromJson<String?>(json['citationJson']),
+      question: serializer.fromJson<String?>(json['question']),
+      optionsListJson: serializer.fromJson<String?>(json['optionsListJson']),
+      answer: serializer.fromJson<String?>(json['answer']),
     );
   }
   @override
@@ -598,9 +643,10 @@ class StudyMaterialItem extends DataClass
       'id': serializer.toJson<String>(id),
       'packId': serializer.toJson<String>(packId),
       'materialType': serializer.toJson<String>(materialType),
-      'question': serializer.toJson<String>(question),
-      'optionsListJson': serializer.toJson<String>(optionsListJson),
-      'answer': serializer.toJson<String>(answer),
+      'citationJson': serializer.toJson<String?>(citationJson),
+      'question': serializer.toJson<String?>(question),
+      'optionsListJson': serializer.toJson<String?>(optionsListJson),
+      'answer': serializer.toJson<String?>(answer),
     };
   }
 
@@ -608,16 +654,20 @@ class StudyMaterialItem extends DataClass
     String? id,
     String? packId,
     String? materialType,
-    String? question,
-    String? optionsListJson,
-    String? answer,
+    Value<String?> citationJson = const Value.absent(),
+    Value<String?> question = const Value.absent(),
+    Value<String?> optionsListJson = const Value.absent(),
+    Value<String?> answer = const Value.absent(),
   }) => StudyMaterialItem(
     id: id ?? this.id,
     packId: packId ?? this.packId,
     materialType: materialType ?? this.materialType,
-    question: question ?? this.question,
-    optionsListJson: optionsListJson ?? this.optionsListJson,
-    answer: answer ?? this.answer,
+    citationJson: citationJson.present ? citationJson.value : this.citationJson,
+    question: question.present ? question.value : this.question,
+    optionsListJson: optionsListJson.present
+        ? optionsListJson.value
+        : this.optionsListJson,
+    answer: answer.present ? answer.value : this.answer,
   );
   StudyMaterialItem copyWithCompanion(StudyMaterialItemsCompanion data) {
     return StudyMaterialItem(
@@ -626,6 +676,9 @@ class StudyMaterialItem extends DataClass
       materialType: data.materialType.present
           ? data.materialType.value
           : this.materialType,
+      citationJson: data.citationJson.present
+          ? data.citationJson.value
+          : this.citationJson,
       question: data.question.present ? data.question.value : this.question,
       optionsListJson: data.optionsListJson.present
           ? data.optionsListJson.value
@@ -640,6 +693,7 @@ class StudyMaterialItem extends DataClass
           ..write('id: $id, ')
           ..write('packId: $packId, ')
           ..write('materialType: $materialType, ')
+          ..write('citationJson: $citationJson, ')
           ..write('question: $question, ')
           ..write('optionsListJson: $optionsListJson, ')
           ..write('answer: $answer')
@@ -648,8 +702,15 @@ class StudyMaterialItem extends DataClass
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, packId, materialType, question, optionsListJson, answer);
+  int get hashCode => Object.hash(
+    id,
+    packId,
+    materialType,
+    citationJson,
+    question,
+    optionsListJson,
+    answer,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -657,6 +718,7 @@ class StudyMaterialItem extends DataClass
           other.id == this.id &&
           other.packId == this.packId &&
           other.materialType == this.materialType &&
+          other.citationJson == this.citationJson &&
           other.question == this.question &&
           other.optionsListJson == this.optionsListJson &&
           other.answer == this.answer);
@@ -666,14 +728,16 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
   final Value<String> id;
   final Value<String> packId;
   final Value<String> materialType;
-  final Value<String> question;
-  final Value<String> optionsListJson;
-  final Value<String> answer;
+  final Value<String?> citationJson;
+  final Value<String?> question;
+  final Value<String?> optionsListJson;
+  final Value<String?> answer;
   final Value<int> rowid;
   const StudyMaterialItemsCompanion({
     this.id = const Value.absent(),
     this.packId = const Value.absent(),
     this.materialType = const Value.absent(),
+    this.citationJson = const Value.absent(),
     this.question = const Value.absent(),
     this.optionsListJson = const Value.absent(),
     this.answer = const Value.absent(),
@@ -683,20 +747,19 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
     required String id,
     required String packId,
     required String materialType,
-    required String question,
-    required String optionsListJson,
-    required String answer,
+    this.citationJson = const Value.absent(),
+    this.question = const Value.absent(),
+    this.optionsListJson = const Value.absent(),
+    this.answer = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        packId = Value(packId),
-       materialType = Value(materialType),
-       question = Value(question),
-       optionsListJson = Value(optionsListJson),
-       answer = Value(answer);
+       materialType = Value(materialType);
   static Insertable<StudyMaterialItem> custom({
     Expression<String>? id,
     Expression<String>? packId,
     Expression<String>? materialType,
+    Expression<String>? citationJson,
     Expression<String>? question,
     Expression<String>? optionsListJson,
     Expression<String>? answer,
@@ -706,6 +769,7 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
       if (id != null) 'id': id,
       if (packId != null) 'pack_id': packId,
       if (materialType != null) 'material_type': materialType,
+      if (citationJson != null) 'citation_json': citationJson,
       if (question != null) 'question': question,
       if (optionsListJson != null) 'options_list_json': optionsListJson,
       if (answer != null) 'answer': answer,
@@ -717,15 +781,17 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
     Value<String>? id,
     Value<String>? packId,
     Value<String>? materialType,
-    Value<String>? question,
-    Value<String>? optionsListJson,
-    Value<String>? answer,
+    Value<String?>? citationJson,
+    Value<String?>? question,
+    Value<String?>? optionsListJson,
+    Value<String?>? answer,
     Value<int>? rowid,
   }) {
     return StudyMaterialItemsCompanion(
       id: id ?? this.id,
       packId: packId ?? this.packId,
       materialType: materialType ?? this.materialType,
+      citationJson: citationJson ?? this.citationJson,
       question: question ?? this.question,
       optionsListJson: optionsListJson ?? this.optionsListJson,
       answer: answer ?? this.answer,
@@ -744,6 +810,9 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
     }
     if (materialType.present) {
       map['material_type'] = Variable<String>(materialType.value);
+    }
+    if (citationJson.present) {
+      map['citation_json'] = Variable<String>(citationJson.value);
     }
     if (question.present) {
       map['question'] = Variable<String>(question.value);
@@ -766,6 +835,7 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
           ..write('id: $id, ')
           ..write('packId: $packId, ')
           ..write('materialType: $materialType, ')
+          ..write('citationJson: $citationJson, ')
           ..write('question: $question, ')
           ..write('optionsListJson: $optionsListJson, ')
           ..write('answer: $answer, ')
@@ -1273,9 +1343,10 @@ typedef $$StudyMaterialItemsTableCreateCompanionBuilder =
       required String id,
       required String packId,
       required String materialType,
-      required String question,
-      required String optionsListJson,
-      required String answer,
+      Value<String?> citationJson,
+      Value<String?> question,
+      Value<String?> optionsListJson,
+      Value<String?> answer,
       Value<int> rowid,
     });
 typedef $$StudyMaterialItemsTableUpdateCompanionBuilder =
@@ -1283,9 +1354,10 @@ typedef $$StudyMaterialItemsTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> packId,
       Value<String> materialType,
-      Value<String> question,
-      Value<String> optionsListJson,
-      Value<String> answer,
+      Value<String?> citationJson,
+      Value<String?> question,
+      Value<String?> optionsListJson,
+      Value<String?> answer,
       Value<int> rowid,
     });
 
@@ -1310,6 +1382,11 @@ class $$StudyMaterialItemsTableFilterComposer
 
   ColumnFilters<String> get materialType => $composableBuilder(
     column: $table.materialType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get citationJson => $composableBuilder(
+    column: $table.citationJson,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1353,6 +1430,11 @@ class $$StudyMaterialItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get citationJson => $composableBuilder(
+    column: $table.citationJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get question => $composableBuilder(
     column: $table.question,
     builder: (column) => ColumnOrderings(column),
@@ -1386,6 +1468,11 @@ class $$StudyMaterialItemsTableAnnotationComposer
 
   GeneratedColumn<String> get materialType => $composableBuilder(
     column: $table.materialType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get citationJson => $composableBuilder(
+    column: $table.citationJson,
     builder: (column) => column,
   );
 
@@ -1444,14 +1531,16 @@ class $$StudyMaterialItemsTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> packId = const Value.absent(),
                 Value<String> materialType = const Value.absent(),
-                Value<String> question = const Value.absent(),
-                Value<String> optionsListJson = const Value.absent(),
-                Value<String> answer = const Value.absent(),
+                Value<String?> citationJson = const Value.absent(),
+                Value<String?> question = const Value.absent(),
+                Value<String?> optionsListJson = const Value.absent(),
+                Value<String?> answer = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StudyMaterialItemsCompanion(
                 id: id,
                 packId: packId,
                 materialType: materialType,
+                citationJson: citationJson,
                 question: question,
                 optionsListJson: optionsListJson,
                 answer: answer,
@@ -1462,14 +1551,16 @@ class $$StudyMaterialItemsTableTableManager
                 required String id,
                 required String packId,
                 required String materialType,
-                required String question,
-                required String optionsListJson,
-                required String answer,
+                Value<String?> citationJson = const Value.absent(),
+                Value<String?> question = const Value.absent(),
+                Value<String?> optionsListJson = const Value.absent(),
+                Value<String?> answer = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StudyMaterialItemsCompanion.insert(
                 id: id,
                 packId: packId,
                 materialType: materialType,
+                citationJson: citationJson,
                 question: question,
                 optionsListJson: optionsListJson,
                 answer: answer,
