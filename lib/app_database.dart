@@ -1,12 +1,15 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart' as path;
-import 'package:project_2359/core/models/study_material.dart';
 import 'package:project_2359/core/tables/source_items.dart';
+import 'package:project_2359/core/tables/study_material_items.dart';
+import 'package:project_2359/core/tables/study_material_packs.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [SourceItems, StudyMaterial])
+@DriftDatabase(
+  tables: [SourceItems, StudyMaterialItems, StudyMaterialPackItems],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 

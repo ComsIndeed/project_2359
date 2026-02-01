@@ -358,15 +358,712 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
   }
 }
 
+class $StudyMaterialItemsTable extends StudyMaterialItems
+    with TableInfo<$StudyMaterialItemsTable, StudyMaterialItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StudyMaterialItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _packIdMeta = const VerificationMeta('packId');
+  @override
+  late final GeneratedColumn<String> packId = GeneratedColumn<String>(
+    'pack_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _materialTypeMeta = const VerificationMeta(
+    'materialType',
+  );
+  @override
+  late final GeneratedColumn<String> materialType = GeneratedColumn<String>(
+    'material_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _questionMeta = const VerificationMeta(
+    'question',
+  );
+  @override
+  late final GeneratedColumn<String> question = GeneratedColumn<String>(
+    'question',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _optionsListJsonMeta = const VerificationMeta(
+    'optionsListJson',
+  );
+  @override
+  late final GeneratedColumn<String> optionsListJson = GeneratedColumn<String>(
+    'options_list_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _answerMeta = const VerificationMeta('answer');
+  @override
+  late final GeneratedColumn<String> answer = GeneratedColumn<String>(
+    'answer',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    packId,
+    materialType,
+    question,
+    optionsListJson,
+    answer,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'study_material_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StudyMaterialItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('pack_id')) {
+      context.handle(
+        _packIdMeta,
+        packId.isAcceptableOrUnknown(data['pack_id']!, _packIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_packIdMeta);
+    }
+    if (data.containsKey('material_type')) {
+      context.handle(
+        _materialTypeMeta,
+        materialType.isAcceptableOrUnknown(
+          data['material_type']!,
+          _materialTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_materialTypeMeta);
+    }
+    if (data.containsKey('question')) {
+      context.handle(
+        _questionMeta,
+        question.isAcceptableOrUnknown(data['question']!, _questionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_questionMeta);
+    }
+    if (data.containsKey('options_list_json')) {
+      context.handle(
+        _optionsListJsonMeta,
+        optionsListJson.isAcceptableOrUnknown(
+          data['options_list_json']!,
+          _optionsListJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_optionsListJsonMeta);
+    }
+    if (data.containsKey('answer')) {
+      context.handle(
+        _answerMeta,
+        answer.isAcceptableOrUnknown(data['answer']!, _answerMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_answerMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StudyMaterialItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StudyMaterialItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      packId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pack_id'],
+      )!,
+      materialType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}material_type'],
+      )!,
+      question: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}question'],
+      )!,
+      optionsListJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}options_list_json'],
+      )!,
+      answer: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}answer'],
+      )!,
+    );
+  }
+
+  @override
+  $StudyMaterialItemsTable createAlias(String alias) {
+    return $StudyMaterialItemsTable(attachedDatabase, alias);
+  }
+}
+
+class StudyMaterialItem extends DataClass
+    implements Insertable<StudyMaterialItem> {
+  final String id;
+  final String packId;
+  final String materialType;
+  final String question;
+  final String optionsListJson;
+  final String answer;
+  const StudyMaterialItem({
+    required this.id,
+    required this.packId,
+    required this.materialType,
+    required this.question,
+    required this.optionsListJson,
+    required this.answer,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['pack_id'] = Variable<String>(packId);
+    map['material_type'] = Variable<String>(materialType);
+    map['question'] = Variable<String>(question);
+    map['options_list_json'] = Variable<String>(optionsListJson);
+    map['answer'] = Variable<String>(answer);
+    return map;
+  }
+
+  StudyMaterialItemsCompanion toCompanion(bool nullToAbsent) {
+    return StudyMaterialItemsCompanion(
+      id: Value(id),
+      packId: Value(packId),
+      materialType: Value(materialType),
+      question: Value(question),
+      optionsListJson: Value(optionsListJson),
+      answer: Value(answer),
+    );
+  }
+
+  factory StudyMaterialItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StudyMaterialItem(
+      id: serializer.fromJson<String>(json['id']),
+      packId: serializer.fromJson<String>(json['packId']),
+      materialType: serializer.fromJson<String>(json['materialType']),
+      question: serializer.fromJson<String>(json['question']),
+      optionsListJson: serializer.fromJson<String>(json['optionsListJson']),
+      answer: serializer.fromJson<String>(json['answer']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'packId': serializer.toJson<String>(packId),
+      'materialType': serializer.toJson<String>(materialType),
+      'question': serializer.toJson<String>(question),
+      'optionsListJson': serializer.toJson<String>(optionsListJson),
+      'answer': serializer.toJson<String>(answer),
+    };
+  }
+
+  StudyMaterialItem copyWith({
+    String? id,
+    String? packId,
+    String? materialType,
+    String? question,
+    String? optionsListJson,
+    String? answer,
+  }) => StudyMaterialItem(
+    id: id ?? this.id,
+    packId: packId ?? this.packId,
+    materialType: materialType ?? this.materialType,
+    question: question ?? this.question,
+    optionsListJson: optionsListJson ?? this.optionsListJson,
+    answer: answer ?? this.answer,
+  );
+  StudyMaterialItem copyWithCompanion(StudyMaterialItemsCompanion data) {
+    return StudyMaterialItem(
+      id: data.id.present ? data.id.value : this.id,
+      packId: data.packId.present ? data.packId.value : this.packId,
+      materialType: data.materialType.present
+          ? data.materialType.value
+          : this.materialType,
+      question: data.question.present ? data.question.value : this.question,
+      optionsListJson: data.optionsListJson.present
+          ? data.optionsListJson.value
+          : this.optionsListJson,
+      answer: data.answer.present ? data.answer.value : this.answer,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StudyMaterialItem(')
+          ..write('id: $id, ')
+          ..write('packId: $packId, ')
+          ..write('materialType: $materialType, ')
+          ..write('question: $question, ')
+          ..write('optionsListJson: $optionsListJson, ')
+          ..write('answer: $answer')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, packId, materialType, question, optionsListJson, answer);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StudyMaterialItem &&
+          other.id == this.id &&
+          other.packId == this.packId &&
+          other.materialType == this.materialType &&
+          other.question == this.question &&
+          other.optionsListJson == this.optionsListJson &&
+          other.answer == this.answer);
+}
+
+class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
+  final Value<String> id;
+  final Value<String> packId;
+  final Value<String> materialType;
+  final Value<String> question;
+  final Value<String> optionsListJson;
+  final Value<String> answer;
+  final Value<int> rowid;
+  const StudyMaterialItemsCompanion({
+    this.id = const Value.absent(),
+    this.packId = const Value.absent(),
+    this.materialType = const Value.absent(),
+    this.question = const Value.absent(),
+    this.optionsListJson = const Value.absent(),
+    this.answer = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StudyMaterialItemsCompanion.insert({
+    required String id,
+    required String packId,
+    required String materialType,
+    required String question,
+    required String optionsListJson,
+    required String answer,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       packId = Value(packId),
+       materialType = Value(materialType),
+       question = Value(question),
+       optionsListJson = Value(optionsListJson),
+       answer = Value(answer);
+  static Insertable<StudyMaterialItem> custom({
+    Expression<String>? id,
+    Expression<String>? packId,
+    Expression<String>? materialType,
+    Expression<String>? question,
+    Expression<String>? optionsListJson,
+    Expression<String>? answer,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (packId != null) 'pack_id': packId,
+      if (materialType != null) 'material_type': materialType,
+      if (question != null) 'question': question,
+      if (optionsListJson != null) 'options_list_json': optionsListJson,
+      if (answer != null) 'answer': answer,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StudyMaterialItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? packId,
+    Value<String>? materialType,
+    Value<String>? question,
+    Value<String>? optionsListJson,
+    Value<String>? answer,
+    Value<int>? rowid,
+  }) {
+    return StudyMaterialItemsCompanion(
+      id: id ?? this.id,
+      packId: packId ?? this.packId,
+      materialType: materialType ?? this.materialType,
+      question: question ?? this.question,
+      optionsListJson: optionsListJson ?? this.optionsListJson,
+      answer: answer ?? this.answer,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (packId.present) {
+      map['pack_id'] = Variable<String>(packId.value);
+    }
+    if (materialType.present) {
+      map['material_type'] = Variable<String>(materialType.value);
+    }
+    if (question.present) {
+      map['question'] = Variable<String>(question.value);
+    }
+    if (optionsListJson.present) {
+      map['options_list_json'] = Variable<String>(optionsListJson.value);
+    }
+    if (answer.present) {
+      map['answer'] = Variable<String>(answer.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StudyMaterialItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('packId: $packId, ')
+          ..write('materialType: $materialType, ')
+          ..write('question: $question, ')
+          ..write('optionsListJson: $optionsListJson, ')
+          ..write('answer: $answer, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $StudyMaterialPackItemsTable extends StudyMaterialPackItems
+    with TableInfo<$StudyMaterialPackItemsTable, StudyMaterialPackItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StudyMaterialPackItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, description];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'study_material_pack_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StudyMaterialPackItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StudyMaterialPackItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StudyMaterialPackItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+    );
+  }
+
+  @override
+  $StudyMaterialPackItemsTable createAlias(String alias) {
+    return $StudyMaterialPackItemsTable(attachedDatabase, alias);
+  }
+}
+
+class StudyMaterialPackItem extends DataClass
+    implements Insertable<StudyMaterialPackItem> {
+  final String id;
+  final String name;
+  final String? description;
+  const StudyMaterialPackItem({
+    required this.id,
+    required this.name,
+    this.description,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    return map;
+  }
+
+  StudyMaterialPackItemsCompanion toCompanion(bool nullToAbsent) {
+    return StudyMaterialPackItemsCompanion(
+      id: Value(id),
+      name: Value(name),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+    );
+  }
+
+  factory StudyMaterialPackItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StudyMaterialPackItem(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+    };
+  }
+
+  StudyMaterialPackItem copyWith({
+    String? id,
+    String? name,
+    Value<String?> description = const Value.absent(),
+  }) => StudyMaterialPackItem(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+  );
+  StudyMaterialPackItem copyWithCompanion(
+    StudyMaterialPackItemsCompanion data,
+  ) {
+    return StudyMaterialPackItem(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StudyMaterialPackItem(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, description);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StudyMaterialPackItem &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.description == this.description);
+}
+
+class StudyMaterialPackItemsCompanion
+    extends UpdateCompanion<StudyMaterialPackItem> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String?> description;
+  final Value<int> rowid;
+  const StudyMaterialPackItemsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StudyMaterialPackItemsCompanion.insert({
+    required String id,
+    required String name,
+    this.description = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name);
+  static Insertable<StudyMaterialPackItem> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StudyMaterialPackItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String?>? description,
+    Value<int>? rowid,
+  }) {
+    return StudyMaterialPackItemsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StudyMaterialPackItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $SourceItemsTable sourceItems = $SourceItemsTable(this);
+  late final $StudyMaterialItemsTable studyMaterialItems =
+      $StudyMaterialItemsTable(this);
+  late final $StudyMaterialPackItemsTable studyMaterialPackItems =
+      $StudyMaterialPackItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [sourceItems];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    sourceItems,
+    studyMaterialItems,
+    studyMaterialPackItems,
+  ];
 }
 
 typedef $$SourceItemsTableCreateCompanionBuilder =
@@ -571,10 +1268,436 @@ typedef $$SourceItemsTableProcessedTableManager =
       SourceItem,
       PrefetchHooks Function()
     >;
+typedef $$StudyMaterialItemsTableCreateCompanionBuilder =
+    StudyMaterialItemsCompanion Function({
+      required String id,
+      required String packId,
+      required String materialType,
+      required String question,
+      required String optionsListJson,
+      required String answer,
+      Value<int> rowid,
+    });
+typedef $$StudyMaterialItemsTableUpdateCompanionBuilder =
+    StudyMaterialItemsCompanion Function({
+      Value<String> id,
+      Value<String> packId,
+      Value<String> materialType,
+      Value<String> question,
+      Value<String> optionsListJson,
+      Value<String> answer,
+      Value<int> rowid,
+    });
+
+class $$StudyMaterialItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $StudyMaterialItemsTable> {
+  $$StudyMaterialItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get packId => $composableBuilder(
+    column: $table.packId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get materialType => $composableBuilder(
+    column: $table.materialType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get question => $composableBuilder(
+    column: $table.question,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get optionsListJson => $composableBuilder(
+    column: $table.optionsListJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get answer => $composableBuilder(
+    column: $table.answer,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StudyMaterialItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StudyMaterialItemsTable> {
+  $$StudyMaterialItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get packId => $composableBuilder(
+    column: $table.packId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get materialType => $composableBuilder(
+    column: $table.materialType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get question => $composableBuilder(
+    column: $table.question,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get optionsListJson => $composableBuilder(
+    column: $table.optionsListJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get answer => $composableBuilder(
+    column: $table.answer,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StudyMaterialItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StudyMaterialItemsTable> {
+  $$StudyMaterialItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get packId =>
+      $composableBuilder(column: $table.packId, builder: (column) => column);
+
+  GeneratedColumn<String> get materialType => $composableBuilder(
+    column: $table.materialType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get question =>
+      $composableBuilder(column: $table.question, builder: (column) => column);
+
+  GeneratedColumn<String> get optionsListJson => $composableBuilder(
+    column: $table.optionsListJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get answer =>
+      $composableBuilder(column: $table.answer, builder: (column) => column);
+}
+
+class $$StudyMaterialItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StudyMaterialItemsTable,
+          StudyMaterialItem,
+          $$StudyMaterialItemsTableFilterComposer,
+          $$StudyMaterialItemsTableOrderingComposer,
+          $$StudyMaterialItemsTableAnnotationComposer,
+          $$StudyMaterialItemsTableCreateCompanionBuilder,
+          $$StudyMaterialItemsTableUpdateCompanionBuilder,
+          (
+            StudyMaterialItem,
+            BaseReferences<
+              _$AppDatabase,
+              $StudyMaterialItemsTable,
+              StudyMaterialItem
+            >,
+          ),
+          StudyMaterialItem,
+          PrefetchHooks Function()
+        > {
+  $$StudyMaterialItemsTableTableManager(
+    _$AppDatabase db,
+    $StudyMaterialItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StudyMaterialItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StudyMaterialItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StudyMaterialItemsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> packId = const Value.absent(),
+                Value<String> materialType = const Value.absent(),
+                Value<String> question = const Value.absent(),
+                Value<String> optionsListJson = const Value.absent(),
+                Value<String> answer = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StudyMaterialItemsCompanion(
+                id: id,
+                packId: packId,
+                materialType: materialType,
+                question: question,
+                optionsListJson: optionsListJson,
+                answer: answer,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String packId,
+                required String materialType,
+                required String question,
+                required String optionsListJson,
+                required String answer,
+                Value<int> rowid = const Value.absent(),
+              }) => StudyMaterialItemsCompanion.insert(
+                id: id,
+                packId: packId,
+                materialType: materialType,
+                question: question,
+                optionsListJson: optionsListJson,
+                answer: answer,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StudyMaterialItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StudyMaterialItemsTable,
+      StudyMaterialItem,
+      $$StudyMaterialItemsTableFilterComposer,
+      $$StudyMaterialItemsTableOrderingComposer,
+      $$StudyMaterialItemsTableAnnotationComposer,
+      $$StudyMaterialItemsTableCreateCompanionBuilder,
+      $$StudyMaterialItemsTableUpdateCompanionBuilder,
+      (
+        StudyMaterialItem,
+        BaseReferences<
+          _$AppDatabase,
+          $StudyMaterialItemsTable,
+          StudyMaterialItem
+        >,
+      ),
+      StudyMaterialItem,
+      PrefetchHooks Function()
+    >;
+typedef $$StudyMaterialPackItemsTableCreateCompanionBuilder =
+    StudyMaterialPackItemsCompanion Function({
+      required String id,
+      required String name,
+      Value<String?> description,
+      Value<int> rowid,
+    });
+typedef $$StudyMaterialPackItemsTableUpdateCompanionBuilder =
+    StudyMaterialPackItemsCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String?> description,
+      Value<int> rowid,
+    });
+
+class $$StudyMaterialPackItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $StudyMaterialPackItemsTable> {
+  $$StudyMaterialPackItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StudyMaterialPackItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StudyMaterialPackItemsTable> {
+  $$StudyMaterialPackItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StudyMaterialPackItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StudyMaterialPackItemsTable> {
+  $$StudyMaterialPackItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+}
+
+class $$StudyMaterialPackItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StudyMaterialPackItemsTable,
+          StudyMaterialPackItem,
+          $$StudyMaterialPackItemsTableFilterComposer,
+          $$StudyMaterialPackItemsTableOrderingComposer,
+          $$StudyMaterialPackItemsTableAnnotationComposer,
+          $$StudyMaterialPackItemsTableCreateCompanionBuilder,
+          $$StudyMaterialPackItemsTableUpdateCompanionBuilder,
+          (
+            StudyMaterialPackItem,
+            BaseReferences<
+              _$AppDatabase,
+              $StudyMaterialPackItemsTable,
+              StudyMaterialPackItem
+            >,
+          ),
+          StudyMaterialPackItem,
+          PrefetchHooks Function()
+        > {
+  $$StudyMaterialPackItemsTableTableManager(
+    _$AppDatabase db,
+    $StudyMaterialPackItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StudyMaterialPackItemsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$StudyMaterialPackItemsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$StudyMaterialPackItemsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StudyMaterialPackItemsCompanion(
+                id: id,
+                name: name,
+                description: description,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                Value<String?> description = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StudyMaterialPackItemsCompanion.insert(
+                id: id,
+                name: name,
+                description: description,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StudyMaterialPackItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StudyMaterialPackItemsTable,
+      StudyMaterialPackItem,
+      $$StudyMaterialPackItemsTableFilterComposer,
+      $$StudyMaterialPackItemsTableOrderingComposer,
+      $$StudyMaterialPackItemsTableAnnotationComposer,
+      $$StudyMaterialPackItemsTableCreateCompanionBuilder,
+      $$StudyMaterialPackItemsTableUpdateCompanionBuilder,
+      (
+        StudyMaterialPackItem,
+        BaseReferences<
+          _$AppDatabase,
+          $StudyMaterialPackItemsTable,
+          StudyMaterialPackItem
+        >,
+      ),
+      StudyMaterialPackItem,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$SourceItemsTableTableManager get sourceItems =>
       $$SourceItemsTableTableManager(_db, _db.sourceItems);
+  $$StudyMaterialItemsTableTableManager get studyMaterialItems =>
+      $$StudyMaterialItemsTableTableManager(_db, _db.studyMaterialItems);
+  $$StudyMaterialPackItemsTableTableManager get studyMaterialPackItems =>
+      $$StudyMaterialPackItemsTableTableManager(
+        _db,
+        _db.studyMaterialPackItems,
+      );
 }
