@@ -45,6 +45,13 @@ class AppTheme {
         error: error,
       ),
 
+      // Predictive Back Navigation (Android)
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+        },
+      ),
+
       // Typography
       textTheme: TextTheme(
         displayLarge: GoogleFonts.outfit(
