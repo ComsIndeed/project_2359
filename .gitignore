@@ -1,16 +1,13 @@
-# Dependencies
+# =========================
+# 📦 Dependency Directories
+# =========================
 node_modules/
 .pnp/
 .pnp.js
 
-# Expo / React Native
-.expo/
-dist/
-web-build/
-expo-env.d.ts
-*.hprof
-
-# Native builds (ephemeral)
+# =========================
+# 🐦 Flutter / Dart
+# =========================
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -20,94 +17,124 @@ expo-env.d.ts
 build/
 bin/
 
-# Platform specific ephemeral files
+# =========================
+# 🤖 Android (Recursive)
+# =========================
 **/android/local.properties
 **/android/key.properties
 **/android/app/google-services.json
+**/android/keystore.properties
+**/android/gradle/.DS_Store
+**/android/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/app/build/
+**/android/build/
+
+# =========================
+# 🍎 iOS / macOS (Recursive)
+# =========================
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/Flutter/flutter_podhelper.rb
 **/ios/Runner/GeneratedPluginRegistrant.[mh]
-**/linux/flutter/
+**/ios/Podfile.lock
+**/ios/Pods/
+**/ios/.symlinks/
 **/macos/Flutter/ephemeral/
+**/macos/Pods/
+
+# =========================
+# 🐧 Linux / Windows / Web
+# =========================
+**/linux/flutter/
 **/windows/flutter/
+**/windows/flutter/ephemeral/
 **/web/flutter_bootstrap.js
 
-# Build outputs
-build/
-*.apk
-*.aab
-*.ipa
-*.app
-
-# Metro bundler
+# =========================
+# ⚛️ React Native / Expo (Legacy/Cleanup)
+# =========================
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+*.hprof
 .metro-health-check*
 
-# Debug logs
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-*.log
-
-# Environment files
+# =========================
+# 🛡️ Environment & Secrets
+# =========================
 .env
 .env.local
 .env.*.local
 .env.development
 .env.production
-
-# macOS
-.DS_Store
-*.pem
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# Linux
-*~
-
-# IDE / Editor
-.idea/
-*.iml
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.vscode/settings.json
-.vscode/launch.json
-
-# TypeScript
-*.tsbuildinfo
-
-# Testing
-coverage/
-.jest/
-
-# Native signing
-*.orig.*
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
 *.keystore
+*.pem
 
-# Temporary files
+# =========================
+# 🔧 IDEs & Editors
+# =========================
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.tsbuildinfo
+
+# =========================
+# 💻 OS Junk
+# =========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*~
+
+# =========================
+# 🗑️ Temp & Logs
+# =========================
 *.tmp
 *.temp
 .cache/
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+coverage/
+.jest/
 
-# Old monorepo ignores (cleaned up)
-*.ipr
-*.iws
+# =========================
+# 📱 Build Outputs
+# =========================
+*.apk
+*.aab
+*.ipa
+*.app
+*.orig.*
 
-# Drizzle
+# =========================
+# 💾 Databases
+# =========================
 drizzle/
-
-# SQLite
 *.db
 *.sqlite
 *.sqlite3
+
+# =========================
+# 🧪 Testing
+# =========================
+coverage/
+*.lcov

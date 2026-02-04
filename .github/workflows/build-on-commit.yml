@@ -3,6 +3,9 @@ name: Build on [BUILD] Commit
 on:
   push:
     branches: [main]
+    paths:
+      - 'apps/project_2359/**'
+      - '.github/workflows/build-on-commit.yml'
 
 jobs:
   # ============================================================================
@@ -39,6 +42,9 @@ jobs:
     if: needs.check-trigger.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
+    defaults:
+      run:
+        working-directory: apps/project_2359
     outputs:
       success: ${{ steps.set_success.outputs.success }}
     
@@ -62,7 +68,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: web-build
-          path: build/web/
+          path: apps/project_2359/build/web/
           retention-days: 1
 
       - name: Set success status
@@ -83,6 +89,9 @@ jobs:
     if: needs.check-trigger.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
+    defaults:
+      run:
+        working-directory: apps/project_2359
     outputs:
       success: ${{ steps.set_success.outputs.success }}
     
@@ -112,7 +121,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: apps/project_2359/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 1
 
       - name: Set success status
@@ -133,6 +142,9 @@ jobs:
     if: needs.check-trigger.outputs.should_build == 'true'
     runs-on: windows-latest
     continue-on-error: true
+    defaults:
+      run:
+        working-directory: apps/project_2359
     outputs:
       success: ${{ steps.set_success.outputs.success }}
     
@@ -160,7 +172,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: windows-build
-          path: project_2359-windows.zip
+          path: apps/project_2359/project_2359-windows.zip
           retention-days: 1
 
       - name: Set success status
@@ -181,6 +193,9 @@ jobs:
     if: needs.check-trigger.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
+    defaults:
+      run:
+        working-directory: apps/project_2359
     outputs:
       success: ${{ steps.set_success.outputs.success }}
     
@@ -214,7 +229,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: linux-build
-          path: project_2359-linux.tar.gz
+          path: apps/project_2359/project_2359-linux.tar.gz
           retention-days: 1
 
       - name: Set success status
