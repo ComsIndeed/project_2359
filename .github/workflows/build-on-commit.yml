@@ -4,19 +4,31 @@ on:
   push:
     branches: [main]
     paths:
-      - 'apps/project_2359/**'
+      - 'apps/**'
       - '.github/workflows/build-on-commit.yml'
+
+# Prevent concurrent deployments to avoid conflicts
+concurrency:
+  group: "pages-${{ github.ref }}"
+  cancel-in-progress: false
 
 jobs:
   # ============================================================================
-  # Check if commit message starts with [BUILD]
+  # Check if commit message starts with [BUILD] and detect changed projects
   # ============================================================================
   check-trigger:
     runs-on: ubuntu-latest
     outputs:
       should_build: ${{ steps.check.outputs.should_build }}
       commit_message: ${{ steps.check.outputs.commit_message }}
+      project_2359_changed: ${{ steps.changes.outputs.project_2359 }}
+      playground_changed: ${{ steps.changes.outputs.playground }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
       - name: Check commit message for [BUILD] trigger
         id: check
         run: |
@@ -34,12 +46,38 @@ jobs:
             echo "should_build=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Detect changed projects
+        id: changes
+        run: |
+          # Get the list of changed files in this push
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only HEAD)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Check if project_2359 has changes
+          if echo "$CHANGED_FILES" | grep -q "^apps/project_2359/"; then
+            echo "project_2359=true" >> $GITHUB_OUTPUT
+            echo "✅ project_2359 has changes"
+          else
+            echo "project_2359=false" >> $GITHUB_OUTPUT
+            echo "⏭️ project_2359 has no changes"
+          fi
+          
+          # Check if playground has changes
+          if echo "$CHANGED_FILES" | grep -q "^apps/playground/"; then
+            echo "playground=true" >> $GITHUB_OUTPUT
+            echo "✅ playground has changes"
+          else
+            echo "playground=false" >> $GITHUB_OUTPUT
+            echo "⏭️ playground has no changes"
+          fi
+
   # ============================================================================
-  # Build Flutter Web
+  # Build Project 2359 - Web
   # ============================================================================
-  build-web:
+  build-project-2359-web:
     needs: check-trigger
-    if: needs.check-trigger.outputs.should_build == 'true'
+    if: needs.check-trigger.outputs.should_build == 'true' && needs.check-trigger.outputs.project_2359_changed == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
     defaults:
@@ -50,10 +88,10 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2.18.0
+        uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           cache: true
@@ -62,12 +100,12 @@ jobs:
         run: flutter pub get
 
       - name: Build Web
-        run: flutter build web --release
+        run: flutter build web --release --base-href "/"
 
       - name: Upload Web Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
-          name: web-build
+          name: project-2359-web
           path: apps/project_2359/build/web/
           retention-days: 1
 
@@ -82,11 +120,11 @@ jobs:
           fi
 
   # ============================================================================
-  # Build Android APK
+  # Build Project 2359 - Android APK
   # ============================================================================
-  build-android:
+  build-project-2359-android:
     needs: check-trigger
-    if: needs.check-trigger.outputs.should_build == 'true'
+    if: needs.check-trigger.outputs.should_build == 'true' && needs.check-trigger.outputs.project_2359_changed == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
     defaults:
@@ -97,7 +135,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -106,7 +144,7 @@ jobs:
           java-version: '17'
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2.18.0
+        uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           cache: true
@@ -118,9 +156,9 @@ jobs:
         run: flutter build apk --release
 
       - name: Upload Android APK
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
-          name: android-apk
+          name: project-2359-android
           path: apps/project_2359/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 1
 
@@ -135,11 +173,11 @@ jobs:
           fi
 
   # ============================================================================
-  # Build Windows Desktop
+  # Build Project 2359 - Windows
   # ============================================================================
-  build-windows:
+  build-project-2359-windows:
     needs: check-trigger
-    if: needs.check-trigger.outputs.should_build == 'true'
+    if: needs.check-trigger.outputs.should_build == 'true' && needs.check-trigger.outputs.project_2359_changed == 'true'
     runs-on: windows-latest
     continue-on-error: true
     defaults:
@@ -150,10 +188,10 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2.18.0
+        uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           cache: true
@@ -169,9 +207,9 @@ jobs:
           Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath project_2359-windows.zip
 
       - name: Upload Windows Build
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
-          name: windows-build
+          name: project-2359-windows
           path: apps/project_2359/project_2359-windows.zip
           retention-days: 1
 
@@ -186,11 +224,11 @@ jobs:
           }
 
   # ============================================================================
-  # Build Linux Desktop
+  # Build Project 2359 - Linux
   # ============================================================================
-  build-linux:
+  build-project-2359-linux:
     needs: check-trigger
-    if: needs.check-trigger.outputs.should_build == 'true'
+    if: needs.check-trigger.outputs.should_build == 'true' && needs.check-trigger.outputs.project_2359_changed == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
     defaults:
@@ -201,7 +239,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Install Linux dependencies
         run: |
@@ -209,7 +247,7 @@ jobs:
           sudo apt-get install -y clang cmake ninja-build libgtk-3-dev libsqlite3-dev
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2.18.0
+        uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           cache: true
@@ -226,9 +264,9 @@ jobs:
           tar -czvf ../../../../../project_2359-linux.tar.gz *
 
       - name: Upload Linux Build
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
-          name: linux-build
+          name: project-2359-linux
           path: apps/project_2359/project_2359-linux.tar.gz
           retention-days: 1
 
@@ -243,41 +281,41 @@ jobs:
           fi
 
   # ============================================================================
-  # Deploy Web to GitHub Pages
+  # Build Playground - Web Only
   # ============================================================================
-  deploy-web:
-    needs: [check-trigger, build-web]
-    if: always() && needs.check-trigger.outputs.should_build == 'true' && needs.build-web.outputs.success == 'true'
+  build-playground-web:
+    needs: check-trigger
+    if: needs.check-trigger.outputs.should_build == 'true' && needs.check-trigger.outputs.playground_changed == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
+    defaults:
+      run:
+        working-directory: apps/playground
     outputs:
       success: ${{ steps.set_success.outputs.success }}
     
-    permissions:
-      contents: write
-      
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: Download Web Build
-        uses: actions/download-artifact@v6
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          name: web-build
-          path: web-build
+          channel: 'stable'
+          cache: true
 
-      - name: Prepare deployment
-        run: |
-          mkdir -p deploy
-          cp -r web-build/* deploy/
+      - name: Get dependencies
+        run: flutter pub get
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Build Web
+        run: flutter build web --release --base-href "/dev/playground/"
+
+      - name: Upload Web Artifact
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./deploy
-          destination_dir: .
-          keep_files: true
+          name: playground-web
+          path: apps/playground/build/web/
+          retention-days: 1
 
       - name: Set success status
         id: set_success
@@ -290,12 +328,126 @@ jobs:
           fi
 
   # ============================================================================
-  # Create Release with All Binaries
+  # Deploy All Web Builds to GitHub Pages
   # ============================================================================
-  create-release:
-    needs: [check-trigger, build-android, build-windows, build-linux, deploy-web]
-    # Always run if at least the check-trigger succeeded, even if builds failed
-    if: always() && needs.check-trigger.outputs.should_build == 'true'
+  deploy-web:
+    needs: [check-trigger, build-project-2359-web, build-playground-web]
+    if: |
+      always() && 
+      needs.check-trigger.outputs.should_build == 'true' && 
+      (needs.build-project-2359-web.outputs.success == 'true' || needs.build-playground-web.outputs.success == 'true')
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    outputs:
+      success: ${{ steps.set_success.outputs.success }}
+    
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+        continue-on-error: true
+
+      - name: Create gh-pages branch if not exists
+        run: |
+          if ! git rev-parse --verify gh-pages >/dev/null 2>&1; then
+            git checkout --orphan gh-pages
+            git reset --hard
+            git commit --allow-empty -m "Initialize gh-pages"
+            git push origin gh-pages
+          fi
+        continue-on-error: true
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-content
+
+      - name: Download Project 2359 Web Build
+        if: needs.build-project-2359-web.outputs.success == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: project-2359-web
+          path: project-2359-web
+
+      - name: Download Playground Web Build
+        if: needs.build-playground-web.outputs.success == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: playground-web
+          path: playground-web
+
+      - name: Prepare deployment directory
+        run: |
+          mkdir -p deploy
+          
+          # Copy existing gh-pages content to preserve other files
+          if [ -d "gh-pages-content" ]; then
+            cp -r gh-pages-content/* deploy/ 2>/dev/null || true
+            rm -rf deploy/.git
+          fi
+          
+          # Deploy Project 2359 to root (if built)
+          if [ -d "project-2359-web" ]; then
+            echo "📦 Deploying Project 2359 to root..."
+            # Remove old root files but keep dev folder
+            find deploy -maxdepth 1 -type f -delete 2>/dev/null || true
+            for dir in deploy/*/; do
+              [ "$(basename "$dir")" != "dev" ] && rm -rf "$dir" 2>/dev/null || true
+            done
+            cp -r project-2359-web/* deploy/
+          fi
+          
+          # Deploy Playground to /dev/playground (if built)
+          if [ -d "playground-web" ]; then
+            echo "📦 Deploying Playground to /dev/playground..."
+            mkdir -p deploy/dev/playground
+            rm -rf deploy/dev/playground/*
+            cp -r playground-web/* deploy/dev/playground/
+          fi
+          
+          # Create .nojekyll to bypass Jekyll processing
+          touch deploy/.nojekyll
+          
+          echo "📁 Deployment structure:"
+          ls -la deploy/
+          [ -d "deploy/dev" ] && ls -la deploy/dev/ || true
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy
+          destination_dir: .
+          keep_files: false
+
+      - name: Set success status
+        id: set_success
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
+  # ============================================================================
+  # Create Release for Project 2359
+  # ============================================================================
+  create-release-project-2359:
+    needs: [check-trigger, build-project-2359-android, build-project-2359-windows, build-project-2359-linux, deploy-web]
+    if: |
+      always() && 
+      needs.check-trigger.outputs.should_build == 'true' && 
+      needs.check-trigger.outputs.project_2359_changed == 'true' &&
+      (needs.build-project-2359-android.outputs.success == 'true' || 
+       needs.build-project-2359-windows.outputs.success == 'true' || 
+       needs.build-project-2359-linux.outputs.success == 'true')
     runs-on: ubuntu-latest
     
     permissions:
@@ -303,15 +455,55 @@ jobs:
       
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
+
+      - name: Download Android APK
+        if: needs.build-project-2359-android.outputs.success == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: project-2359-android
+          path: ./release-assets
+
+      - name: Download Windows Build
+        if: needs.build-project-2359-windows.outputs.success == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: project-2359-windows
+          path: ./release-assets
+
+      - name: Download Linux Build
+        if: needs.build-project-2359-linux.outputs.success == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: project-2359-linux
+          path: ./release-assets
+
+      - name: Rename APK
+        if: needs.build-project-2359-android.outputs.success == 'true'
+        run: mv ./release-assets/app-release.apk ./release-assets/project_2359-android.apk
+
+      - name: Get build information
+        id: build_info
+        run: |
+          BUILD_DATE=$(date -u +'%Y-%m-%d')
+          BUILD_TIME=$(date -u +'%H:%M:%S UTC')
+          BUILD_DATETIME=$(date -u +'%Y%m%d-%H%M%S')
+          COMMIT_SHA="${{ github.sha }}"
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+          BUILD_NUMBER="${{ github.run_number }}"
+          
+          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "build_datetime=$BUILD_DATETIME" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
 
       - name: Determine build status
         id: build_status
         run: |
-          # Track which builds succeeded
-          ANDROID_SUCCESS="${{ needs.build-android.outputs.success }}"
-          WINDOWS_SUCCESS="${{ needs.build-windows.outputs.success }}"
-          LINUX_SUCCESS="${{ needs.build-linux.outputs.success }}"
+          ANDROID_SUCCESS="${{ needs.build-project-2359-android.outputs.success }}"
+          WINDOWS_SUCCESS="${{ needs.build-project-2359-windows.outputs.success }}"
+          LINUX_SUCCESS="${{ needs.build-project-2359-linux.outputs.success }}"
           WEB_SUCCESS="${{ needs.deploy-web.outputs.success }}"
           
           echo "android_success=${ANDROID_SUCCESS}" >> $GITHUB_OUTPUT
@@ -319,317 +511,141 @@ jobs:
           echo "linux_success=${LINUX_SUCCESS}" >> $GITHUB_OUTPUT
           echo "web_success=${WEB_SUCCESS}" >> $GITHUB_OUTPUT
           
-          # Count successful builds
           SUCCESS_COUNT=0
-          FAILED_BUILDS=""
-          SUCCESS_BUILDS=""
+          [ "$ANDROID_SUCCESS" == "true" ] && SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+          [ "$WINDOWS_SUCCESS" == "true" ] && SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+          [ "$LINUX_SUCCESS" == "true" ] && SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+          [ "$WEB_SUCCESS" == "true" ] && SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
           
-          if [ "$ANDROID_SUCCESS" == "true" ]; then
-            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-            SUCCESS_BUILDS="${SUCCESS_BUILDS}Android, "
-          else
-            FAILED_BUILDS="${FAILED_BUILDS}Android, "
-          fi
-          
-          if [ "$WINDOWS_SUCCESS" == "true" ]; then
-            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-            SUCCESS_BUILDS="${SUCCESS_BUILDS}Windows, "
-          else
-            FAILED_BUILDS="${FAILED_BUILDS}Windows, "
-          fi
-          
-          if [ "$LINUX_SUCCESS" == "true" ]; then
-            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-            SUCCESS_BUILDS="${SUCCESS_BUILDS}Linux, "
-          else
-            FAILED_BUILDS="${FAILED_BUILDS}Linux, "
-          fi
-          
-          if [ "$WEB_SUCCESS" == "true" ]; then
-            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-            SUCCESS_BUILDS="${SUCCESS_BUILDS}Web, "
-          else
-            FAILED_BUILDS="${FAILED_BUILDS}Web, "
-          fi
-          
-          # Remove trailing comma and space
-          SUCCESS_BUILDS="${SUCCESS_BUILDS%, }"
-          FAILED_BUILDS="${FAILED_BUILDS%, }"
-          
-          echo "success_count=${SUCCESS_COUNT}" >> $GITHUB_OUTPUT
-          echo "success_builds=${SUCCESS_BUILDS}" >> $GITHUB_OUTPUT
-          echo "failed_builds=${FAILED_BUILDS}" >> $GITHUB_OUTPUT
-          
-          # Determine release type
           if [ $SUCCESS_COUNT -eq 4 ]; then
-            RELEASE_TYPE="Complete"
+            echo "release_type=Complete" >> $GITHUB_OUTPUT
           elif [ $SUCCESS_COUNT -eq 0 ]; then
-            RELEASE_TYPE="Failed"
+            echo "release_type=Failed" >> $GITHUB_OUTPUT
           else
-            RELEASE_TYPE="Partial"
+            echo "release_type=Partial" >> $GITHUB_OUTPUT
           fi
-          
-          echo "release_type=${RELEASE_TYPE}" >> $GITHUB_OUTPUT
-
-      - name: Download Android APK
-        if: needs.build-android.outputs.success == 'true'
-        uses: actions/download-artifact@v6
-        with:
-          name: android-apk
-          path: ./release-assets
-
-      - name: Download Windows Build
-        if: needs.build-windows.outputs.success == 'true'
-        uses: actions/download-artifact@v6
-        with:
-          name: windows-build
-          path: ./release-assets
-
-      - name: Download Linux Build
-        if: needs.build-linux.outputs.success == 'true'
-        uses: actions/download-artifact@v6
-        with:
-          name: linux-build
-          path: ./release-assets
-
-      - name: Rename APK
-        if: needs.build-android.outputs.success == 'true'
-        run: mv ./release-assets/app-release.apk ./release-assets/project_2359-android.apk
-
-      - name: Get build information
-        id: build_info
-        run: |
-          # Get current date and time
-          BUILD_DATE=$(date -u +'%Y-%m-%d')
-          BUILD_TIME=$(date -u +'%H:%M:%S UTC')
-          BUILD_DATETIME=$(date -u +'%Y%m%d-%H%M%S')
-          
-          # Get commit info
-          COMMIT_SHA="${{ github.sha }}"
-          SHORT_SHA="${COMMIT_SHA:0:7}"
-          COMMIT_AUTHOR="${{ github.actor }}"
-          COMMIT_MESSAGE="${{ needs.check-trigger.outputs.commit_message }}"
-          
-          # Get Flutter version from workflow
-          FLUTTER_VERSION="stable channel"
-          
-          # Generate unique build number
-          BUILD_NUMBER="${{ github.run_number }}"
-          
-          # Export outputs
-          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
-          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
-          echo "build_datetime=$BUILD_DATETIME" >> $GITHUB_OUTPUT
-          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
-          echo "commit_author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
-          echo "flutter_version=$FLUTTER_VERSION" >> $GITHUB_OUTPUT
-          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
 
       - name: Generate release notes
-        id: release_notes
-        env:
-          BUILD_DATE: ${{ steps.build_info.outputs.build_date }}
-          BUILD_TIME: ${{ steps.build_info.outputs.build_time }}
-          SHORT_SHA: ${{ steps.build_info.outputs.short_sha }}
-          COMMIT_AUTHOR: ${{ steps.build_info.outputs.commit_author }}
-          COMMIT_MESSAGE: ${{ needs.check-trigger.outputs.commit_message }}
-          FLUTTER_VERSION: ${{ steps.build_info.outputs.flutter_version }}
-          BUILD_NUMBER: ${{ steps.build_info.outputs.build_number }}
-          GITHUB_PAGES_URL: ${{ github.event.repository.html_url }}
-          RELEASE_TYPE: ${{ steps.build_status.outputs.release_type }}
-          SUCCESS_BUILDS: ${{ steps.build_status.outputs.success_builds }}
-          FAILED_BUILDS: ${{ steps.build_status.outputs.failed_builds }}
-          ANDROID_SUCCESS: ${{ steps.build_status.outputs.android_success }}
-          WINDOWS_SUCCESS: ${{ steps.build_status.outputs.windows_success }}
-          LINUX_SUCCESS: ${{ steps.build_status.outputs.linux_success }}
-          WEB_SUCCESS: ${{ steps.build_status.outputs.web_success }}
         run: |
-          # Extract repo owner and name for pages URL
           REPO_OWNER="${{ github.repository_owner }}"
           REPO_NAME="${{ github.event.repository.name }}"
           PAGES_URL="https://${REPO_OWNER}.github.io/${REPO_NAME}"
           
-          # Determine release emoji and title suffix
-          if [ "$RELEASE_TYPE" == "Complete" ]; then
-            RELEASE_EMOJI="✅"
-            RELEASE_SUFFIX=""
-          elif [ "$RELEASE_TYPE" == "Partial" ]; then
-            RELEASE_EMOJI="⚠️"
-            RELEASE_SUFFIX=" (Partial Build)"
-          else
-            RELEASE_EMOJI="❌"
-            RELEASE_SUFFIX=" (Failed Build)"
-          fi
-          
           cat > release_notes.md << EOF
-          # 🚀 Automated Build #${BUILD_NUMBER} ${RELEASE_EMOJI}
+          # 🚀 Project 2359 - Build #${{ steps.build_info.outputs.build_number }}
           
           ## 📋 Build Information
           
           | Property | Value |
           |----------|-------|
-          | 📅 **Build Date** | ${BUILD_DATE} |
-          | 🕐 **Build Time** | ${BUILD_TIME} |
-          | 🔢 **Build Number** | #${BUILD_NUMBER} |
-          | 📝 **Commit** | \`${SHORT_SHA}\` |
-          | 👤 **Triggered By** | @${COMMIT_AUTHOR} |
-          | 🦋 **Flutter Version** | ${FLUTTER_VERSION} |
-          | 📦 **Release Type** | **${RELEASE_TYPE}** ${RELEASE_EMOJI} |
+          | 📅 **Build Date** | ${{ steps.build_info.outputs.build_date }} |
+          | 🕐 **Build Time** | ${{ steps.build_info.outputs.build_time }} |
+          | 📝 **Commit** | \`${{ steps.build_info.outputs.short_sha }}\` |
+          | 👤 **Triggered By** | @${{ github.actor }} |
           
           ## 💬 Commit Message
           
-          > ${COMMIT_MESSAGE}
+          > ${{ needs.check-trigger.outputs.commit_message }}
           
-          ## 🎯 Build Status
-          
-          EOF
-          
-          # Add build status section
-          if [ "$RELEASE_TYPE" != "Complete" ]; then
-            cat >> release_notes.md << EOF
-          **⚠️ Note:** This is a ${RELEASE_TYPE} release. Some builds may have failed.
-          
-          EOF
-            
-            if [ -n "$SUCCESS_BUILDS" ]; then
-              cat >> release_notes.md << EOF
-          ✅ **Successful Builds:** ${SUCCESS_BUILDS}
-          
-          EOF
-            fi
-            
-            if [ -n "$FAILED_BUILDS" ]; then
-              cat >> release_notes.md << EOF
-          ❌ **Failed Builds:** ${FAILED_BUILDS}
-          
-          EOF
-            fi
-            
-            cat >> release_notes.md << EOF
-          Please check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details on failed builds.
-          
-          EOF
-          fi
-          
-          cat >> release_notes.md << EOF
           ## 📦 Available Downloads
           
-          | Platform | File | Status | Description |
-          |----------|------|--------|-------------|
-          EOF
+          | Platform | Status | Description |
+          |----------|--------|-------------|
+          | 🤖 Android | ${{ steps.build_status.outputs.android_success == 'true' && '✅' || '❌' }} | Release APK |
+          | 🪟 Windows | ${{ steps.build_status.outputs.windows_success == 'true' && '✅' || '❌' }} | Portable executable |
+          | 🐧 Linux | ${{ steps.build_status.outputs.linux_success == 'true' && '✅' || '❌' }} | Linux bundle |
+          | 🌐 Web | ${{ steps.build_status.outputs.web_success == 'true' && '✅' || '❌' }} | [Open Web App](${PAGES_URL}) |
           
-          # Android row
-          if [ "$ANDROID_SUCCESS" == "true" ]; then
-            echo "| 🤖 **Android** | \`project_2359-android.apk\` | ✅ Available | Release APK for Android devices |" >> release_notes.md
-          else
-            echo "| 🤖 **Android** | — | ❌ Build Failed | — |" >> release_notes.md
-          fi
-          
-          # Windows row
-          if [ "$WINDOWS_SUCCESS" == "true" ]; then
-            echo "| 🪟 **Windows** | \`project_2359-windows.zip\` | ✅ Available | Portable Windows executable |" >> release_notes.md
-          else
-            echo "| 🪟 **Windows** | — | ❌ Build Failed | — |" >> release_notes.md
-          fi
-          
-          # Linux row
-          if [ "$LINUX_SUCCESS" == "true" ]; then
-            echo "| 🐧 **Linux** | \`project_2359-linux.tar.gz\` | ✅ Available | Linux bundle archive |" >> release_notes.md
-          else
-            echo "| 🐧 **Linux** | — | ❌ Build Failed | — |" >> release_notes.md
-          fi
-          
-          # Web row
-          if [ "$WEB_SUCCESS" == "true" ]; then
-            echo "| 🌐 **Web** | [Open Web App](${PAGES_URL}) | ✅ Deployed | Hosted on GitHub Pages |" >> release_notes.md
-          else
-            echo "| 🌐 **Web** | — | ❌ Deploy Failed | — |" >> release_notes.md
-          fi
-          
-          cat >> release_notes.md << EOF
-          
-          ## 🔧 Installation Instructions
-          
-          EOF
-          
-          # Only show instructions for successful builds
-          if [ "$ANDROID_SUCCESS" == "true" ]; then
-            cat >> release_notes.md << EOF
-          ### Android
-          1. Download \`project_2359-android.apk\`
-          2. Enable "Install from unknown sources" in your device settings
-          3. Open the APK file to install
-          
-          EOF
-          fi
-          
-          if [ "$WINDOWS_SUCCESS" == "true" ]; then
-            cat >> release_notes.md << EOF
-          ### Windows
-          1. Download and extract \`project_2359-windows.zip\`
-          2. Run \`project_2359.exe\`
-          
-          EOF
-          fi
-          
-          if [ "$LINUX_SUCCESS" == "true" ]; then
-            cat >> release_notes.md << EOF
-          ### Linux
-          1. Download and extract \`project_2359-linux.tar.gz\`
-          2. Run the executable: \`./project_2359\`
-          
-          EOF
-          fi
-          
-          if [ "$WEB_SUCCESS" == "true" ]; then
-            cat >> release_notes.md << EOF
-          ### Web
-          Simply visit: [${PAGES_URL}](${PAGES_URL})
-          
-          EOF
-          fi
-          
-          cat >> release_notes.md << EOF
           ---
-          
-          *This is an automated build triggered by a commit starting with \`[BUILD]\`.*
-          *Build generated on ${BUILD_DATE} at ${BUILD_TIME}*
+          *Automated build triggered by \`[BUILD]\` commit prefix.*
           EOF
-
-      - name: Prepare release files list
-        id: release_files
-        run: |
-          # Create list of files to include in release
-          FILES=""
-          
-          if [ -f ./release-assets/project_2359-android.apk ]; then
-            FILES="${FILES}./release-assets/project_2359-android.apk"$'\n'
-          fi
-          
-          if [ -f ./release-assets/project_2359-windows.zip ]; then
-            FILES="${FILES}./release-assets/project_2359-windows.zip"$'\n'
-          fi
-          
-          if [ -f ./release-assets/project_2359-linux.tar.gz ]; then
-            FILES="${FILES}./release-assets/project_2359-linux.tar.gz"$'\n'
-          fi
-          
-          # Write files list to output
-          echo "files<<EOF" >> $GITHUB_OUTPUT
-          echo "$FILES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2.5.0
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: build-${{ steps.build_info.outputs.build_datetime }}-${{ steps.build_info.outputs.short_sha }}
-          name: "Project 2359 - ${{ steps.build_status.outputs.release_type }} Release - Build #${{ steps.build_info.outputs.build_number }} (${{ steps.build_info.outputs.build_date }})"
+          tag_name: project-2359-${{ steps.build_info.outputs.build_datetime }}-${{ steps.build_info.outputs.short_sha }}
+          name: "Project 2359 - Build #${{ steps.build_info.outputs.build_number }} (${{ steps.build_info.outputs.build_date }})"
           body_path: release_notes.md
-          files: ${{ steps.release_files.outputs.files }}
+          files: |
+            ./release-assets/project_2359-android.apk
+            ./release-assets/project_2359-windows.zip
+            ./release-assets/project_2359-linux.tar.gz
           draft: false
           prerelease: true
-          # Keep fail_on_unmatched_files: false as a safety measure in case the
-          # files list contains empty lines or formatting issues from the dynamic generation
           fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================================================
+  # Create Release for Playground (Web only - no binaries)
+  # ============================================================================
+  create-release-playground:
+    needs: [check-trigger, build-playground-web, deploy-web]
+    if: |
+      always() && 
+      needs.check-trigger.outputs.should_build == 'true' && 
+      needs.check-trigger.outputs.playground_changed == 'true' &&
+      needs.build-playground-web.outputs.success == 'true'
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get build information
+        id: build_info
+        run: |
+          BUILD_DATE=$(date -u +'%Y-%m-%d')
+          BUILD_DATETIME=$(date -u +'%Y%m%d-%H%M%S')
+          COMMIT_SHA="${{ github.sha }}"
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+          BUILD_NUMBER="${{ github.run_number }}"
+          
+          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
+          echo "build_datetime=$BUILD_DATETIME" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        run: |
+          REPO_OWNER="${{ github.repository_owner }}"
+          REPO_NAME="${{ github.event.repository.name }}"
+          PLAYGROUND_URL="https://${REPO_OWNER}.github.io/${REPO_NAME}/dev/playground"
+          
+          cat > release_notes.md << EOF
+          # 🧪 Playground - Build #${{ steps.build_info.outputs.build_number }}
+          
+          ## 📋 Build Information
+          
+          | Property | Value |
+          |----------|-------|
+          | 📅 **Build Date** | ${{ steps.build_info.outputs.build_date }} |
+          | 📝 **Commit** | \`${{ steps.build_info.outputs.short_sha }}\` |
+          | 👤 **Triggered By** | @${{ github.actor }} |
+          
+          ## 💬 Commit Message
+          
+          > ${{ needs.check-trigger.outputs.commit_message }}
+          
+          ## 🌐 Web Deployment
+          
+          The playground is deployed to: [${PLAYGROUND_URL}](${PLAYGROUND_URL})
+          
+          ---
+          *Automated build triggered by \`[BUILD]\` commit prefix.*
+          *This is a development/experimental project.*
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: playground-${{ steps.build_info.outputs.build_datetime }}-${{ steps.build_info.outputs.short_sha }}
+          name: "Playground - Build #${{ steps.build_info.outputs.build_number }} (${{ steps.build_info.outputs.build_date }})"
+          body_path: release_notes.md
+          draft: false
+          prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
