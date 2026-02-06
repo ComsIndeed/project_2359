@@ -31,6 +31,14 @@ class AppTheme {
 
   static const double defaultPadding = 16.0;
 
+  // CardButton Style Defaults
+  static const CardButtonStyle cardButtonStyle = CardButtonStyle(
+    saturation: 0.7,
+    lightness: 0.08,
+    disabledSaturation: 0.1,
+    disabledLightness: 0.04,
+  );
+
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -169,6 +177,35 @@ class AppTheme {
         foregroundColor: Colors.white,
         shape: defaultShape,
       ),
+    );
+  }
+}
+
+/// Style configuration for CardButton widget
+class CardButtonStyle {
+  final double saturation;
+  final double lightness;
+  final double disabledSaturation;
+  final double disabledLightness;
+
+  const CardButtonStyle({
+    this.saturation = 0.7,
+    this.lightness = 0.08,
+    this.disabledSaturation = 0.1,
+    this.disabledLightness = 0.04,
+  });
+
+  CardButtonStyle copyWith({
+    double? saturation,
+    double? lightness,
+    double? disabledSaturation,
+    double? disabledLightness,
+  }) {
+    return CardButtonStyle(
+      saturation: saturation ?? this.saturation,
+      lightness: lightness ?? this.lightness,
+      disabledSaturation: disabledSaturation ?? this.disabledSaturation,
+      disabledLightness: disabledLightness ?? this.disabledLightness,
     );
   }
 }
