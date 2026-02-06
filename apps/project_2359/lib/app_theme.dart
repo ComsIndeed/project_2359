@@ -21,6 +21,11 @@ class AppTheme {
     borderRadius: BorderRadius.circular(32),
   );
 
+  static ShapeBorder defaultShapeWithSide = RoundedSuperellipseBorder(
+    borderRadius: BorderRadius.circular(32),
+    side: BorderSide(color: primary, width: 1.5),
+  );
+
   static ShapeBorder cardShape = RoundedSuperellipseBorder(
     borderRadius: BorderRadius.circular(24),
   );
