@@ -5,7 +5,7 @@
             "name": "Playground (Debug)",
             "type": "dart",
             "request": "launch",
-            "program": "apps/playground/lib/main.dart",
+            "program": "lib/main.dart",
             "cwd": "apps/playground",
             "flutterMode": "debug"
         },
@@ -13,7 +13,7 @@
             "name": "Playground (Profile)",
             "type": "dart",
             "request": "launch",
-            "program": "apps/playground/lib/main.dart",
+            "program": "lib/main.dart",
             "cwd": "apps/playground",
             "flutterMode": "profile"
         },
@@ -21,7 +21,7 @@
             "name": "Playground (Release)",
             "type": "dart",
             "request": "launch",
-            "program": "apps/playground/lib/main.dart",
+            "program": "lib/main.dart",
             "cwd": "apps/playground",
             "flutterMode": "release"
         },
@@ -29,7 +29,7 @@
             "name": "Main App (Debug)",
             "type": "dart",
             "request": "launch",
-            "program": "apps/project_2359/lib/main.dart",
+            "program": "lib/main.dart",
             "cwd": "apps/project_2359",
             "flutterMode": "debug"
         },
@@ -37,7 +37,7 @@
             "name": "Main App (Profile)",
             "type": "dart",
             "request": "launch",
-            "program": "apps/project_2359/lib/main.dart",
+            "program": "lib/main.dart",
             "cwd": "apps/project_2359",
             "flutterMode": "profile"
         },
@@ -45,7 +45,7 @@
             "name": "Main App (Release)",
             "type": "dart",
             "request": "launch",
-            "program": "apps/project_2359/lib/main.dart",
+            "program": "lib/main.dart",
             "cwd": "apps/project_2359",
             "flutterMode": "release"
         }
