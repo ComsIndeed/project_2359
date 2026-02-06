@@ -34,9 +34,9 @@ class AppTheme {
   // CardButton Style Defaults
   static const CardButtonStyle cardButtonStyle = CardButtonStyle(
     saturation: 0.7,
-    lightness: 0.08,
+    lightness: 0.05,
     disabledSaturation: 0.1,
-    disabledLightness: 0.04,
+    disabledLightness: 0.02,
   );
 
   static ThemeData get darkTheme {
@@ -190,9 +190,9 @@ class CardButtonStyle {
 
   const CardButtonStyle({
     this.saturation = 0.7,
-    this.lightness = 0.08,
+    this.lightness = 0.05,
     this.disabledSaturation = 0.1,
-    this.disabledLightness = 0.04,
+    this.disabledLightness = 0.02,
   });
 
   CardButtonStyle copyWith({

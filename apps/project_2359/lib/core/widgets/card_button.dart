@@ -2,6 +2,15 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:project_2359/app_theme.dart';
 
+/// The layout direction for a [CardButton]
+enum CardLayoutDirection {
+  /// Icon on top, text below (default)
+  vertical,
+
+  /// Icon on the left, text on the right
+  horizontal,
+}
+
 enum _SeedSource { manual, label, icon, sublabel }
 
 class GenerationSeed {
@@ -46,6 +55,10 @@ class CardButton extends StatelessWidget {
   final GenerationSeed? backgroundGenerator;
   final VoidCallback? onTap;
   final CardButtonStyle? style;
+  final CardLayoutDirection layoutDirection;
+  final EdgeInsetsGeometry? padding;
+  final double? labelFontSize;
+  final double? subLabelFontSize;
 
   const CardButton({
     super.key,
@@ -55,6 +68,10 @@ class CardButton extends StatelessWidget {
     this.backgroundGenerator,
     this.onTap,
     this.style,
+    this.layoutDirection = CardLayoutDirection.vertical,
+    this.padding,
+    this.labelFontSize,
+    this.subLabelFontSize,
   });
 
   @override
@@ -129,50 +146,10 @@ class CardButton extends StatelessWidget {
 
                   // Content Layer
                   Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.25),
-                              width: 1,
-                            ),
-                          ),
-                          child: Icon(icon, color: Colors.white, size: 28),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          label,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                letterSpacing: 0.5,
-                              ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (subLabel != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            subLabel!,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.55),
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ],
-                    ),
+                    padding: padding ?? const EdgeInsets.all(16.0),
+                    child: layoutDirection == CardLayoutDirection.horizontal
+                        ? _buildHorizontalContent(context)
+                        : _buildVerticalContent(context),
                   ),
                 ],
               ),
@@ -180,6 +157,95 @@ class CardButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildIconContainer() {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.25),
+          width: 1,
+        ),
+      ),
+      child: Icon(icon, color: Colors.white, size: 28),
+    );
+  }
+
+  Widget _buildVerticalContent(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildIconContainer(),
+        const SizedBox(height: 16),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: labelFontSize ?? 16,
+            letterSpacing: 0.5,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        if (subLabel != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            subLabel!,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.55),
+              fontSize: subLabelFontSize ?? 12,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildHorizontalContent(BuildContext context) {
+    return Row(
+      children: [
+        _buildIconContainer(),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: labelFontSize ?? 15,
+                  letterSpacing: 0.5,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (subLabel != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  subLabel!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.55),
+                    fontSize: subLabelFontSize ?? 11,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
