@@ -83,7 +83,8 @@ expo-env.d.ts
 # 🔧 IDEs & Editors
 # =========================
 .idea/
-.vscode/
+.vscode/*
+!.vscode/launch.json
 *.iml
 *.ipr
 *.iws
