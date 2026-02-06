@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:project_2359/core/models/source.dart';
+import 'package:project_2359/features/sources_page/data/source.dart';
 
 void main() {
   group('DocumentSource Serialization', () {
