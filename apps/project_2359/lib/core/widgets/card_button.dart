@@ -76,42 +76,65 @@ class CardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Resolve the seed
+    final bool hasBackground = backgroundGenerator != null;
+    final bool isDisabled = onTap == null;
+
+    // Resolve the seed (defaults to label for deterministic properties even if background is hidden)
     final seedResolver = backgroundGenerator ?? GenerationSeed.useLabel();
     final seedString = seedResolver.resolve(label, icon, subLabel);
-
-    // Deterministic random generator from hash
     final hash = seedString.hashCode;
     final r = Random(hash);
 
-    final bool isDisabled = onTap == null;
+    // Determine decoration and painter color
+    BoxDecoration decoration;
+    Color? painterBaseColor;
 
-    // Use provided style or fall back to AppTheme defaults
-    final cardStyle = style ?? AppTheme.cardButtonStyle;
+    if (hasBackground) {
+      final cardStyle = style ?? AppTheme.cardButtonStyle;
+      final double hue = r.nextDouble() * 360;
+      final double saturation = isDisabled
+          ? cardStyle.disabledSaturation
+          : cardStyle.saturation;
+      final double lightness = isDisabled
+          ? cardStyle.disabledLightness
+          : cardStyle.lightness;
 
-    // 1. Hue Selection (Determined by hash, but consistent S/L from style)
-    final double hue = r.nextDouble() * 360;
-    final double saturation = isDisabled
-        ? cardStyle.disabledSaturation
-        : cardStyle.saturation;
-    final double lightness = isDisabled
-        ? cardStyle.disabledLightness
-        : cardStyle.lightness;
+      painterBaseColor = HSLColor.fromAHSL(
+        1.0,
+        hue,
+        saturation,
+        lightness,
+      ).toColor();
+      final double secondaryHue = (hue + (r.nextBool() ? 25 : 155)) % 360;
+      final Color secondaryColor = HSLColor.fromAHSL(
+        1.0,
+        secondaryHue,
+        saturation,
+        lightness * 1.5,
+      ).toColor();
 
-    final Color baseColor = HSLColor.fromAHSL(
-      1.0,
-      hue,
-      saturation,
-      lightness,
-    ).toColor();
-    // Secondary color for gradient (Shifted based on hash)
-    final double secondaryHue = (hue + (r.nextBool() ? 25 : 155)) % 360;
-    final Color secondaryColor = HSLColor.fromAHSL(
-      1.0,
-      secondaryHue,
-      saturation,
-      lightness * 1.5,
-    ).toColor();
+      decoration = BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [painterBaseColor, secondaryColor],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: isDisabled ? 0.05 : 0.15),
+          width: 1,
+        ),
+      );
+    } else {
+      decoration = BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.08),
+          width: 1,
+        ),
+      );
+    }
 
     return Material(
       color: Colors.transparent,
@@ -119,30 +142,20 @@ class CardButton extends StatelessWidget {
         onTap: onTap,
         customBorder: AppTheme.cardShape,
         child: Ink(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [baseColor, secondaryColor],
-            ),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: isDisabled ? 0.05 : 0.15),
-              width: 1,
-            ),
-          ),
+          decoration: decoration,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
             child: Opacity(
               opacity: isDisabled ? 0.4 : 1.0,
               child: Stack(
                 children: [
-                  // Pattern Layer: Proc-gen Abstract Art
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _AbstractArtPainter(hash, baseColor),
+                  // Pattern Layer: Proc-gen Abstract Art (only if showing background)
+                  if (hasBackground && painterBaseColor != null)
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: _AbstractArtPainter(hash, painterBaseColor),
+                      ),
                     ),
-                  ),
 
                   // Content Layer
                   Padding(
