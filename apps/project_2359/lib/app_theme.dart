@@ -37,11 +37,22 @@ class AppTheme {
   static const double defaultPadding = 16.0;
 
   // CardButton Style Defaults
-  static const CardButtonStyle cardButtonStyle = CardButtonStyle(
+  static CardButtonStyle cardButtonStyle = CardButtonStyle(
     saturation: 0.7,
     lightness: 0.05,
     disabledSaturation: 0.1,
     disabledLightness: 0.02,
+    labelStyle: GoogleFonts.inter(
+      fontWeight: FontWeight.bold,
+      fontSize: 14,
+      letterSpacing: 0.5,
+      color: Colors.white,
+    ),
+    subLabelStyle: GoogleFonts.inter(
+      fontWeight: FontWeight.normal,
+      fontSize: 11,
+      color: Colors.white.withValues(alpha: 0.55),
+    ),
   );
 
   static ThemeData get darkTheme {
@@ -192,12 +203,16 @@ class CardButtonStyle {
   final double lightness;
   final double disabledSaturation;
   final double disabledLightness;
+  final TextStyle? labelStyle;
+  final TextStyle? subLabelStyle;
 
   const CardButtonStyle({
     this.saturation = 0.7,
     this.lightness = 0.05,
     this.disabledSaturation = 0.1,
     this.disabledLightness = 0.02,
+    this.labelStyle,
+    this.subLabelStyle,
   });
 
   CardButtonStyle copyWith({
@@ -205,12 +220,16 @@ class CardButtonStyle {
     double? lightness,
     double? disabledSaturation,
     double? disabledLightness,
+    TextStyle? labelStyle,
+    TextStyle? subLabelStyle,
   }) {
     return CardButtonStyle(
       saturation: saturation ?? this.saturation,
       lightness: lightness ?? this.lightness,
       disabledSaturation: disabledSaturation ?? this.disabledSaturation,
       disabledLightness: disabledLightness ?? this.disabledLightness,
+      labelStyle: labelStyle ?? this.labelStyle,
+      subLabelStyle: subLabelStyle ?? this.subLabelStyle,
     );
   }
 }

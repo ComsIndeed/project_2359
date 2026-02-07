@@ -9,7 +9,7 @@ class TapToGrow extends StatelessWidget {
     super.key,
     required this.page,
     required this.builder,
-    this.duration = const Duration(milliseconds: 400),
+    this.duration = const Duration(milliseconds: 300),
   });
 
   @override
@@ -42,7 +42,10 @@ class TapToGrow extends StatelessWidget {
           transitionsBuilder: (ctx, anim, secAnim, child) {
             return ScaleTransition(
               alignment: alignment,
-              scale: CurvedAnimation(parent: anim, curve: Curves.easeOutExpo),
+              scale: CurvedAnimation(
+                parent: anim,
+                curve: Curves.easeInOutCubicEmphasized,
+              ),
               child: child,
             );
           },

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
 
@@ -27,9 +26,9 @@ class SourcesPage extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 "Import Sources",
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.textPrimary,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 16),
@@ -46,6 +45,7 @@ class SourcesPage extends StatelessWidget {
                     label: "Document",
                     subLabel: "pdf, docx, pptx, slides",
                     layoutDirection: CardLayoutDirection.horizontal,
+                    isCompact: true,
                     onTap: () {},
                   ),
                   CardButton(
@@ -53,6 +53,7 @@ class SourcesPage extends StatelessWidget {
                     label: "Photo",
                     subLabel: "whiteboard, diagrams",
                     layoutDirection: CardLayoutDirection.horizontal,
+                    isCompact: true,
                     onTap: () {},
                   ),
                   CardButton(
@@ -60,6 +61,7 @@ class SourcesPage extends StatelessWidget {
                     label: "Audio",
                     subLabel: "lecture, mp3, memo",
                     layoutDirection: CardLayoutDirection.horizontal,
+                    isCompact: true,
                     onTap: () {},
                   ),
                   CardButton(
@@ -67,6 +69,7 @@ class SourcesPage extends StatelessWidget {
                     label: "Flashcards",
                     subLabel: ".apkg, .csv, quizlet",
                     layoutDirection: CardLayoutDirection.horizontal,
+                    isCompact: true,
                     onTap: () {},
                   ),
                   CardButton(
@@ -74,6 +77,7 @@ class SourcesPage extends StatelessWidget {
                     label: "Cloud Drive",
                     subLabel: "Google, OneDrive",
                     layoutDirection: CardLayoutDirection.horizontal,
+                    isCompact: true,
                     onTap: () {},
                   ),
                   CardButton(
@@ -81,6 +85,7 @@ class SourcesPage extends StatelessWidget {
                     label: "Website",
                     subLabel: "YouTube, Wiki, Articles",
                     layoutDirection: CardLayoutDirection.horizontal,
+                    isCompact: true,
                     onTap: () {},
                   ),
                   CardButton(
@@ -88,6 +93,7 @@ class SourcesPage extends StatelessWidget {
                     label: "Note App",
                     subLabel: "Notion, Obsidian",
                     layoutDirection: CardLayoutDirection.horizontal,
+                    isCompact: true,
                     onTap: () {},
                   ),
                   CardButton(
@@ -95,6 +101,7 @@ class SourcesPage extends StatelessWidget {
                     label: "Video",
                     subLabel: "Coming Soon",
                     layoutDirection: CardLayoutDirection.horizontal,
+                    isCompact: true,
                     onTap: null,
                   ),
                 ],
@@ -102,9 +109,9 @@ class SourcesPage extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 "Your Sources",
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.textPrimary,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 12),

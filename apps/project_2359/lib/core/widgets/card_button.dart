@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/core/widgets/pressable_scale.dart';
 
 /// The layout direction for a [CardButton]
 enum CardLayoutDirection {
@@ -59,6 +60,9 @@ class CardButton extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final double? labelFontSize;
   final double? subLabelFontSize;
+  final TextStyle? labelStyle;
+  final TextStyle? subLabelStyle;
+  final bool isCompact;
 
   const CardButton({
     super.key,
@@ -72,6 +76,9 @@ class CardButton extends StatelessWidget {
     this.padding,
     this.labelFontSize,
     this.subLabelFontSize,
+    this.labelStyle,
+    this.subLabelStyle,
+    this.isCompact = false,
   });
 
   @override
@@ -124,10 +131,18 @@ class CardButton extends StatelessWidget {
           color: Colors.white.withValues(alpha: isDisabled ? 0.05 : 0.15),
           width: 1,
         ),
+        boxShadow: [
+          if (!isDisabled)
+            BoxShadow(
+              color: painterBaseColor.withValues(alpha: 0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+        ],
       );
     } else {
       decoration = BoxDecoration(
-        color: Colors.transparent,
+        color: AppTheme.surface.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.08),
@@ -136,35 +151,42 @@ class CardButton extends StatelessWidget {
       );
     }
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        customBorder: AppTheme.cardShape,
-        child: Ink(
-          decoration: decoration,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Opacity(
-              opacity: isDisabled ? 0.4 : 1.0,
-              child: Stack(
-                children: [
-                  // Pattern Layer: Proc-gen Abstract Art (only if showing background)
-                  if (hasBackground && painterBaseColor != null)
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: _AbstractArtPainter(hash, painterBaseColor),
+    return PressableScale(
+      onTap: onTap,
+      child: Container(
+        decoration: decoration,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            customBorder: AppTheme.cardShape,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Opacity(
+                opacity: isDisabled ? 0.4 : 1.0,
+                child: Stack(
+                  children: [
+                    // Pattern Layer: Proc-gen Abstract Art (only if showing background)
+                    if (hasBackground && painterBaseColor != null)
+                      Positioned.fill(
+                        child: CustomPaint(
+                          painter: _AbstractArtPainter(hash, painterBaseColor),
+                        ),
                       ),
-                    ),
 
-                  // Content Layer
-                  Padding(
-                    padding: padding ?? const EdgeInsets.all(16.0),
-                    child: layoutDirection == CardLayoutDirection.horizontal
-                        ? _buildHorizontalContent(context)
-                        : _buildVerticalContent(context),
-                  ),
-                ],
+                    // Content Layer
+                    Padding(
+                      padding:
+                          padding ??
+                          (isCompact
+                              ? const EdgeInsets.all(12.0)
+                              : const EdgeInsets.all(16.0)),
+                      child: layoutDirection == CardLayoutDirection.horizontal
+                          ? _buildHorizontalContent(context)
+                          : _buildVerticalContent(context),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -174,8 +196,11 @@ class CardButton extends StatelessWidget {
   }
 
   Widget _buildIconContainer() {
+    final double iconSize = isCompact ? 22 : 28;
+    final double containerPadding = isCompact ? 8 : 10;
+
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(containerPadding),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.12),
         shape: BoxShape.circle,
@@ -184,11 +209,18 @@ class CardButton extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: Icon(icon, color: Colors.white, size: 28),
+      child: Icon(icon, color: Colors.white, size: iconSize),
     );
   }
 
   Widget _buildVerticalContent(BuildContext context) {
+    final cardStyle = style ?? AppTheme.cardButtonStyle;
+    final effectiveLabelStyle = (labelStyle ?? cardStyle.labelStyle)?.copyWith(
+      fontSize: labelFontSize,
+    );
+    final effectiveSubLabelStyle = (subLabelStyle ?? cardStyle.subLabelStyle)
+        ?.copyWith(fontSize: subLabelFontSize);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -197,12 +229,7 @@ class CardButton extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           label,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: labelFontSize ?? 16,
-            letterSpacing: 0.5,
-          ),
+          style: effectiveLabelStyle,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -210,10 +237,7 @@ class CardButton extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subLabel!,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white.withValues(alpha: 0.55),
-              fontSize: subLabelFontSize ?? 12,
-            ),
+            style: effectiveSubLabelStyle,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -223,6 +247,13 @@ class CardButton extends StatelessWidget {
   }
 
   Widget _buildHorizontalContent(BuildContext context) {
+    final cardStyle = style ?? AppTheme.cardButtonStyle;
+    final effectiveLabelStyle = (labelStyle ?? cardStyle.labelStyle)?.copyWith(
+      fontSize: labelFontSize,
+    );
+    final effectiveSubLabelStyle = (subLabelStyle ?? cardStyle.subLabelStyle)
+        ?.copyWith(fontSize: subLabelFontSize);
+
     return Row(
       children: [
         _buildIconContainer(),
@@ -234,12 +265,7 @@ class CardButton extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: labelFontSize ?? 15,
-                  letterSpacing: 0.5,
-                ),
+                style: effectiveLabelStyle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -247,10 +273,7 @@ class CardButton extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subLabel!,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.55),
-                    fontSize: subLabelFontSize ?? 11,
-                  ),
+                  style: effectiveSubLabelStyle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
