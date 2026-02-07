@@ -394,10 +394,11 @@ class _AbstractArtPainter extends CustomPainter {
         final dist = radius * (0.8 + r.nextDouble() * 0.4);
         final px = center.dx + dist * cos(angle);
         final py = center.dy + dist * sin(angle);
-        if (s == 0)
+        if (s == 0) {
           path.moveTo(px, py);
-        else
+        } else {
           path.lineTo(px, py);
+        }
       }
       path.close();
       canvas.drawPath(path, paint);
@@ -431,10 +432,11 @@ class _AbstractArtPainter extends CustomPainter {
         final r = (p % 2 == 0) ? outerRadius : innerRadius;
         final px = center.dx + r * cos(angle);
         final py = center.dy + r * sin(angle);
-        if (p == 0)
+        if (p == 0) {
           path.moveTo(px, py);
-        else
+        } else {
           path.lineTo(px, py);
+        }
       }
       path.close();
       canvas.drawPath(path, paint);

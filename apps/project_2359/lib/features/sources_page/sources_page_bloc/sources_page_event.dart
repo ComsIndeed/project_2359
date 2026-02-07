@@ -1,5 +1,3 @@
-import 'dart:io';
-
 abstract class SourcesPageEvent {
   const SourcesPageEvent();
 }
@@ -8,7 +6,9 @@ class SourcesPageEventInitial extends SourcesPageEvent {
   const SourcesPageEventInitial();
 }
 
-class UploadDocumentSourcesPageEvent extends SourcesPageEvent {
-  final File file;
-  const UploadDocumentSourcesPageEvent(this.file);
+class ImportDocumentSourcesPageEvent extends SourcesPageEvent {
+  /// The path or URI to the file to import.
+  /// Using String instead of File for web compatibility.
+  final String filePath;
+  const ImportDocumentSourcesPageEvent(this.filePath);
 }

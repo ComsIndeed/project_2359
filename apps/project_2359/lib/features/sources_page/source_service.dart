@@ -1,7 +1,9 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:project_2359/features/sources_page/data/source.dart';
 
+/// Service class for managing source operations.
+/// Uses platform-agnostic types (Uint8List, String) for web compatibility.
 class SourceService {
   /// =============================
   /// CRUD METHODS
@@ -23,23 +25,44 @@ class SourceService {
   /// IMPORT METHODS
   /// =============================
 
-  static Future<void> importDocument(File file) async {
+  /// Imports a document from raw bytes.
+  /// [fileName] - The original file name.
+  /// [fileBytes] - The raw bytes of the document.
+  static Future<void> importDocument(
+    String fileName,
+    Uint8List fileBytes,
+  ) async {
     throw UnimplementedError();
   }
 
-  static Future<void> importPhoto(File file) async {
+  /// Imports a photo from raw bytes.
+  /// [fileName] - The original file name.
+  /// [fileBytes] - The raw bytes of the photo.
+  static Future<void> importPhoto(String fileName, Uint8List fileBytes) async {
     throw UnimplementedError();
   }
 
-  static Future<void> importAudio(File file) async {
+  /// Imports an audio file from raw bytes.
+  /// [fileName] - The original file name.
+  /// [fileBytes] - The raw bytes of the audio.
+  static Future<void> importAudio(String fileName, Uint8List fileBytes) async {
     throw UnimplementedError();
   }
 
-  static Future<void> importVideo(File file) async {
+  /// Imports a video file from raw bytes.
+  /// [fileName] - The original file name.
+  /// [fileBytes] - The raw bytes of the video.
+  static Future<void> importVideo(String fileName, Uint8List fileBytes) async {
     throw UnimplementedError();
   }
 
-  static Future<void> importFlashcards(File file) async {
+  /// Imports a flashcards file from raw bytes.
+  /// [fileName] - The original file name.
+  /// [fileBytes] - The raw bytes of the flashcards file.
+  static Future<void> importFlashcards(
+    String fileName,
+    Uint8List fileBytes,
+  ) async {
     throw UnimplementedError();
   }
 

@@ -38,7 +38,7 @@ class TapToGrow extends StatelessWidget {
         PageRouteBuilder(
           transitionDuration: duration,
           reverseTransitionDuration: duration,
-          pageBuilder: (_, __, ___) => page,
+          pageBuilder: (context, animation, secondaryAnimation) => page,
           transitionsBuilder: (ctx, anim, secAnim, child) {
             return ScaleTransition(
               alignment: alignment,

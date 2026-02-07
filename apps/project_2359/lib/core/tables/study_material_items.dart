@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:project_2359/core/tables/study_material_packs.dart';
 
 /// User: Partly worried that I may be forgetting some properties here.
 ///       Maybe something like the IDs for the sources or the indexing?

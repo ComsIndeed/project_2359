@@ -1,3 +1,5 @@
+import 'package:project_2359/features/sources_page/data/source.dart';
+
 abstract class SourcesPageState {
   const SourcesPageState();
 }
@@ -11,7 +13,9 @@ class SourcesPageStateLoading extends SourcesPageState {
 }
 
 class SourcesPageStateLoaded extends SourcesPageState {
-  const SourcesPageStateLoaded();
+  final List<Source> sources;
+
+  const SourcesPageStateLoaded(this.sources);
 }
 
 class SourcesPageStateError extends SourcesPageState {
