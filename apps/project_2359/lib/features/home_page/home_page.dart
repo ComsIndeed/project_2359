@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:project_2359/core/widgets/special_navigation_bar.dart';
-import 'package:project_2359/core/widgets/tap_to_grow.dart';
+
+import 'package:project_2359/core/widgets/tap_to_slide_up.dart';
 import 'package:project_2359/features/home_page/home_page_content.dart';
 import 'package:project_2359/features/materials_page/generate_materials_page.dart';
 import 'package:project_2359/features/sources_page/sources_page.dart';
@@ -77,7 +78,7 @@ class _HomePageState extends State<HomePage> {
                     pageActions: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        TapToGrow(
+                        TapToSlideUp(
                           page: SourcesPage(),
                           builder: (pushPage) {
                             return TextButton.icon(
@@ -93,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                           indent: 8,
                           endIndent: 8,
                         ),
-                        TapToGrow(
+                        TapToSlideUp(
                           page: GenerateMaterialsPage(),
                           builder: (pushPage) {
                             return TextButton.icon(
