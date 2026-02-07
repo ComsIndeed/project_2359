@@ -48,8 +48,9 @@ bin/
 # =========================
 # 🐧 Linux / Windows / Web
 # =========================
-**/linux/flutter/
-**/windows/flutter/
+# Only exclude ephemeral directories, NOT the entire flutter/ directories
+# The flutter/ directories contain CMakeLists.txt files required for CI builds
+**/linux/flutter/ephemeral/
 **/windows/flutter/ephemeral/
 **/web/flutter_bootstrap.js
 
