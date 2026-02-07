@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
@@ -51,7 +52,12 @@ class SourcesPage extends StatelessWidget {
                     layoutDirection: CardLayoutDirection.horizontal,
                     isCompact: true,
                     accentColor: AppTheme.primary,
-                    onTap: () {},
+                    onTap: () async {
+                      final file = await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ["pdf", "docx", "pptx"],
+                      );
+                    },
                   ),
                   CardButton(
                     icon: Icons.perm_media_rounded,
