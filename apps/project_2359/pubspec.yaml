@@ -11,7 +11,7 @@ dependencies:
   collection: ^1.19.1
   drift: ^2.30.0
   drift_flutter: ^0.2.8
-  file_picker: ^10.3.8
+  file_picker: ^10.3.10
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1

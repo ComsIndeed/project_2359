@@ -50,7 +50,7 @@ class AppTheme {
     ),
     subLabelStyle: GoogleFonts.inter(
       fontWeight: FontWeight.normal,
-      fontSize: 11,
+      fontSize: 10,
       color: Colors.white.withValues(alpha: 0.55),
     ),
   );

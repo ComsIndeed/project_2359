@@ -63,6 +63,8 @@ class CardButton extends StatelessWidget {
   final TextStyle? labelStyle;
   final TextStyle? subLabelStyle;
   final bool isCompact;
+  final Color? accentColor;
+  final GenerationSeed? iconColorGenerator;
 
   const CardButton({
     super.key,
@@ -79,6 +81,8 @@ class CardButton extends StatelessWidget {
     this.labelStyle,
     this.subLabelStyle,
     this.isCompact = false,
+    this.accentColor,
+    this.iconColorGenerator,
   });
 
   @override
@@ -199,17 +203,45 @@ class CardButton extends StatelessWidget {
     final double iconSize = isCompact ? 22 : 28;
     final double containerPadding = isCompact ? 8 : 10;
 
+    Color? generatedColor;
+    if (iconColorGenerator != null) {
+      final seedString = iconColorGenerator!.resolve(label, icon, subLabel);
+      final hash = seedString.hashCode;
+      final r = Random(hash);
+
+      // Use vibrant colors for icons
+      final double hue = r.nextDouble() * 360;
+      final double saturation = 0.85 + (r.nextDouble() * 0.15); // 0.85 - 1.0
+      final double lightness = 0.55 + (r.nextDouble() * 0.1); // 0.55 - 0.65
+
+      generatedColor = HSLColor.fromAHSL(
+        1.0,
+        hue,
+        saturation,
+        lightness,
+      ).toColor();
+    }
+
+    final Color effectiveIconColor =
+        accentColor ?? generatedColor ?? Colors.white;
+
+    // Calculate bg/border based on the effective color
+    final Color backgroundColor = effectiveIconColor == Colors.white
+        ? Colors.white.withValues(alpha: 0.12)
+        : effectiveIconColor.withValues(alpha: 0.15);
+
+    final Color borderColor = effectiveIconColor == Colors.white
+        ? Colors.white.withValues(alpha: 0.25)
+        : effectiveIconColor.withValues(alpha: 0.25);
+
     return Container(
       padding: EdgeInsets.all(containerPadding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
+        color: backgroundColor,
         shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.25),
-          width: 1,
-        ),
+        border: Border.all(color: borderColor, width: 1),
       ),
-      child: Icon(icon, color: Colors.white, size: iconSize),
+      child: Icon(icon, color: effectiveIconColor, size: iconSize),
     );
   }
 
