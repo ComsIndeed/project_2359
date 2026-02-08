@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:project_2359/features/home_page/home_page.dart';
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +15,12 @@ Future<void> main() async {
     debugPrint('Failed to set high refresh rate: $e');
   }
 
-  runApp(const MainApp());
+  runApp(
+    MultiBlocProvider(
+      providers: [BlocProvider(create: (context) => SourcesPageBloc())],
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {

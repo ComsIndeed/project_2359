@@ -1025,18 +1025,18 @@ packages:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: "2c6ba5e21f944e9c18db7be9fb40a9e09747b6f9942c9c0e77eb573c15e68338"
+      sha256: "0fdd1d5e435c3fc89a5d9558ddfd9cb9272500433b141fa2068e9e5607d1c63a"
       url: "https://pub.dev"
     source: hosted
-    version: "32.1.24"
+    version: "32.2.3"
   syncfusion_flutter_pdf:
     dependency: "direct main"
     description:
       name: syncfusion_flutter_pdf
-      sha256: f5cba79fc4633067864cdde916558c03e6214bc09c30838e1477ead710554534
+      sha256: cf535daf304233052937316b72e89827811f9c7c71379ebee99eca4aa4e3850f
       url: "https://pub.dev"
     source: hosted
-    version: "32.1.24"
+    version: "32.2.3"
   term_glyph:
     dependency: transitive
     description:
