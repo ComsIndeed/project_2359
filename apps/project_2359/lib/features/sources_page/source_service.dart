@@ -1,96 +1,72 @@
 import 'dart:typed_data';
 
-import 'package:project_2359/features/sources_page/data/source.dart';
+import 'package:project_2359/app_database.dart';
 
 /// Service class for managing source operations.
 /// Uses platform-agnostic types (Uint8List, String) for web compatibility.
 class SourceService {
-  /// =============================
-  /// CRUD METHODS (SUPABASE)
-  /// =============================
+  final AppDatabase _db;
 
-  static Future<List<Source>> getAllSources() async {
-    throw UnimplementedError();
-  }
-
-  static Future<Source> getSourceById(String id) async {
-    throw UnimplementedError();
-  }
-
-  static Future<void> deleteSource(String id) async {
-    throw UnimplementedError();
-  }
+  SourceService(this._db);
 
   /// =============================
-  /// CRUD METHODS (LOCAL)
+  /// CRUD METHODS (LOCAL DATABASE)
   /// =============================
 
-  static Future<List<Source>> getAllLocalSources() async {
-    throw UnimplementedError();
+  // TODO: AI GENERATED THIS CODE, DOUBLE CHECK
+
+  Future<List<SourceItem>> getAllSources() async {
+    return await _db.select(_db.sourceItems).get();
   }
 
-  static Future<Source> getLocalSourceById(String id) async {
-    throw UnimplementedError();
+  Future<SourceItem?> getSourceById(String id) async {
+    return await (_db.select(
+      _db.sourceItems,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
-  static Future<void> deleteLocalSource(String id) async {
-    throw UnimplementedError();
+  Future<void> insertSource(SourceItem source) async {
+    await _db.into(_db.sourceItems).insert(source);
+  }
+
+  Future<void> updateSource(SourceItem source) async {
+    await _db.update(_db.sourceItems).replace(source);
+  }
+
+  Future<void> deleteSource(String id) async {
+    await (_db.delete(_db.sourceItems)..where((t) => t.id.equals(id))).go();
   }
 
   /// =============================
-  /// IMPORT METHODS
+  /// IMPORT METHODS (STUBS)
   /// =============================
 
   /// Imports a document from raw bytes.
   /// [fileName] - The original file name.
   /// [fileBytes] - The raw bytes of the document.
-  static Future<void> importDocument(
+  Future<SourceItem> importDocument(
     String fileName,
     Uint8List fileBytes,
   ) async {
+    // TODO: Implement PDF text extraction using syncfusion_flutter_pdf
     throw UnimplementedError();
   }
 
   /// Imports a photo from raw bytes.
-  /// [fileName] - The original file name.
-  /// [fileBytes] - The raw bytes of the photo.
-  static Future<void> importPhoto(String fileName, Uint8List fileBytes) async {
+  Future<SourceItem> importPhoto(String fileName, Uint8List fileBytes) async {
+    // TODO: Implement image OCR
     throw UnimplementedError();
   }
 
   /// Imports an audio file from raw bytes.
-  /// [fileName] - The original file name.
-  /// [fileBytes] - The raw bytes of the audio.
-  static Future<void> importAudio(String fileName, Uint8List fileBytes) async {
+  Future<SourceItem> importAudio(String fileName, Uint8List fileBytes) async {
+    // TODO: Implement audio transcription
     throw UnimplementedError();
   }
 
   /// Imports a video file from raw bytes.
-  /// [fileName] - The original file name.
-  /// [fileBytes] - The raw bytes of the video.
-  static Future<void> importVideo(String fileName, Uint8List fileBytes) async {
-    throw UnimplementedError();
-  }
-
-  /// Imports a flashcards file from raw bytes.
-  /// [fileName] - The original file name.
-  /// [fileBytes] - The raw bytes of the flashcards file.
-  static Future<void> importFlashcards(
-    String fileName,
-    Uint8List fileBytes,
-  ) async {
-    throw UnimplementedError();
-  }
-
-  static Future<void> importCloudDrive() async {
-    throw UnimplementedError();
-  }
-
-  static Future<void> importWebsite() async {
-    throw UnimplementedError();
-  }
-
-  static Future<void> importNoteApp() async {
+  Future<SourceItem> importVideo(String fileName, Uint8List fileBytes) async {
+    // TODO: Implement video transcription
     throw UnimplementedError();
   }
 }
