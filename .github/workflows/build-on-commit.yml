@@ -38,8 +38,9 @@ jobs:
           if [[ "$COMMIT_MSG" == \[BUILD\]* ]]; then
             echo "✅ Commit starts with [BUILD] - triggering build"
             echo "should_build=true" >> $GITHUB_OUTPUT
-            # Extract the message after [BUILD] for release notes
-            CLEAN_MSG=$(echo "$COMMIT_MSG" | sed 's/^\[BUILD\]\s*//')
+            # Extract only the first line after [BUILD] for release notes (handles multi-line commits)
+            FIRST_LINE=$(echo "$COMMIT_MSG" | head -n 1)
+            CLEAN_MSG=$(echo "$FIRST_LINE" | sed 's/^\[BUILD\]\s*//')
             echo "commit_message=$CLEAN_MSG" >> $GITHUB_OUTPUT
           else
             echo "⏭️ Commit does not start with [BUILD] - skipping build"
