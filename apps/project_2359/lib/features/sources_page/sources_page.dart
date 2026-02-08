@@ -52,12 +52,7 @@ class SourcesPage extends StatelessWidget {
                     layoutDirection: CardLayoutDirection.horizontal,
                     isCompact: true,
                     accentColor: AppTheme.primary,
-                    onTap: () async {
-                      final file = await FilePicker.platform.pickFiles(
-                        type: FileType.custom,
-                        allowedExtensions: ["pdf", "docx", "pptx"],
-                      );
-                    },
+                    onTap: _importDocument,
                   ),
                   CardButton(
                     icon: Icons.perm_media_rounded,
@@ -155,5 +150,18 @@ class SourcesPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _importDocument() async {
+    final file = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ["pdf", "docx", "pptx"],
+    );
+
+    if (file == null) return;
+
+    final filePath = file.files.first.path!;
+    final fileName = file.files.first.name;
+    final fileExtension = file.files.first.extension;
   }
 }

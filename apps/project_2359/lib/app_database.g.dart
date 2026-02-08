@@ -45,19 +45,25 @@ class $SourceItemsTable extends SourceItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _indexContentMeta = const VerificationMeta(
-    'indexContent',
+  static const VerificationMeta _extractedContentMeta = const VerificationMeta(
+    'extractedContent',
   );
   @override
-  late final GeneratedColumn<String> indexContent = GeneratedColumn<String>(
-    'index_content',
+  late final GeneratedColumn<String> extractedContent = GeneratedColumn<String>(
+    'extracted_content',
     aliasedName,
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, label, path, type, indexContent];
+  List<GeneratedColumn> get $columns => [
+    id,
+    label,
+    path,
+    type,
+    extractedContent,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -97,12 +103,12 @@ class $SourceItemsTable extends SourceItems
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
-    if (data.containsKey('index_content')) {
+    if (data.containsKey('extracted_content')) {
       context.handle(
-        _indexContentMeta,
-        indexContent.isAcceptableOrUnknown(
-          data['index_content']!,
-          _indexContentMeta,
+        _extractedContentMeta,
+        extractedContent.isAcceptableOrUnknown(
+          data['extracted_content']!,
+          _extractedContentMeta,
         ),
       );
     }
@@ -110,7 +116,7 @@ class $SourceItemsTable extends SourceItems
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => const {};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
   SourceItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -131,9 +137,9 @@ class $SourceItemsTable extends SourceItems
         DriftSqlType.string,
         data['${effectivePrefix}type'],
       )!,
-      indexContent: attachedDatabase.typeMapping.read(
+      extractedContent: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}index_content'],
+        data['${effectivePrefix}extracted_content'],
       ),
     );
   }
@@ -149,13 +155,13 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
   final String label;
   final String? path;
   final String type;
-  final String? indexContent;
+  final String? extractedContent;
   const SourceItem({
     required this.id,
     required this.label,
     this.path,
     required this.type,
-    this.indexContent,
+    this.extractedContent,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -166,8 +172,8 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
       map['path'] = Variable<String>(path);
     }
     map['type'] = Variable<String>(type);
-    if (!nullToAbsent || indexContent != null) {
-      map['index_content'] = Variable<String>(indexContent);
+    if (!nullToAbsent || extractedContent != null) {
+      map['extracted_content'] = Variable<String>(extractedContent);
     }
     return map;
   }
@@ -178,9 +184,9 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
       label: Value(label),
       path: path == null && nullToAbsent ? const Value.absent() : Value(path),
       type: Value(type),
-      indexContent: indexContent == null && nullToAbsent
+      extractedContent: extractedContent == null && nullToAbsent
           ? const Value.absent()
-          : Value(indexContent),
+          : Value(extractedContent),
     );
   }
 
@@ -194,7 +200,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
       label: serializer.fromJson<String>(json['label']),
       path: serializer.fromJson<String?>(json['path']),
       type: serializer.fromJson<String>(json['type']),
-      indexContent: serializer.fromJson<String?>(json['indexContent']),
+      extractedContent: serializer.fromJson<String?>(json['extractedContent']),
     );
   }
   @override
@@ -205,7 +211,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
       'label': serializer.toJson<String>(label),
       'path': serializer.toJson<String?>(path),
       'type': serializer.toJson<String>(type),
-      'indexContent': serializer.toJson<String?>(indexContent),
+      'extractedContent': serializer.toJson<String?>(extractedContent),
     };
   }
 
@@ -214,13 +220,15 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
     String? label,
     Value<String?> path = const Value.absent(),
     String? type,
-    Value<String?> indexContent = const Value.absent(),
+    Value<String?> extractedContent = const Value.absent(),
   }) => SourceItem(
     id: id ?? this.id,
     label: label ?? this.label,
     path: path.present ? path.value : this.path,
     type: type ?? this.type,
-    indexContent: indexContent.present ? indexContent.value : this.indexContent,
+    extractedContent: extractedContent.present
+        ? extractedContent.value
+        : this.extractedContent,
   );
   SourceItem copyWithCompanion(SourceItemsCompanion data) {
     return SourceItem(
@@ -228,9 +236,9 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
       label: data.label.present ? data.label.value : this.label,
       path: data.path.present ? data.path.value : this.path,
       type: data.type.present ? data.type.value : this.type,
-      indexContent: data.indexContent.present
-          ? data.indexContent.value
-          : this.indexContent,
+      extractedContent: data.extractedContent.present
+          ? data.extractedContent.value
+          : this.extractedContent,
     );
   }
 
@@ -241,13 +249,13 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
           ..write('label: $label, ')
           ..write('path: $path, ')
           ..write('type: $type, ')
-          ..write('indexContent: $indexContent')
+          ..write('extractedContent: $extractedContent')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, label, path, type, indexContent);
+  int get hashCode => Object.hash(id, label, path, type, extractedContent);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -256,7 +264,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
           other.label == this.label &&
           other.path == this.path &&
           other.type == this.type &&
-          other.indexContent == this.indexContent);
+          other.extractedContent == this.extractedContent);
 }
 
 class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
@@ -264,14 +272,14 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
   final Value<String> label;
   final Value<String?> path;
   final Value<String> type;
-  final Value<String?> indexContent;
+  final Value<String?> extractedContent;
   final Value<int> rowid;
   const SourceItemsCompanion({
     this.id = const Value.absent(),
     this.label = const Value.absent(),
     this.path = const Value.absent(),
     this.type = const Value.absent(),
-    this.indexContent = const Value.absent(),
+    this.extractedContent = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SourceItemsCompanion.insert({
@@ -279,7 +287,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
     required String label,
     this.path = const Value.absent(),
     required String type,
-    this.indexContent = const Value.absent(),
+    this.extractedContent = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        label = Value(label),
@@ -289,7 +297,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
     Expression<String>? label,
     Expression<String>? path,
     Expression<String>? type,
-    Expression<String>? indexContent,
+    Expression<String>? extractedContent,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -297,7 +305,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
       if (label != null) 'label': label,
       if (path != null) 'path': path,
       if (type != null) 'type': type,
-      if (indexContent != null) 'index_content': indexContent,
+      if (extractedContent != null) 'extracted_content': extractedContent,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -307,7 +315,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
     Value<String>? label,
     Value<String?>? path,
     Value<String>? type,
-    Value<String?>? indexContent,
+    Value<String?>? extractedContent,
     Value<int>? rowid,
   }) {
     return SourceItemsCompanion(
@@ -315,7 +323,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
       label: label ?? this.label,
       path: path ?? this.path,
       type: type ?? this.type,
-      indexContent: indexContent ?? this.indexContent,
+      extractedContent: extractedContent ?? this.extractedContent,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -335,8 +343,8 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
-    if (indexContent.present) {
-      map['index_content'] = Variable<String>(indexContent.value);
+    if (extractedContent.present) {
+      map['extracted_content'] = Variable<String>(extractedContent.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -351,7 +359,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
           ..write('label: $label, ')
           ..write('path: $path, ')
           ..write('type: $type, ')
-          ..write('indexContent: $indexContent, ')
+          ..write('extractedContent: $extractedContent, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -564,10 +572,10 @@ class StudyMaterialItem extends DataClass
   final String materialType;
   final String? citationJson;
 
-  /// Everything else is nullable because not all types will have the same props.
-  /// MCQ: Question, choices, answer
-  /// Free-Text: Question, answer
-  /// Image Occlusion (not yet implemented; under drafting): List of {question -> answer, and their coordinates and masking values}
+  /// Fields are nullable because not all types use the same properties.
+  /// - MCQ: question, optionsListJson, answer
+  /// - Free-Text: question, answer
+  /// - Image Occlusion: (not yet implemented)
   final String? question;
   final String? optionsListJson;
   final String? answer;
@@ -1142,7 +1150,7 @@ typedef $$SourceItemsTableCreateCompanionBuilder =
       required String label,
       Value<String?> path,
       required String type,
-      Value<String?> indexContent,
+      Value<String?> extractedContent,
       Value<int> rowid,
     });
 typedef $$SourceItemsTableUpdateCompanionBuilder =
@@ -1151,7 +1159,7 @@ typedef $$SourceItemsTableUpdateCompanionBuilder =
       Value<String> label,
       Value<String?> path,
       Value<String> type,
-      Value<String?> indexContent,
+      Value<String?> extractedContent,
       Value<int> rowid,
     });
 
@@ -1184,8 +1192,8 @@ class $$SourceItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get indexContent => $composableBuilder(
-    column: $table.indexContent,
+  ColumnFilters<String> get extractedContent => $composableBuilder(
+    column: $table.extractedContent,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1219,8 +1227,8 @@ class $$SourceItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get indexContent => $composableBuilder(
-    column: $table.indexContent,
+  ColumnOrderings<String> get extractedContent => $composableBuilder(
+    column: $table.extractedContent,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -1246,8 +1254,8 @@ class $$SourceItemsTableAnnotationComposer
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<String> get indexContent => $composableBuilder(
-    column: $table.indexContent,
+  GeneratedColumn<String> get extractedContent => $composableBuilder(
+    column: $table.extractedContent,
     builder: (column) => column,
   );
 }
@@ -1287,14 +1295,14 @@ class $$SourceItemsTableTableManager
                 Value<String> label = const Value.absent(),
                 Value<String?> path = const Value.absent(),
                 Value<String> type = const Value.absent(),
-                Value<String?> indexContent = const Value.absent(),
+                Value<String?> extractedContent = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SourceItemsCompanion(
                 id: id,
                 label: label,
                 path: path,
                 type: type,
-                indexContent: indexContent,
+                extractedContent: extractedContent,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1303,14 +1311,14 @@ class $$SourceItemsTableTableManager
                 required String label,
                 Value<String?> path = const Value.absent(),
                 required String type,
-                Value<String?> indexContent = const Value.absent(),
+                Value<String?> extractedContent = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SourceItemsCompanion.insert(
                 id: id,
                 label: label,
                 path: path,
                 type: type,
-                indexContent: indexContent,
+                extractedContent: extractedContent,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

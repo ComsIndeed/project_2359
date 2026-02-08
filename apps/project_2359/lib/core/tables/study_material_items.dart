@@ -1,21 +1,26 @@
 import 'package:drift/drift.dart';
 
-/// User: Partly worried that I may be forgetting some properties here.
-///       Maybe something like the IDs for the sources or the indexing?
-///       Still dont really know how to handle those yet
+/// The type of study material.
+enum StudyMaterialType {
+  multipleChoiceQuestion,
+  freeTextQuestion,
+  imageOcclusion,
+}
 
+/// Study material items table.
+/// Use [StudyMaterialType.name] to store type as string.
 class StudyMaterialItems extends Table {
   TextColumn get id => text()();
   TextColumn get packId => text()();
-  TextColumn get materialType => text()(); // e.g. MCQ, TrueFalse, etc
+  TextColumn get materialType => text()(); // Store as StudyMaterialType.name
   TextColumn get citationJson => text().nullable()();
 
-  /// Everything else is nullable because not all types will have the same props.
-  /// MCQ: Question, choices, answer
-  /// Free-Text: Question, answer
-  /// Image Occlusion (not yet implemented; under drafting): List of {question -> answer, and their coordinates and masking values}
+  /// Fields are nullable because not all types use the same properties.
+  /// - MCQ: question, optionsListJson, answer
+  /// - Free-Text: question, answer
+  /// - Image Occlusion: (not yet implemented)
   TextColumn get question => text().nullable()();
-  TextColumn get optionsListJson => text().nullable()(); // Thisll be a list
+  TextColumn get optionsListJson => text().nullable()(); // List<String>
   TextColumn get answer => text().nullable()();
 
   @override

@@ -1,4 +1,4 @@
-import 'package:project_2359/features/sources_page/data/source.dart';
+import 'package:project_2359/app_database.dart';
 
 abstract class SourcesPageState {
   const SourcesPageState();
@@ -13,7 +13,7 @@ class SourcesPageStateLoading extends SourcesPageState {
 }
 
 class SourcesPageStateLoaded extends SourcesPageState {
-  final List<Source> sources;
+  final List<SourceItem> sources;
 
   const SourcesPageStateLoaded(this.sources);
 }

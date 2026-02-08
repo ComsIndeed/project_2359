@@ -6,7 +6,7 @@ import 'package:project_2359/features/sources_page/data/source.dart';
 /// Uses platform-agnostic types (Uint8List, String) for web compatibility.
 class SourceService {
   /// =============================
-  /// CRUD METHODS
+  /// CRUD METHODS (SUPABASE)
   /// =============================
 
   static Future<List<Source>> getAllSources() async {
@@ -18,6 +18,22 @@ class SourceService {
   }
 
   static Future<void> deleteSource(String id) async {
+    throw UnimplementedError();
+  }
+
+  /// =============================
+  /// CRUD METHODS (LOCAL)
+  /// =============================
+
+  static Future<List<Source>> getAllLocalSources() async {
+    throw UnimplementedError();
+  }
+
+  static Future<Source> getLocalSourceById(String id) async {
+    throw UnimplementedError();
+  }
+
+  static Future<void> deleteLocalSource(String id) async {
     throw UnimplementedError();
   }
 

@@ -1,0 +1,172 @@
+@startuml
+set namespaceSeparator ::
+
+abstract class "project_2359::features::sources_page::data::source.dart::Source" {
+  +String id
+  +String label
+  +String? path
+  +String? indexContent
+  +SourceType type
+  +Map<String, dynamic> toMap()
+  +String toJson()
+  +Source copyWith()
+  {static} +Source fromMap()
+  {static} +Source fromJson()
+}
+
+"project_2359::features::sources_page::data::source.dart::Source" o-- "project_2359::features::sources_page::data::source.dart::SourceType"
+
+class "project_2359::features::sources_page::data::source.dart::DocumentSource" {
+  +String documentText
+  +SourceType type
+  +Map<String, dynamic> toMap()
+  +DocumentSource copyWith()
+}
+
+"project_2359::features::sources_page::data::source.dart::DocumentSource" o-- "project_2359::features::sources_page::data::source.dart::SourceType"
+"project_2359::features::sources_page::data::source.dart::Source" <|-- "project_2359::features::sources_page::data::source.dart::DocumentSource"
+
+class "project_2359::features::sources_page::data::source.dart::VideoSource" {
+  +String videoTranscript
+  +SourceType type
+  +Map<String, dynamic> toMap()
+  +VideoSource copyWith()
+}
+
+"project_2359::features::sources_page::data::source.dart::VideoSource" o-- "project_2359::features::sources_page::data::source.dart::SourceType"
+"project_2359::features::sources_page::data::source.dart::Source" <|-- "project_2359::features::sources_page::data::source.dart::VideoSource"
+
+class "project_2359::features::sources_page::data::source.dart::AudioSource" {
+  +String audioTranscript
+  +SourceType type
+  +Map<String, dynamic> toMap()
+  +AudioSource copyWith()
+}
+
+"project_2359::features::sources_page::data::source.dart::AudioSource" o-- "project_2359::features::sources_page::data::source.dart::SourceType"
+"project_2359::features::sources_page::data::source.dart::Source" <|-- "project_2359::features::sources_page::data::source.dart::AudioSource"
+
+class "project_2359::features::sources_page::data::source.dart::ImageSource" {
+  +String imageInterpretation
+  +SourceType type
+  +Map<String, dynamic> toMap()
+  +ImageSource copyWith()
+}
+
+"project_2359::features::sources_page::data::source.dart::ImageSource" o-- "project_2359::features::sources_page::data::source.dart::SourceType"
+"project_2359::features::sources_page::data::source.dart::Source" <|-- "project_2359::features::sources_page::data::source.dart::ImageSource"
+
+class "project_2359::features::sources_page::data::source.dart::TextSource" {
+  +String textContent
+  +SourceType type
+  +Map<String, dynamic> toMap()
+  +TextSource copyWith()
+}
+
+"project_2359::features::sources_page::data::source.dart::TextSource" o-- "project_2359::features::sources_page::data::source.dart::SourceType"
+"project_2359::features::sources_page::data::source.dart::Source" <|-- "project_2359::features::sources_page::data::source.dart::TextSource"
+
+class "project_2359::features::sources_page::data::source.dart::SourceType" {
+  +int index
+  {static} +List<SourceType> values
+  {static} +SourceType document
+  {static} +SourceType video
+  {static} +SourceType audio
+  {static} +SourceType image
+  {static} +SourceType text
+}
+
+"project_2359::features::sources_page::data::source.dart::SourceType" o-- "project_2359::features::sources_page::data::source.dart::SourceType"
+"dart::core::Enum" <|-- "project_2359::features::sources_page::data::source.dart::SourceType"
+
+class "project_2359::features::sources_page::data::source_items.dart::SourceItems" {
+  +Column<String> id
+  +Column<String> label
+  +Column<String> path
+  +Column<String> type
+  +Column<String> indexContent
+}
+
+"project_2359::features::sources_page::data::source_items.dart::SourceItems" o-- "drift::src::dsl::dsl.dart::Column<String>"
+"drift::src::dsl::dsl.dart::Table" <|-- "project_2359::features::sources_page::data::source_items.dart::SourceItems"
+
+class "project_2359::features::sources_page::sources_page.dart::SourcesPage" {
+  +Widget build()
+  -void _importDocument()
+}
+
+"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "project_2359::features::sources_page::sources_page.dart::SourcesPage"
+
+class "project_2359::features::sources_page::sources_page_bloc::sources_page_bloc.dart::SourcesPageBloc" {
+}
+
+"bloc::src::bloc.dart::Bloc" <|-- "project_2359::features::sources_page::sources_page_bloc::sources_page_bloc.dart::SourcesPageBloc"
+
+abstract class "project_2359::features::sources_page::sources_page_bloc::sources_page_event.dart::SourcesPageEvent" {
+}
+
+class "project_2359::features::sources_page::sources_page_bloc::sources_page_event.dart::SourcesPageEventInitial" {
+}
+
+"project_2359::features::sources_page::sources_page_bloc::sources_page_event.dart::SourcesPageEvent" <|-- "project_2359::features::sources_page::sources_page_bloc::sources_page_event.dart::SourcesPageEventInitial"
+
+class "project_2359::features::sources_page::sources_page_bloc::sources_page_event.dart::ImportDocumentSourcesPageEvent" {
+  +String filePath
+}
+
+"project_2359::features::sources_page::sources_page_bloc::sources_page_event.dart::SourcesPageEvent" <|-- "project_2359::features::sources_page::sources_page_bloc::sources_page_event.dart::ImportDocumentSourcesPageEvent"
+
+abstract class "project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageState" {
+}
+
+class "project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageStateInitial" {
+}
+
+"project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageState" <|-- "project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageStateInitial"
+
+class "project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageStateLoading" {
+}
+
+"project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageState" <|-- "project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageStateLoading"
+
+class "project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageStateLoaded" {
+  +List<Source> sources
+}
+
+"project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageState" <|-- "project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageStateLoaded"
+
+class "project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageStateError" {
+  +String error
+}
+
+"project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageState" <|-- "project_2359::features::sources_page::sources_page_bloc::sources_page_state.dart::SourcesPageStateError"
+
+class "project_2359::features::sources_page::source_repository.dart::SourceRepository" {
+}
+
+class "project_2359::features::sources_page::source_service.dart::SourceService" {
+  {static} +dynamic getAllSources()
+  {static} +dynamic getSourceById()
+  {static} +dynamic deleteSource()
+  {static} +dynamic getAllLocalSources()
+  {static} +dynamic getLocalSourceById()
+  {static} +dynamic deleteLocalSource()
+  {static} +dynamic importDocument()
+  {static} +dynamic importPhoto()
+  {static} +dynamic importAudio()
+  {static} +dynamic importVideo()
+  {static} +dynamic importFlashcards()
+  {static} +dynamic importCloudDrive()
+  {static} +dynamic importWebsite()
+  {static} +dynamic importNoteApp()
+}
+
+class "project_2359::features::sources_page::source_utils.dart::SourceUtils" {
+  {static} +dynamic pptxToPdf()
+  {static} +dynamic docxToPdf()
+  {static} +dynamic xlsxToPdf()
+  {static} +dynamic extractTextFromPdf()
+}
+
+
+@enduml
