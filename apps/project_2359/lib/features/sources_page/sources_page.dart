@@ -135,17 +135,17 @@ class SourcesPage extends StatelessWidget {
                             if (index < state.files.length) {
                               final file = state.files[index];
                               return ActivityListItem(
-                                icon: Icons.telegram,
-                                title: file.name,
-                                subtitle: file.path ?? "",
+                                icon: const Icon(Icons.telegram),
+                                title: Text(file.name),
+                                subtitle: Text(file.path ?? ""),
                               );
                             } else {
                               final pendingFile = state
                                   .pendingFiles[index - state.files.length];
                               return ActivityListItem(
-                                icon: Icons.telegram,
-                                title: pendingFile.name,
-                                subtitle: pendingFile.path ?? "",
+                                icon: const Icon(Icons.telegram),
+                                title: Text(pendingFile.name),
+                                subtitle: Text(pendingFile.path ?? ""),
                               );
                             }
                           },

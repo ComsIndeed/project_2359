@@ -1,69 +1,266 @@
 import 'package:flutter/material.dart';
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/core/widgets/pressable_scale.dart';
 
-class ActivityListItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color iconColor;
+class ActivityListItem extends StatefulWidget {
+  final Widget? icon;
+  final Widget? title;
+  final Widget? subtitle;
+  final Color accentColor;
   final VoidCallback? onTap;
+  final EdgeInsetsGeometry? padding;
+  final bool isCompact;
+  final bool showChevron;
+  final bool isLoading;
+  final double bottomMargin;
 
   const ActivityListItem({
     super.key,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    this.iconColor = AppTheme.primary,
+    this.icon,
+    this.title,
+    this.subtitle,
+    this.accentColor = AppTheme.primary,
     this.onTap,
+    this.padding,
+    this.isCompact = false,
+    this.showChevron = true,
+    this.isLoading = false,
+    this.bottomMargin = 12,
   });
 
   @override
+  State<ActivityListItem> createState() => _ActivityListItemState();
+}
+
+class _ActivityListItemState extends State<ActivityListItem>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shimmerController;
+  late Animation<double> _shimmerAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+    _shimmerAnimation = Tween<double>(begin: -1.0, end: 2.0).animate(
+      CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
+    );
+
+    if (widget.isLoading) {
+      _shimmerController.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(ActivityListItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isLoading && !oldWidget.isLoading) {
+      _shimmerController.repeat();
+    } else if (!widget.isLoading && oldWidget.isLoading) {
+      _shimmerController.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bool isDisabled = widget.onTap == null && !widget.isLoading;
+    final contentPadding =
+        widget.padding ?? EdgeInsets.all(widget.isCompact ? 12.0 : 16.0);
+    final double iconContainerPadding = widget.isCompact ? 8 : 10;
+    final double iconSize = widget.isCompact ? 20 : 24;
+    final double skeletonIconSize = widget.isCompact ? 36 : 44;
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      // Card theme handles shape and color
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(
-          24,
-        ), // Match card shape roughly or use AppTheme.cardShape if possible to cast
-        customBorder: AppTheme.cardShape,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: iconColor, size: 24),
+      margin: EdgeInsets.only(bottom: widget.bottomMargin),
+      child: PressableScale(
+        onTap: widget.isLoading ? null : widget.onTap,
+        child: AnimatedBuilder(
+          animation: _shimmerAnimation,
+          builder: (context, child) {
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient: widget.isLoading
+                    ? _buildShimmerGradient(_shimmerAnimation.value)
+                    : null,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
+              child: child,
+            );
+          },
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: widget.isLoading ? null : widget.onTap,
+              customBorder: AppTheme.cardShape,
+              child: Opacity(
+                opacity: isDisabled ? 0.5 : 1.0,
+                child: Padding(
+                  padding: contentPadding,
+                  child: Row(
+                    children: [
+                      // Icon Container
+                      if (widget.isLoading)
+                        _buildSkeletonIcon(skeletonIconSize)
+                      else if (widget.icon != null)
+                        Container(
+                          padding: EdgeInsets.all(iconContainerPadding),
+                          decoration: BoxDecoration(
+                            color: widget.accentColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: widget.accentColor.withValues(alpha: 0.25),
+                              width: 1,
+                            ),
+                          ),
+                          child: IconTheme(
+                            data: IconThemeData(
+                              color: widget.accentColor,
+                              size: iconSize,
+                            ),
+                            child: widget.icon!,
+                          ),
+                        ),
+
+                      SizedBox(width: widget.isCompact ? 12 : 16),
+
+                      // Text Content
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (widget.isLoading)
+                              _buildSkeletonText(width: 0.6, height: 16)
+                            else if (widget.title != null)
+                              DefaultTextStyle(
+                                style:
+                                    Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ) ??
+                                    const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                child: widget.title!,
+                              ),
+                            SizedBox(height: widget.isCompact ? 2 : 4),
+                            if (widget.isLoading)
+                              _buildSkeletonText(width: 0.4, height: 14)
+                            else if (widget.subtitle != null)
+                              DefaultTextStyle(
+                                style:
+                                    Theme.of(context).textTheme.bodyMedium ??
+                                    const TextStyle(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                child: widget.subtitle!,
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
+
+                      // Trailing Chevron
+                      if (widget.showChevron && !widget.isLoading)
+                        Icon(
+                          Icons.chevron_right,
+                          color: AppTheme.textSecondary,
+                          size: widget.isCompact ? 20 : 24,
+                        ),
+                      if (widget.isLoading) _buildSkeletonChevron(),
+                    ],
+                  ),
                 ),
               ),
-              const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
-            ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  LinearGradient _buildShimmerGradient(double animationValue) {
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        AppTheme.surface.withValues(alpha: 0.3),
+        AppTheme.surface.withValues(alpha: 0.5),
+        Colors.white.withValues(alpha: 0.15),
+        AppTheme.surface.withValues(alpha: 0.5),
+        AppTheme.surface.withValues(alpha: 0.3),
+      ],
+      stops: [
+        0.0,
+        (animationValue - 0.3).clamp(0.0, 1.0),
+        animationValue.clamp(0.0, 1.0),
+        (animationValue + 0.3).clamp(0.0, 1.0),
+        1.0,
+      ],
+    );
+  }
+
+  Widget _buildSkeletonIcon(double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: AppTheme.surface.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
+  }
+
+  Widget _buildSkeletonText({required double width, required double height}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Container(
+          width: constraints.maxWidth * width,
+          height: height,
+          decoration: BoxDecoration(
+            color: AppTheme.surface.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(height / 2),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSkeletonChevron() {
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        color: AppTheme.surface.withValues(alpha: 0.3),
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+}
+
+class AnimatedBuilder extends AnimatedWidget {
+  final Widget? child;
+  final Widget Function(BuildContext context, Widget? child) builder;
+
+  const AnimatedBuilder({
+    super.key,
+    required Animation<double> animation,
+    required this.builder,
+    this.child,
+  }) : super(listenable: animation);
+
+  @override
+  Widget build(BuildContext context) {
+    return builder(context, child);
   }
 }
