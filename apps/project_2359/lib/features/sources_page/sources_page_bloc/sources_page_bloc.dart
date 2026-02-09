@@ -5,19 +5,15 @@ import 'package:project_2359/features/sources_page/sources_page_bloc/sources_pag
 class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
   SourcesPageBloc() : super(const SourcesPageStateInitial()) {
     on<SourcesPageEventInitial>((event, emit) {
-      emit(SourcesPageStateLoadedFiles(pendingFiles: [], files: []));
+      emit(const SourcesPageStateLoadedFiles(files: []));
     });
 
     on<ImportDocumentSourcesPageEvent>((event, emit) {
-      if (state is! SourcesPageStateLoadedFiles) return;
       final loadedState = state as SourcesPageStateLoadedFiles;
-      final files = event.files;
+      final oldFiles = loadedState.files;
+      final newFiles = event.files;
 
-      emit(
-        loadedState.copyWith(
-          pendingFiles: [...loadedState.pendingFiles, ...files],
-        ),
-      );
+      emit(loadedState.copyWith(files: [...newFiles, ...oldFiles]));
     });
   }
 }

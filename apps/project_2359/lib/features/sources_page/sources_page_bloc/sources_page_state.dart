@@ -9,21 +9,11 @@ class SourcesPageStateInitial extends SourcesPageState {
 }
 
 class SourcesPageStateLoadedFiles extends SourcesPageState {
-  final List<PlatformFile> pendingFiles;
   final List<PlatformFile> files;
 
-  const SourcesPageStateLoadedFiles({
-    required this.pendingFiles,
-    required this.files,
-  });
+  const SourcesPageStateLoadedFiles({required this.files});
 
-  SourcesPageStateLoadedFiles copyWith({
-    List<PlatformFile>? pendingFiles,
-    List<PlatformFile>? files,
-  }) {
-    return SourcesPageStateLoadedFiles(
-      pendingFiles: pendingFiles ?? this.pendingFiles,
-      files: files ?? this.files,
-    );
+  SourcesPageStateLoadedFiles copyWith({List<PlatformFile>? files}) {
+    return SourcesPageStateLoadedFiles(files: files ?? this.files);
   }
 }
