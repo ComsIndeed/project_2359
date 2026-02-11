@@ -124,35 +124,23 @@ class SourcesPage extends StatelessWidget {
                       const SizedBox(height: 12),
 
                       if (state is SourcesPageStateLoadedFiles &&
-                          (state.files.isNotEmpty ||
-                              state.pendingFiles.isNotEmpty))
+                          state.files.isNotEmpty)
                         ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount:
-                              state.files.length + state.pendingFiles.length,
+                          itemCount: state.files.length,
                           itemBuilder: (context, index) {
-                            if (index < state.files.length) {
-                              final file = state.files[index];
-                              return ActivityListItem(
-                                icon: const Icon(Icons.telegram),
-                                title: Text(file.name),
-                                subtitle: Text(file.path ?? ""),
-                              );
-                            } else {
-                              final pendingFile = state
-                                  .pendingFiles[index - state.files.length];
-                              return ActivityListItem(
-                                icon: const Icon(Icons.telegram),
-                                title: Text(pendingFile.name),
-                                subtitle: Text(pendingFile.path ?? ""),
-                              );
-                            }
+                            final file = state.files[index];
+                            return ActivityListItem(
+                              icon: const Icon(Icons.telegram),
+                              title: Text(file.name),
+                              subtitle: Text(file.path ?? ""),
+                            );
                           },
                         ),
 
                       if (state is SourcesPageStateLoadedFiles &&
-                          (state.files.isEmpty || state.pendingFiles.isEmpty))
+                          state.files.isEmpty)
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 40.0),
