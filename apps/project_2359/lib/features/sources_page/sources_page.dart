@@ -6,6 +6,8 @@ import 'package:project_2359/core/widgets/activity_list_item.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
+import 'package:project_2359/core/widgets/tap_to_slide_left.dart';
+import 'package:project_2359/features/source_page/source_page.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_state.dart';
@@ -132,10 +134,31 @@ class SourcesPage extends StatelessWidget {
                           itemCount: state.files.length,
                           itemBuilder: (context, index) {
                             final file = state.files[index];
-                            return ActivityListItem(
-                              icon: const Icon(Icons.telegram),
-                              title: Text(file.name),
-                              subtitle: Text(file.path ?? ""),
+                            if (file.bytes == null) {
+                              return ActivityListItem(
+                                onTap: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "File content is unavailable",
+                                      ),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.edit_document),
+                                title: Text(file.name),
+                                subtitle: Text(file.path ?? ""),
+                              );
+                            }
+
+                            return TapToSlideLeft(
+                              page: SourcePage(fileBytes: file.bytes!),
+                              builder: (switchPage) => ActivityListItem(
+                                onTap: switchPage,
+                                icon: const Icon(Icons.edit_document),
+                                title: Text(file.name),
+                                subtitle: Text(file.path ?? ""),
+                              ),
                             );
                           },
                         ),
@@ -182,13 +205,18 @@ class SourcesPage extends StatelessWidget {
   void _importDocument(BuildContext context) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
+      allowMultiple: true,
+      withData: true,
+      onFileLoading: (statusx) {},
       allowedExtensions: ["pdf", "docx", "pptx"],
     );
 
     if (result == null) return;
 
-    context.read<SourcesPageBloc>().add(
-      ImportDocumentSourcesPageEvent(result.files),
-    );
+    if (context.mounted) {
+      context.read<SourcesPageBloc>().add(
+        ImportDocumentSourcesPageEvent(result.files),
+      );
+    }
   }
 }

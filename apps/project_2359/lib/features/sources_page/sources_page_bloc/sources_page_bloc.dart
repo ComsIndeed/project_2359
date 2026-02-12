@@ -9,11 +9,14 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
     });
 
     on<ImportDocumentSourcesPageEvent>((event, emit) {
+      if (state is! SourcesPageStateLoadedFiles) return;
+
       final loadedState = state as SourcesPageStateLoadedFiles;
       final oldFiles = loadedState.files;
       final newFiles = event.files;
+      final files = [...newFiles, ...oldFiles];
 
-      emit(loadedState.copyWith(files: [...newFiles, ...oldFiles]));
+      emit(loadedState.copyWith(files: files));
     });
   }
 }
