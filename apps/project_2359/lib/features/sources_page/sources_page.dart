@@ -207,7 +207,7 @@ class SourcesPage extends StatelessWidget {
       type: FileType.custom,
       allowMultiple: true,
       withData: true,
-      onFileLoading: (statusx) {},
+      onFileLoading: (status) {},
       allowedExtensions: ["pdf", "docx", "pptx"],
     );
 
