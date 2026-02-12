@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
 
 class SourcePage extends StatelessWidget {
   const SourcePage({super.key, required this.fileBytes});
@@ -20,7 +21,14 @@ class SourcePage extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            SfPdfViewer.memory(fileBytes),
+            SizedBox(
+              height: 800,
+              width: double.infinity,
+              child: SfPdfViewerTheme(
+                data: const SfPdfViewerThemeData(),
+                child: SfPdfViewer.memory(fileBytes),
+              ),
+            ),
           ],
         ),
       ),
