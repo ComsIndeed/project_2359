@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 
 class GenerateMaterialsPage extends StatefulWidget {
@@ -12,7 +11,6 @@ class GenerateMaterialsPage extends StatefulWidget {
 }
 
 class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
-  // Mock Data
   final List<String> _outputTypes = ['Flashcards', 'Quiz', 'Summary'];
   String _selectedOutputType = 'Flashcards';
 
@@ -23,8 +21,9 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: AppTheme.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
@@ -48,7 +47,7 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
               Container(
                 height: 100,
                 decoration: BoxDecoration(
-                  color: AppTheme.surface.withValues(alpha: 0.3),
+                  color: cs.surface.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.05),
@@ -59,7 +58,7 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
                 child: Text(
                   "Preview content based on selection",
                   style: GoogleFonts.inter(
-                    color: AppTheme.textSecondary,
+                    color: cs.onSurface.withValues(alpha: 0.5),
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -72,35 +71,34 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
   }
 
   Widget _buildSectionHeader(String title) {
+    final cs = Theme.of(context).colorScheme;
     return Text(
       title,
       style: GoogleFonts.inter(
         fontSize: 12,
         fontWeight: FontWeight.bold,
         letterSpacing: 1.5,
-        color: AppTheme.textSecondary,
+        color: cs.onSurface.withValues(alpha: 0.5),
       ),
     );
   }
 
   Widget _buildSearchBar() {
+    final cs = Theme.of(context).colorScheme;
+    final muted = cs.onSurface.withValues(alpha: 0.5);
+
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: TextField(
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: cs.onSurface),
         decoration: InputDecoration(
           hintText: 'Filter sources...',
-          hintStyle: TextStyle(
-            color: AppTheme.textSecondary.withValues(alpha: 0.5),
-          ),
-          prefixIcon: Icon(
-            Icons.search,
-            color: AppTheme.textSecondary.withValues(alpha: 0.5),
-          ),
+          hintStyle: TextStyle(color: muted),
+          prefixIcon: Icon(Icons.search, color: muted),
           filled: false,
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
@@ -115,7 +113,6 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
   }
 
   Widget _buildSourceGrid() {
-    // Mock sources with IDs for consistent icons/colors
     final sources = [
       (
         icon: Icons.description,
@@ -148,7 +145,6 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
       runSpacing: 16,
       children: sources.map((source) {
         final isSelected = _selectedSources.contains(source.id);
-        // Calculate width for 2 columns. Subtract padding (24*2) and spacing (16)
         final width = (MediaQuery.of(context).size.width - 48 - 16) / 2;
 
         return SizedBox(
@@ -172,16 +168,16 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
     String id,
     bool isSelected,
   ) {
+    final cs = Theme.of(context).colorScheme;
+
     return Stack(
       children: [
-        // We use a Container to ensure the CardButton expands
         SizedBox(
-          height: 80, // Fixed height for consistency
+          height: 80,
           child: CardButton(
             icon: icon,
             label: label,
             subLabel: subLabel,
-            // Use ID for consistent background/color generation
             backgroundGenerator: GenerationSeed.fromString(id),
             isCompact: true,
             layoutDirection: CardLayoutDirection.horizontal,
@@ -196,7 +192,6 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
             },
           ),
         ),
-        // Selection Indicator Overlay
         Positioned(
           right: 12,
           top: 0,
@@ -208,10 +203,10 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
               height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? AppTheme.primary : Colors.transparent,
+                color: isSelected ? cs.primary : Colors.transparent,
                 border: Border.all(
                   color: isSelected
-                      ? AppTheme.primary
+                      ? cs.primary
                       : Colors.white.withValues(alpha: 0.2),
                   width: 2,
                 ),
@@ -227,10 +222,12 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
   }
 
   Widget _buildOutputTypeSelector() {
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -245,7 +242,7 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppTheme.secondarySurface
+                      ? cs.surfaceContainerHighest
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -254,8 +251,8 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
                   type,
                   style: GoogleFonts.inter(
                     color: isSelected
-                        ? AppTheme.textPrimary
-                        : AppTheme.textSecondary,
+                        ? cs.onSurface
+                        : cs.onSurface.withValues(alpha: 0.5),
                     fontWeight: isSelected
                         ? FontWeight.w600
                         : FontWeight.normal,
@@ -271,10 +268,12 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
   }
 
   Widget _buildConfigurationOptions() {
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.surface.withValues(alpha: 0.3),
+        color: cs.surface.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.05),
@@ -313,6 +312,8 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
     bool value,
     ValueChanged<bool>? onChanged,
   ) {
+    final cs = Theme.of(context).colorScheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -323,7 +324,7 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
               Text(
                 title,
                 style: GoogleFonts.inter(
-                  color: AppTheme.textPrimary,
+                  color: cs.onSurface,
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),
@@ -332,7 +333,7 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
               Text(
                 subtitle,
                 style: GoogleFonts.inter(
-                  color: AppTheme.textSecondary,
+                  color: cs.onSurface.withValues(alpha: 0.5),
                   fontSize: 13,
                 ),
               ),
@@ -341,8 +342,8 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
         ),
         CupertinoSwitch(
           value: value,
-          activeTrackColor: AppTheme.primary,
-          inactiveTrackColor: AppTheme.secondarySurface,
+          activeTrackColor: cs.primary,
+          inactiveTrackColor: cs.surfaceContainerHighest,
           onChanged: onChanged,
         ),
       ],

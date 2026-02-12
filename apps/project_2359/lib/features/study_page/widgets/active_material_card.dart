@@ -6,7 +6,7 @@ class ActiveMaterialCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final double progress;
-  final Color accentColor;
+  final Color? accentColor;
 
   const ActiveMaterialCard({
     super.key,
@@ -14,18 +14,18 @@ class ActiveMaterialCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.progress,
-    this.accentColor = AppTheme.primary,
+    this.accentColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final accent = accentColor ?? cs.primary;
+
     return Container(
-      width: 200, // Fixed width for horizontal scrolling
+      width: 200,
       margin: const EdgeInsets.only(right: 16),
-      decoration: ShapeDecoration(
-        color: AppTheme.surface,
-        shape: AppTheme.cardShape,
-      ),
+      decoration: ShapeDecoration(color: cs.surface, shape: AppTheme.cardShape),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -34,10 +34,10 @@ class ActiveMaterialCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: accentColor.withValues(alpha: 0.15),
+                color: accent.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: accentColor, size: 24),
+              child: Icon(icon, color: accent, size: 24),
             ),
             const SizedBox(height: 16),
             Text(
@@ -79,8 +79,8 @@ class ActiveMaterialCard extends StatelessWidget {
             const SizedBox(height: 8),
             LinearProgressIndicator(
               value: progress,
-              backgroundColor: accentColor.withValues(alpha: 0.2),
-              color: accentColor,
+              backgroundColor: accent.withValues(alpha: 0.2),
+              color: accent,
               borderRadius: BorderRadius.circular(4),
               minHeight: 6,
             ),

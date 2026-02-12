@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:project_2359/app_theme.dart';
-
-// TODO: This file is largely vibecoded right now. Review everything
 
 class SpecialSearchBar extends StatelessWidget {
   final String hintText;
@@ -17,10 +14,14 @@ class SpecialSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final muted = cs.onSurface.withValues(alpha: 0.5);
+
     return SearchAnchor.bar(
       barHintText: hintText,
       isFullScreen: true,
-      barBackgroundColor: WidgetStateProperty.all(AppTheme.secondarySurface),
+      barBackgroundColor: WidgetStateProperty.all(cs.surfaceContainerHighest),
       barElevation: WidgetStateProperty.all(0),
       barShape: WidgetStateProperty.all(
         RoundedSuperellipseBorder(
@@ -29,21 +30,17 @@ class SpecialSearchBar extends StatelessWidget {
         ),
       ),
       barTextStyle: WidgetStateProperty.all(
-        Theme.of(
-          context,
-        ).textTheme.bodyLarge?.copyWith(color: AppTheme.textPrimary),
+        tt.bodyLarge?.copyWith(color: cs.onSurface),
       ),
       barHintStyle: WidgetStateProperty.all(
-        Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+        tt.bodyMedium?.copyWith(color: muted),
       ),
-      barLeading: const Icon(Icons.search_rounded, color: AppTheme.primary),
+      barLeading: Icon(Icons.search_rounded, color: cs.primary),
       barTrailing: [
         if (onFilterTap != null)
           IconButton(
             onPressed: onFilterTap,
-            icon: const Icon(Icons.tune_rounded, color: AppTheme.textSecondary),
+            icon: Icon(Icons.tune_rounded, color: muted),
           ),
       ],
       dividerColor: Colors.transparent,
@@ -51,10 +48,10 @@ class SpecialSearchBar extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).pop();
         },
-        icon: const Icon(Icons.arrow_back_rounded, color: AppTheme.primary),
+        icon: Icon(Icons.arrow_back_rounded, color: cs.primary),
       ),
       viewHintText: hintText,
-      viewBackgroundColor: AppTheme.surface,
+      viewBackgroundColor: cs.surface,
       viewElevation: 0,
       viewShape: const RoundedSuperellipseBorder(
         borderRadius: BorderRadius.zero,
@@ -64,29 +61,26 @@ class SpecialSearchBar extends StatelessWidget {
           onChanged!(controller.text);
         }
 
+        final cs = Theme.of(context).colorScheme;
+        final tt = Theme.of(context).textTheme;
+        final muted = cs.onSurface.withValues(alpha: 0.5);
         final text = controller.text;
         final List<Widget> children = [];
 
-        // Add some top spacing
         children.add(const SizedBox(height: 24));
 
         if (text.isEmpty) {
-          // Recent Searches Section
           children.add(
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.history_rounded,
-                    size: 16,
-                    color: AppTheme.primary,
-                  ),
+                  Icon(Icons.history_rounded, size: 16, color: cs.primary),
                   const SizedBox(width: 8),
                   Text(
                     "Recent",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppTheme.primary,
+                    style: tt.titleMedium?.copyWith(
+                      color: cs.primary,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -96,7 +90,6 @@ class SpecialSearchBar extends StatelessWidget {
             ),
           );
 
-          // Mock Recent Items
           final recent = [
             "Calculus II Notes",
             "Physics Formula Sheet",
@@ -108,22 +101,17 @@ class SpecialSearchBar extends StatelessWidget {
 
           children.add(const SizedBox(height: 32));
 
-          // Discover / Quick Actions Section
           children.add(
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.explore_outlined,
-                    size: 16,
-                    color: AppTheme.primary,
-                  ),
+                  Icon(Icons.explore_outlined, size: 16, color: cs.primary),
                   const SizedBox(width: 8),
                   Text(
                     "Discover",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppTheme.primary,
+                    style: tt.titleMedium?.copyWith(
+                      color: cs.primary,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -157,20 +145,16 @@ class SpecialSearchBar extends StatelessWidget {
             ),
           );
         } else {
-          // Search Results Section
           children.add(
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Text(
                 "Results for \"$text\"",
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                style: tt.bodyMedium?.copyWith(color: muted),
               ),
             ),
           );
 
-          // Mock Results
           final suggestions = [
             "Math formulas",
             "History notes",
@@ -202,13 +186,10 @@ class SpecialSearchBar extends StatelessWidget {
                       Icon(
                         Icons.sentiment_dissatisfied_rounded,
                         size: 48,
-                        color: AppTheme.textSecondary.withValues(alpha: 0.5),
+                        color: muted.withValues(alpha: 0.5),
                       ),
                       const SizedBox(height: 16),
-                      Text(
-                        "No results found",
-                        style: TextStyle(color: AppTheme.textSecondary),
-                      ),
+                      Text("No results found", style: TextStyle(color: muted)),
                     ],
                   ),
                 ),
@@ -216,7 +197,6 @@ class SpecialSearchBar extends StatelessWidget {
             );
           }
 
-          // specific "Search for" action
           children.add(const SizedBox(height: 16));
           children.add(
             _buildSuggestionItem(
@@ -237,21 +217,22 @@ class SpecialSearchBar extends StatelessWidget {
     String text,
     IconData icon,
   ) {
+    final cs = Theme.of(context).colorScheme;
+    final muted = cs.onSurface.withValues(alpha: 0.5);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            // Handle tap
-          },
+          onTap: () {},
           borderRadius: BorderRadius.circular(20),
-          splashColor: AppTheme.primary.withValues(alpha: 0.1),
-          highlightColor: AppTheme.primary.withValues(alpha: 0.05),
+          splashColor: cs.primary.withValues(alpha: 0.1),
+          highlightColor: cs.primary.withValues(alpha: 0.05),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: AppTheme.secondarySurface.withValues(alpha: 0.5),
+              color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.white.withValues(alpha: 0.03)),
             ),
@@ -260,24 +241,24 @@ class SpecialSearchBar extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.1),
+                    color: cs.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: AppTheme.primary, size: 18),
+                  child: Icon(icon, color: cs.primary, size: 18),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
                     text,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppTheme.textPrimary,
+                      color: cs.onSurface,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
                 Icon(
                   Icons.north_west_rounded,
-                  color: AppTheme.textSecondary.withValues(alpha: 0.5),
+                  color: muted.withValues(alpha: 0.5),
                   size: 16,
                 ),
               ],
@@ -289,6 +270,8 @@ class SpecialSearchBar extends StatelessWidget {
   }
 
   Widget _buildQuickAction(BuildContext context, String label, IconData icon) {
+    final cs = Theme.of(context).colorScheme;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -297,10 +280,10 @@ class SpecialSearchBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
-            color: AppTheme.secondarySurface,
+            color: cs.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: AppTheme.primary.withValues(alpha: 0.2),
+              color: cs.primary.withValues(alpha: 0.2),
               width: 1,
             ),
             boxShadow: [
@@ -314,12 +297,12 @@ class SpecialSearchBar extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: AppTheme.primary, size: 20),
+              Icon(icon, color: cs.primary, size: 20),
               const SizedBox(width: 12),
               Text(
                 label,
-                style: const TextStyle(
-                  color: AppTheme.textPrimary,
+                style: TextStyle(
+                  color: cs.onSurface,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                 ),

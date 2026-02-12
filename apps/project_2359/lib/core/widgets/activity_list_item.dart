@@ -6,7 +6,7 @@ class ActivityListItem extends StatefulWidget {
   final Widget? icon;
   final Widget? title;
   final Widget? subtitle;
-  final Color accentColor;
+  final Color? accentColor;
   final VoidCallback? onTap;
   final EdgeInsetsGeometry? padding;
   final bool isCompact;
@@ -19,7 +19,7 @@ class ActivityListItem extends StatefulWidget {
     this.icon,
     this.title,
     this.subtitle,
-    this.accentColor = AppTheme.primary,
+    this.accentColor,
     this.onTap,
     this.padding,
     this.isCompact = false,
@@ -71,6 +71,8 @@ class _ActivityListItemState extends State<ActivityListItem>
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final accent = widget.accentColor ?? cs.primary;
     final bool isDisabled = widget.onTap == null && !widget.isLoading;
     final contentPadding =
         widget.padding ?? EdgeInsets.all(widget.isCompact ? 12.0 : 16.0);
@@ -89,7 +91,7 @@ class _ActivityListItemState extends State<ActivityListItem>
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
                 gradient: widget.isLoading
-                    ? _buildShimmerGradient(_shimmerAnimation.value)
+                    ? _buildShimmerGradient(_shimmerAnimation.value, cs.surface)
                     : null,
               ),
               child: child,
@@ -106,39 +108,38 @@ class _ActivityListItemState extends State<ActivityListItem>
                   padding: contentPadding,
                   child: Row(
                     children: [
-                      // Icon Container
                       if (widget.isLoading)
-                        _buildSkeletonIcon(skeletonIconSize)
+                        _buildSkeletonIcon(skeletonIconSize, cs.surface)
                       else if (widget.icon != null)
                         Container(
                           padding: EdgeInsets.all(iconContainerPadding),
                           decoration: BoxDecoration(
-                            color: widget.accentColor.withValues(alpha: 0.15),
+                            color: accent.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: widget.accentColor.withValues(alpha: 0.25),
+                              color: accent.withValues(alpha: 0.25),
                               width: 1,
                             ),
                           ),
                           child: IconTheme(
-                            data: IconThemeData(
-                              color: widget.accentColor,
-                              size: iconSize,
-                            ),
+                            data: IconThemeData(color: accent, size: iconSize),
                             child: widget.icon!,
                           ),
                         ),
 
                       SizedBox(width: widget.isCompact ? 12 : 16),
 
-                      // Text Content
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (widget.isLoading)
-                              _buildSkeletonText(width: 0.6, height: 16)
+                              _buildSkeletonText(
+                                width: 0.6,
+                                height: 16,
+                                surfaceColor: cs.surface,
+                              )
                             else if (widget.title != null)
                               DefaultTextStyle(
                                 style:
@@ -156,7 +157,11 @@ class _ActivityListItemState extends State<ActivityListItem>
                               ),
                             SizedBox(height: widget.isCompact ? 2 : 4),
                             if (widget.isLoading)
-                              _buildSkeletonText(width: 0.4, height: 14)
+                              _buildSkeletonText(
+                                width: 0.4,
+                                height: 14,
+                                surfaceColor: cs.surface,
+                              )
                             else if (widget.subtitle != null)
                               DefaultTextStyle(
                                 style:
@@ -170,14 +175,13 @@ class _ActivityListItemState extends State<ActivityListItem>
                         ),
                       ),
 
-                      // Trailing Chevron
                       if (widget.showChevron && !widget.isLoading)
                         Icon(
                           Icons.chevron_right,
-                          color: AppTheme.textSecondary,
+                          color: cs.onSurface.withValues(alpha: 0.5),
                           size: widget.isCompact ? 20 : 24,
                         ),
-                      if (widget.isLoading) _buildSkeletonChevron(),
+                      if (widget.isLoading) _buildSkeletonChevron(cs.surface),
                     ],
                   ),
                 ),
@@ -189,16 +193,16 @@ class _ActivityListItemState extends State<ActivityListItem>
     );
   }
 
-  LinearGradient _buildShimmerGradient(double animationValue) {
+  LinearGradient _buildShimmerGradient(double animationValue, Color surface) {
     return LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        AppTheme.surface.withValues(alpha: 0.3),
-        AppTheme.surface.withValues(alpha: 0.5),
+        surface.withValues(alpha: 0.3),
+        surface.withValues(alpha: 0.5),
         Colors.white.withValues(alpha: 0.15),
-        AppTheme.surface.withValues(alpha: 0.5),
-        AppTheme.surface.withValues(alpha: 0.3),
+        surface.withValues(alpha: 0.5),
+        surface.withValues(alpha: 0.3),
       ],
       stops: [
         0.0,
@@ -210,25 +214,29 @@ class _ActivityListItemState extends State<ActivityListItem>
     );
   }
 
-  Widget _buildSkeletonIcon(double size) {
+  Widget _buildSkeletonIcon(double size, Color surface) {
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: AppTheme.surface.withValues(alpha: 0.4),
+        color: surface.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(12),
       ),
     );
   }
 
-  Widget _buildSkeletonText({required double width, required double height}) {
+  Widget _buildSkeletonText({
+    required double width,
+    required double height,
+    required Color surfaceColor,
+  }) {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Container(
           width: constraints.maxWidth * width,
           height: height,
           decoration: BoxDecoration(
-            color: AppTheme.surface.withValues(alpha: 0.4),
+            color: surfaceColor.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(height / 2),
           ),
         );
@@ -236,12 +244,12 @@ class _ActivityListItemState extends State<ActivityListItem>
     );
   }
 
-  Widget _buildSkeletonChevron() {
+  Widget _buildSkeletonChevron(Color surface) {
     return Container(
       width: 24,
       height: 24,
       decoration: BoxDecoration(
-        color: AppTheme.surface.withValues(alpha: 0.3),
+        color: surface.withValues(alpha: 0.3),
         shape: BoxShape.circle,
       ),
     );

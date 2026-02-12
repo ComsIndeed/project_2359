@@ -5,7 +5,7 @@ class ActionGridItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final String? subLabel;
-  final Color iconColor;
+  final Color? iconColor;
   final Color? backgroundColor;
   final VoidCallback? onTap;
 
@@ -14,15 +14,19 @@ class ActionGridItem extends StatelessWidget {
     required this.icon,
     required this.label,
     this.subLabel,
-    this.iconColor = AppTheme.primary,
-    this.backgroundColor = AppTheme.secondarySurface,
+    this.iconColor,
+    this.backgroundColor,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final effectiveIconColor = iconColor ?? cs.primary;
+    final effectiveBgColor = backgroundColor ?? cs.surfaceContainerHighest;
+
     return Material(
-      color: backgroundColor,
+      color: effectiveBgColor,
       shape: AppTheme.cardShape,
       child: InkWell(
         onTap: onTap,
@@ -36,16 +40,16 @@ class ActionGridItem extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.1),
+                  color: effectiveIconColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: iconColor, size: 28),
+                child: Icon(icon, color: effectiveIconColor, size: 28),
               ),
               const Spacer(),
               Text(
                 label,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.textPrimary,
+                  color: cs.onSurface,
                   fontWeight: FontWeight.bold,
                 ),
                 maxLines: 1,
@@ -55,9 +59,7 @@ class ActionGridItem extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subLabel!,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

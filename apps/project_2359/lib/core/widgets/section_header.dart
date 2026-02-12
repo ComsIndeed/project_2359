@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:project_2359/app_theme.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -26,7 +25,7 @@ class SectionHeader extends StatelessWidget {
               child: Text(
                 "View All",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),

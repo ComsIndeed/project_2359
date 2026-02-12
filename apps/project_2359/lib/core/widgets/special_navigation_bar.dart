@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:project_2359/app_theme.dart';
 
 class SpecialNavigationItem {
   final IconData icon;
@@ -12,8 +11,6 @@ class SpecialNavigationItem {
     this.pageActions,
   });
 }
-
-// TODO: Add ripples to the popup buttons
 
 class SpecialNavigationBar extends StatefulWidget {
   final List<SpecialNavigationItem> items;
@@ -36,10 +33,10 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final activeItem = widget.items[widget.currentIndex];
     final hasActions = activeItem.pageActions != null;
 
-    // Persist the last set of actions so they don't disappear instantly during animation
     if (hasActions) {
       _activeActions = activeItem.pageActions;
     }
@@ -48,9 +45,7 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOutCubic,
       padding: EdgeInsets.only(
-        bottom: hasActions
-            ? 16
-            : 32, // Moves navbar down slightly when actions shown
+        bottom: hasActions ? 16 : 32,
         left: 24,
         right: 24,
       ),
@@ -65,11 +60,10 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
             width: double.infinity,
           ),
 
-          // Page Actions Popup
           AnimatedPositioned(
             duration: const Duration(milliseconds: 500),
             curve: hasActions ? Curves.easeOutBack : Curves.easeInCubic,
-            bottom: hasActions ? 72 : 30, // Tighter transition
+            bottom: hasActions ? 72 : 30,
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 300),
               opacity: hasActions ? 1.0 : 0.0,
@@ -90,17 +84,17 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
                     ],
                   ),
                   child: Material(
-                    color: AppTheme.secondarySurface.withValues(alpha: 0.9),
+                    color: cs.surfaceContainerHighest.withValues(alpha: 0.9),
                     shape: RoundedSuperellipseBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color: AppTheme.primary.withValues(alpha: 0.3),
+                        color: cs.primary.withValues(alpha: 0.3),
                         width: 1.5,
                       ),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: Theme(
-                      data: AppTheme.darkTheme.copyWith(
+                      data: Theme.of(context).copyWith(
                         textButtonTheme: TextButtonThemeData(
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.white,
@@ -140,7 +134,6 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
             ),
           ),
 
-          // Main Navigation Bar Container
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -149,7 +142,7 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
                 height: 60,
                 padding: const EdgeInsets.all(6),
                 decoration: ShapeDecoration(
-                  color: AppTheme.surface.withValues(alpha: 0.95),
+                  color: cs.surface.withValues(alpha: 0.95),
                   shape: RoundedSuperellipseBorder(
                     borderRadius: BorderRadius.circular(24),
                     side: BorderSide(
@@ -160,7 +153,6 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
                 ),
                 child: Stack(
                   children: [
-                    // Sliding active tab background
                     AnimatedAlign(
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.easeInOutCubic,
@@ -175,7 +167,7 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
                         heightFactor: 1,
                         child: Container(
                           decoration: ShapeDecoration(
-                            color: AppTheme.primary.withValues(alpha: 0.5),
+                            color: cs.primary.withValues(alpha: 0.5),
                             shape: RoundedSuperellipseBorder(
                               borderRadius: BorderRadius.circular(18),
                             ),
@@ -183,13 +175,13 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
                         ),
                       ),
                     ),
-                    // Navigation Items
                     Row(
                       children: List.generate(widget.items.length, (index) {
                         final item = widget.items[index];
                         final isSelected = widget.currentIndex == index;
                         return Expanded(
                           child: _buildNavItem(
+                            context,
                             index,
                             item.icon,
                             item.label,
@@ -209,14 +201,17 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
   }
 
   Widget _buildNavItem(
+    BuildContext context,
     int index,
     IconData icon,
     String label,
     bool isSelected,
   ) {
+    final cs = Theme.of(context).colorScheme;
     final navShape = RoundedSuperellipseBorder(
       borderRadius: BorderRadius.circular(18),
     );
+    final inactiveColor = cs.onSurface.withValues(alpha: 0.5);
 
     return RepaintBoundary(
       child: AnimatedScale(
@@ -228,7 +223,7 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
           child: InkWell(
             onTap: () => widget.onTap(index),
             customBorder: navShape,
-            splashColor: AppTheme.primary.withValues(alpha: 0.2),
+            splashColor: cs.primary.withValues(alpha: 0.2),
             highlightColor: Colors.transparent,
             child: Center(
               child: Row(
@@ -236,14 +231,14 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
                 children: [
                   Icon(
                     icon,
-                    color: isSelected ? Colors.white : AppTheme.textSecondary,
+                    color: isSelected ? Colors.white : inactiveColor,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     label,
                     style: TextStyle(
-                      color: isSelected ? Colors.white : AppTheme.textSecondary,
+                      color: isSelected ? Colors.white : inactiveColor,
                       fontWeight: isSelected
                           ? FontWeight.bold
                           : FontWeight.w600,

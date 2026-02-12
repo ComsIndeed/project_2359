@@ -15,6 +15,8 @@ class SourcesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -38,8 +40,7 @@ class SourcesPage extends StatelessWidget {
                       const SizedBox(height: 24),
                       SectionHeader(
                         title: "Import Sources",
-                        onViewAllTap:
-                            null, // No 'View All' needed for this grid
+                        onViewAllTap: null,
                       ),
                       const SizedBox(height: 8),
                     ]),
@@ -59,7 +60,7 @@ class SourcesPage extends StatelessWidget {
                         subLabel: "pdf, docx, pptx",
                         layoutDirection: CardLayoutDirection.horizontal,
                         isCompact: true,
-                        accentColor: AppTheme.primary,
+                        accentColor: cs.primary,
                         onTap: () => _importDocument(context),
                       ),
                       CardButton(
@@ -68,7 +69,7 @@ class SourcesPage extends StatelessWidget {
                         subLabel: "photos, audio, video",
                         layoutDirection: CardLayoutDirection.horizontal,
                         isCompact: true,
-                        accentColor: const Color(0xFFFF9F43), // Vibrant Orange
+                        accentColor: const Color(0xFFFF9F43),
                         onTap: () {},
                       ),
                       CardButton(
@@ -86,7 +87,7 @@ class SourcesPage extends StatelessWidget {
                         subLabel: "Google, OneDrive",
                         layoutDirection: CardLayoutDirection.horizontal,
                         isCompact: true,
-                        accentColor: const Color(0xFF00D2D3), // Cyan
+                        accentColor: const Color(0xFF00D2D3),
                         onTap: null,
                       ),
                       CardButton(
@@ -95,7 +96,7 @@ class SourcesPage extends StatelessWidget {
                         subLabel: "YouTube, Wiki",
                         layoutDirection: CardLayoutDirection.horizontal,
                         isCompact: true,
-                        accentColor: const Color(0xFF5f27cd), // Dark Purple
+                        accentColor: const Color(0xFF5f27cd),
                         onTap: null,
                       ),
                       CardButton(
@@ -150,24 +151,23 @@ class SourcesPage extends StatelessWidget {
                                 Icon(
                                   Icons.source_rounded,
                                   size: 48,
-                                  color: AppTheme.textSecondary.withValues(
-                                    alpha: 0.2,
-                                  ),
+                                  color: cs.onSurface.withValues(alpha: 0.2),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
                                   "No sources added yet.",
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
-                                        color: AppTheme.textSecondary
-                                            .withValues(alpha: 0.5),
+                                        color: cs.onSurface.withValues(
+                                          alpha: 0.5,
+                                        ),
                                       ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                      const SizedBox(height: 80), // Bottom padding
+                      const SizedBox(height: 80),
                     ]),
                   ),
                 ),

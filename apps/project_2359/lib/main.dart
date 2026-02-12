@@ -3,17 +3,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:project_2359/features/home_page/home_page.dart';
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/theme_notifier.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Enable high refresh rate for supported devices
   try {
     await FlutterDisplayMode.setHighRefreshRate();
   } catch (e) {
     debugPrint('Failed to set high refresh rate: $e');
   }
+
+  await themeNotifier.init();
 
   runApp(
     MultiBlocProvider(
@@ -28,12 +30,23 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
-      theme: AppTheme.darkTheme,
-      darkTheme: AppTheme.darkTheme,
-      home: HomePage(),
+    return ListenableBuilder(
+      listenable: themeNotifier,
+      builder: (context, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          themeMode: themeNotifier.themeMode,
+          theme: AppTheme.buildTheme(
+            Brightness.light,
+            themeNotifier.accentColor,
+          ),
+          darkTheme: AppTheme.buildTheme(
+            Brightness.dark,
+            themeNotifier.accentColor,
+          ),
+          home: HomePage(),
+        );
+      },
     );
   }
 }

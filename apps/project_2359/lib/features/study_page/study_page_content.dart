@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/activity_list_item.dart';
 import 'package:project_2359/features/study_page/widgets/active_material_card.dart';
@@ -7,7 +6,6 @@ import 'package:project_2359/features/study_page/widgets/active_material_card.da
 class StudyPageContent extends StatelessWidget {
   const StudyPageContent({super.key});
 
-  @override
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -19,7 +17,7 @@ class StudyPageContent extends StatelessWidget {
           _buildActiveMaterialsSection(context),
           const SizedBox(height: 32),
           _buildSourceLibrarySection(context),
-          const SizedBox(height: 100), // Bottom padding for navigation bar
+          const SizedBox(height: 100),
         ],
       ),
     );
@@ -36,7 +34,7 @@ class StudyPageContent extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         SizedBox(
-          height: 240, // Height for the cards
+          height: 240,
           child: ListView(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
@@ -46,14 +44,14 @@ class StudyPageContent extends StatelessWidget {
                 title: "Advanced Chemistry",
                 subtitle: "Week 4 • Molecules",
                 progress: 0.75,
-                accentColor: Color(0xFF7B61FF), // Custom purple
+                accentColor: Color(0xFF7B61FF),
               ),
               ActiveMaterialCard(
                 icon: Icons.history_edu,
                 title: "World History",
                 subtitle: "The Renaissance",
                 progress: 0.42,
-                accentColor: Color(0xFFFF9F43), // Custom orange
+                accentColor: Color(0xFFFF9F43),
               ),
             ],
           ),
@@ -76,21 +74,18 @@ class StudyPageContent extends StatelessWidget {
           icon: const Icon(Icons.picture_as_pdf),
           title: const Text("Introduction to Psychology"),
           subtitle: const Text("PDF • 3.4 MB"),
-          accentColor: AppTheme.textSecondary,
           onTap: () {},
         ),
         ActivityListItem(
           icon: const Icon(Icons.link),
           title: const Text("Khan Academy: Calculus"),
           subtitle: const Text("Web Link • 5 Citations"),
-          accentColor: AppTheme.textSecondary,
           onTap: () {},
         ),
         ActivityListItem(
           icon: const Icon(Icons.image),
           title: const Text("Whiteboard_Session_02"),
           subtitle: const Text("PNG • 1.2 MB"),
-          accentColor: AppTheme.textSecondary,
           onTap: () {},
         ),
       ],

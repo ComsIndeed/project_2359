@@ -146,7 +146,7 @@ class CardButton extends StatelessWidget {
       );
     } else {
       decoration = BoxDecoration(
-        color: AppTheme.surface.withValues(alpha: 0.6),
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.08),

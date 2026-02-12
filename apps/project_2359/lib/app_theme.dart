@@ -2,28 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Colors
-  static const Color background = Color(0xFF0A0E17);
-  static const Color surface = Color(0xFF111625);
-  static const Color primary = Color(0xFF448AFF);
-  static const Color primaryOption2 = Color(
-    0xFF2962FF,
-  ); // Slightly darker variant
-  static const Color secondarySurface = Color(0xFF1E2738);
-  static const Color textPrimary = Colors.white;
-  static const Color textSecondary = Color(0xFF8F9BB3);
   static const Color success = Color(0xFF00E676);
   static const Color error = Color(0xFFFF5252);
   static const Color warning = Color(0xFFFFAB40);
 
-  // Border
   static ShapeBorder defaultShape = RoundedSuperellipseBorder(
     borderRadius: BorderRadius.circular(32),
-  );
-
-  static ShapeBorder defaultShapeWithSide = RoundedSuperellipseBorder(
-    borderRadius: BorderRadius.circular(32),
-    side: BorderSide(color: primary, width: 1.5),
   );
 
   static ShapeBorder cardShape = RoundedSuperellipseBorder(
@@ -36,7 +20,6 @@ class AppTheme {
 
   static const double defaultPadding = 16.0;
 
-  // CardButton Style Defaults
   static CardButtonStyle cardButtonStyle = CardButtonStyle(
     saturation: 0.7,
     lightness: 0.05,
@@ -55,28 +38,40 @@ class AppTheme {
     ),
   );
 
-  static ThemeData get darkTheme {
+  static ThemeData buildTheme(Brightness brightness, Color accent) {
+    final isDark = brightness == Brightness.dark;
+    final bg = isDark ? const Color(0xFF0A0E17) : const Color(0xFFF5F6FA);
+    final surface = isDark ? const Color(0xFF111625) : Colors.white;
+    final secondarySurface = isDark
+        ? const Color(0xFF1E2738)
+        : const Color(0xFFE8EAF0);
+    final textPrimary = isDark ? Colors.white : const Color(0xFF1A1A2E);
+    final textSecondary = isDark
+        ? const Color(0xFF8F9BB3)
+        : const Color(0xFF6B7280);
+
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: background,
-      primaryColor: primary,
-      colorScheme: const ColorScheme.dark(
-        primary: primary,
-        secondary: primaryOption2,
+      brightness: brightness,
+      scaffoldBackgroundColor: bg,
+      primaryColor: accent,
+      colorScheme: ColorScheme(
+        brightness: brightness,
+        primary: accent,
+        onPrimary: Colors.white,
+        secondary: accent.withValues(alpha: 0.8),
+        onSecondary: Colors.white,
         surface: surface,
         onSurface: textPrimary,
+        surfaceContainerHighest: secondarySurface,
         error: error,
+        onError: Colors.white,
       ),
-
-      // Predictive Back Navigation (Android)
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
         },
       ),
-
-      // Typography
       textTheme: TextTheme(
         displayLarge: GoogleFonts.outfit(
           color: textPrimary,
@@ -106,19 +101,15 @@ class AppTheme {
         bodyLarge: GoogleFonts.inter(color: textPrimary, fontSize: 16),
         bodyMedium: GoogleFonts.inter(color: textSecondary, fontSize: 14),
       ),
-
-      // Card Theme
       cardTheme: CardThemeData(
         color: surface,
         elevation: 0,
         shape: cardShape,
         margin: EdgeInsets.all(8),
       ),
-
-      // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primary,
+          backgroundColor: accent,
           foregroundColor: Colors.white,
           shape: buttonShape as OutlinedBorder,
           elevation: 0,
@@ -129,11 +120,10 @@ class AppTheme {
           ),
         ),
       ),
-
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: primary,
-          side: const BorderSide(color: primary, width: 1.5),
+          foregroundColor: accent,
+          side: BorderSide(color: accent, width: 1.5),
           shape: buttonShape as OutlinedBorder,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           textStyle: GoogleFonts.inter(
@@ -142,15 +132,12 @@ class AppTheme {
           ),
         ),
       ),
-
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: primary,
+          foregroundColor: accent,
           shape: buttonShape as OutlinedBorder,
         ),
       ),
-
-      // Input Decoration
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: secondarySurface,
@@ -164,32 +151,27 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: primary, width: 1.5),
+          borderSide: BorderSide(color: accent, width: 1.5),
         ),
-        labelStyle: const TextStyle(color: textSecondary),
-        hintStyle: const TextStyle(color: textSecondary),
+        labelStyle: TextStyle(color: textSecondary),
+        hintStyle: TextStyle(color: textSecondary),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
         ),
       ),
-
-      // Icon Theme
-      iconTheme: const IconThemeData(color: textSecondary, size: 24),
-
-      // Bottom Navigation Bar
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: background, // Transparent/Background
-        selectedItemColor: primary,
+      iconTheme: IconThemeData(color: textSecondary, size: 24),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: bg,
+        selectedItemColor: accent,
         unselectedItemColor: textSecondary,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
         showSelectedLabels: true,
         showUnselectedLabels: true,
       ),
-
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: primary,
+        backgroundColor: accent,
         foregroundColor: Colors.white,
         shape: defaultShape,
       ),
@@ -197,7 +179,6 @@ class AppTheme {
   }
 }
 
-/// Style configuration for CardButton widget
 class CardButtonStyle {
   final double saturation;
   final double lightness;
