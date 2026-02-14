@@ -78,6 +78,7 @@ class HomePageContent extends StatelessWidget {
             );
           },
         ),
+        SizedBox(width: 12),
         const CircleAvatar(
           radius: 24,
           backgroundImage: NetworkImage(
