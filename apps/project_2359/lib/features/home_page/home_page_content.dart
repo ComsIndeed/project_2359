@@ -44,7 +44,7 @@ class HomePageContent extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
-        Image.asset('assets/images/app_icon.png', height: 40),
+        Image.asset('assets/images/app_icon_nobg.png', height: 40),
         SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
