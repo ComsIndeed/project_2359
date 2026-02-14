@@ -42,8 +42,6 @@ class SourcePage extends StatefulWidget {
 
 class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   // Controllers
-  late final AnimationController _drawerAnimController;
-  late final AnimationController _menuAnimController;
   final ScrollController _drawerScrollController = ScrollController();
   final PdfViewerController _pdfController = PdfViewerController();
 
@@ -57,23 +55,12 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
 
   // Constants
   static const _revealFraction = 0.85;
-  static const _menuSlide = 0.12; // fraction of height the PDF slides down
   static const _animDuration = Duration(milliseconds: 200);
   static const _animCurve = Curves.easeOutCubic;
 
   @override
   void initState() {
     super.initState();
-
-    _drawerAnimController = AnimationController(
-      vsync: this,
-      duration: _animDuration,
-    );
-    _menuAnimController = AnimationController(
-      vsync: this,
-      duration: _animDuration,
-    );
-
     compute(_parsePdf, widget.fileBytes).then((info) {
       if (mounted) {
         setState(() {
@@ -86,8 +73,6 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _drawerAnimController.dispose();
-    _menuAnimController.dispose();
     _pdfController.dispose();
     _drawerScrollController.dispose();
     super.dispose();
@@ -96,36 +81,19 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   // ─── Toggles ──────────────────────────────────────────────────────
 
   void _toggleDrawer() {
-    // Close menu first if open
-    if (_isMenuOpen) _closeMenu();
+    if (_isMenuOpen) setState(() => _isMenuOpen = false);
     setState(() => _isDrawerOpen = !_isDrawerOpen);
-    _isDrawerOpen
-        ? _drawerAnimController.forward()
-        : _drawerAnimController.reverse();
   }
 
   void _toggleMenu() {
-    // Close drawer first if open
-    if (_isDrawerOpen) _closeDrawer();
     setState(() => _isMenuOpen = !_isMenuOpen);
-    _isMenuOpen ? _menuAnimController.forward() : _menuAnimController.reverse();
-  }
-
-  void _closeDrawer() {
-    if (!_isDrawerOpen) return;
-    setState(() => _isDrawerOpen = false);
-    _drawerAnimController.reverse();
-  }
-
-  void _closeMenu() {
-    if (!_isMenuOpen) return;
-    setState(() => _isMenuOpen = false);
-    _menuAnimController.reverse();
   }
 
   void _closeAll() {
-    _closeDrawer();
-    _closeMenu();
+    setState(() {
+      _isDrawerOpen = false;
+      _isMenuOpen = false;
+    });
   }
 
   // ─── Zoom ─────────────────────────────────────────────────────────
@@ -165,43 +133,47 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
     return Scaffold(
       body: Stack(
         children: [
-          // ── Menu row (sits behind PDF, top area) ─────────────────
-          _buildMenuRow(cs, tt, isDark),
-
-          // ── Extracted text (right 85%) ───────────────────────────
+          // ── Text panel (right 85%, behind main unit) ─────────────
           Positioned(
             top: 0,
             bottom: 0,
             right: 0,
             width: screenWidth * _revealFraction,
-            child: _buildTextPanel(cs, tt, isDark),
+            child: _buildTextPanel(cs, tt),
           ),
 
-          // ── PDF layer ───────────────────────────────────────────
+          // ── Main unit: AppBar + Menu + PDF (slides left together) ──
           AnimatedSlide(
             duration: _animDuration,
             curve: _animCurve,
-            offset: Offset(
-              _isDrawerOpen ? -_revealFraction : 0,
-              _isMenuOpen ? _menuSlide : 0,
-            ),
+            offset: Offset(_isDrawerOpen ? -_revealFraction : 0, 0),
             child: GestureDetector(
-              onTap: (_isDrawerOpen || _isMenuOpen) ? _closeAll : null,
+              onTap: _isDrawerOpen ? _closeAll : null,
               child: Container(
                 width: screenWidth,
                 color: Theme.of(context).scaffoldBackgroundColor,
                 child: Column(
                   children: [
-                    _buildAppBar(context, cs, tt, isDark),
+                    // App bar
+                    _buildAppBar(context, cs, tt),
+
+                    // Menu (animated reveal — pushes PDF down)
+                    AnimatedSize(
+                      duration: _animDuration,
+                      curve: _animCurve,
+                      alignment: Alignment.topCenter,
+                      child: _isMenuOpen
+                          ? _buildMenuContent(cs, tt, isDark)
+                          : const SizedBox.shrink(),
+                    ),
+
+                    // PDF viewer area
                     Expanded(child: _buildPdfArea(cs, isDark)),
                   ],
                 ),
               ),
             ),
           ),
-
-          // ── FAB (center-right) ──────────────────────────────────
-          _buildFab(cs, isDark, screenWidth),
         ],
       ),
     );
@@ -211,19 +183,13 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   // App Bar
   // ═══════════════════════════════════════════════════════════════════
 
-  Widget _buildAppBar(
-    BuildContext context,
-    ColorScheme cs,
-    TextTheme tt,
-    bool isDark,
-  ) {
+  Widget _buildAppBar(BuildContext context, ColorScheme cs, TextTheme tt) {
     return SafeArea(
       bottom: false,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Row(
           children: [
-            // Back button
             _appBarButton(
               cs: cs,
               icon: Icons.arrow_back_rounded,
@@ -231,7 +197,6 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
             ),
             const SizedBox(width: 12),
 
-            // Title
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +220,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
               ),
             ),
 
-            // Menu toggle button (horizontal bars ↔ X)
+            // Menu toggle (horizontal bars ↔ X)
             _appBarButton(
               cs: cs,
               icon: _isMenuOpen
@@ -297,71 +262,88 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // Menu Row (sits behind PDF, revealed by sliding PDF down)
+  // Menu Content (revealed by pushing PDF down)
   // ═══════════════════════════════════════════════════════════════════
 
-  Widget _buildMenuRow(ColorScheme cs, TextTheme tt, bool isDark) {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Title
-              Text('Options', style: tt.headlineMedium?.copyWith(fontSize: 15)),
-              const SizedBox(height: 12),
-
-              // Action row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _menuItem(cs, Icons.share_rounded, 'Share', () {}),
-                  _menuItem(cs, Icons.bookmark_add_rounded, 'Bookmark', () {}),
-                  _menuItem(cs, Icons.print_rounded, 'Print', () {}),
-                  _menuItem(cs, Icons.info_outline_rounded, 'Info', () {}),
-                ],
-              ),
-            ],
-          ),
+  Widget _buildMenuContent(ColorScheme cs, TextTheme tt, bool isDark) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isDark
+            ? cs.surfaceContainerHighest.withValues(alpha: 0.4)
+            : cs.surfaceContainerHighest.withValues(alpha: 0.5),
+        border: Border(
+          bottom: BorderSide(color: cs.onSurface.withValues(alpha: 0.06)),
         ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 4),
+          _menuTile(
+            cs: cs,
+            icon: Icons.share_rounded,
+            label: 'Share document',
+            onTap: () {},
+          ),
+          _menuTile(
+            cs: cs,
+            icon: Icons.bookmark_add_rounded,
+            label: 'Add bookmark',
+            onTap: () {},
+          ),
+          _menuTile(
+            cs: cs,
+            icon: Icons.print_rounded,
+            label: 'Print',
+            onTap: () {},
+          ),
+          _menuTile(
+            cs: cs,
+            icon: Icons.info_outline_rounded,
+            label: 'Document info',
+            onTap: () {},
+          ),
+          const SizedBox(height: 4),
+        ],
       ),
     );
   }
 
-  Widget _menuItem(
-    ColorScheme cs,
-    IconData icon,
-    String label,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: ShapeDecoration(
-              color: cs.primary.withValues(alpha: 0.1),
-              shape: AppTheme.buttonShape,
-            ),
-            child: Icon(icon, size: 22, color: cs.primary),
+  Widget _menuTile({
+    required ColorScheme cs,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: cs.onSurface.withValues(alpha: 0.7)),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: cs.onSurface.withValues(alpha: 0.8),
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18,
+                color: cs.onSurface.withValues(alpha: 0.3),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: cs.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -373,7 +355,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   Widget _buildPdfArea(ColorScheme cs, bool isDark) {
     return Stack(
       children: [
-        // PDF viewer
+        // PDF viewer with superellipse top clip
         ClipPath(
           clipper: _SuperellipseTopClipper(),
           child: Container(
@@ -403,7 +385,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
           ),
         ),
 
-        // ── Bottom controls bar ───────────────────────────────────
+        // Bottom controls bar
         if (_totalPages > 0)
           Positioned(
             left: 12,
@@ -415,11 +397,15 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════════
+  // Bottom Controls (page badge + zoom + extract text button)
+  // ═══════════════════════════════════════════════════════════════════
+
   Widget _buildBottomControls(ColorScheme cs) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: ShapeDecoration(
-        color: cs.surface.withValues(alpha: 0.88),
+        color: cs.surface.withValues(alpha: 0.92),
         shape: AppTheme.cardShape as OutlinedBorder,
         shadows: [
           BoxShadow(
@@ -450,30 +436,78 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
 
           const Spacer(),
 
-          // Zoom controls
-          _zoomButton(cs, Icons.remove_rounded, _zoomOut),
-          Container(
-            constraints: const BoxConstraints(minWidth: 44),
-            alignment: Alignment.center,
-            child: GestureDetector(
-              onTap: _zoomReset,
-              child: Text(
-                '${(_zoomLevel * 100).round()}%',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: cs.primary,
-                ),
+          // Zoom out
+          _controlButton(cs, Icons.remove_rounded, _zoomOut),
+
+          // Zoom percentage display
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Text(
+              '${(_zoomLevel * 100).round()}%',
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ),
-          _zoomButton(cs, Icons.add_rounded, _zoomIn),
+
+          // Zoom in
+          _controlButton(cs, Icons.add_rounded, _zoomIn),
+
+          // Zoom reset (fit)
+          _controlButton(cs, Icons.fit_screen_rounded, _zoomReset),
+
+          // Divider
+          Container(
+            width: 1,
+            height: 20,
+            color: cs.onSurface.withValues(alpha: 0.3),
+          ),
+
+          _extractTextButton(cs),
         ],
       ),
     );
   }
 
-  Widget _zoomButton(ColorScheme cs, IconData icon, VoidCallback onTap) {
+  Material _extractTextButton(ColorScheme cs) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: _toggleDrawer,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.article_rounded,
+                size: 16,
+                color: _isDrawerOpen
+                    ? cs.primary
+                    : cs.onSurface.withValues(alpha: 0.6),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Text',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: _isDrawerOpen
+                      ? cs.primary
+                      : cs.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _controlButton(ColorScheme cs, IconData icon, VoidCallback onTap) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -492,10 +526,10 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // Text Panel
+  // Text Panel (right side, behind main unit)
   // ═══════════════════════════════════════════════════════════════════
 
-  Widget _buildTextPanel(ColorScheme cs, TextTheme tt, bool isDark) {
+  Widget _buildTextPanel(ColorScheme cs, TextTheme tt) {
     return Container(
       color: cs.surface,
       child: SafeArea(
@@ -601,6 +635,41 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                       ),
                     ),
             ),
+
+            // ── Action Buttons ─────────────────────────
+            if (_extractedText != null && _extractedText!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 4, 8, 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildActionButton(
+                      cs: cs,
+                      icon: Icons.copy_rounded,
+                      label: 'Copy',
+                      onTap: () {
+                        // TODO: copy to clipboard
+                      },
+                    ),
+                    _buildActionButton(
+                      cs: cs,
+                      icon: Icons.text_fields_rounded,
+                      label: 'Reinterpret\ntext',
+                      onTap: () {
+                        // TODO: reinterpret extracted text
+                      },
+                    ),
+                    _buildActionButton(
+                      cs: cs,
+                      icon: Icons.find_in_page_rounded,
+                      label: 'Reinterpret\ndoc',
+                      onTap: () {
+                        // TODO: reinterpret document
+                      },
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
@@ -608,81 +677,58 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // Floating Action Button (Custom, center-right)
+  // Action Button (icon + label below)
   // ═══════════════════════════════════════════════════════════════════
 
-  Widget _buildFab(ColorScheme cs, bool isDark, double screenWidth) {
-    // Position follows the PDF edge when drawer is open
-    final fabRight = _isDrawerOpen ? screenWidth * _revealFraction - 22 : -2.0;
-
-    return AnimatedPositioned(
-      duration: _animDuration,
-      curve: _animCurve,
-      right: fabRight,
-      top: 0,
-      bottom: 0,
-      child: Center(
-        child: GestureDetector(
-          onTap: _toggleDrawer,
-          onHorizontalDragEnd: (details) {
-            if (details.primaryVelocity != null) {
-              if (details.primaryVelocity! < -100 && !_isDrawerOpen) {
-                _toggleDrawer();
-              } else if (details.primaryVelocity! > 100 && _isDrawerOpen) {
-                _toggleDrawer();
-              }
-            }
-          },
-          child: AnimatedBuilder(
-            animation: _drawerAnimController,
-            builder: (context, child) {
-              final glow = _drawerAnimController.value;
-              return Container(
-                width: 44,
-                height: 44,
-                decoration: ShapeDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [cs.primary, cs.primary.withValues(alpha: 0.8)],
-                  ),
-                  shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  shadows: [
-                    BoxShadow(
-                      color: cs.primary.withValues(alpha: 0.25 + glow * 0.15),
-                      blurRadius: 16 + glow * 8,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 2),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.15),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: AnimatedRotation(
-                  duration: _animDuration,
-                  turns: _isDrawerOpen ? 0.5 : 0,
-                  child: const Icon(
-                    Icons.chevron_left_rounded,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-              );
-            },
+  Widget _buildActionButton({
+    required ColorScheme cs,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: ShapeDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  cs.primary.withValues(alpha: 0.15),
+                  cs.primary.withValues(alpha: 0.06),
+                ],
+              ),
+              shape: RoundedSuperellipseBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(color: cs.primary.withValues(alpha: 0.12)),
+              ),
+            ),
+            child: Icon(icon, size: 18, color: cs.primary),
           ),
-        ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              height: 1.2,
+              color: cs.onSurface.withValues(alpha: 0.55),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// Custom clipper for superellipse-shaped top corners on the PDF area
+// Custom clipper for superellipse top corners on the PDF area
 // ═══════════════════════════════════════════════════════════════════════
 
 class _SuperellipseTopClipper extends CustomClipper<Path> {
