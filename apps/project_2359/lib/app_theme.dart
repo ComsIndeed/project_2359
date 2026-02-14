@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:project_2359/theme_notifier.dart';
 
 class AppTheme {
   static const Color success = Color(0xFF00E676);
@@ -38,12 +39,17 @@ class AppTheme {
     ),
   );
 
-  static ThemeData buildTheme(Brightness brightness, Color accent) {
+  static ThemeData buildTheme(
+    Brightness brightness,
+    Color accent, {
+    BackgroundTone? backgroundTone,
+  }) {
     final isDark = brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF0A0E17) : const Color(0xFFF5F6FA);
-    final surface = isDark ? const Color(0xFF111625) : Colors.white;
+    final tone = backgroundTone ?? BackgroundTone.deepNavy;
+    final bg = isDark ? tone.background : const Color(0xFFF5F6FA);
+    final surface = isDark ? tone.surface : Colors.white;
     final secondarySurface = isDark
-        ? const Color(0xFF1E2738)
+        ? Color.lerp(tone.surface, Colors.white, 0.08)!
         : const Color(0xFFE8EAF0);
     final textPrimary = isDark ? Colors.white : const Color(0xFF1A1A2E);
     final textSecondary = isDark

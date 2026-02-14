@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/core/ai_helpers.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -666,7 +667,11 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                   children: [
                     _buildActionButton(
                       cs: cs,
-                      icon: FontAwesomeIcons.copy,
+                      icon: FaIcon(
+                        FontAwesomeIcons.copy,
+                        size: 18,
+                        color: cs.primary,
+                      ),
                       label: 'Copy',
                       onTap: () {
                         // TODO: copy to clipboard
@@ -674,15 +679,28 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                     ),
                     _buildActionButton(
                       cs: cs,
-                      icon: FontAwesomeIcons.font,
+                      icon: FaIcon(
+                        FontAwesomeIcons.font,
+                        size: 18,
+                        color: cs.primary,
+                      ),
                       label: 'Reinterpret\ntext',
                       onTap: () {
                         // TODO: reinterpret extracted text
+
+                        final stream = AiHelpers.indexExtractedText(
+                          _extractedText!,
+                        );
+                        stream.listen((e) => print(e));
                       },
                     ),
                     _buildActionButton(
                       cs: cs,
-                      icon: FontAwesomeIcons.magnifyingGlassPlus,
+                      icon: FaIcon(
+                        FontAwesomeIcons.magnifyingGlassPlus,
+                        size: 18,
+                        color: cs.primary,
+                      ),
                       label: 'Reinterpret\ndoc',
                       onTap: () {
                         // TODO: reinterpret document
@@ -703,16 +721,21 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
 
   Widget _buildActionButton({
     required ColorScheme cs,
-    required IconData icon,
+    required Widget icon,
     required String label,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
+    final shape = RoundedSuperellipseBorder(
+      borderRadius: BorderRadius.circular(14),
+      side: BorderSide(color: cs.primary.withValues(alpha: 0.12)),
+    );
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: Ink(
             width: 40,
             height: 40,
             decoration: ShapeDecoration(
@@ -724,15 +747,20 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                   cs.primary.withValues(alpha: 0.06),
                 ],
               ),
-              shape: RoundedSuperellipseBorder(
-                borderRadius: BorderRadius.circular(14),
-                side: BorderSide(color: cs.primary.withValues(alpha: 0.12)),
-              ),
+              shape: shape,
             ),
-            child: FaIcon(icon, size: 18, color: cs.primary),
+            child: InkWell(
+              customBorder: shape,
+              onTap: onTap,
+              child: Center(child: icon),
+            ),
           ),
-          const SizedBox(height: 4),
-          Text(
+        ),
+        const SizedBox(height: 4),
+        GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Text(
             label,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
@@ -742,8 +770,8 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
               color: cs.onSurface.withValues(alpha: 0.55),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

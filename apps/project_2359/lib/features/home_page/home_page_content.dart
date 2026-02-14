@@ -72,18 +72,14 @@ class HomePageContent extends StatelessWidget {
         TapToSlideUp(
           page: const SettingsPage(),
           builder: (pushPage) {
-            return IconButton(
-              onPressed: pushPage,
-              icon: const FaIcon(FontAwesomeIcons.gear),
+            return Badge(
+              label: Text("1"),
+              child: IconButton(
+                onPressed: pushPage,
+                icon: const FaIcon(FontAwesomeIcons.gear),
+              ),
             );
           },
-        ),
-        SizedBox(width: 12),
-        const CircleAvatar(
-          radius: 24,
-          backgroundImage: NetworkImage(
-            'https://i.pravatar.cc/150?u=a042581f4e29026704d',
-          ),
         ),
       ],
     );

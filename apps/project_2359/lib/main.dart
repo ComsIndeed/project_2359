@@ -51,10 +51,12 @@ class MainApp extends StatelessWidget {
           theme: AppTheme.buildTheme(
             Brightness.light,
             themeNotifier.accentColor,
+            backgroundTone: themeNotifier.backgroundTone,
           ),
           darkTheme: AppTheme.buildTheme(
             Brightness.dark,
             themeNotifier.accentColor,
+            backgroundTone: themeNotifier.backgroundTone,
           ),
           home: HomePage(),
         );
