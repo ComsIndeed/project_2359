@@ -6,9 +6,15 @@ import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/theme_notifier.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://digzsxnfivcmrsyzdnrb.supabase.co',
+    anonKey: 'sb_publishable_moMCFpqrLfTXqWaJATrahQ_SUfKdwbm',
+  );
 
   try {
     await FlutterDisplayMode.setHighRefreshRate();
