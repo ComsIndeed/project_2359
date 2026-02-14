@@ -152,7 +152,10 @@ class SourcesPage extends StatelessWidget {
                             }
 
                             return TapToSlideLeft(
-                              page: SourcePage(fileBytes: file.bytes!),
+                              page: SourcePage(
+                                fileBytes: file.bytes!,
+                                title: file.name,
+                              ),
                               builder: (switchPage) => ActivityListItem(
                                 onTap: switchPage,
                                 icon: const Icon(Icons.edit_document),
