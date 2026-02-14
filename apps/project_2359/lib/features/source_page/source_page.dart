@@ -53,6 +53,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   int _currentPage = 1;
   int _totalPages = 0;
   double _zoomLevel = 1.0;
+  bool _pdfReady = false;
 
   // Constants
   static const _revealFraction = 0.85;
@@ -62,6 +63,10 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    // Defer PDF viewer init until after the route transition's first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _pdfReady = true);
+    });
     compute(_parsePdf, widget.fileBytes).then((info) {
       if (mounted) {
         setState(() {
@@ -373,19 +378,26 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                     ? const Color(0xFF2A2A2A)
                     : Colors.grey.shade300,
               ),
-              child: SfPdfViewer.memory(
-                canShowPageLoadingIndicator: true,
-                widget.fileBytes,
-                controller: _pdfController,
-                onPageChanged: (details) {
-                  setState(() => _currentPage = details.newPageNumber);
-                },
-                onZoomLevelChanged: (details) {
-                  setState(() => _zoomLevel = details.newZoomLevel);
-                },
-                canShowScrollHead: false,
-                pageSpacing: 24,
-              ),
+              child: _pdfReady
+                  ? SfPdfViewer.memory(
+                      canShowPageLoadingIndicator: true,
+                      widget.fileBytes,
+                      controller: _pdfController,
+                      onPageChanged: (details) {
+                        setState(() => _currentPage = details.newPageNumber);
+                      },
+                      onZoomLevelChanged: (details) {
+                        setState(() => _zoomLevel = details.newZoomLevel);
+                      },
+                      canShowScrollHead: false,
+                      pageSpacing: 24,
+                    )
+                  : Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
             ),
           ),
         ),
