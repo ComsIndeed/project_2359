@@ -5,6 +5,7 @@ import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
 import 'package:project_2359/core/widgets/tap_to_slide_up.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
+import 'package:project_2359/theme_notifier.dart';
 
 class HomePageContent extends StatelessWidget {
   const HomePageContent({super.key});
@@ -44,7 +45,18 @@ class HomePageContent extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
-        Image.asset('assets/images/app_icon_nobg.png', height: 40),
+        ListenableBuilder(
+          listenable: themeNotifier,
+          builder: (context, __) => AnimatedSwitcher(
+            duration: Durations.short4,
+            child: themeNotifier.themeMode == ThemeMode.dark
+                ? Image.asset(
+                    'assets/images/app_icon_light_nobg.png',
+                    height: 40,
+                  )
+                : Image.asset('assets/images/app_icon_nobg.png', height: 40),
+          ),
+        ),
         SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,

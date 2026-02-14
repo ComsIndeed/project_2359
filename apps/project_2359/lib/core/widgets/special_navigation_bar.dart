@@ -98,13 +98,13 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
                       data: Theme.of(context).copyWith(
                         textButtonTheme: TextButtonThemeData(
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
+                            foregroundColor: cs.onSurface,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 8,
                             ),
                             textStyle: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w500,
                               fontSize: 13,
                               letterSpacing: 0.3,
                             ),

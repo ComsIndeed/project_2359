@@ -92,8 +92,10 @@ class _HomePageState extends State<HomePage> {
                             );
                           },
                         ),
-                        const VerticalDivider(
-                          color: Colors.white12,
+                        VerticalDivider(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.12),
                           width: 8,
                           indent: 8,
                           endIndent: 8,
