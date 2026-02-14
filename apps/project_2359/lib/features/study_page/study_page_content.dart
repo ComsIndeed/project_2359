@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/activity_list_item.dart';
+import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/features/study_page/widgets/active_material_card.dart';
 
 class StudyPageContent extends StatelessWidget {
@@ -39,20 +40,22 @@ class StudyPageContent extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
-            children: const [
+            children: [
               ActiveMaterialCard(
                 icon: FontAwesomeIcons.flask,
                 title: "Advanced Chemistry",
                 subtitle: "Week 4 • Molecules",
                 progress: 0.75,
-                accentColor: Color(0xFF7B61FF),
+                backgroundGenerator: GenerationSeed.fromString(
+                  "Advanced Chemistry",
+                ),
               ),
               ActiveMaterialCard(
                 icon: FontAwesomeIcons.bookOpen,
                 title: "World History",
                 subtitle: "The Renaissance",
                 progress: 0.42,
-                accentColor: Color(0xFFFF9F43),
+                backgroundGenerator: GenerationSeed.fromString("World History"),
               ),
             ],
           ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/core/widgets/pressable_scale.dart';
+import 'package:project_2359/core/widgets/special_background_generator.dart';
 
 class ActivityListItem extends StatefulWidget {
   final Widget? icon;
@@ -15,6 +17,12 @@ class ActivityListItem extends StatefulWidget {
   final bool isLoading;
   final double bottomMargin;
 
+  // Background generator properties
+  final GenerationSeed? backgroundSeed;
+  final String? backgroundLabel;
+  final IconData? backgroundIcon;
+  final CardButtonStyle? backgroundStyle;
+
   const ActivityListItem({
     super.key,
     this.icon,
@@ -27,6 +35,10 @@ class ActivityListItem extends StatefulWidget {
     this.showChevron = true,
     this.isLoading = false,
     this.bottomMargin = 12,
+    this.backgroundSeed,
+    this.backgroundLabel,
+    this.backgroundIcon,
+    this.backgroundStyle,
   });
 
   @override
@@ -72,125 +84,180 @@ class _ActivityListItemState extends State<ActivityListItem>
 
   @override
   Widget build(BuildContext context) {
+    // If loading, simpler return (keeps existing shimmer logic intact)
+    if (widget.isLoading) {
+      return _buildLoadingState(context);
+    }
+
     final cs = Theme.of(context).colorScheme;
     final accent = widget.accentColor ?? cs.primary;
-    final bool isDisabled = widget.onTap == null && !widget.isLoading;
+    final bool isDisabled = widget.onTap == null;
     final contentPadding =
         widget.padding ?? EdgeInsets.all(widget.isCompact ? 12.0 : 16.0);
-    final double iconContainerPadding = widget.isCompact ? 8 : 10;
-    final double iconSize = widget.isCompact ? 20 : 24;
-    final double skeletonIconSize = widget.isCompact ? 36 : 44;
 
-    return Card(
-      margin: EdgeInsets.only(bottom: widget.bottomMargin),
-      child: PressableScale(
-        onTap: widget.isLoading ? null : widget.onTap,
-        child: AnimatedBuilder(
-          animation: _shimmerAnimation,
-          builder: (context, child) {
-            return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                gradient: widget.isLoading
-                    ? _buildShimmerGradient(_shimmerAnimation.value, cs.surface)
-                    : null,
-              ),
-              child: child,
-            );
-          },
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: widget.isLoading ? null : widget.onTap,
-              customBorder: AppTheme.cardShape,
-              child: Opacity(
-                opacity: isDisabled ? 0.5 : 1.0,
-                child: Padding(
-                  padding: contentPadding,
-                  child: Row(
-                    children: [
-                      if (widget.isLoading)
-                        _buildSkeletonIcon(skeletonIconSize, cs.surface)
-                      else if (widget.icon != null)
-                        Container(
-                          padding: EdgeInsets.all(iconContainerPadding),
-                          decoration: BoxDecoration(
-                            color: accent.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: accent.withValues(alpha: 0.25),
-                              width: 1,
-                            ),
-                          ),
-                          child: IconTheme(
-                            data: IconThemeData(color: accent, size: iconSize),
-                            child: widget.icon!,
-                          ),
-                        ),
+    // Build the core content row
+    final content = _buildContentRow(context, cs, accent);
 
-                      SizedBox(width: widget.isCompact ? 12 : 16),
+    // Check if we should use the special background generator
+    final bool hasBackground =
+        widget.backgroundSeed != null &&
+        widget.backgroundLabel != null &&
+        widget.backgroundIcon != null;
 
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (widget.isLoading)
-                              _buildSkeletonText(
-                                width: 0.6,
-                                height: 16,
-                                surfaceColor: cs.surface,
-                              )
-                            else if (widget.title != null)
-                              DefaultTextStyle(
-                                style:
-                                    Theme.of(
-                                      context,
-                                    ).textTheme.bodyLarge?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ) ??
-                                    const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                child: widget.title!,
-                              ),
-                            SizedBox(height: widget.isCompact ? 2 : 4),
-                            if (widget.isLoading)
-                              _buildSkeletonText(
-                                width: 0.4,
-                                height: 14,
-                                surfaceColor: cs.surface,
-                              )
-                            else if (widget.subtitle != null)
-                              DefaultTextStyle(
-                                style:
-                                    Theme.of(context).textTheme.bodyMedium ??
-                                    const TextStyle(),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                child: widget.subtitle!,
-                              ),
-                          ],
-                        ),
-                      ),
-
-                      if (widget.showChevron && !widget.isLoading)
-                        FaIcon(
-                          FontAwesomeIcons.chevronRight,
-                          color: cs.onSurface.withValues(alpha: 0.5),
-                          size: widget.isCompact ? 14 : 16,
-                        ),
-                      if (widget.isLoading) _buildSkeletonChevron(cs.surface),
-                    ],
-                  ),
+    if (hasBackground) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: widget.bottomMargin),
+        child: PressableScale(
+          onTap: widget.onTap,
+          child: SpecialBackgroundGenerator(
+            seed: widget.backgroundSeed!,
+            label: widget.backgroundLabel!,
+            icon: widget.backgroundIcon!,
+            style: widget.backgroundStyle,
+            isDisabled: isDisabled,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: widget.onTap,
+                customBorder: AppTheme.cardShape,
+                child: Opacity(
+                  opacity: isDisabled ? 0.5 : 1.0,
+                  child: Padding(padding: contentPadding, child: content),
                 ),
               ),
             ),
           ),
         ),
+      );
+    }
+
+    // Default Card implementation
+    return Card(
+      margin: EdgeInsets.only(bottom: widget.bottomMargin),
+      child: PressableScale(
+        onTap: widget.onTap,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.onTap,
+            customBorder: AppTheme.cardShape,
+            child: Opacity(
+              opacity: isDisabled ? 0.5 : 1.0,
+              child: Padding(padding: contentPadding, child: content),
+            ),
+          ),
+        ),
       ),
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final contentPadding =
+        widget.padding ?? EdgeInsets.all(widget.isCompact ? 12.0 : 16.0);
+
+    return Card(
+      margin: EdgeInsets.only(bottom: widget.bottomMargin),
+      child: AnimatedBuilder(
+        animation: _shimmerAnimation,
+        builder: (context, child) {
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: _buildShimmerGradient(
+                _shimmerAnimation.value,
+                cs.surface,
+              ),
+            ),
+            child: child,
+          );
+        },
+        child: Padding(
+          padding: contentPadding,
+          child: _buildContentRow(context, cs, cs.primary),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentRow(BuildContext context, ColorScheme cs, Color accent) {
+    final double iconContainerPadding = widget.isCompact ? 8 : 10;
+    final double iconSize = widget.isCompact ? 20 : 24;
+    final double skeletonIconSize = widget.isCompact ? 36 : 44;
+
+    return Row(
+      children: [
+        if (widget.isLoading)
+          _buildSkeletonIcon(skeletonIconSize, cs.surface)
+        else if (widget.icon != null)
+          Container(
+            padding: EdgeInsets.all(iconContainerPadding),
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.25),
+                width: 1,
+              ),
+            ),
+            child: IconTheme(
+              data: IconThemeData(color: accent, size: iconSize),
+              child: widget.icon!,
+            ),
+          ),
+
+        SizedBox(width: widget.isCompact ? 12 : 16),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (widget.isLoading)
+                _buildSkeletonText(
+                  width: 0.6,
+                  height: 16,
+                  surfaceColor: cs.surface,
+                )
+              else if (widget.title != null)
+                DefaultTextStyle(
+                  style:
+                      Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ) ??
+                      const TextStyle(fontWeight: FontWeight.w600),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  child: widget.title!,
+                ),
+              SizedBox(height: widget.isCompact ? 2 : 4),
+              if (widget.isLoading)
+                _buildSkeletonText(
+                  width: 0.4,
+                  height: 14,
+                  surfaceColor: cs.surface,
+                )
+              else if (widget.subtitle != null)
+                DefaultTextStyle(
+                  style:
+                      Theme.of(context).textTheme.bodyMedium ??
+                      const TextStyle(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  child: widget.subtitle!,
+                ),
+            ],
+          ),
+        ),
+
+        if (widget.showChevron && !widget.isLoading)
+          FaIcon(
+            FontAwesomeIcons.chevronRight,
+            color: cs.onSurface.withValues(alpha: 0.5),
+            size: widget.isCompact ? 14 : 16,
+          ),
+        if (widget.isLoading) _buildSkeletonChevron(cs.surface),
+      ],
     );
   }
 
