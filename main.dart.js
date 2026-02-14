@@ -106466,7 +106466,7 @@ $S:243}
 A.Wu.prototype={
 N(a){return A.pv(A.d0(A.b([this.au3(a),B.ds,B.Gd,B.ds,new A.ta("Recent Activity",null,null),A.yL(B.i2,B.Pb,new A.amZ(),B.a7Q,B.a7G),A.yL(B.Wx,B.P6,new A.an_(),B.a7F,B.a7z),B.G7],t.p),B.aU,null,B.B,B.C),B.mH,B.a6)},
 au3(a){var s=null,r=t.p
-return A.cw(A.b([new A.vs(A.b4i(s,s,new A.yS("assets/images/app_icon.png",s,s)),s,40,s,s,!1,s),A.cm(s,s,8),A.d0(A.b([A.b4("Project 2359",s,s,s,s,A.E(a).ok.e,s,s),A.b4("Good Evening",s,s,s,s,A.E(a).ok.z,s,s)],r),B.aU,s,B.B,B.C),new A.LU(s),A.aYy(new A.amY(),B.a0Z),B.KA],r),B.x,s,B.B,B.C,0,s)}}
+return A.cw(A.b([new A.vs(A.b4i(s,s,new A.yS("assets/images/app_icon_nobg.png",s,s)),s,40,s,s,!1,s),A.cm(s,s,8),A.d0(A.b([A.b4("Project 2359",s,s,s,s,A.E(a).ok.e,s,s),A.b4("Good Evening",s,s,s,s,A.E(a).ok.z,s,s)],r),B.aU,s,B.B,B.C),new A.LU(s),A.aYy(new A.amY(),B.a0Z),B.KA],r),B.x,s,B.B,B.C,0,s)}}
 A.amZ.prototype={
 $0(){},
 $S:0}
