@@ -25,6 +25,14 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          "Generate Materials",
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
@@ -99,10 +107,17 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
         decoration: InputDecoration(
           hintText: 'Filter sources...',
           hintStyle: TextStyle(color: muted),
-          prefixIcon: FaIcon(
-            FontAwesomeIcons.magnifyingGlass,
-            color: muted,
-            size: 18,
+          prefixIcon: Padding(
+            padding: const EdgeInsets.only(left: 16, right: 8),
+            child: FaIcon(
+              FontAwesomeIcons.magnifyingGlass,
+              color: muted,
+              size: 18,
+            ),
+          ),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 0,
+            minHeight: 0,
           ),
           filled: false,
           border: InputBorder.none,
@@ -133,13 +148,13 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
       ),
       (
         icon: FontAwesomeIcons.link,
-        label: 'Web Res...',
+        label: 'Web Resources',
         subLabel: 'Link • 5 URLs',
         id: 'Web Res',
       ),
       (
         icon: FontAwesomeIcons.microphone,
-        label: 'Lecture...',
+        label: 'Lecture Recording',
         subLabel: 'MP3 • 45m',
         id: 'Lecture',
       ),
@@ -186,6 +201,12 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
             backgroundGenerator: GenerationSeed.fromString(id),
             isCompact: true,
             layoutDirection: CardLayoutDirection.horizontal,
+            padding: const EdgeInsets.only(
+              left: 12,
+              top: 12,
+              bottom: 12,
+              right: 44,
+            ),
             onTap: () {
               setState(() {
                 if (isSelected) {
