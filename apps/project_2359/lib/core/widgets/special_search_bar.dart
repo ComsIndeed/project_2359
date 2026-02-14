@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SpecialSearchBar extends StatelessWidget {
   final String hintText;
@@ -35,12 +36,16 @@ class SpecialSearchBar extends StatelessWidget {
       barHintStyle: WidgetStateProperty.all(
         tt.bodyMedium?.copyWith(color: muted),
       ),
-      barLeading: Icon(Icons.search_rounded, color: cs.primary),
+      barLeading: FaIcon(
+        FontAwesomeIcons.magnifyingGlass,
+        color: cs.primary,
+        size: 18,
+      ),
       barTrailing: [
         if (onFilterTap != null)
           IconButton(
             onPressed: onFilterTap,
-            icon: Icon(Icons.tune_rounded, color: muted),
+            icon: FaIcon(FontAwesomeIcons.sliders, color: muted, size: 18),
           ),
       ],
       dividerColor: Colors.transparent,
@@ -48,7 +53,7 @@ class SpecialSearchBar extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).pop();
         },
-        icon: Icon(Icons.arrow_back_rounded, color: cs.primary),
+        icon: FaIcon(FontAwesomeIcons.arrowLeft, color: cs.primary, size: 18),
       ),
       viewHintText: hintText,
       viewBackgroundColor: cs.surface,
@@ -75,7 +80,11 @@ class SpecialSearchBar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Row(
                 children: [
-                  Icon(Icons.history_rounded, size: 16, color: cs.primary),
+                  FaIcon(
+                    FontAwesomeIcons.clockRotateLeft,
+                    size: 14,
+                    color: cs.primary,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     "Recent",
@@ -96,7 +105,13 @@ class SpecialSearchBar extends StatelessWidget {
             "Study Group A",
           ];
           for (var item in recent) {
-            children.add(_buildSuggestionItem(context, item, Icons.history));
+            children.add(
+              _buildSuggestionItem(
+                context,
+                item,
+                FontAwesomeIcons.clockRotateLeft,
+              ),
+            );
           }
 
           children.add(const SizedBox(height: 32));
@@ -106,7 +121,7 @@ class SpecialSearchBar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Row(
                 children: [
-                  Icon(Icons.explore_outlined, size: 16, color: cs.primary),
+                  FaIcon(FontAwesomeIcons.compass, size: 14, color: cs.primary),
                   const SizedBox(width: 8),
                   Text(
                     "Discover",
@@ -127,18 +142,22 @@ class SpecialSearchBar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 children: [
-                  _buildQuickAction(context, "Notes", Icons.note_alt_outlined),
+                  _buildQuickAction(
+                    context,
+                    "Notes",
+                    FontAwesomeIcons.noteSticky,
+                  ),
                   const SizedBox(width: 12),
                   _buildQuickAction(
                     context,
                     "Tasks",
-                    Icons.check_circle_outline,
+                    FontAwesomeIcons.circleCheck,
                   ),
                   const SizedBox(width: 12),
                   _buildQuickAction(
                     context,
                     "Flashcards",
-                    Icons.style_outlined,
+                    FontAwesomeIcons.clone,
                   ),
                 ],
               ),
@@ -166,11 +185,7 @@ class SpecialSearchBar extends StatelessWidget {
           for (var item in suggestions) {
             if (item.toLowerCase().contains(text.toLowerCase())) {
               children.add(
-                _buildSuggestionItem(
-                  context,
-                  item,
-                  Icons.insert_drive_file_outlined,
-                ),
+                _buildSuggestionItem(context, item, FontAwesomeIcons.file),
               );
               foundAny = true;
             }
@@ -183,8 +198,8 @@ class SpecialSearchBar extends StatelessWidget {
                 child: Center(
                   child: Column(
                     children: [
-                      Icon(
-                        Icons.sentiment_dissatisfied_rounded,
+                      FaIcon(
+                        FontAwesomeIcons.faceFrown,
                         size: 48,
                         color: muted.withValues(alpha: 0.5),
                       ),
@@ -202,7 +217,7 @@ class SpecialSearchBar extends StatelessWidget {
             _buildSuggestionItem(
               context,
               "Search everywhere for \"$text\"",
-              Icons.travel_explore,
+              FontAwesomeIcons.earthAmericas,
             ),
           );
         }
@@ -244,7 +259,7 @@ class SpecialSearchBar extends StatelessWidget {
                     color: cs.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: cs.primary, size: 18),
+                  child: FaIcon(icon, color: cs.primary, size: 18),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -256,10 +271,10 @@ class SpecialSearchBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.north_west_rounded,
+                FaIcon(
+                  FontAwesomeIcons.arrowTurnUp,
                   color: muted.withValues(alpha: 0.5),
-                  size: 16,
+                  size: 14,
                 ),
               ],
             ),
@@ -297,7 +312,7 @@ class SpecialSearchBar extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: cs.primary, size: 20),
+              FaIcon(icon, color: cs.primary, size: 18),
               const SizedBox(width: 12),
               Text(
                 label,

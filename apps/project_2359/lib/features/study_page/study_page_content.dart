@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/activity_list_item.dart';
 import 'package:project_2359/features/study_page/widgets/active_material_card.dart';
@@ -40,14 +41,14 @@ class StudyPageContent extends StatelessWidget {
             clipBehavior: Clip.none,
             children: const [
               ActiveMaterialCard(
-                icon: Icons.science,
+                icon: FontAwesomeIcons.flask,
                 title: "Advanced Chemistry",
                 subtitle: "Week 4 • Molecules",
                 progress: 0.75,
                 accentColor: Color(0xFF7B61FF),
               ),
               ActiveMaterialCard(
-                icon: Icons.history_edu,
+                icon: FontAwesomeIcons.bookOpen,
                 title: "World History",
                 subtitle: "The Renaissance",
                 progress: 0.42,
@@ -71,19 +72,19 @@ class StudyPageContent extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ActivityListItem(
-          icon: const Icon(Icons.picture_as_pdf),
+          icon: const FaIcon(FontAwesomeIcons.filePdf),
           title: const Text("Introduction to Psychology"),
           subtitle: const Text("PDF • 3.4 MB"),
           onTap: () {},
         ),
         ActivityListItem(
-          icon: const Icon(Icons.link),
+          icon: const FaIcon(FontAwesomeIcons.link),
           title: const Text("Khan Academy: Calculus"),
           subtitle: const Text("Web Link • 5 Citations"),
           onTap: () {},
         ),
         ActivityListItem(
-          icon: const Icon(Icons.image),
+          icon: const FaIcon(FontAwesomeIcons.image),
           title: const Text("Whiteboard_Session_02"),
           subtitle: const Text("PNG • 1.2 MB"),
           onTap: () {},

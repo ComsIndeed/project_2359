@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/widgets/activity_list_item.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
@@ -21,14 +22,14 @@ class HomePageContent extends StatelessWidget {
           const SizedBox(height: 24),
           SectionHeader(title: "Recent Activity"),
           ActivityListItem(
-            icon: const Icon(Icons.quiz),
+            icon: const FaIcon(FontAwesomeIcons.circleQuestion),
             title: const Text("Cell Biology Quiz"),
             subtitle: const Text("Score: 8/10 • 2h ago"),
             accentColor: Colors.blue,
             onTap: () {},
           ),
           ActivityListItem(
-            icon: const Icon(Icons.description),
+            icon: const FaIcon(FontAwesomeIcons.fileLines),
             title: const Text("Lecture Notes: Week 3"),
             subtitle: const Text("Added to Library • 5h ago"),
             accentColor: Colors.pink,
@@ -61,7 +62,7 @@ class HomePageContent extends StatelessWidget {
           builder: (pushPage) {
             return IconButton(
               onPressed: pushPage,
-              icon: const Icon(Icons.settings_rounded),
+              icon: const FaIcon(FontAwesomeIcons.gear),
             );
           },
         ),

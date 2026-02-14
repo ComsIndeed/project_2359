@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/pressable_scale.dart';
 
@@ -241,7 +242,7 @@ class CardButton extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: borderColor, width: 1),
       ),
-      child: Icon(icon, color: effectiveIconColor, size: iconSize),
+      child: FaIcon(icon, color: effectiveIconColor, size: iconSize),
     );
   }
 

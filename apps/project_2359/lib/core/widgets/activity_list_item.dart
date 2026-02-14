@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/pressable_scale.dart';
 
@@ -176,10 +177,10 @@ class _ActivityListItemState extends State<ActivityListItem>
                       ),
 
                       if (widget.showChevron && !widget.isLoading)
-                        Icon(
-                          Icons.chevron_right,
+                        FaIcon(
+                          FontAwesomeIcons.chevronRight,
                           color: cs.onSurface.withValues(alpha: 0.5),
-                          size: widget.isCompact ? 20 : 24,
+                          size: widget.isCompact ? 14 : 16,
                         ),
                       if (widget.isLoading) _buildSkeletonChevron(cs.surface),
                     ],

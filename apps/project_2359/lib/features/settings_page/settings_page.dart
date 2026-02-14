@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/theme_notifier.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -41,17 +42,17 @@ class SettingsPage extends StatelessWidget {
                   ButtonSegment(
                     value: ThemeMode.dark,
                     label: Text('Dark'),
-                    icon: Icon(Icons.dark_mode_rounded),
+                    icon: FaIcon(FontAwesomeIcons.moon),
                   ),
                   ButtonSegment(
                     value: ThemeMode.light,
                     label: Text('Light'),
-                    icon: Icon(Icons.light_mode_rounded),
+                    icon: FaIcon(FontAwesomeIcons.sun),
                   ),
                   ButtonSegment(
                     value: ThemeMode.system,
                     label: Text('System'),
-                    icon: Icon(Icons.settings_brightness_rounded),
+                    icon: FaIcon(FontAwesomeIcons.circleHalfStroke),
                   ),
                 ],
                 selected: {themeNotifier.themeMode},
@@ -93,8 +94,8 @@ class SettingsPage extends StatelessWidget {
                             : null,
                       ),
                       child: isSelected
-                          ? const Icon(
-                              Icons.check_rounded,
+                          ? const FaIcon(
+                              FontAwesomeIcons.check,
                               color: Colors.white,
                               size: 24,
                             )

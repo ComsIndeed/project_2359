@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
 
 class ActiveMaterialCard extends StatelessWidget {
@@ -37,7 +38,7 @@ class ActiveMaterialCard extends StatelessWidget {
                 color: accent.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: accent, size: 24),
+              child: FaIcon(icon, color: accent, size: 22),
             ),
             const SizedBox(height: 16),
             Text(

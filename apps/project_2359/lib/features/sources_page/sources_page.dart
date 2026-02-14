@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/activity_list_item.dart';
@@ -57,7 +58,7 @@ class SourcesPage extends StatelessWidget {
                     childAspectRatio: 2.7,
                     children: [
                       CardButton(
-                        icon: Icons.description_rounded,
+                        icon: FontAwesomeIcons.fileLines,
                         label: "Document",
                         subLabel: "pdf, docx, pptx",
                         layoutDirection: CardLayoutDirection.horizontal,
@@ -66,7 +67,7 @@ class SourcesPage extends StatelessWidget {
                         onTap: () => _importDocument(context),
                       ),
                       CardButton(
-                        icon: Icons.perm_media_rounded,
+                        icon: FontAwesomeIcons.photoFilm,
                         label: "Media",
                         subLabel: "photos, audio, video",
                         layoutDirection: CardLayoutDirection.horizontal,
@@ -75,7 +76,7 @@ class SourcesPage extends StatelessWidget {
                         onTap: () {},
                       ),
                       CardButton(
-                        icon: Icons.style_rounded,
+                        icon: FontAwesomeIcons.clone,
                         label: "Flashcards",
                         subLabel: ".apkg, .csv, quizlet",
                         layoutDirection: CardLayoutDirection.horizontal,
@@ -84,7 +85,7 @@ class SourcesPage extends StatelessWidget {
                         onTap: null,
                       ),
                       CardButton(
-                        icon: Icons.cloud_queue_rounded,
+                        icon: FontAwesomeIcons.cloud,
                         label: "Cloud Drive",
                         subLabel: "Google, OneDrive",
                         layoutDirection: CardLayoutDirection.horizontal,
@@ -93,7 +94,7 @@ class SourcesPage extends StatelessWidget {
                         onTap: null,
                       ),
                       CardButton(
-                        icon: Icons.link_rounded,
+                        icon: FontAwesomeIcons.link,
                         label: "Website",
                         subLabel: "YouTube, Wiki",
                         layoutDirection: CardLayoutDirection.horizontal,
@@ -102,7 +103,7 @@ class SourcesPage extends StatelessWidget {
                         onTap: null,
                       ),
                       CardButton(
-                        icon: Icons.edit_note_rounded,
+                        icon: FontAwesomeIcons.penToSquare,
                         label: "Note App",
                         subLabel: "Notion, Obsidian",
                         layoutDirection: CardLayoutDirection.horizontal,
@@ -145,7 +146,7 @@ class SourcesPage extends StatelessWidget {
                                     ),
                                   );
                                 },
-                                icon: const Icon(Icons.edit_document),
+                                icon: const FaIcon(FontAwesomeIcons.filePen),
                                 title: Text(file.name),
                                 subtitle: Text(file.path ?? ""),
                               );
@@ -158,7 +159,7 @@ class SourcesPage extends StatelessWidget {
                               ),
                               builder: (switchPage) => ActivityListItem(
                                 onTap: switchPage,
-                                icon: const Icon(Icons.edit_document),
+                                icon: const FaIcon(FontAwesomeIcons.filePen),
                                 title: Text(file.name),
                                 subtitle: Text(file.path ?? ""),
                               ),
@@ -174,8 +175,8 @@ class SourcesPage extends StatelessWidget {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.source_rounded,
+                                FaIcon(
+                                  FontAwesomeIcons.folderOpen,
                                   size: 48,
                                   color: cs.onSurface.withValues(alpha: 0.2),
                                 ),

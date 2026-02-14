@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SpecialNavigationItem {
   final IconData icon;
@@ -229,10 +230,10 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  FaIcon(
                     icon,
                     color: isSelected ? Colors.white : inactiveColor,
-                    size: 20,
+                    size: 18,
                   ),
                   const SizedBox(width: 8),
                   Text(

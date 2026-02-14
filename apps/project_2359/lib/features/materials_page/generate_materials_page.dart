@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 
@@ -98,7 +99,11 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
         decoration: InputDecoration(
           hintText: 'Filter sources...',
           hintStyle: TextStyle(color: muted),
-          prefixIcon: Icon(Icons.search, color: muted),
+          prefixIcon: FaIcon(
+            FontAwesomeIcons.magnifyingGlass,
+            color: muted,
+            size: 18,
+          ),
           filled: false,
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
@@ -115,25 +120,25 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
   Widget _buildSourceGrid() {
     final sources = [
       (
-        icon: Icons.description,
+        icon: FontAwesomeIcons.fileLines,
         label: 'Biochemistry',
         subLabel: 'PDF • 2.4MB',
         id: 'Biochem',
       ),
       (
-        icon: Icons.history_edu,
+        icon: FontAwesomeIcons.bookOpen,
         label: 'Hist_Drama',
         subLabel: 'Doc • 15KB',
         id: 'Hist_Drama',
       ),
       (
-        icon: Icons.link,
+        icon: FontAwesomeIcons.link,
         label: 'Web Res...',
         subLabel: 'Link • 5 URLs',
         id: 'Web Res',
       ),
       (
-        icon: Icons.mic,
+        icon: FontAwesomeIcons.microphone,
         label: 'Lecture...',
         subLabel: 'MP3 • 45m',
         id: 'Lecture',
@@ -212,7 +217,11 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
                 ),
               ),
               child: isSelected
-                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  ? const FaIcon(
+                      FontAwesomeIcons.check,
+                      size: 14,
+                      color: Colors.white,
+                    )
                   : null,
             ),
           ),

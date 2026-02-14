@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:project_2359/core/widgets/special_navigation_bar.dart';
 
@@ -69,11 +70,11 @@ class _HomePageState extends State<HomePage> {
                 onTap: _onNavBarTap,
                 items: [
                   const SpecialNavigationItem(
-                    icon: Icons.grid_view_rounded,
+                    icon: FontAwesomeIcons.tableCellsLarge,
                     label: "Home",
                   ),
                   SpecialNavigationItem(
-                    icon: Icons.school_rounded,
+                    icon: FontAwesomeIcons.graduationCap,
                     label: "Study",
                     pageActions: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -83,7 +84,10 @@ class _HomePageState extends State<HomePage> {
                           builder: (pushPage) {
                             return TextButton.icon(
                               onPressed: pushPage,
-                              icon: const Icon(Icons.layers_rounded, size: 18),
+                              icon: const FaIcon(
+                                FontAwesomeIcons.layerGroup,
+                                size: 16,
+                              ),
                               label: const Text("Sources"),
                             );
                           },

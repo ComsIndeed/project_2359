@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
 
 class ActionGridItem extends StatelessWidget {
@@ -43,7 +44,7 @@ class ActionGridItem extends StatelessWidget {
                   color: effectiveIconColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: effectiveIconColor, size: 28),
+                child: FaIcon(icon, color: effectiveIconColor, size: 24),
               ),
               const Spacer(),
               Text(

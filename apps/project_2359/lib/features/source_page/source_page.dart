@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
@@ -192,7 +193,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
           children: [
             _appBarButton(
               cs: cs,
-              icon: Icons.arrow_back_rounded,
+              icon: FontAwesomeIcons.arrowLeft,
               onTap: () => Navigator.pop(context),
             ),
             const SizedBox(width: 12),
@@ -224,8 +225,8 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
             _appBarButton(
               cs: cs,
               icon: _isMenuOpen
-                  ? Icons.close_rounded
-                  : Icons.drag_handle_rounded,
+                  ? FontAwesomeIcons.xmark
+                  : FontAwesomeIcons.bars,
               onTap: _toggleMenu,
             ),
           ],
@@ -249,11 +250,11 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
           padding: const EdgeInsets.all(10),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 150),
-            child: Icon(
+            child: FaIcon(
               icon,
               key: ValueKey(icon),
               color: cs.onSurface,
-              size: 22,
+              size: 20,
             ),
           ),
         ),
@@ -282,25 +283,25 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
           const SizedBox(height: 4),
           _menuTile(
             cs: cs,
-            icon: Icons.share_rounded,
+            icon: FontAwesomeIcons.shareNodes,
             label: 'Share document',
             onTap: () {},
           ),
           _menuTile(
             cs: cs,
-            icon: Icons.bookmark_add_rounded,
+            icon: FontAwesomeIcons.bookmark,
             label: 'Add bookmark',
             onTap: () {},
           ),
           _menuTile(
             cs: cs,
-            icon: Icons.print_rounded,
+            icon: FontAwesomeIcons.print,
             label: 'Print',
             onTap: () {},
           ),
           _menuTile(
             cs: cs,
-            icon: Icons.info_outline_rounded,
+            icon: FontAwesomeIcons.circleInfo,
             label: 'Document info',
             onTap: () {},
           ),
@@ -324,7 +325,11 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              Icon(icon, size: 20, color: cs.onSurface.withValues(alpha: 0.7)),
+              FaIcon(
+                icon,
+                size: 18,
+                color: cs.onSurface.withValues(alpha: 0.7),
+              ),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
@@ -336,9 +341,9 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 18,
+              FaIcon(
+                FontAwesomeIcons.chevronRight,
+                size: 14,
                 color: cs.onSurface.withValues(alpha: 0.3),
               ),
             ],
@@ -437,7 +442,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
           const Spacer(),
 
           // Zoom out
-          _controlButton(cs, Icons.remove_rounded, _zoomOut),
+          _controlButton(cs, FontAwesomeIcons.minus, _zoomOut),
 
           // Zoom percentage display
           Padding(
@@ -453,10 +458,10 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
           ),
 
           // Zoom in
-          _controlButton(cs, Icons.add_rounded, _zoomIn),
+          _controlButton(cs, FontAwesomeIcons.plus, _zoomIn),
 
           // Zoom reset (fit)
-          _controlButton(cs, Icons.fit_screen_rounded, _zoomReset),
+          _controlButton(cs, FontAwesomeIcons.expand, _zoomReset),
 
           // Divider
           Container(
@@ -482,8 +487,8 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.article_rounded,
+              FaIcon(
+                FontAwesomeIcons.fileLines,
                 size: 16,
                 color: _isDrawerOpen
                     ? cs.primary
@@ -515,9 +520,9 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(8),
-          child: Icon(
+          child: FaIcon(
             icon,
-            size: 18,
+            size: 16,
             color: cs.onSurface.withValues(alpha: 0.6),
           ),
         ),
@@ -541,7 +546,11 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
               padding: const EdgeInsets.fromLTRB(16, 12, 12, 0),
               child: Row(
                 children: [
-                  Icon(Icons.article_rounded, color: cs.primary, size: 18),
+                  FaIcon(
+                    FontAwesomeIcons.fileLines,
+                    color: cs.primary,
+                    size: 16,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -600,8 +609,8 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.text_snippet_outlined,
+                          FaIcon(
+                            FontAwesomeIcons.alignLeft,
                             size: 32,
                             color: cs.onSurface.withValues(alpha: 0.2),
                           ),
@@ -645,7 +654,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                   children: [
                     _buildActionButton(
                       cs: cs,
-                      icon: Icons.copy_rounded,
+                      icon: FontAwesomeIcons.copy,
                       label: 'Copy',
                       onTap: () {
                         // TODO: copy to clipboard
@@ -653,7 +662,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                     ),
                     _buildActionButton(
                       cs: cs,
-                      icon: Icons.text_fields_rounded,
+                      icon: FontAwesomeIcons.font,
                       label: 'Reinterpret\ntext',
                       onTap: () {
                         // TODO: reinterpret extracted text
@@ -661,7 +670,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                     ),
                     _buildActionButton(
                       cs: cs,
-                      icon: Icons.find_in_page_rounded,
+                      icon: FontAwesomeIcons.magnifyingGlassPlus,
                       label: 'Reinterpret\ndoc',
                       onTap: () {
                         // TODO: reinterpret document
@@ -708,7 +717,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                 side: BorderSide(color: cs.primary.withValues(alpha: 0.12)),
               ),
             ),
-            child: Icon(icon, size: 18, color: cs.primary),
+            child: FaIcon(icon, size: 18, color: cs.primary),
           ),
           const SizedBox(height: 4),
           Text(
