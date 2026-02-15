@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/features/home_page/home_page_content.dart';
 import 'package:project_2359/features/settings_page/auth_page.dart';
 import 'package:project_2359/theme_notifier.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -248,6 +250,35 @@ class SettingsPage extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
+                  _divider(theme),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: HomePageContent.showCarouselNotifier,
+                    builder: (context, show, child) {
+                      return SwitchListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        secondary: FaIcon(
+                          FontAwesomeIcons.layerGroup,
+                          size: 18,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.6,
+                          ),
+                        ),
+                        title: Text(
+                          'Show Home Carousel',
+                          style: theme.textTheme.bodyLarge,
+                        ),
+                        value: show,
+                        onChanged: (value) async {
+                          HomePageContent.showCarouselNotifier.value = value;
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('show_home_carousel', value);
+                        },
+                      );
+                    },
                   ),
                 ],
               ),
