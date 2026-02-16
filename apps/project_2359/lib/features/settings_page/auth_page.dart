@@ -38,10 +38,12 @@ class _AuthPageState extends State<AuthPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Header
-            FaIcon(
-              FontAwesomeIcons.userLarge,
-              size: 48,
-              color: theme.colorScheme.primary,
+            Center(
+              child: FaIcon(
+                FontAwesomeIcons.user,
+                size: 48,
+                color: theme.colorScheme.primary,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -52,7 +54,7 @@ class _AuthPageState extends State<AuthPage> {
             const SizedBox(height: 8),
             Text(
               _isLogin
-                  ? 'Sign in to sync your data'
+                  ? 'Sign in to use all features'
                   : 'Create an account to get started',
               style: theme.textTheme.bodyMedium,
               textAlign: TextAlign.center,
