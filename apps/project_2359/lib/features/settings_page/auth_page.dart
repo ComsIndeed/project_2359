@@ -4,14 +4,15 @@ import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/slide_fade_text.dart';
 
 class AuthPage extends StatefulWidget {
-  const AuthPage({super.key});
+  final bool initialIsLogin;
+  const AuthPage({super.key, this.initialIsLogin = true});
 
   @override
   State<AuthPage> createState() => _AuthPageState();
 }
 
 class _AuthPageState extends State<AuthPage> {
-  bool _isLogin = true;
+  late bool _isLogin;
   bool _obscurePassword = true;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -32,6 +33,7 @@ class _AuthPageState extends State<AuthPage> {
   @override
   void initState() {
     super.initState();
+    _isLogin = widget.initialIsLogin;
     _emailController.addListener(_validateEmail);
     _passwordController.addListener(_validatePassword);
   }

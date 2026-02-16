@@ -168,12 +168,12 @@ class _StatusPill extends StatelessWidget {
             // Case 2: Online but Logged Out
             if (!isLoggedIn) {
               return TapToSlideUp(
-                page: const AuthPage(),
+                page: const AuthPage(initialIsLogin: false),
                 builder: (pushPage) => _buildPill(
                   onTap: pushPage,
                   context,
                   icon: FontAwesomeIcons.circleExclamation,
-                  text: "Sign in to generate study materials",
+                  text: "Sign up to generate study materials",
                   iconColor: AppTheme.warning,
                   showChevron: true,
                 ),
