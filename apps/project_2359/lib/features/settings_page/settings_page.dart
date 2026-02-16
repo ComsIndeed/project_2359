@@ -486,12 +486,10 @@ class _SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Material(
+      color: Theme.of(context).colorScheme.surface,
+      shape: AppTheme.cardShape,
       clipBehavior: Clip.antiAlias,
-      decoration: ShapeDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        shape: AppTheme.cardShape,
-      ),
       child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
