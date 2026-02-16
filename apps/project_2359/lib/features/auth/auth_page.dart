@@ -118,8 +118,8 @@ class _AuthPageState extends State<AuthPage> {
               _isSuccess = false;
             });
 
-            // Reset error state visuals after a delay
-            Future.delayed(const Duration(seconds: 2), () {
+            // Reset error state visuals after a delay to allow for soft fade-out
+            Future.delayed(const Duration(seconds: 5), () {
               if (mounted) setState(() => _isError = false);
             });
 
@@ -171,287 +171,335 @@ class _AuthPageState extends State<AuthPage> {
           final theme = Theme.of(context);
           final isLoading = state is AuthLoading;
 
-          // Background Color Animation
-          Color backgroundColor = theme.scaffoldBackgroundColor;
-          if (_isSuccess) {
-            backgroundColor = Colors.green.withValues(
-              alpha: 0.15,
-            ); // Subtle green
-          } else if (_isError) {
-            backgroundColor = Colors.red.withValues(alpha: 0.1);
-          }
-
           return Scaffold(
-            body: AnimatedContainer(
-              duration: const Duration(milliseconds: 500),
-              color: backgroundColor,
-              child: Stack(
-                children: [
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 60),
-                        // Header
-                        Center(child: _AuthIcon(isLogin: _isLogin)),
-                        const SizedBox(height: 16),
-                        SlideFadeText(
-                          text: _isLogin ? 'Welcome Back' : 'Get Started',
-                          style: theme.textTheme.displaySmall,
-                          textAlign: TextAlign.center,
+            backgroundColor: theme.scaffoldBackgroundColor,
+            body: Stack(
+              children: [
+                // Animated Background Gradient
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: _BackgroundGradient(
+                      isSuccess: _isSuccess,
+                      isError: _isError,
+                    ),
+                  ),
+                ),
+
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Sign in to use all features',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 32,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 32),
-
-                        AutofillGroup(
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // Email field
-                              _EmailField(
-                                controller: _emailController,
-                                errorText: _emailError,
-                                enabled: !isLoading && !_isSuccess,
-                              ),
-                              const SizedBox(height: 16),
+                              const SizedBox(
+                                height: 80,
+                              ), // Keep some top space for back button
+                              // Optional: Add a Spacer or flexible to push everything down
+                              // But in SingleChildScrollView, MainAxisAlignment.end works with ConstrainedBox
 
-                              // Password field
-                              _PasswordField(
-                                controller: _passwordController,
-                                obscureText: _obscurePassword,
-                                onToggleObscure: () => setState(
-                                  () => _obscurePassword = !_obscurePassword,
+                              // Header
+                              Center(child: _AuthIcon(isLogin: _isLogin)),
+                              const SizedBox(height: 24),
+
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 400),
+                                transitionBuilder: (child, animation) =>
+                                    FadeTransition(
+                                      opacity: animation,
+                                      child: SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(0, 0.1),
+                                          end: Offset.zero,
+                                        ).animate(animation),
+                                        child: child,
+                                      ),
+                                    ),
+                                child: Column(
+                                  key: ValueKey(_isLogin),
+                                  children: [
+                                    Text(
+                                      _isLogin ? 'Welcome Back' : 'Get Started',
+                                      style: theme.textTheme.displaySmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Sign in to use all features',
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
                                 ),
-                                enabled: !isLoading && !_isSuccess,
-                                onSubmitted: (_) {
-                                  if (!_emailController.text.isEmpty &&
-                                      !_passwordController.text.isEmpty) {
-                                    _handleAuth(context);
-                                  }
+                              ),
+                              const SizedBox(height: 32),
+
+                              AutofillGroup(
+                                child: Column(
+                                  children: [
+                                    _EmailField(
+                                      controller: _emailController,
+                                      errorText: _emailError,
+                                      enabled: !isLoading && !_isSuccess,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _PasswordField(
+                                      controller: _passwordController,
+                                      obscureText: _obscurePassword,
+                                      onToggleObscure: () => setState(
+                                        () => _obscurePassword =
+                                            !_obscurePassword,
+                                      ),
+                                      enabled: !isLoading && !_isSuccess,
+                                      onSubmitted: (_) {
+                                        if (_emailController.text.isNotEmpty &&
+                                            _passwordController
+                                                .text
+                                                .isNotEmpty) {
+                                          _handleAuth(context);
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              if (_isLogin)
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                    onPressed: isLoading
+                                        ? null
+                                        : () {
+                                            if (_emailController.text.isEmpty) {
+                                              setState(
+                                                () => _emailError =
+                                                    "Enter email to reset password",
+                                              );
+                                              return;
+                                            }
+                                            context
+                                                .read<AuthCubit>()
+                                                .resetPassword(
+                                                  _emailController.text,
+                                                )
+                                                .then(
+                                                  (_) =>
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        const SnackBar(
+                                                          content: Text(
+                                                            'Password reset email sent',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                )
+                                                .catchError(
+                                                  (e) =>
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            'Error: ${e.toString()}',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                );
+                                          },
+                                    child: Text(
+                                      'Forgot Password?',
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+
+                              _PasswordStrengthBar(
+                                isVisible:
+                                    !_isLogin &&
+                                    _passwordController.text.isNotEmpty,
+                                strength: _passwordStrength,
+                                hasMinChars: _hasMinChars,
+                                hasUpperCase: _hasUpperCase,
+                                hasLowerCase: _hasLowerCase,
+                                hasNumber: _hasNumber,
+                                hasSpecial: _hasSpecial,
+                              ),
+                              const SizedBox(height: 32),
+
+                              // Submit button
+                              ListenableBuilder(
+                                listenable: Listenable.merge([
+                                  _emailController,
+                                  _passwordController,
+                                ]),
+                                builder: (context, _) {
+                                  final isEmpty =
+                                      _emailController.text.isEmpty ||
+                                      _passwordController.text.isEmpty;
+                                  final isDisabled =
+                                      isEmpty || isLoading || _isSuccess;
+
+                                  return AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 300),
+                                    opacity: isEmpty ? 0.5 : 1.0,
+                                    child: AnimatedContainer(
+                                      duration: const Duration(
+                                        milliseconds: 400,
+                                      ),
+                                      curve: Curves.easeOutCubic,
+                                      width: double.infinity,
+                                      height: 56,
+                                      child: ElevatedButton(
+                                        onPressed: isDisabled
+                                            ? null
+                                            : () => _handleAuth(context),
+                                        style: ElevatedButton.styleFrom(
+                                          padding: EdgeInsets.zero,
+                                          shape:
+                                              AppTheme.buttonShape
+                                                  as OutlinedBorder,
+                                          backgroundColor: _isSuccess
+                                              ? Colors.green
+                                              : (_isError
+                                                    ? theme.colorScheme.error
+                                                    : null),
+                                          foregroundColor:
+                                              (_isSuccess || _isError)
+                                              ? Colors.white
+                                              : null,
+                                        ),
+                                        child: AnimatedSwitcher(
+                                          duration: const Duration(
+                                            milliseconds: 300,
+                                          ),
+                                          child: _buildButtonChild(isLoading),
+                                        ),
+                                      ),
+                                    ),
+                                  );
                                 },
                               ),
+                              const SizedBox(height: 24),
+
+                              Row(
+                                children: [
+                                  const Expanded(child: Divider()),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
+                                    child: Text(
+                                      'or',
+                                      style: theme.textTheme.bodyMedium,
+                                    ),
+                                  ),
+                                  const Expanded(child: Divider()),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+
+                              _SocialButton(
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Not yet implemented'),
+                                    ),
+                                  );
+                                },
+                                icon: const FaIcon(
+                                  FontAwesomeIcons.google,
+                                  size: 18,
+                                  color: Color(0xFFDB4437),
+                                ),
+                                label: 'Continue with Google',
+                              ),
+                              const SizedBox(height: 12),
+                              _SocialButton(
+                                onPressed: () {},
+                                icon: const FaIcon(
+                                  FontAwesomeIcons.facebook,
+                                  size: 20,
+                                  color: Color(0xFF1877F2),
+                                ),
+                                label: 'Continue with Facebook',
+                              ),
+                              const SizedBox(height: 32),
+
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    _isLogin
+                                        ? "Don't have an account?"
+                                        : 'Already have an account?',
+                                    style: theme.textTheme.bodyMedium,
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).hideCurrentMaterialBanner();
+                                      setState(() => _isLogin = !_isLogin);
+                                    },
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      _isLogin ? 'Create Account' : 'Sign In',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
                             ],
                           ),
                         ),
-
-                        // Forgot Password
-                        if (_isLogin)
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: isLoading
-                                  ? null
-                                  : () {
-                                      if (_emailController.text.isEmpty) {
-                                        setState(
-                                          () => _emailError =
-                                              "Enter email to reset password",
-                                        );
-                                        return;
-                                      }
-                                      context
-                                          .read<AuthCubit>()
-                                          .resetPassword(_emailController.text)
-                                          .then(
-                                            (_) => ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
-                                                      'Password reset email sent',
-                                                    ),
-                                                  ),
-                                                ),
-                                          )
-                                          .catchError(
-                                            (e) => ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      'Error: ${e.toString()}',
-                                                    ),
-                                                  ),
-                                                ),
-                                          );
-                                    },
-                              child: Text(
-                                'Forgot Password?',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                        // Password Strength
-                        _PasswordStrengthBar(
-                          isVisible:
-                              !_isLogin && _passwordController.text.isNotEmpty,
-                          strength: _passwordStrength,
-                          hasMinChars: _hasMinChars,
-                          hasUpperCase: _hasUpperCase,
-                          hasLowerCase: _hasLowerCase,
-                          hasNumber: _hasNumber,
-                          hasSpecial: _hasSpecial,
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Submit button
-                        ListenableBuilder(
-                          listenable: Listenable.merge([
-                            _emailController,
-                            _passwordController,
-                          ]),
-                          builder: (context, _) {
-                            final isEmpty =
-                                _emailController.text.isEmpty ||
-                                _passwordController.text.isEmpty;
-                            final isDisabled =
-                                isEmpty || isLoading || _isSuccess;
-
-                            return AnimatedOpacity(
-                              duration: const Duration(milliseconds: 300),
-                              opacity: isEmpty ? 0.5 : 1.0,
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                width: double.infinity,
-                                height: 50,
-                                child: ElevatedButton(
-                                  onPressed: isDisabled
-                                      ? null
-                                      : () => _handleAuth(context),
-                                  style: ElevatedButton.styleFrom(
-                                    padding: EdgeInsets
-                                        .zero, // Important for custom child alignment
-                                    shape:
-                                        AppTheme.buttonShape as OutlinedBorder,
-                                    backgroundColor: _isSuccess
-                                        ? Colors.green
-                                        : null,
-                                  ),
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 300),
-                                    child: _buildButtonChild(isLoading),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Divider
-                        Row(
-                          children: [
-                            const Expanded(child: Divider()),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: Text(
-                                'or',
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                            ),
-                            const Expanded(child: Divider()),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Social Sign In
-                        Column(
-                          children: [
-                            _SocialButton(
-                              onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Not yet implemented'),
-                                  ),
-                                );
-                              },
-                              icon: const FaIcon(
-                                FontAwesomeIcons.google,
-                                size: 18,
-                                color: Color(0xFFDB4437),
-                              ), // Google Red
-                              label: 'Continue with Google',
-                            ),
-                            // Facebook removed for cleaner look or just kept?
-                            // User asked for "simple", reducing clutter might be good,
-                            // but let's keep it consistent with previous if not asked to remove.
-                            // I'll keep Google only or both? Original had both. I'll keep both.
-                            const SizedBox(height: 12),
-                            _SocialButton(
-                              onPressed: () {},
-                              icon: const FaIcon(
-                                FontAwesomeIcons.facebook,
-                                size: 20,
-                                color: Color(0xFF1877F2),
-                              ), // Facebook Blue
-                              label: 'Continue with Facebook',
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Toggle mode
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SlideFadeText(
-                              text: _isLogin
-                                  ? "Don't have an account?"
-                                  : 'Already have an account?',
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                ScaffoldMessenger.of(
-                                  context,
-                                ).hideCurrentMaterialBanner();
-                                setState(() => _isLogin = !_isLogin);
-                              },
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                              ),
-                              child: SlideFadeText(
-                                text: _isLogin ? 'Create Account' : 'Sign In',
-                                textAlign: TextAlign.left,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Custom back button
-                  Positioned(
-                    top: MediaQuery.of(context).padding.top + 8,
-                    left: 16,
-                    child: IconButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).hideCurrentMaterialBanner();
-                        Navigator.of(context).pop();
-                      },
-                      icon: const FaIcon(
-                        FontAwesomeIcons.chevronLeft,
-                        size: 24,
                       ),
-                      padding: const EdgeInsets.all(8),
-                    ),
+                    );
+                  },
+                ),
+                // Custom back button
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 8,
+                  left: 16,
+                  child: IconButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                      Navigator.of(context).pop();
+                    },
+                    icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 24),
+                    padding: const EdgeInsets.all(8),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
@@ -762,6 +810,46 @@ class _PasswordReqItem extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BackgroundGradient extends StatelessWidget {
+  final bool isSuccess;
+  final bool isError;
+
+  const _BackgroundGradient({required this.isSuccess, required this.isError});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final baseColor = isSuccess
+        ? Colors.green
+        : (isError ? theme.colorScheme.error : Colors.transparent);
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 1500),
+      opacity: (isSuccess || isError) ? 1.0 : 0.0,
+      curve: Curves.easeInOutQuart,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            stops: const [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.501, 1.0],
+            colors: [
+              baseColor.withValues(alpha: 0.75),
+              baseColor.withValues(alpha: 0.6),
+              baseColor.withValues(alpha: 0.4),
+              baseColor.withValues(alpha: 0.2),
+              baseColor.withValues(alpha: 0.05),
+              baseColor.withValues(alpha: 0.0),
+              Colors.transparent,
+              Colors.transparent,
+            ],
+          ),
+        ),
       ),
     );
   }
