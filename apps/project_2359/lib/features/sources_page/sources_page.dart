@@ -20,14 +20,6 @@ class SourcesPage extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          "Sources",
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-      ),
       body: BlocBuilder<SourcesPageBloc, SourcesPageState>(
         builder: (context, state) {
           return SafeArea(
@@ -38,6 +30,28 @@ class SourcesPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
+                      // --- Custom Header ---
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const FaIcon(
+                                FontAwesomeIcons.chevronLeft,
+                                size: 20,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              "Sources",
+                              style: Theme.of(context).textTheme.displaySmall,
+                            ),
+                          ],
+                        ),
+                      ),
                       const SpecialSearchBar(),
                       const SizedBox(height: 24),
                       SectionHeader(

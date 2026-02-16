@@ -25,20 +25,29 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          "Generate Materials",
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // --- Custom Header ---
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    "Generate Materials",
+                    style: Theme.of(context).textTheme.displaySmall,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
               _buildSectionHeader("1. SELECT SOURCES"),
               const SizedBox(height: 16),
               _buildSearchBar(),

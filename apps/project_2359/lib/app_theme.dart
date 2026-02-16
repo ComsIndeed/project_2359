@@ -183,6 +183,19 @@ class AppTheme {
         foregroundColor: Colors.white,
         shape: defaultShape,
       ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: bg,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.outfit(
+          color: textPrimary,
+          fontWeight: FontWeight.w600,
+          fontSize: 18,
+        ),
+        iconTheme: IconThemeData(color: textPrimary),
+      ),
     );
   }
 }

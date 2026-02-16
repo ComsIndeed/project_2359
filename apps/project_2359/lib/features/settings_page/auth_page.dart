@@ -119,154 +119,189 @@ class _AuthPageState extends State<AuthPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header
-            Center(child: _AuthIcon(isLogin: _isLogin)),
-            const SizedBox(height: 16),
-            SlideFadeText(
-              text: _isLogin ? 'Welcome Back' : 'Get Started',
-              style: theme.textTheme.displaySmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Sign in to use all features',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-
-            // Email field
-            _EmailField(controller: _emailController, errorText: _emailError),
-            const SizedBox(height: 16),
-
-            // Password field
-            _PasswordField(
-              controller: _passwordController,
-              obscureText: _obscurePassword,
-              onToggleObscure: () =>
-                  setState(() => _obscurePassword = !_obscurePassword),
-            ),
-
-            // Password Strength
-            _PasswordStrengthBar(
-              isVisible: !_isLogin,
-              strength: _passwordStrength,
-              hasMinChars: _hasMinChars,
-              hasUpperCase: _hasUpperCase,
-              hasLowerCase: _hasLowerCase,
-              hasNumber: _hasNumber,
-              hasSpecial: _hasSpecial,
-            ),
-            const SizedBox(height: 24),
-
-            // Submit button
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: SizedBox(
-                key: ValueKey(_isLogin),
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implement auth
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Not yet implemented')),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: AppTheme.buttonShape as OutlinedBorder,
-                  ),
-                  child: SlideFadeText(
-                    text: _isLogin ? 'Sign In' : 'Create Account',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Divider
-            Row(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Expanded(child: Divider()),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('or', style: theme.textTheme.bodyMedium),
-                ),
-                const Expanded(child: Divider()),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Social Sign In
-            Column(
-              children: [
-                _SocialButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Not yet implemented')),
-                    );
-                  },
-                  icon: const FaIcon(
-                    FontAwesomeIcons.google,
-                    size: 18,
-                    color: Color(0xFFDB4437),
-                  ), // Google Red
-                  label: 'Continue with Google',
-                ),
-                const SizedBox(height: 12),
-                _SocialButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Not yet implemented')),
-                    );
-                  },
-                  icon: const FaIcon(
-                    FontAwesomeIcons.facebook,
-                    size: 20,
-                    color: Color(0xFF1877F2),
-                  ), // Facebook Blue
-                  label: 'Continue with Facebook',
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Toggle mode
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+                // Header
+                Center(child: _AuthIcon(isLogin: _isLogin)),
+                const SizedBox(height: 16),
                 SlideFadeText(
-                  text: _isLogin
-                      ? "Don't have an account?"
-                      : 'Already have an account?',
-                  style: theme.textTheme.bodyMedium,
+                  text: _isLogin ? 'Welcome Back' : 'Get Started',
+                  style: theme.textTheme.displaySmall,
+                  textAlign: TextAlign.center,
                 ),
-                TextButton(
-                  onPressed: () => setState(() => _isLogin = !_isLogin),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                const SizedBox(height: 8),
+                Text(
+                  'Sign in to use all features',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
-                  child: SlideFadeText(
-                    text: _isLogin ? 'Create Account' : 'Sign In',
-                    textAlign: TextAlign.left,
-                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+
+                // Email field
+                _EmailField(
+                  controller: _emailController,
+                  errorText: _emailError,
+                ),
+                const SizedBox(height: 16),
+
+                // Password field
+                _PasswordField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  onToggleObscure: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                ),
+
+                // Password Strength
+                _PasswordStrengthBar(
+                  isVisible: !_isLogin && _passwordController.text.isNotEmpty,
+                  strength: _passwordStrength,
+                  hasMinChars: _hasMinChars,
+                  hasUpperCase: _hasUpperCase,
+                  hasLowerCase: _hasLowerCase,
+                  hasNumber: _hasNumber,
+                  hasSpecial: _hasSpecial,
+                ),
+                const SizedBox(height: 24),
+
+                // Submit button
+                ListenableBuilder(
+                  listenable: Listenable.merge([
+                    _emailController,
+                    _passwordController,
+                  ]),
+                  builder: (context, _) {
+                    final isEmpty =
+                        _emailController.text.isEmpty ||
+                        _passwordController.text.isEmpty;
+                    return AnimatedOpacity(
+                      duration: const Duration(milliseconds: 300),
+                      opacity: isEmpty ? 0.5 : 1.0,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: SizedBox(
+                          key: ValueKey(_isLogin),
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: isEmpty
+                                ? null
+                                : () {
+                                    // TODO: Implement auth
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Not yet implemented'),
+                                      ),
+                                    );
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: AppTheme.buttonShape as OutlinedBorder,
+                            ),
+                            child: SlideFadeText(
+                              text: _isLogin ? 'Sign In' : 'Create Account',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Divider
+                Row(
+                  children: [
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text('or', style: theme.textTheme.bodyMedium),
+                    ),
+                    const Expanded(child: Divider()),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Social Sign In
+                Column(
+                  children: [
+                    _SocialButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Not yet implemented')),
+                        );
+                      },
+                      icon: const FaIcon(
+                        FontAwesomeIcons.google,
+                        size: 18,
+                        color: Color(0xFFDB4437),
+                      ), // Google Red
+                      label: 'Continue with Google',
+                    ),
+                    const SizedBox(height: 12),
+                    _SocialButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Not yet implemented')),
+                        );
+                      },
+                      icon: const FaIcon(
+                        FontAwesomeIcons.facebook,
+                        size: 20,
+                        color: Color(0xFF1877F2),
+                      ), // Facebook Blue
+                      label: 'Continue with Facebook',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Toggle mode
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SlideFadeText(
+                      text: _isLogin
+                          ? "Don't have an account?"
+                          : 'Already have an account?',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    TextButton(
+                      onPressed: () => setState(() => _isLogin = !_isLogin),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      child: SlideFadeText(
+                        text: _isLogin ? 'Create Account' : 'Sign In',
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          // Custom back button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 4,
+            left: 8,
+            child: IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 24),
+              padding: const EdgeInsets.all(12),
+            ),
+          ),
+        ],
       ),
     );
   }
