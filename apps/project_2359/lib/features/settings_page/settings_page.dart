@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/core/widgets/tap_to_slide_left.dart';
+import 'package:project_2359/core/widgets/tap_to_slide_up.dart';
 import 'package:project_2359/features/auth/auth_page.dart';
 import 'package:project_2359/features/credits/credits_page.dart';
+import 'package:project_2359/features/profile_page/profile_page.dart';
 import 'package:project_2359/theme_notifier.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -65,73 +68,41 @@ class SettingsPage extends StatelessWidget {
                     _SettingsCard(
                       children: [
                         if (!isLoggedIn)
-                          _SettingsTile(
-                            icon: FontAwesomeIcons.rightToBracket,
-                            title: 'Sign In',
-                            subtitle: 'Log in to sync your data',
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const AuthPage(),
-                              ),
+                          TapToSlideUp(
+                            page: const AuthPage(),
+                            builder: (trigger) => _SettingsTile(
+                              icon: FontAwesomeIcons.rightToBracket,
+                              title: 'Sign In',
+                              subtitle: 'Log in to sync your data',
+                              onTap: trigger,
                             ),
                           )
                         else ...[
-                          _SettingsTile(
-                            icon: FontAwesomeIcons.coins,
-                            title: 'Credits',
-                            subtitle: '42 credits remaining • Buy more',
-                            trailing: Text(
-                              '42',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder:
-                                      (
-                                        context,
-                                        animation,
-                                        secondaryAnimation,
-                                      ) => const CreditsPage(),
-                                  transitionsBuilder:
-                                      (
-                                        context,
-                                        animation,
-                                        secondaryAnimation,
-                                        child,
-                                      ) {
-                                        const begin = Offset(1.0, 0.0);
-                                        const end = Offset.zero;
-                                        const curve = Curves.easeInOutCubic;
-                                        var tween = Tween(
-                                          begin: begin,
-                                          end: end,
-                                        ).chain(CurveTween(curve: curve));
-                                        return SlideTransition(
-                                          position: animation.drive(tween),
-                                          child: child,
-                                        );
-                                      },
+                          TapToSlideLeft(
+                            page: const CreditsPage(),
+                            builder: (trigger) => _SettingsTile(
+                              icon: FontAwesomeIcons.coins,
+                              title: 'Credits',
+                              subtitle: '42 credits remaining • Buy more',
+                              trailing: Text(
+                                '42',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              );
-                            },
+                              ),
+                              onTap: trigger,
+                            ),
                           ),
                           _divider(theme),
-                          _SettingsTile(
-                            icon: FontAwesomeIcons.user,
-                            title: 'Profile',
-                            subtitle: user.email,
-                            onTap: () {
-                              _showSnackBar(
-                                context,
-                                'Profile settings coming soon',
-                              );
-                            },
+                          TapToSlideLeft(
+                            page: const ProfilePage(),
+                            builder: (trigger) => _SettingsTile(
+                              icon: FontAwesomeIcons.user,
+                              title: 'Profile',
+                              subtitle: user.email,
+                              onTap: trigger,
+                            ),
                           ),
                           _divider(theme),
                           _SettingsTile(

@@ -74,51 +74,44 @@ class _HomeHeader extends StatelessWidget {
 
             return Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: Material(
-                color: Colors.transparent,
-                shape: const StadiumBorder(),
-                child: InkWell(
-                  customBorder: const StadiumBorder(),
-                  onTap: () {
-                    // Navigate to credits purchase page
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const SettingsPage(),
+              child: TapToSlideUp(
+                page: const SettingsPage(),
+                builder: (pushPage) => Material(
+                  color: Colors.transparent,
+                  shape: const StadiumBorder(),
+                  child: InkWell(
+                    customBorder: const StadiumBorder(),
+                    onTap: pushPage,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: ShapeDecoration(
-                      shape: const StadiumBorder(),
-                      color: const Color(
-                        0xFFFFD700,
-                      ).withValues(alpha: 0.15), // Gold tint
-                      // border: Border.all(
-                      //   color: const Color(0xFFFFD700).withValues(alpha: 0.3),
-                      // ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const FaIcon(
-                          FontAwesomeIcons.coins,
-                          size: 12,
-                          color: Color(0xFFFFD700), // Gold
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          "800",
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(
-                                color: const Color(0xFFFFD700),
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                      ],
+                      decoration: ShapeDecoration(
+                        shape: const StadiumBorder(),
+                        color: const Color(
+                          0xFFFFD700,
+                        ).withValues(alpha: 0.15), // Gold tint
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const FaIcon(
+                            FontAwesomeIcons.coins,
+                            size: 12,
+                            color: Color(0xFFFFD700), // Gold
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            "800",
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  color: const Color(0xFFFFD700),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

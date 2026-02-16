@@ -7,6 +7,7 @@ import 'package:project_2359/core/widgets/activity_list_item.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
+import 'package:project_2359/core/widgets/tap_to_slide_left.dart';
 import 'package:project_2359/features/source_page/source_page.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
@@ -164,48 +165,17 @@ class SourcesPage extends StatelessWidget {
                               );
                             }
 
-                            return ActivityListItem(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  PageRouteBuilder(
-                                    transitionDuration: const Duration(
-                                      milliseconds: 300,
-                                    ),
-                                    reverseTransitionDuration: const Duration(
-                                      milliseconds: 300,
-                                    ),
-                                    pageBuilder: (_, _, _) => SourcePage(
-                                      fileBytes: file.bytes!,
-                                      title: file.name,
-                                    ),
-                                    transitionsBuilder:
-                                        (
-                                          context,
-                                          animation,
-                                          secondaryAnimation,
-                                          child,
-                                        ) {
-                                          final tween =
-                                              Tween(
-                                                begin: const Offset(1.0, 0.0),
-                                                end: Offset.zero,
-                                              ).chain(
-                                                CurveTween(
-                                                  curve: Curves
-                                                      .easeInOutCubicEmphasized,
-                                                ),
-                                              );
-                                          return SlideTransition(
-                                            position: animation.drive(tween),
-                                            child: child,
-                                          );
-                                        },
-                                  ),
-                                );
-                              },
-                              icon: const FaIcon(FontAwesomeIcons.filePen),
-                              title: Text(file.name),
-                              subtitle: Text(file.path ?? ""),
+                            return TapToSlideLeft(
+                              page: SourcePage(
+                                fileBytes: file.bytes!,
+                                title: file.name,
+                              ),
+                              builder: (pushPage) => ActivityListItem(
+                                onTap: pushPage,
+                                icon: const FaIcon(FontAwesomeIcons.filePen),
+                                title: Text(file.name),
+                                subtitle: Text(file.path ?? ""),
+                              ),
                             );
                           },
                         ),
