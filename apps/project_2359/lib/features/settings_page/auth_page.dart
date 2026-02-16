@@ -293,12 +293,12 @@ class _AuthPageState extends State<AuthPage> {
           ),
           // Custom back button
           Positioned(
-            top: MediaQuery.of(context).padding.top + 4,
-            left: 8,
+            top: MediaQuery.of(context).padding.top + 8,
+            left: 16,
             child: IconButton(
               onPressed: () => Navigator.of(context).pop(),
               icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 24),
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8),
             ),
           ),
         ],

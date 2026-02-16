@@ -50,10 +50,9 @@ class SettingsPage extends StatelessWidget {
                           onPressed: () => Navigator.of(context).pop(),
                           icon: const FaIcon(
                             FontAwesomeIcons.chevronLeft,
-                            size: 20,
+                            size: 24,
                           ),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
+                          padding: const EdgeInsets.all(8),
                         ),
                         const SizedBox(width: 16),
                         Text('Settings', style: theme.textTheme.displaySmall),

@@ -86,7 +86,7 @@ class _HomePageState extends State<HomePage> {
                               onPressed: pushPage,
                               icon: const FaIcon(
                                 FontAwesomeIcons.layerGroup,
-                                size: 16,
+                                size: 18,
                               ),
                               label: const Text("Sources"),
                             );
@@ -105,7 +105,11 @@ class _HomePageState extends State<HomePage> {
                           builder: (pushPage) {
                             return TextButton.icon(
                               onPressed: pushPage,
-                              label: const Text("Generate Materials"),
+                              icon: const FaIcon(
+                                FontAwesomeIcons.wandSparkles,
+                                size: 18,
+                              ),
+                              label: const Text("Generate"),
                             );
                           },
                         ),

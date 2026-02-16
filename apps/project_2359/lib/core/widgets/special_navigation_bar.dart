@@ -100,12 +100,12 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
                           style: TextButton.styleFrom(
                             foregroundColor: cs.onSurface,
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
+                              horizontal: 20,
+                              vertical: 12,
                             ),
                             textStyle: const TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
                               letterSpacing: 0.3,
                             ),
                           ),
@@ -233,7 +233,7 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
                   FaIcon(
                     icon,
                     color: isSelected ? Colors.white : inactiveColor,
-                    size: 18,
+                    size: 20,
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -243,7 +243,7 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar> {
                       fontWeight: isSelected
                           ? FontWeight.bold
                           : FontWeight.w600,
-                      fontSize: 13,
+                      fontSize: 14,
                     ),
                   ),
                 ],

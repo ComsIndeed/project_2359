@@ -39,10 +39,9 @@ class SourcesPage extends StatelessWidget {
                               onPressed: () => Navigator.of(context).pop(),
                               icon: const FaIcon(
                                 FontAwesomeIcons.chevronLeft,
-                                size: 20,
+                                size: 24,
                               ),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
+                              padding: const EdgeInsets.all(8),
                             ),
                             const SizedBox(width: 16),
                             Text(
@@ -175,7 +174,7 @@ class SourcesPage extends StatelessWidget {
                                     reverseTransitionDuration: const Duration(
                                       milliseconds: 300,
                                     ),
-                                    pageBuilder: (_, __, ___) => SourcePage(
+                                    pageBuilder: (_, _, _) => SourcePage(
                                       fileBytes: file.bytes!,
                                       title: file.name,
                                     ),

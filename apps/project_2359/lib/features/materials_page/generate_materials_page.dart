@@ -36,9 +36,8 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
                 children: [
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 20),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+                    icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 24),
+                    padding: const EdgeInsets.all(8),
                   ),
                   const SizedBox(width: 16),
                   Text(
