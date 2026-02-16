@@ -81,47 +81,48 @@ class SettingsPage extends StatelessWidget {
               _SectionTitle(title: 'Appearance'),
               _SettingsCard(
                 children: [
+                  // ── Theme Mode ──
                   Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                    child: Row(
                       children: [
-                        Text('Theme Mode', style: theme.textTheme.titleMedium),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: SegmentedButton<ThemeMode>(
-                            segments: const [
-                              ButtonSegment(
-                                value: ThemeMode.dark,
-                                label: Text('Dark'),
-                                icon: FaIcon(FontAwesomeIcons.moon, size: 14),
-                              ),
-                              ButtonSegment(
-                                value: ThemeMode.light,
-                                label: Text('Light'),
-                                icon: FaIcon(FontAwesomeIcons.sun, size: 14),
-                              ),
-                              ButtonSegment(
-                                value: ThemeMode.system,
-                                label: Text('Auto'),
-                                icon: FaIcon(
-                                  FontAwesomeIcons.circleHalfStroke,
-                                  size: 14,
-                                ),
-                              ),
-                            ],
-                            selected: {themeNotifier.themeMode},
-                            onSelectionChanged: (modes) =>
-                                themeNotifier.setThemeMode(modes.first),
+                        Expanded(
+                          child: Text(
+                            'Theme Mode',
+                            style: theme.textTheme.titleMedium,
                           ),
+                        ),
+                        SegmentedButton<ThemeMode>(
+                          showSelectedIcon: false,
+                          segments: const [
+                            ButtonSegment(
+                              value: ThemeMode.dark,
+                              icon: FaIcon(FontAwesomeIcons.moon, size: 12),
+                            ),
+                            ButtonSegment(
+                              value: ThemeMode.light,
+                              icon: FaIcon(FontAwesomeIcons.sun, size: 12),
+                            ),
+                            ButtonSegment(
+                              value: ThemeMode.system,
+                              label: Text(
+                                'Auto',
+                                style: TextStyle(fontSize: 10),
+                              ),
+                            ),
+                          ],
+                          selected: {themeNotifier.themeMode},
+                          onSelectionChanged: (modes) =>
+                              themeNotifier.setThemeMode(modes.first),
                         ),
                       ],
                     ),
                   ),
                   _divider(theme),
+
+                  // ── Accent Color ──
                   Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -129,58 +130,57 @@ class SettingsPage extends StatelessWidget {
                           'Accent Color',
                           style: theme.textTheme.titleMedium,
                         ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: _accentColors.map((color) {
-                            final isSelected =
-                                themeNotifier.accentColor.toARGB32() ==
-                                color.toARGB32();
-                            return GestureDetector(
-                              onTap: () => themeNotifier.setAccentColor(color),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  shape: BoxShape.circle,
-                                  border: isSelected
-                                      ? Border.all(
-                                          color: theme.colorScheme.onSurface,
-                                          width: 2.5,
-                                        )
-                                      : null,
-                                  boxShadow: isSelected
-                                      ? [
-                                          BoxShadow(
-                                            color: color.withValues(alpha: 0.4),
-                                            blurRadius: 8,
-                                            spreadRadius: 1,
-                                          ),
-                                        ]
-                                      : null,
+                        const SizedBox(height: 10),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: _accentColors.map((color) {
+                              final isSelected =
+                                  themeNotifier.accentColor.toARGB32() ==
+                                  color.toARGB32();
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 12),
+                                child: GestureDetector(
+                                  onTap: () =>
+                                      themeNotifier.setAccentColor(color),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      shape: BoxShape.circle,
+                                      border: isSelected
+                                          ? Border.all(
+                                              color:
+                                                  theme.colorScheme.onSurface,
+                                              width: 2,
+                                            )
+                                          : null,
+                                    ),
+                                    child: isSelected
+                                        ? const Center(
+                                            child: FaIcon(
+                                              FontAwesomeIcons.check,
+                                              color: Colors.white,
+                                              size: 12,
+                                            ),
+                                          )
+                                        : null,
+                                  ),
                                 ),
-                                child: isSelected
-                                    ? const Center(
-                                        child: FaIcon(
-                                          FontAwesomeIcons.check,
-                                          color: Colors.white,
-                                          size: 18,
-                                        ),
-                                      )
-                                    : null,
-                              ),
-                            );
-                          }).toList(),
+                              );
+                            }).toList(),
+                          ),
                         ),
                       ],
                     ),
                   ),
                   _divider(theme),
+
+                  // ── Background Tone ──
                   Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -188,60 +188,56 @@ class SettingsPage extends StatelessWidget {
                           'Background Tone',
                           style: theme.textTheme.titleMedium,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Dark mode only',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: BackgroundTone.values.map((tone) {
                             final isSelected =
                                 themeNotifier.backgroundTone == tone;
+                            final toneColor = tone.background(theme.brightness);
+
                             return GestureDetector(
                               onTap: () =>
                                   themeNotifier.setBackgroundTone(tone),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: tone.background,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? theme.colorScheme.primary
-                                        : theme.colorScheme.onSurface
-                                              .withValues(alpha: 0.12),
-                                    width: isSelected ? 2.5 : 1,
-                                  ),
-                                  boxShadow: isSelected
-                                      ? [
-                                          BoxShadow(
-                                            color: theme.colorScheme.primary
-                                                .withValues(alpha: 0.3),
-                                            blurRadius: 8,
-                                            spreadRadius: 1,
-                                          ),
-                                        ]
-                                      : null,
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    tone.label.split(' ').first,
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(
-                                        alpha: isSelected ? 1 : 0.6,
+                              child: Column(
+                                children: [
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    width: 52,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: toneColor,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? theme.colorScheme.primary
+                                            : theme.colorScheme.onSurface
+                                                  .withValues(alpha: 0.1),
+                                        width: isSelected ? 2 : 1,
                                       ),
+                                    ),
+                                    child: isSelected
+                                        ? Center(
+                                            child: FaIcon(
+                                              FontAwesomeIcons.check,
+                                              size: 12,
+                                              color: theme.colorScheme.primary,
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    tone.label,
+                                    style: theme.textTheme.bodySmall?.copyWith(
                                       fontSize: 10,
-                                      fontWeight: isSelected
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
+                                      color: isSelected
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.onSurface
+                                                .withValues(alpha: 0.5),
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
                             );
                           }).toList(),

@@ -45,12 +45,14 @@ class AppTheme {
     BackgroundTone? backgroundTone,
   }) {
     final isDark = brightness == Brightness.dark;
-    final tone = backgroundTone ?? BackgroundTone.deepNavy;
-    final bg = isDark ? tone.background : const Color(0xFFF5F6FA);
-    final surface = isDark ? tone.surface : Colors.white;
-    final secondarySurface = isDark
-        ? Color.lerp(tone.surface, Colors.white, 0.08)!
-        : const Color(0xFFE8EAF0);
+    final tone = backgroundTone ?? BackgroundTone.ocean;
+    final bg = tone.background(brightness);
+    final surface = tone.surface(brightness);
+    final secondarySurface = Color.lerp(
+      surface,
+      isDark ? Colors.white : Colors.black,
+      0.08,
+    )!;
     final textPrimary = isDark ? Colors.white : const Color(0xFF1A1A2E);
     final textSecondary = isDark
         ? const Color(0xFF8F9BB3)
