@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/features/settings_page/auth_page.dart';
 import 'package:project_2359/theme_notifier.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -32,292 +33,332 @@ class SettingsPage extends StatelessWidget {
       body: ListenableBuilder(
         listenable: themeNotifier,
         builder: (context, _) {
-          return ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            children: [
-              // ── General ──
-              _SectionTitle(title: 'General'),
-              _SettingsCard(
-                children: [
-                  _InfoTile(
-                    icon: FontAwesomeIcons.coins,
-                    title: 'Credits',
-                    trailing: Text(
-                      '42',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                  _divider(theme),
-                  _SettingsTile(
-                    icon: FontAwesomeIcons.cartShopping,
-                    title: 'Buy Credits',
-                    onTap: () {
-                      // TODO: Implement credit purchase
-                      _showSnackBar(context, 'Credit purchase coming soon');
-                    },
-                  ),
-                ],
-              ),
+          return StreamBuilder<AuthState>(
+            stream: Supabase.instance.client.auth.onAuthStateChange,
+            builder: (context, snapshot) {
+              final user =
+                  snapshot.data?.session?.user ??
+                  Supabase.instance.client.auth.currentUser;
+              final isLoggedIn = user != null;
 
-              // ── Account ──
-              _SectionTitle(title: 'Account'),
-              _SettingsCard(
+              return ListView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
                 children: [
-                  _SettingsTile(
-                    icon: FontAwesomeIcons.rightToBracket,
-                    title: 'Sign In',
-                    subtitle: 'Log in to sync your data',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const AuthPage()),
-                    ),
-                  ),
-                ],
-              ),
-
-              // ── Appearance ──
-              _SectionTitle(title: 'Appearance'),
-              _SettingsCard(
-                children: [
-                  // ── Theme Mode ──
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Theme Mode',
-                            style: theme.textTheme.titleMedium,
+                  // ── Account ──
+                  _SectionTitle(title: 'Account'),
+                  _SettingsCard(
+                    children: [
+                      if (!isLoggedIn)
+                        _SettingsTile(
+                          icon: FontAwesomeIcons.rightToBracket,
+                          title: 'Sign In',
+                          subtitle: 'Log in to sync your data',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const AuthPage()),
                           ),
+                        )
+                      else ...[
+                        _SettingsTile(
+                          icon: FontAwesomeIcons.coins,
+                          title: 'Credits',
+                          subtitle: '42 credits remaining • Buy more',
+                          trailing: Text(
+                            '42',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          onTap: () {
+                            _showSnackBar(
+                              context,
+                              'Credit purchase coming soon',
+                            );
+                          },
                         ),
-                        SegmentedButton<ThemeMode>(
-                          showSelectedIcon: false,
-                          segments: const [
-                            ButtonSegment(
-                              value: ThemeMode.dark,
-                              icon: FaIcon(FontAwesomeIcons.moon, size: 12),
+                        _divider(theme),
+                        _SettingsTile(
+                          icon: FontAwesomeIcons.user,
+                          title: 'Profile',
+                          subtitle: user.email,
+                          onTap: () {
+                            _showSnackBar(
+                              context,
+                              'Profile settings coming soon',
+                            );
+                          },
+                        ),
+                        _divider(theme),
+                        _SettingsTile(
+                          icon: FontAwesomeIcons.rightFromBracket,
+                          title: 'Sign Out',
+                          onTap: () async {
+                            await Supabase.instance.client.auth.signOut();
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
+
+                  // ── Appearance ──
+                  _SectionTitle(title: 'Appearance'),
+                  _SettingsCard(
+                    children: [
+                      // ── Theme Mode ──
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Theme Mode',
+                                style: theme.textTheme.titleMedium,
+                              ),
                             ),
-                            ButtonSegment(
-                              value: ThemeMode.light,
-                              icon: FaIcon(FontAwesomeIcons.sun, size: 12),
+                            SegmentedButton<ThemeMode>(
+                              showSelectedIcon: false,
+                              segments: const [
+                                ButtonSegment(
+                                  value: ThemeMode.dark,
+                                  icon: FaIcon(FontAwesomeIcons.moon, size: 12),
+                                ),
+                                ButtonSegment(
+                                  value: ThemeMode.light,
+                                  icon: FaIcon(FontAwesomeIcons.sun, size: 12),
+                                ),
+                                ButtonSegment(
+                                  value: ThemeMode.system,
+                                  label: Text(
+                                    'Auto',
+                                    style: TextStyle(fontSize: 10),
+                                  ),
+                                ),
+                              ],
+                              selected: {themeNotifier.themeMode},
+                              onSelectionChanged: (modes) =>
+                                  themeNotifier.setThemeMode(modes.first),
                             ),
-                            ButtonSegment(
-                              value: ThemeMode.system,
-                              label: Text(
-                                'Auto',
-                                style: TextStyle(fontSize: 10),
+                          ],
+                        ),
+                      ),
+                      _divider(theme),
+
+                      // ── Accent Color ──
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Accent Color',
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 10),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: _accentColors.map((color) {
+                                  final isSelected =
+                                      themeNotifier.accentColor.toARGB32() ==
+                                      color.toARGB32();
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 12),
+                                    child: GestureDetector(
+                                      onTap: () =>
+                                          themeNotifier.setAccentColor(color),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        width: 28,
+                                        height: 28,
+                                        decoration: BoxDecoration(
+                                          color: color,
+                                          shape: BoxShape.circle,
+                                          border: isSelected
+                                              ? Border.all(
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onSurface,
+                                                  width: 2,
+                                                )
+                                              : null,
+                                        ),
+                                        child: isSelected
+                                            ? const Center(
+                                                child: FaIcon(
+                                                  FontAwesomeIcons.check,
+                                                  color: Colors.white,
+                                                  size: 12,
+                                                ),
+                                              )
+                                            : null,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
                               ),
                             ),
                           ],
-                          selected: {themeNotifier.themeMode},
-                          onSelectionChanged: (modes) =>
-                              themeNotifier.setThemeMode(modes.first),
                         ),
-                      ],
-                    ),
-                  ),
-                  _divider(theme),
+                      ),
+                      _divider(theme),
 
-                  // ── Accent Color ──
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Accent Color',
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 10),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: _accentColors.map((color) {
-                              final isSelected =
-                                  themeNotifier.accentColor.toARGB32() ==
-                                  color.toARGB32();
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 12),
-                                child: GestureDetector(
+                      // ── Background Tone ──
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Background Tone',
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: BackgroundTone.values.map((tone) {
+                                final isSelected =
+                                    themeNotifier.backgroundTone == tone;
+                                final toneColor = tone.background(
+                                  theme.brightness,
+                                );
+
+                                return GestureDetector(
                                   onTap: () =>
-                                      themeNotifier.setAccentColor(color),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    width: 28,
-                                    height: 28,
-                                    decoration: BoxDecoration(
-                                      color: color,
-                                      shape: BoxShape.circle,
-                                      border: isSelected
-                                          ? Border.all(
-                                              color:
-                                                  theme.colorScheme.onSurface,
-                                              width: 2,
-                                            )
-                                          : null,
-                                    ),
-                                    child: isSelected
-                                        ? const Center(
-                                            child: FaIcon(
-                                              FontAwesomeIcons.check,
-                                              color: Colors.white,
-                                              size: 12,
-                                            ),
-                                          )
-                                        : null,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _divider(theme),
-
-                  // ── Background Tone ──
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Background Tone',
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: BackgroundTone.values.map((tone) {
-                            final isSelected =
-                                themeNotifier.backgroundTone == tone;
-                            final toneColor = tone.background(theme.brightness);
-
-                            return GestureDetector(
-                              onTap: () =>
-                                  themeNotifier.setBackgroundTone(tone),
-                              child: Column(
-                                children: [
-                                  AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    width: 52,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: toneColor,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? theme.colorScheme.primary
-                                            : theme.colorScheme.onSurface
-                                                  .withValues(alpha: 0.1),
-                                        width: isSelected ? 2 : 1,
+                                      themeNotifier.setBackgroundTone(tone),
+                                  child: Column(
+                                    children: [
+                                      AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        width: 52,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          color: toneColor,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? theme.colorScheme.primary
+                                                : theme.colorScheme.onSurface
+                                                      .withValues(alpha: 0.1),
+                                            width: isSelected ? 2 : 1,
+                                          ),
+                                        ),
+                                        child: isSelected
+                                            ? Center(
+                                                child: FaIcon(
+                                                  FontAwesomeIcons.check,
+                                                  size: 12,
+                                                  color:
+                                                      theme.colorScheme.primary,
+                                                ),
+                                              )
+                                            : null,
                                       ),
-                                    ),
-                                    child: isSelected
-                                        ? Center(
-                                            child: FaIcon(
-                                              FontAwesomeIcons.check,
-                                              size: 12,
-                                              color: theme.colorScheme.primary,
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        tone.label,
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              fontSize: 10,
+                                              color: isSelected
+                                                  ? theme.colorScheme.primary
+                                                  : theme.colorScheme.onSurface
+                                                        .withValues(alpha: 0.5),
                                             ),
-                                          )
-                                        : null,
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    tone.label,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      fontSize: 10,
-                                      color: isSelected
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.onSurface
-                                                .withValues(alpha: 0.5),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
+                                );
+                              }).toList(),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
+                    ],
+                  ),
+
+                  // ── Storage ──
+                  _SectionTitle(title: 'Storage'),
+                  _SettingsCard(
+                    children: [
+                      _SettingsTile(
+                        icon: FontAwesomeIcons.eraser,
+                        title: 'Clear Cache',
+                        onTap: () {
+                          // TODO: Implement cache clearing
+                          _showSnackBar(context, 'Cache cleared');
+                        },
+                      ),
+                      _divider(theme),
+                      _SettingsTile(
+                        icon: FontAwesomeIcons.hardDrive,
+                        title: 'Manage Downloads',
+                        onTap: () {
+                          // TODO: Implement download management
+                          _showSnackBar(context, 'Coming soon');
+                        },
+                      ),
+                    ],
+                  ),
+
+                  // ── Legal ──
+                  _SectionTitle(title: 'Legal'),
+                  _SettingsCard(
+                    children: [
+                      _SettingsTile(
+                        icon: FontAwesomeIcons.fileContract,
+                        title: 'Terms of Service',
+                        onTap: () => _showLegalSheet(
+                          context,
+                          'Terms of Service',
+                          _placeholderToS,
+                        ),
+                      ),
+                      _divider(theme),
+                      _SettingsTile(
+                        icon: FontAwesomeIcons.shieldHalved,
+                        title: 'Privacy Policy',
+                        onTap: () => _showLegalSheet(
+                          context,
+                          'Privacy Policy',
+                          _placeholderPrivacy,
+                        ),
+                      ),
+                      _divider(theme),
+                      _SettingsTile(
+                        icon: FontAwesomeIcons.scaleBalanced,
+                        title: 'Licenses',
+                        onTap: () => showLicensePage(
+                          context: context,
+                          applicationName: 'Project 2359',
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 32),
+                  Center(
+                    child: Text(
+                      'Project 2359 • v0.1.0',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.3,
+                        ),
+                      ),
                     ),
                   ),
                 ],
-              ),
-
-              // ── Storage ──
-              _SectionTitle(title: 'Storage'),
-              _SettingsCard(
-                children: [
-                  _SettingsTile(
-                    icon: FontAwesomeIcons.eraser,
-                    title: 'Clear Cache',
-                    onTap: () {
-                      // TODO: Implement cache clearing
-                      _showSnackBar(context, 'Cache cleared');
-                    },
-                  ),
-                  _divider(theme),
-                  _SettingsTile(
-                    icon: FontAwesomeIcons.hardDrive,
-                    title: 'Manage Downloads',
-                    onTap: () {
-                      // TODO: Implement download management
-                      _showSnackBar(context, 'Coming soon');
-                    },
-                  ),
-                ],
-              ),
-
-              // ── Legal ──
-              _SectionTitle(title: 'Legal'),
-              _SettingsCard(
-                children: [
-                  _SettingsTile(
-                    icon: FontAwesomeIcons.fileContract,
-                    title: 'Terms of Service',
-                    onTap: () => _showLegalSheet(
-                      context,
-                      'Terms of Service',
-                      _placeholderToS,
-                    ),
-                  ),
-                  _divider(theme),
-                  _SettingsTile(
-                    icon: FontAwesomeIcons.shieldHalved,
-                    title: 'Privacy Policy',
-                    onTap: () => _showLegalSheet(
-                      context,
-                      'Privacy Policy',
-                      _placeholderPrivacy,
-                    ),
-                  ),
-                  _divider(theme),
-                  _SettingsTile(
-                    icon: FontAwesomeIcons.scaleBalanced,
-                    title: 'Licenses',
-                    onTap: () => showLicensePage(
-                      context: context,
-                      applicationName: 'Project 2359',
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 32),
-              Center(
-                child: Text(
-                  'Project 2359 • v0.1.0',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 40),
-            ],
+              );
+            },
           );
         },
       ),
@@ -460,12 +501,14 @@ class _SettingsTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final String? subtitle;
+  final Widget? trailing;
   final VoidCallback? onTap;
 
   const _SettingsTile({
     required this.icon,
     required this.title,
     this.subtitle,
+    this.trailing,
     this.onTap,
   });
 
@@ -494,6 +537,7 @@ class _SettingsTile extends StatelessWidget {
                 ],
               ),
             ),
+            if (trailing != null) ...[trailing!, const SizedBox(width: 8)],
             FaIcon(
               FontAwesomeIcons.chevronRight,
               size: 14,
@@ -501,39 +545,6 @@ class _SettingsTile extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _InfoTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Widget trailing;
-
-  const _InfoTile({
-    required this.icon,
-    required this.title,
-    required this.trailing,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          FaIcon(
-            icon,
-            size: 18,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-          const SizedBox(width: 14),
-          Text(title, style: theme.textTheme.bodyLarge),
-          const Spacer(),
-          trailing,
-        ],
       ),
     );
   }
