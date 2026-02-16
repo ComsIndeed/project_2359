@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
-import 'package:project_2359/features/settings_page/auth_page.dart';
+import 'package:project_2359/features/auth/auth_page.dart';
 import 'package:project_2359/theme_notifier.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

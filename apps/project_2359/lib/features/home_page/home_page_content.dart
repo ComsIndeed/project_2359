@@ -7,7 +7,7 @@ import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/activity_list_item.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/tap_to_slide_up.dart';
-import 'package:project_2359/features/settings_page/auth_page.dart';
+import 'package:project_2359/features/auth/auth_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
 import 'package:project_2359/theme_notifier.dart';
 
@@ -44,14 +44,17 @@ class _HomeHeader extends StatelessWidget {
       children: [
         ListenableBuilder(
           listenable: themeNotifier,
-          builder: (context, _) => AnimatedSwitcher(
-            duration: Durations.short4,
-            child: themeNotifier.themeMode == ThemeMode.dark
-                ? Image.asset(
-                    'assets/images/app_icon_light_nobg.png',
-                    height: 32,
-                  )
-                : Image.asset('assets/images/app_icon_nobg.png', height: 32),
+          builder: (context, _) => Hero(
+            tag: 'app_icon',
+            child: AnimatedSwitcher(
+              duration: Durations.short4,
+              child: themeNotifier.themeMode == ThemeMode.dark
+                  ? Image.asset(
+                      'assets/images/app_icon_light_nobg.png',
+                      height: 32,
+                    )
+                  : Image.asset('assets/images/app_icon_nobg.png', height: 32),
+            ),
           ),
         ),
         const SizedBox(width: 12),
