@@ -51,6 +51,9 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   bool _isDrawerOpen = false;
   bool _isMenuOpen = false;
   String? _extractedText;
+  String? _indexedText;
+  bool _isIndexing = false;
+  bool _isViewingIndexed = false;
   int _currentPage = 1;
   int _totalPages = 0;
   double _zoomLevel = 1.0;
@@ -125,6 +128,40 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
       _zoomLevel = 1.0;
       _pdfController.zoomLevel = 1.0;
     });
+  }
+
+  // ─── Indexing ─────────────────────────────────────────────────────
+
+  Future<void> _startIndexing() async {
+    if (_extractedText == null || _extractedText!.isEmpty || _isIndexing) {
+      return;
+    }
+
+    setState(() {
+      _isIndexing = true;
+      _indexedText = '';
+      _isViewingIndexed = true; // Auto-switch to indexed view
+    });
+
+    try {
+      final stream = AiHelpers.indexExtractedText(_extractedText!);
+      await for (final chunk in stream) {
+        if (!mounted) break;
+        setState(() {
+          _indexedText = (_indexedText ?? '') + chunk;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Indexing failed: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isIndexing = false);
+      }
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -613,23 +650,40 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
               ),
             ),
 
-            // Header
+            // Header with Tabs and Index Button
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 12, 0),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: Row(
                 children: [
-                  FaIcon(
-                    FontAwesomeIcons.fileLines,
-                    color: cs.primary,
-                    size: 16,
+                  // Extracted Text Tab
+                  _buildTab(
+                    cs: cs,
+                    tt: tt,
+                    label: 'Extracted Text',
+                    icon: FontAwesomeIcons.fileLines,
+                    isActive: !_isViewingIndexed,
+                    onTap: () => setState(() => _isViewingIndexed = false),
                   ),
-                  const SizedBox(width: 6),
+
+                  // Dotted Arrow + Index Button
                   Expanded(
-                    child: Text(
-                      'Extracted Text',
-                      style: tt.headlineMedium?.copyWith(fontSize: 14),
-                      overflow: TextOverflow.ellipsis,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [const _DottedArrow(), _buildIndexButton(cs)],
+                      ),
                     ),
+                  ),
+
+                  // Indexed Text Tab
+                  _buildTab(
+                    cs: cs,
+                    tt: tt,
+                    label: 'Indexed Text',
+                    icon: FontAwesomeIcons.brain,
+                    isActive: _isViewingIndexed,
+                    onTap: () => setState(() => _isViewingIndexed = true),
                   ),
                 ],
               ),
@@ -637,7 +691,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
 
             // Gradient divider
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Container(
                 height: 1,
                 decoration: BoxDecoration(
@@ -645,6 +699,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                     colors: [
                       cs.primary.withValues(alpha: 0.3),
                       cs.primary.withValues(alpha: 0.05),
+                      cs.primary.withValues(alpha: 0.3),
                     ],
                   ),
                 ),
@@ -653,68 +708,9 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
 
             // Content
             Expanded(
-              child: _extractedText == null
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: cs.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Extracting…',
-                            style: tt.bodySmall?.copyWith(
-                              color: cs.onSurface.withValues(alpha: 0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : _extractedText!.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          FaIcon(
-                            FontAwesomeIcons.alignLeft,
-                            size: 32,
-                            color: cs.onSurface.withValues(alpha: 0.2),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'No text found.',
-                            style: tt.bodySmall?.copyWith(
-                              color: cs.onSurface.withValues(alpha: 0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Scrollbar(
-                      controller: _drawerScrollController,
-                      thumbVisibility: true,
-                      child: ListView(
-                        controller: _drawerScrollController,
-                        padding: const EdgeInsets.fromLTRB(16, 2, 12, 16),
-                        children: [
-                          SelectableText(
-                            _extractedText!,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              height: 1.6,
-                              color: cs.onSurface.withValues(alpha: 0.85),
-                              letterSpacing: 0.1,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+              child: _isViewingIndexed
+                  ? _buildIndexedContent(cs, tt)
+                  : _buildExtractedContent(cs, tt),
             ),
           ],
         ),
@@ -722,65 +718,271 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildTab({
+    required ColorScheme cs,
+    required TextTheme tt,
+    required String label,
+    required IconData icon,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FaIcon(
+              icon,
+              color: isActive
+                  ? cs.primary
+                  : cs.onSurface.withValues(alpha: 0.4),
+              size: 14,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: tt.headlineMedium?.copyWith(
+                fontSize: 13,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive
+                    ? cs.onSurface
+                    : cs.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIndexButton(ColorScheme cs) {
+    return Material(
+      color: _isIndexing
+          ? cs.surface
+          : cs.surfaceContainerHighest.withValues(alpha: 0.8),
+      shape: StadiumBorder(
+        side: BorderSide(color: cs.primary.withValues(alpha: 0.2), width: 0.5),
+      ),
+      child: InkWell(
+        onTap: (_extractedText == null || _isIndexing) ? null : _startIndexing,
+        customBorder: const StadiumBorder(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_isIndexing)
+                Container(
+                  width: 10,
+                  height: 10,
+                  margin: const EdgeInsets.only(right: 6),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    color: cs.primary,
+                  ),
+                )
+              else
+                FaIcon(
+                  FontAwesomeIcons.bolt,
+                  size: 10,
+                  color: cs.primary.withValues(alpha: 0.8),
+                ),
+              if (!_isIndexing) const SizedBox(width: 4),
+              Text(
+                _isIndexing ? 'Indexing...' : 'Index',
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: cs.primary.withValues(alpha: 0.9),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExtractedContent(ColorScheme cs, TextTheme tt) {
+    if (_extractedText == null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: cs.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Extracting…',
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_extractedText!.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FaIcon(
+              FontAwesomeIcons.alignLeft,
+              size: 32,
+              color: cs.onSurface.withValues(alpha: 0.2),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'No text found.',
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Scrollbar(
+      controller: _drawerScrollController,
+      thumbVisibility: true,
+      child: ListView(
+        controller: _drawerScrollController,
+        padding: const EdgeInsets.fromLTRB(16, 2, 12, 16),
+        children: [
+          SelectableText(
+            _extractedText!,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              height: 1.6,
+              color: cs.onSurface.withValues(alpha: 0.85),
+              letterSpacing: 0.1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIndexedContent(ColorScheme cs, TextTheme tt) {
+    if (_indexedText == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.05),
+                  shape: BoxShape.circle,
+                ),
+                child: FaIcon(
+                  FontAwesomeIcons.brain,
+                  size: 32,
+                  color: cs.primary.withValues(alpha: 0.2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Not Indexed Yet',
+                style: tt.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface.withValues(alpha: 0.8),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Index this document to enjoy better search and smarter AI interactions.',
+                textAlign: TextAlign.center,
+                style: tt.bodyMedium?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.5),
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _extractedText == null ? null : _startIndexing,
+                icon: const FaIcon(FontAwesomeIcons.bolt, size: 14),
+                label: const Text('Index Now'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: cs.primary,
+                  foregroundColor: cs.onPrimary,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Scrollbar(
+      thumbVisibility: true,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 2, 12, 16),
+        children: [
+          SelectableText(
+            _indexedText!,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              height: 1.6,
+              color: cs.onSurface.withValues(alpha: 0.85),
+              letterSpacing: 0.1,
+            ),
+          ),
+          if (_isIndexing)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 12,
+                    height: 12,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: cs.primary.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'AI is thinking...',
+                    style: tt.bodySmall?.copyWith(
+                      fontStyle: FontStyle.italic,
+                      color: cs.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   // ═══════════════════════════════════════════════════════════════════
   // Action Button (icon + label below)
   // ═══════════════════════════════════════════════════════════════════
-
-  Widget _buildActionButton({
-    required ColorScheme cs,
-    required Widget icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    final shape = RoundedSuperellipseBorder(
-      borderRadius: BorderRadius.circular(14),
-      side: BorderSide(color: cs.primary.withValues(alpha: 0.12)),
-    );
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Material(
-          color: Colors.transparent,
-          child: Ink(
-            width: 40,
-            height: 40,
-            decoration: ShapeDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  cs.primary.withValues(alpha: 0.15),
-                  cs.primary.withValues(alpha: 0.06),
-                ],
-              ),
-              shape: shape,
-            ),
-            child: InkWell(
-              customBorder: shape,
-              onTap: onTap,
-              child: Center(child: icon),
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        GestureDetector(
-          onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              height: 1.2,
-              color: cs.onSurface.withValues(alpha: 0.55),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -824,4 +1026,53 @@ class _SuperellipseClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
+class _DottedArrow extends StatelessWidget {
+  const _DottedArrow();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return SizedBox(
+      height: 20,
+      width: double.infinity,
+      child: CustomPaint(
+        painter: _DottedArrowPainter(color: cs.primary.withValues(alpha: 0.2)),
+      ),
+    );
+  }
+}
+
+class _DottedArrowPainter extends CustomPainter {
+  final Color color;
+  _DottedArrowPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    const dashWidth = 4.0;
+    const dashSpace = 3.0;
+    double startX = 0;
+    final y = size.height / 2;
+
+    while (startX < size.width) {
+      canvas.drawLine(Offset(startX, y), Offset(startX + dashWidth, y), paint);
+      startX += dashWidth + dashSpace;
+    }
+
+    // Draw arrow head
+    final path = Path()
+      ..moveTo(size.width - 6, y - 4)
+      ..lineTo(size.width, y)
+      ..lineTo(size.width - 6, y + 4);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
