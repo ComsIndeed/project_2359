@@ -165,16 +165,25 @@ class SourcesPage extends StatelessWidget {
                               );
                             }
 
+                            final status = (index % 3 == 0)
+                                ? SourceIndexingStatus.indexing
+                                : (index % 3 == 1)
+                                ? SourceIndexingStatus.indexed
+                                : SourceIndexingStatus.none;
+
                             return TapToSlideLeft(
                               page: SourcePage(
                                 fileBytes: file.bytes!,
                                 title: file.name,
                               ),
                               builder: (pushPage) => SourceListItem(
-                                onTap: pushPage,
+                                onTap: status == SourceIndexingStatus.indexing
+                                    ? null
+                                    : pushPage,
                                 icon: FontAwesomeIcons.fileLines,
                                 title: file.name,
                                 subtitle: file.path ?? "",
+                                status: status,
                               ),
                             );
                           },
