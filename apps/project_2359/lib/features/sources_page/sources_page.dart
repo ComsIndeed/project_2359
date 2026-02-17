@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:project_2359/app_theme.dart';
-import 'package:project_2359/core/widgets/activity_list_item.dart';
+import 'package:project_2359/features/sources_page/source_list_item.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
@@ -149,7 +149,7 @@ class SourcesPage extends StatelessWidget {
                           itemBuilder: (context, index) {
                             final file = state.files[index];
                             if (file.bytes == null) {
-                              return ActivityListItem(
+                              return SourceListItem(
                                 onTap: () {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -159,9 +159,9 @@ class SourcesPage extends StatelessWidget {
                                     ),
                                   );
                                 },
-                                icon: const FaIcon(FontAwesomeIcons.filePen),
-                                title: Text(file.name),
-                                subtitle: Text(file.path ?? ""),
+                                icon: FontAwesomeIcons.fileLines,
+                                title: file.name,
+                                subtitle: file.path ?? "",
                               );
                             }
 
@@ -170,11 +170,11 @@ class SourcesPage extends StatelessWidget {
                                 fileBytes: file.bytes!,
                                 title: file.name,
                               ),
-                              builder: (pushPage) => ActivityListItem(
+                              builder: (pushPage) => SourceListItem(
                                 onTap: pushPage,
-                                icon: const FaIcon(FontAwesomeIcons.filePen),
-                                title: Text(file.name),
-                                subtitle: Text(file.path ?? ""),
+                                icon: FontAwesomeIcons.fileLines,
+                                title: file.name,
+                                subtitle: file.path ?? "",
                               ),
                             );
                           },
