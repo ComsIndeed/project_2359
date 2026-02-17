@@ -389,7 +389,9 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 
 [functions.index-extracted-text]
 enabled = true
-verify_jwt = true
+# Auth is enforced manually inside the function via _shared/auth.ts
+# This must be false when using publishable keys (non-JWT API keys)
+verify_jwt = false
 import_map = "./functions/index-extracted-text/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
