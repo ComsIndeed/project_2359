@@ -57,7 +57,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   bool _pdfReady = false;
 
   // Constants
-  static const _revealFraction = 0.85;
+
   static const _animDuration = Duration(milliseconds: 200);
   static const _animCurve = Curves.easeOutCubic;
 
@@ -93,6 +93,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   }
 
   void _toggleMenu() {
+    if (_isDrawerOpen) setState(() => _isDrawerOpen = false);
     setState(() => _isMenuOpen = !_isMenuOpen);
   }
 
@@ -135,51 +136,43 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      body: Stack(
+      body: Column(
         children: [
-          // ── Text panel (right 85%, behind main unit) ─────────────
-          Positioned(
-            top: 0,
-            bottom: 0,
-            right: 0,
-            width: screenWidth * _revealFraction,
-            child: _buildTextPanel(cs, tt),
-          ),
+          // App bar
+          _buildAppBar(context, cs, tt),
 
-          // ── Main unit: AppBar + Menu + PDF (slides left together) ──
-          AnimatedSlide(
+          // Menu (animated reveal — pushes PDF down)
+          AnimatedSize(
             duration: _animDuration,
             curve: _animCurve,
-            offset: Offset(_isDrawerOpen ? -_revealFraction : 0, 0),
+            alignment: Alignment.topCenter,
+            child: _isMenuOpen
+                ? _buildMenuContent(cs, tt, isDark)
+                : const SizedBox.shrink(),
+          ),
+
+          // PDF viewer area (slides up when text panel expands)
+          Expanded(
             child: GestureDetector(
-              onTap: _isDrawerOpen ? _closeAll : null,
-              child: Container(
-                width: screenWidth,
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: Column(
-                  children: [
-                    // App bar
-                    _buildAppBar(context, cs, tt),
-
-                    // Menu (animated reveal — pushes PDF down)
-                    AnimatedSize(
-                      duration: _animDuration,
-                      curve: _animCurve,
-                      alignment: Alignment.topCenter,
-                      child: _isMenuOpen
-                          ? _buildMenuContent(cs, tt, isDark)
-                          : const SizedBox.shrink(),
-                    ),
-
-                    // PDF viewer area
-                    Expanded(child: _buildPdfArea(cs, isDark)),
-                  ],
-                ),
-              ),
+              onTap: (_isMenuOpen || _isDrawerOpen) ? _closeAll : null,
+              behavior: HitTestBehavior.opaque,
+              child: _buildPdfArea(cs, isDark),
             ),
+          ),
+
+          // Text panel (animated reveal from bottom)
+          AnimatedSize(
+            duration: _animDuration,
+            curve: _animCurve,
+            alignment: Alignment.bottomCenter,
+            child: _isDrawerOpen
+                ? SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    child: _buildTextPanel(cs, tt),
+                  )
+                : const SizedBox.shrink(),
           ),
         ],
       ),
@@ -364,44 +357,61 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   // ═══════════════════════════════════════════════════════════════════
 
   Widget _buildPdfArea(ColorScheme cs, bool isDark) {
+    bool isAnyPanelOpen = _isMenuOpen || _isDrawerOpen;
+
     return Stack(
       children: [
-        // PDF viewer with superellipse top clip
-        ClipPath(
-          clipper: _SuperellipseTopClipper(),
-          child: Container(
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1A1A1A) : Colors.grey.shade200,
-            ),
-            child: SfPdfViewerTheme(
-              data: SfPdfViewerThemeData(
-                backgroundColor: isDark
-                    ? const Color(0xFF2A2A2A)
-                    : Colors.grey.shade300,
+        // PDF viewer with superellipse curves
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+          ), // Adjust if needed
+          child: ClipPath(
+            clipper: _SuperellipseClipper(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1A1A1A) : Colors.grey.shade200,
               ),
-              child: _pdfReady
-                  ? SfPdfViewer.memory(
-                      canShowPageLoadingIndicator: true,
-                      widget.fileBytes,
-                      controller: _pdfController,
-                      onPageChanged: (details) {
-                        setState(() => _currentPage = details.newPageNumber);
-                      },
-                      onZoomLevelChanged: (details) {
-                        setState(() => _zoomLevel = details.newZoomLevel);
-                      },
-                      canShowScrollHead: false,
-                      pageSpacing: 24,
-                    )
-                  : Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Theme.of(context).colorScheme.primary,
+              child: SfPdfViewerTheme(
+                data: SfPdfViewerThemeData(
+                  backgroundColor: isDark
+                      ? const Color(0xFF2A2A2A)
+                      : Colors.grey.shade300,
+                ),
+                child: _pdfReady
+                    ? SfPdfViewer.memory(
+                        canShowPageLoadingIndicator: true,
+                        widget.fileBytes,
+                        controller: _pdfController,
+                        onPageChanged: (details) {
+                          setState(() => _currentPage = details.newPageNumber);
+                        },
+                        onZoomLevelChanged: (details) {
+                          setState(() => _zoomLevel = details.newZoomLevel);
+                        },
+                        canShowScrollHead: false,
+                        pageSpacing: 24,
+                      )
+                    : Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
-                    ),
+              ),
             ),
           ),
         ),
+
+        // Transparent overlay to catch taps when a panel is open
+        if (isAnyPanelOpen)
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: _closeAll,
+              behavior: HitTestBehavior.opaque,
+              child: Container(color: Colors.transparent),
+            ),
+          ),
 
         // Bottom controls bar
         if (_totalPages > 0)
@@ -421,68 +431,80 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
 
   Widget _buildBottomControls(ColorScheme cs) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: ShapeDecoration(
-        color: cs.surface.withValues(alpha: 0.92),
-        shape: AppTheme.cardShape as OutlinedBorder,
+        color: cs.surface.withValues(alpha: 0.94),
+        shape: const StadiumBorder(),
         shadows: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Page indicator
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+          // Page indicator badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: ShapeDecoration(
+              color: cs.onSurface.withValues(alpha: 0.05),
+              shape: const StadiumBorder(),
+            ),
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 120),
               child: Text(
                 '$_currentPage / $_totalPages',
                 key: ValueKey(_currentPage),
                 style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurface.withValues(alpha: 0.7),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface.withValues(alpha: 0.8),
                 ),
               ),
             ),
           ),
 
-          const Spacer(),
+          const SizedBox(width: 8),
 
-          // Zoom out
-          _controlButton(cs, FontAwesomeIcons.minus, _zoomOut),
-
-          // Zoom percentage display
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: Text(
-              '${(_zoomLevel * 100).round()}%',
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface.withValues(alpha: 0.5),
-              ),
+          // Zoom controls group
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: ShapeDecoration(
+              color: cs.onSurface.withValues(alpha: 0.05),
+              shape: const StadiumBorder(),
+            ),
+            child: Row(
+              children: [
+                _controlButton(cs, FontAwesomeIcons.minus, _zoomOut),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Text(
+                    '${(_zoomLevel * 100).round()}%',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: cs.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+                _controlButton(cs, FontAwesomeIcons.plus, _zoomIn),
+              ],
             ),
           ),
 
-          // Zoom in
-          _controlButton(cs, FontAwesomeIcons.plus, _zoomIn),
+          const SizedBox(width: 8),
 
-          // Zoom reset (fit)
-          _controlButton(cs, FontAwesomeIcons.expand, _zoomReset),
-
-          // Divider
-          Container(
-            width: 1,
-            height: 20,
-            color: cs.onSurface.withValues(alpha: 0.3),
+          // Action buttons
+          _controlButton(
+            cs,
+            FontAwesomeIcons.expand,
+            _zoomReset,
+            useBackground: true,
           ),
-
+          const SizedBox(width: 8),
           _extractTextButton(cs),
         ],
       ),
@@ -490,32 +512,34 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   }
 
   Material _extractTextButton(ColorScheme cs) {
+    final bool active = _isDrawerOpen;
     return Material(
-      color: Colors.transparent,
+      color: active ? cs.primary : cs.onSurface.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(20),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         onTap: _toggleDrawer,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               FaIcon(
                 FontAwesomeIcons.fileLines,
                 size: 16,
-                color: _isDrawerOpen
-                    ? cs.primary
-                    : cs.onSurface.withValues(alpha: 0.6),
+                color: active
+                    ? cs.onPrimary
+                    : cs.onSurface.withValues(alpha: 0.7),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 8),
               Text(
-                'Text',
+                'View Text',
                 style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: _isDrawerOpen
-                      ? cs.primary
-                      : cs.onSurface.withValues(alpha: 0.6),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: active
+                      ? cs.onPrimary
+                      : cs.onSurface.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -525,18 +549,26 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _controlButton(ColorScheme cs, IconData icon, VoidCallback onTap) {
+  Widget _controlButton(
+    ColorScheme cs,
+    IconData icon,
+    VoidCallback onTap, {
+    bool useBackground = false,
+  }) {
     return Material(
-      color: Colors.transparent,
+      color: useBackground
+          ? cs.onSurface.withValues(alpha: 0.05)
+          : Colors.transparent,
+      shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(10),
           child: FaIcon(
             icon,
             size: 16,
-            color: cs.onSurface.withValues(alpha: 0.6),
+            color: cs.onSurface.withValues(alpha: 0.7),
           ),
         ),
       ),
@@ -549,14 +581,41 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
 
   Widget _buildTextPanel(ColorScheme cs, TextTheme tt) {
     return Container(
-      color: cs.surface,
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 12,
+            offset: const Offset(0, -2),
+          ),
+        ],
+        border: Border(
+          top: BorderSide(color: cs.onSurface.withValues(alpha: 0.08)),
+        ),
+      ),
       child: SafeArea(
+        top: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Drag handle indicator
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 32,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: cs.onSurface.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+
             // Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 12, 0),
+              padding: const EdgeInsets.fromLTRB(16, 8, 12, 0),
               child: Row(
                 children: [
                   FaIcon(
@@ -657,58 +716,6 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                       ),
                     ),
             ),
-
-            // ── Action Buttons ─────────────────────────
-            if (_extractedText != null && _extractedText!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 4, 8, 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildActionButton(
-                      cs: cs,
-                      icon: FaIcon(
-                        FontAwesomeIcons.copy,
-                        size: 18,
-                        color: cs.primary,
-                      ),
-                      label: 'Copy',
-                      onTap: () {
-                        // TODO: copy to clipboard
-                      },
-                    ),
-                    _buildActionButton(
-                      cs: cs,
-                      icon: FaIcon(
-                        FontAwesomeIcons.font,
-                        size: 18,
-                        color: cs.primary,
-                      ),
-                      label: 'Reinterpret\ntext',
-                      onTap: () {
-                        // TODO: reinterpret extracted text
-
-                        final stream = AiHelpers.indexExtractedText(
-                          _extractedText!,
-                        );
-                        stream.listen((e) => print(e));
-                      },
-                    ),
-                    _buildActionButton(
-                      cs: cs,
-                      icon: FaIcon(
-                        FontAwesomeIcons.magnifyingGlassPlus,
-                        size: 18,
-                        color: cs.primary,
-                      ),
-                      label: 'Reinterpret\ndoc',
-                      onTap: () {
-                        // TODO: reinterpret document
-                      },
-                    ),
-                  ],
-                ),
-              ),
           ],
         ),
       ),
@@ -777,20 +784,40 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// Custom clipper for superellipse top corners on the PDF area
+// Custom clipper for superellipse corners on the PDF area
 // ═══════════════════════════════════════════════════════════════════════
 
-class _SuperellipseTopClipper extends CustomClipper<Path> {
+class _SuperellipseClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     const r = 24.0;
     final path = Path()
       ..moveTo(0, r)
+      // Top Left
       ..cubicTo(0, r * 0.2, r * 0.2, 0, r, 0)
       ..lineTo(size.width - r, 0)
+      // Top Right
       ..cubicTo(size.width - r * 0.2, 0, size.width, r * 0.2, size.width, r)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
+      ..lineTo(size.width, size.height - r)
+      // Bottom Right
+      ..cubicTo(
+        size.width,
+        size.height - r * 0.2,
+        size.width - r * 0.2,
+        size.height,
+        size.width - r,
+        size.height,
+      )
+      ..lineTo(r, size.height)
+      // Bottom Left
+      ..cubicTo(
+        r * 0.2,
+        size.height,
+        0,
+        size.height - r * 0.2,
+        0,
+        size.height - r,
+      )
       ..close();
     return path;
   }
