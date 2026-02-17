@@ -36,27 +36,35 @@ class AiHelpers {
     // supabase_flutter >= 2.x returns the raw response body.
     final rawData = response.data;
 
+    Stream<String> linesStream;
+
     if (rawData is String) {
       // Parse SSE lines from the complete response
-      yield* _parseSseString(rawData);
+      linesStream = Stream.fromIterable(const LineSplitter().convert(rawData));
     } else if (rawData is List<int>) {
       // Binary response — decode as UTF-8 then parse
-      final decoded = utf8.decode(rawData);
-      yield* _parseSseString(decoded);
+      linesStream = Stream.fromIterable(
+        const LineSplitter().convert(utf8.decode(rawData)),
+      );
+    } else if (rawData is Stream<List<int>>) {
+      // Streamed response (ByteStream)
+      linesStream = rawData
+          .transform(utf8.decoder)
+          .transform(const LineSplitter());
     } else {
       throw Exception(
         'Unexpected response type from index-extracted-text: '
         '${rawData.runtimeType}',
       );
     }
+
+    yield* _parseSseLines(linesStream);
   }
 
   /// Parses an SSE-formatted string and yields the text content from each
   /// `data:` line. Stops when it encounters `[DONE]`.
-  static Stream<String> _parseSseString(String sseData) async* {
-    final lines = const LineSplitter().convert(sseData);
-
-    for (final line in lines) {
+  static Stream<String> _parseSseLines(Stream<String> lines) async* {
+    await for (final line in lines) {
       if (!line.startsWith('data: ')) continue;
 
       final payload = line.substring(6).trim(); // strip "data: "
