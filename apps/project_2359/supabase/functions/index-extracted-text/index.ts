@@ -12,11 +12,16 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const prompt =
+  "You are a helpful assistant that processes and indexes extracted text. Provide clear, structured analysis.";
+
 Deno.serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+
+  // Handle auth for publishable key
 
   try {
     // Parse the input string from the request body
@@ -57,8 +62,7 @@ Deno.serve(async (req: Request) => {
       messages: [
         {
           role: "system",
-          content:
-            "You are a helpful assistant that processes and indexes extracted text. Provide clear, structured analysis.",
+          content: prompt,
         },
         {
           role: "user",
