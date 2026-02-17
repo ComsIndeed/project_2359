@@ -36,6 +36,7 @@ class SourceListItem extends StatefulWidget {
 
 class _SourceListItemState extends State<SourceListItem> {
   late SourceIndexingStatus status;
+  double _indexingProgress = 0.0;
 
   @override
   void initState() {
@@ -48,11 +49,19 @@ class _SourceListItemState extends State<SourceListItem> {
 
     setState(() {
       status = SourceIndexingStatus.indexing;
+      _indexingProgress = 0.0;
     });
 
     // TODO: Handle actual indexing logic with LLM
-    // For now, simulate a delay and then set to indexed
-    await Future.delayed(const Duration(seconds: 3));
+    // For now, simulate a partitioned progress delay
+    for (int i = 1; i <= 5; i++) {
+      await Future.delayed(const Duration(milliseconds: 600));
+      if (mounted) {
+        setState(() {
+          _indexingProgress = i / 5;
+        });
+      }
+    }
 
     if (mounted) {
       setState(() {
@@ -76,76 +85,85 @@ class _SourceListItemState extends State<SourceListItem> {
 
     Widget itemContent = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Icon Container
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : Colors.black.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: FaIcon(
-              widget.icon,
-              size: 18,
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.7)
-                  : Colors.black.withValues(alpha: 0.7),
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Text Content
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  widget.title,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface.withValues(
-                      alpha: isIndexing ? 0.5 : 1.0,
-                    ),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              // Icon Container
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.black.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                if (widget.subtitle != null && widget.subtitle!.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    widget.subtitle!,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: cs.onSurfaceVariant.withValues(
-                        alpha: isIndexing ? 0.3 : 0.6,
+                child: FaIcon(
+                  widget.icon,
+                  size: 18,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.7)
+                      : Colors.black.withValues(alpha: 0.7),
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Text Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface.withValues(
+                          alpha: isIndexing ? 0.5 : 1.0,
+                        ),
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ],
-            ),
+                    if (widget.subtitle != null &&
+                        widget.subtitle!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        widget.subtitle!,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: cs.onSurfaceVariant.withValues(
+                            alpha: isIndexing ? 0.3 : 0.6,
+                          ),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // Action Area with smooth transition
+              AnimatedSwitcher(
+                duration: 400.ms,
+                switchInCurve: Curves.easeOutBack,
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(scale: animation, child: child),
+                  );
+                },
+                child: _buildStatusArea(context, cs, isDark),
+              ),
+            ],
           ),
 
-          const SizedBox(width: 12),
-
-          // Action Area with smooth transition
-          AnimatedSwitcher(
-            duration: 400.ms,
-            switchInCurve: Curves.easeOutBack,
-            switchOutCurve: Curves.easeIn,
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: ScaleTransition(scale: animation, child: child),
-              );
-            },
-            child: _buildStatusArea(context, cs, isDark),
-          ),
+          // Partitioned Progress Bar (Only during indexing)
+          _buildBottomProgressBar(context, cs, isDark),
         ],
       ),
     );
@@ -166,6 +184,7 @@ class _SourceListItemState extends State<SourceListItem> {
       child: PressableScale(
         onTap: isIndexing ? null : widget.onTap,
         child: Container(
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(20),
@@ -183,8 +202,47 @@ class _SourceListItemState extends State<SourceListItem> {
     );
   }
 
+  Widget _buildBottomProgressBar(
+    BuildContext context,
+    ColorScheme cs,
+    bool isDark,
+  ) {
+    final isIndexing = status == SourceIndexingStatus.indexing;
+
+    return AnimatedSize(
+      duration: 300.ms,
+      curve: Curves.easeInOut,
+      alignment: Alignment.topCenter,
+      child: isIndexing
+          ? Padding(
+              padding: const EdgeInsets.only(top: 12.0),
+              child: Row(
+                children: List.generate(5, (index) {
+                  final segmentProgress = (index + 1) / 5;
+                  final isFilled = _indexingProgress >= segmentProgress;
+
+                  return Expanded(
+                    child: Container(
+                      height: 3,
+                      margin: EdgeInsets.only(left: index == 0 ? 0 : 4),
+                      decoration: BoxDecoration(
+                        color: isFilled
+                            ? AppTheme.warning.withValues(alpha: 0.8)
+                            : (isDark ? Colors.white : Colors.black).withValues(
+                                alpha: 0.05,
+                              ),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            )
+          : const SizedBox.shrink(),
+    );
+  }
+
   Widget _buildStatusArea(BuildContext context, ColorScheme cs, bool isDark) {
-    // We use Keys to help AnimatedSwitcher identify different widgets
     switch (status) {
       case SourceIndexingStatus.none:
         return _buildChip(
