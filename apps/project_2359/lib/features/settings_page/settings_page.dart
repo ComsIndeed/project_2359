@@ -83,14 +83,7 @@ class SettingsPage extends StatelessWidget {
                             builder: (trigger) => _SettingsTile(
                               icon: FontAwesomeIcons.coins,
                               title: 'Credits',
-                              subtitle: '42 credits remaining • Buy more',
-                              trailing: Text(
-                                '42',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              subtitle: '42 credits remaining',
                               onTap: trigger,
                             ),
                           ),
