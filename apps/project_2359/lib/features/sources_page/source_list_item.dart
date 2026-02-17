@@ -6,18 +6,18 @@ import 'package:project_2359/core/widgets/pressable_scale.dart';
 
 enum SourceIndexingStatus {
   none, // Not indexed
-  indexing, // Is being indexed
+  indexing, // Is being indexing
   indexed, // Indexed
 }
 
-class SourceListItem extends StatelessWidget {
+class SourceListItem extends StatefulWidget {
   final String title;
   final String? subtitle;
   final IconData icon;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
   final Color? accentColor;
-  final SourceIndexingStatus status;
+  final SourceIndexingStatus initialStatus;
 
   const SourceListItem({
     super.key,
@@ -27,8 +27,39 @@ class SourceListItem extends StatelessWidget {
     this.onTap,
     this.onDelete,
     this.accentColor,
-    this.status = SourceIndexingStatus.none,
+    this.initialStatus = SourceIndexingStatus.none,
   });
+
+  @override
+  State<SourceListItem> createState() => _SourceListItemState();
+}
+
+class _SourceListItemState extends State<SourceListItem> {
+  late SourceIndexingStatus status;
+
+  @override
+  void initState() {
+    super.initState();
+    status = widget.initialStatus;
+  }
+
+  void _startIndexing() async {
+    if (status != SourceIndexingStatus.none) return;
+
+    setState(() {
+      status = SourceIndexingStatus.indexing;
+    });
+
+    // TODO: Handle actual indexing logic with LLM
+    // For now, simulate a delay and then set to indexed
+    await Future.delayed(const Duration(seconds: 3));
+
+    if (mounted) {
+      setState(() {
+        status = SourceIndexingStatus.indexed;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,31 +69,27 @@ class SourceListItem extends StatelessWidget {
 
     final isIndexing = status == SourceIndexingStatus.indexing;
 
-    // "Style" colors: strong highlights, no visible border
-    // Highlight even more when indexing
+    // Background colors
     final backgroundColor = isDark
         ? Colors.white.withValues(alpha: isIndexing ? 0.15 : 0.1)
         : Colors.black.withValues(alpha: isIndexing ? 0.12 : 0.08);
 
-    final borderColor = Colors.transparent;
-    final bool isDisabled = onTap == null || isIndexing;
-
-    Widget content = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    Widget itemContent = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
         children: [
-          // Compact Icon Container
+          // Icon Container
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: isDark
                   ? Colors.white.withValues(alpha: 0.05)
                   : Colors.black.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: FaIcon(
-              icon,
-              size: 16,
+              widget.icon,
+              size: 18,
               color: isDark
                   ? Colors.white.withValues(alpha: 0.7)
                   : Colors.black.withValues(alpha: 0.7),
@@ -76,31 +103,21 @@ class SourceListItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurface.withValues(
-                            alpha: isIndexing ? 0.5 : 1.0,
-                          ),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                Text(
+                  widget.title,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface.withValues(
+                      alpha: isIndexing ? 0.5 : 1.0,
                     ),
-                    if (status != SourceIndexingStatus.none) ...[
-                      const SizedBox(width: 8),
-                      _buildStatusChip(context, cs, isDark),
-                    ],
-                  ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                if (subtitle != null && subtitle!.isNotEmpty) ...[
-                  const SizedBox(height: 1),
+                if (widget.subtitle != null && widget.subtitle!.isNotEmpty) ...[
+                  const SizedBox(height: 2),
                   Text(
-                    subtitle!,
+                    widget.subtitle!,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: cs.onSurfaceVariant.withValues(
                         alpha: isIndexing ? 0.3 : 0.6,
@@ -114,32 +131,27 @@ class SourceListItem extends StatelessWidget {
             ),
           ),
 
-          // Optional Delete / Action Button
-          if (onDelete != null && !isIndexing)
-            IconButton(
-              onPressed: onDelete,
-              icon: FaIcon(
-                FontAwesomeIcons.trashCan,
-                size: 14,
-                color: cs.error.withValues(alpha: 0.6),
-              ),
-              visualDensity: VisualDensity.compact,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-            )
-          else if (!isIndexing)
-            FaIcon(
-              FontAwesomeIcons.chevronRight,
-              size: 12,
-              color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-            ),
+          const SizedBox(width: 12),
+
+          // Action Area with smooth transition
+          AnimatedSwitcher(
+            duration: 400.ms,
+            switchInCurve: Curves.easeOutBack,
+            switchOutCurve: Curves.easeIn,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(scale: animation, child: child),
+              );
+            },
+            child: _buildStatusArea(context, cs, isDark),
+          ),
         ],
       ),
     );
 
-    // Apply shimmer effect if indexing
     if (isIndexing) {
-      content = content
+      itemContent = itemContent
           .animate(onPlay: (controller) => controller.repeat())
           .shimmer(
             duration: 1500.ms,
@@ -152,22 +164,18 @@ class SourceListItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: PressableScale(
-        onTap: isDisabled ? null : onTap,
+        onTap: isIndexing ? null : widget.onTap,
         child: Container(
           decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor, width: 1),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: isDisabled ? null : onTap,
-              borderRadius: BorderRadius.circular(16),
-              child: Opacity(
-                opacity: isDisabled && !isIndexing ? 0.5 : 1.0,
-                child: content,
-              ),
+              onTap: isIndexing ? null : widget.onTap,
+              borderRadius: BorderRadius.circular(20),
+              child: itemContent,
             ),
           ),
         ),
@@ -175,42 +183,117 @@ class SourceListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusChip(BuildContext context, ColorScheme cs, bool isDark) {
-    final Color chipColor;
-    final Color textColor;
-    final String label;
-
+  Widget _buildStatusArea(BuildContext context, ColorScheme cs, bool isDark) {
+    // We use Keys to help AnimatedSwitcher identify different widgets
     switch (status) {
-      case SourceIndexingStatus.indexing:
-        chipColor = AppTheme.warning.withValues(alpha: 0.15);
-        textColor = AppTheme.warning;
-        label = "Indexing...";
-        break;
-      case SourceIndexingStatus.indexed:
-        chipColor = AppTheme.success.withValues(alpha: 0.15);
-        textColor = AppTheme.success;
-        label = "Indexed";
-        break;
       case SourceIndexingStatus.none:
-        return const SizedBox.shrink();
+        return _buildChip(
+          key: const ValueKey('none'),
+          context: context,
+          cs: cs,
+          isDark: isDark,
+          label: "Index",
+          icon: FontAwesomeIcons.magnifyingGlassChart,
+          onTap: _startIndexing,
+          highlighted: true,
+        );
+      case SourceIndexingStatus.indexing:
+        return _buildChip(
+          key: const ValueKey('indexing'),
+          context: context,
+          cs: cs,
+          isDark: isDark,
+          label: "Indexing",
+          color: AppTheme.warning,
+          isGhost: true,
+        );
+      case SourceIndexingStatus.indexed:
+        return Row(
+          key: const ValueKey('indexed_area'),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildChip(
+              context: context,
+              cs: cs,
+              isDark: isDark,
+              label: "Indexed",
+              color: AppTheme.success,
+              isGhost: true,
+            ),
+            if (widget.onDelete != null) ...[
+              const SizedBox(width: 4),
+              IconButton(
+                onPressed: widget.onDelete,
+                icon: FaIcon(
+                  FontAwesomeIcons.trashCan,
+                  size: 14,
+                  color: cs.error.withValues(alpha: 0.6),
+                ),
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ],
+        );
     }
+  }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+  Widget _buildChip({
+    Key? key,
+    required BuildContext context,
+    required ColorScheme cs,
+    required bool isDark,
+    required String label,
+    IconData? icon,
+    VoidCallback? onTap,
+    Color? color,
+    bool highlighted = false,
+    bool isGhost = false,
+  }) {
+    final textColor = color ?? cs.onSurface.withValues(alpha: 0.8);
+    final bgColor = isGhost
+        ? (color ?? cs.onSurface).withValues(alpha: 0.1)
+        : highlighted
+        ? (isDark
+              ? Colors.white.withValues(alpha: 0.12)
+              : Colors.black.withValues(alpha: 0.12))
+        : (isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.08));
+
+    Widget chip = Container(
+      key: key,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: chipColor,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: textColor.withValues(alpha: 0.2), width: 0.5),
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: isGhost
+            ? Border.all(color: textColor.withValues(alpha: 0.2), width: 1)
+            : null,
       ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          fontSize: 9,
-          fontWeight: FontWeight.bold,
-          color: textColor,
-          letterSpacing: 0.2,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            FaIcon(icon, size: 10, color: textColor),
+            const SizedBox(width: 6),
+          ],
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+              color: textColor,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
       ),
     );
+
+    if (onTap != null) {
+      return PressableScale(onTap: onTap, child: chip);
+    }
+
+    return chip;
   }
 }
