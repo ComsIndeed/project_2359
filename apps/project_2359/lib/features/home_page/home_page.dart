@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:project_2359/core/widgets/special_navigation_bar.dart';
@@ -7,6 +8,7 @@ import 'package:project_2359/core/widgets/tap_to_slide_up.dart';
 import 'package:project_2359/features/home_page/home_page_content.dart';
 import 'package:project_2359/features/materials_page/generate_materials_page.dart';
 import 'package:project_2359/features/sources_page/sources_page.dart';
+import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/study_page/study_page_content.dart';
 
 class HomePage extends StatefulWidget {
@@ -80,7 +82,11 @@ class _HomePageState extends State<HomePage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         TapToSlideUp(
-                          page: SourcesPage(),
+                          page: SourcesPage(
+                            sourceService: context
+                                .read<SourcesPageBloc>()
+                                .sourceService,
+                          ),
                           builder: (pushPage) {
                             return TextButton.icon(
                               onPressed: pushPage,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/tap_to_slide_left.dart';
@@ -6,6 +7,8 @@ import 'package:project_2359/core/widgets/tap_to_slide_up.dart';
 import 'package:project_2359/features/auth/auth_page.dart';
 import 'package:project_2359/features/credits/credits_page.dart';
 import 'package:project_2359/features/profile_page/profile_page.dart';
+import 'package:project_2359/features/settings_page/storage_page.dart';
+import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/theme_notifier.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -307,21 +310,25 @@ class SettingsPage extends StatelessWidget {
                     _SectionTitle(title: 'Storage'),
                     _SettingsCard(
                       children: [
+                        TapToSlideLeft(
+                          page: StoragePage(
+                            sourceService: context
+                                .read<SourcesPageBloc>()
+                                .sourceService,
+                          ),
+                          builder: (trigger) => _SettingsTile(
+                            icon: FontAwesomeIcons.hardDrive,
+                            title: 'Manage Files',
+                            subtitle: 'View and delete stored sources',
+                            onTap: trigger,
+                          ),
+                        ),
+                        _divider(theme),
                         _SettingsTile(
                           icon: FontAwesomeIcons.eraser,
                           title: 'Clear Cache',
                           onTap: () {
-                            // TODO: Implement cache clearing
                             _showSnackBar(context, 'Cache cleared');
-                          },
-                        ),
-                        _divider(theme),
-                        _SettingsTile(
-                          icon: FontAwesomeIcons.hardDrive,
-                          title: 'Manage Downloads',
-                          onTap: () {
-                            // TODO: Implement download management
-                            _showSnackBar(context, 'Coming soon');
                           },
                         ),
                       ],

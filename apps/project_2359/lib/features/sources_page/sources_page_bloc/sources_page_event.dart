@@ -4,12 +4,16 @@ abstract class SourcesPageEvent {
   const SourcesPageEvent();
 }
 
-class SourcesPageEventInitial extends SourcesPageEvent {
-  const SourcesPageEventInitial();
+class LoadSourcesEvent extends SourcesPageEvent {
+  const LoadSourcesEvent();
 }
 
-class ImportDocumentSourcesPageEvent extends SourcesPageEvent {
+class ImportDocumentsEvent extends SourcesPageEvent {
   final List<PlatformFile> files;
+  const ImportDocumentsEvent(this.files);
+}
 
-  const ImportDocumentSourcesPageEvent(this.files);
+class DeleteSourceEvent extends SourcesPageEvent {
+  final String sourceId;
+  const DeleteSourceEvent(this.sourceId);
 }

@@ -1,4 +1,4 @@
-import 'package:file_picker/file_picker.dart';
+import 'package:project_2359/app_database.dart';
 
 abstract class SourcesPageState {
   const SourcesPageState();
@@ -8,12 +8,12 @@ class SourcesPageStateInitial extends SourcesPageState {
   const SourcesPageStateInitial();
 }
 
-class SourcesPageStateLoadedFiles extends SourcesPageState {
-  final List<PlatformFile> files;
+class SourcesPageStateLoaded extends SourcesPageState {
+  final List<SourceItem> sources;
 
-  const SourcesPageStateLoadedFiles({required this.files});
+  const SourcesPageStateLoaded({required this.sources});
 
-  SourcesPageStateLoadedFiles copyWith({List<PlatformFile>? files}) {
-    return SourcesPageStateLoadedFiles(files: files ?? this.files);
+  SourcesPageStateLoaded copyWith({List<SourceItem>? sources}) {
+    return SourcesPageStateLoaded(sources: sources ?? this.sources);
   }
 }

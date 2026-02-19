@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/features/sources_page/source_list_item.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
@@ -9,12 +10,15 @@ import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
 import 'package:project_2359/core/widgets/tap_to_slide_left.dart';
 import 'package:project_2359/features/source_page/source_page.dart';
+import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_state.dart';
 
 class SourcesPage extends StatelessWidget {
-  const SourcesPage({super.key});
+  final SourceService sourceService;
+
+  const SourcesPage({super.key, required this.sourceService});
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +27,10 @@ class SourcesPage extends StatelessWidget {
     return Scaffold(
       body: BlocBuilder<SourcesPageBloc, SourcesPageState>(
         builder: (context, state) {
+          final sources = state is SourcesPageStateLoaded
+              ? state.sources
+              : <SourceItem>[];
+
           return SafeArea(
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
@@ -31,7 +39,6 @@ class SourcesPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
-                      // --- Custom Header ---
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 24),
                         child: Row(
@@ -132,57 +139,34 @@ class SourcesPage extends StatelessWidget {
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       const SizedBox(height: 32),
-                      SectionHeader(
-                        title: "Your Sources",
-                        onViewAllTap: () {
-                          // TODO: Manage sources
-                        },
-                      ),
+                      SectionHeader(title: "Your Sources", onViewAllTap: () {}),
                       const SizedBox(height: 12),
 
-                      if (state is SourcesPageStateLoadedFiles &&
-                          state.files.isNotEmpty)
+                      if (sources.isNotEmpty)
                         ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: state.files.length,
+                          itemCount: sources.length,
                           itemBuilder: (context, index) {
-                            final file = state.files[index];
-                            if (file.bytes == null) {
-                              return SourceListItem(
-                                onTap: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        "File content is unavailable",
-                                      ),
-                                    ),
-                                  );
-                                },
-                                icon: FontAwesomeIcons.fileLines,
-                                title: file.name,
-                                subtitle: file.path ?? "",
-                              );
-                            }
+                            final source = sources[index];
 
                             return TapToSlideLeft(
-                              page: SourcePage(
-                                fileBytes: file.bytes!,
-                                title: file.name,
+                              page: _SourcePageLoader(
+                                sourceService: sourceService,
+                                source: source,
                               ),
                               builder: (pushPage) => SourceListItem(
                                 onTap: pushPage,
                                 icon: FontAwesomeIcons.fileLines,
-                                title: file.name,
-                                subtitle: file.path ?? "",
+                                title: source.label,
+                                subtitle: source.path ?? "",
                                 initialStatus: SourceIndexingStatus.none,
                               ),
                             );
                           },
                         ),
 
-                      if (state is SourcesPageStateLoadedFiles &&
-                          state.files.isEmpty)
+                      if (sources.isEmpty)
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 40.0),
@@ -232,9 +216,53 @@ class SourcesPage extends StatelessWidget {
     if (result == null) return;
 
     if (context.mounted) {
-      context.read<SourcesPageBloc>().add(
-        ImportDocumentSourcesPageEvent(result.files),
-      );
+      context.read<SourcesPageBloc>().add(ImportDocumentsEvent(result.files));
     }
+  }
+}
+
+class _SourcePageLoader extends StatefulWidget {
+  final SourceService sourceService;
+  final SourceItem source;
+
+  const _SourcePageLoader({required this.sourceService, required this.source});
+
+  @override
+  State<_SourcePageLoader> createState() => _SourcePageLoaderState();
+}
+
+class _SourcePageLoaderState extends State<_SourcePageLoader> {
+  SourceItemBlob? _blob;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBlob();
+  }
+
+  Future<void> _loadBlob() async {
+    final blob = await widget.sourceService.getSourceBlobBySourceId(
+      widget.source.id,
+    );
+    if (mounted) {
+      setState(() {
+        _blob = blob;
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (_blob == null) {
+      return Scaffold(body: Center(child: Text("File data not found")));
+    }
+
+    return SourcePage(fileBytes: _blob!.bytes, title: widget.source.label);
   }
 }
