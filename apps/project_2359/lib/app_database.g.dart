@@ -1125,6 +1125,380 @@ class StudyMaterialPackItemsCompanion
   }
 }
 
+class $SourceItemBlobsTable extends SourceItemBlobs
+    with TableInfo<$SourceItemBlobsTable, SourceItemBlob> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SourceItemBlobsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceItemIdMeta = const VerificationMeta(
+    'sourceItemId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceItemId = GeneratedColumn<String>(
+    'source_item_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceItemNameMeta = const VerificationMeta(
+    'sourceItemName',
+  );
+  @override
+  late final GeneratedColumn<String> sourceItemName = GeneratedColumn<String>(
+    'source_item_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bytesMeta = const VerificationMeta('bytes');
+  @override
+  late final GeneratedColumn<Uint8List> bytes = GeneratedColumn<Uint8List>(
+    'bytes',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    sourceItemId,
+    sourceItemName,
+    type,
+    bytes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'source_item_blobs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SourceItemBlob> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('source_item_id')) {
+      context.handle(
+        _sourceItemIdMeta,
+        sourceItemId.isAcceptableOrUnknown(
+          data['source_item_id']!,
+          _sourceItemIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceItemIdMeta);
+    }
+    if (data.containsKey('source_item_name')) {
+      context.handle(
+        _sourceItemNameMeta,
+        sourceItemName.isAcceptableOrUnknown(
+          data['source_item_name']!,
+          _sourceItemNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceItemNameMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('bytes')) {
+      context.handle(
+        _bytesMeta,
+        bytes.isAcceptableOrUnknown(data['bytes']!, _bytesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bytesMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SourceItemBlob map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SourceItemBlob(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      sourceItemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_item_id'],
+      )!,
+      sourceItemName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_item_name'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      bytes: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}bytes'],
+      )!,
+    );
+  }
+
+  @override
+  $SourceItemBlobsTable createAlias(String alias) {
+    return $SourceItemBlobsTable(attachedDatabase, alias);
+  }
+}
+
+class SourceItemBlob extends DataClass implements Insertable<SourceItemBlob> {
+  final String id;
+  final String sourceItemId;
+  final String sourceItemName;
+  final String type;
+  final Uint8List bytes;
+  const SourceItemBlob({
+    required this.id,
+    required this.sourceItemId,
+    required this.sourceItemName,
+    required this.type,
+    required this.bytes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['source_item_id'] = Variable<String>(sourceItemId);
+    map['source_item_name'] = Variable<String>(sourceItemName);
+    map['type'] = Variable<String>(type);
+    map['bytes'] = Variable<Uint8List>(bytes);
+    return map;
+  }
+
+  SourceItemBlobsCompanion toCompanion(bool nullToAbsent) {
+    return SourceItemBlobsCompanion(
+      id: Value(id),
+      sourceItemId: Value(sourceItemId),
+      sourceItemName: Value(sourceItemName),
+      type: Value(type),
+      bytes: Value(bytes),
+    );
+  }
+
+  factory SourceItemBlob.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SourceItemBlob(
+      id: serializer.fromJson<String>(json['id']),
+      sourceItemId: serializer.fromJson<String>(json['sourceItemId']),
+      sourceItemName: serializer.fromJson<String>(json['sourceItemName']),
+      type: serializer.fromJson<String>(json['type']),
+      bytes: serializer.fromJson<Uint8List>(json['bytes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'sourceItemId': serializer.toJson<String>(sourceItemId),
+      'sourceItemName': serializer.toJson<String>(sourceItemName),
+      'type': serializer.toJson<String>(type),
+      'bytes': serializer.toJson<Uint8List>(bytes),
+    };
+  }
+
+  SourceItemBlob copyWith({
+    String? id,
+    String? sourceItemId,
+    String? sourceItemName,
+    String? type,
+    Uint8List? bytes,
+  }) => SourceItemBlob(
+    id: id ?? this.id,
+    sourceItemId: sourceItemId ?? this.sourceItemId,
+    sourceItemName: sourceItemName ?? this.sourceItemName,
+    type: type ?? this.type,
+    bytes: bytes ?? this.bytes,
+  );
+  SourceItemBlob copyWithCompanion(SourceItemBlobsCompanion data) {
+    return SourceItemBlob(
+      id: data.id.present ? data.id.value : this.id,
+      sourceItemId: data.sourceItemId.present
+          ? data.sourceItemId.value
+          : this.sourceItemId,
+      sourceItemName: data.sourceItemName.present
+          ? data.sourceItemName.value
+          : this.sourceItemName,
+      type: data.type.present ? data.type.value : this.type,
+      bytes: data.bytes.present ? data.bytes.value : this.bytes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SourceItemBlob(')
+          ..write('id: $id, ')
+          ..write('sourceItemId: $sourceItemId, ')
+          ..write('sourceItemName: $sourceItemName, ')
+          ..write('type: $type, ')
+          ..write('bytes: $bytes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    sourceItemId,
+    sourceItemName,
+    type,
+    $driftBlobEquality.hash(bytes),
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SourceItemBlob &&
+          other.id == this.id &&
+          other.sourceItemId == this.sourceItemId &&
+          other.sourceItemName == this.sourceItemName &&
+          other.type == this.type &&
+          $driftBlobEquality.equals(other.bytes, this.bytes));
+}
+
+class SourceItemBlobsCompanion extends UpdateCompanion<SourceItemBlob> {
+  final Value<String> id;
+  final Value<String> sourceItemId;
+  final Value<String> sourceItemName;
+  final Value<String> type;
+  final Value<Uint8List> bytes;
+  final Value<int> rowid;
+  const SourceItemBlobsCompanion({
+    this.id = const Value.absent(),
+    this.sourceItemId = const Value.absent(),
+    this.sourceItemName = const Value.absent(),
+    this.type = const Value.absent(),
+    this.bytes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SourceItemBlobsCompanion.insert({
+    required String id,
+    required String sourceItemId,
+    required String sourceItemName,
+    required String type,
+    required Uint8List bytes,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       sourceItemId = Value(sourceItemId),
+       sourceItemName = Value(sourceItemName),
+       type = Value(type),
+       bytes = Value(bytes);
+  static Insertable<SourceItemBlob> custom({
+    Expression<String>? id,
+    Expression<String>? sourceItemId,
+    Expression<String>? sourceItemName,
+    Expression<String>? type,
+    Expression<Uint8List>? bytes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (sourceItemId != null) 'source_item_id': sourceItemId,
+      if (sourceItemName != null) 'source_item_name': sourceItemName,
+      if (type != null) 'type': type,
+      if (bytes != null) 'bytes': bytes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SourceItemBlobsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? sourceItemId,
+    Value<String>? sourceItemName,
+    Value<String>? type,
+    Value<Uint8List>? bytes,
+    Value<int>? rowid,
+  }) {
+    return SourceItemBlobsCompanion(
+      id: id ?? this.id,
+      sourceItemId: sourceItemId ?? this.sourceItemId,
+      sourceItemName: sourceItemName ?? this.sourceItemName,
+      type: type ?? this.type,
+      bytes: bytes ?? this.bytes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (sourceItemId.present) {
+      map['source_item_id'] = Variable<String>(sourceItemId.value);
+    }
+    if (sourceItemName.present) {
+      map['source_item_name'] = Variable<String>(sourceItemName.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (bytes.present) {
+      map['bytes'] = Variable<Uint8List>(bytes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SourceItemBlobsCompanion(')
+          ..write('id: $id, ')
+          ..write('sourceItemId: $sourceItemId, ')
+          ..write('sourceItemName: $sourceItemName, ')
+          ..write('type: $type, ')
+          ..write('bytes: $bytes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1133,6 +1507,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $StudyMaterialItemsTable(this);
   late final $StudyMaterialPackItemsTable studyMaterialPackItems =
       $StudyMaterialPackItemsTable(this);
+  late final $SourceItemBlobsTable sourceItemBlobs = $SourceItemBlobsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1141,6 +1518,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     sourceItems,
     studyMaterialItems,
     studyMaterialPackItems,
+    sourceItemBlobs,
   ];
 }
 
@@ -1786,6 +2164,216 @@ typedef $$StudyMaterialPackItemsTableProcessedTableManager =
       StudyMaterialPackItem,
       PrefetchHooks Function()
     >;
+typedef $$SourceItemBlobsTableCreateCompanionBuilder =
+    SourceItemBlobsCompanion Function({
+      required String id,
+      required String sourceItemId,
+      required String sourceItemName,
+      required String type,
+      required Uint8List bytes,
+      Value<int> rowid,
+    });
+typedef $$SourceItemBlobsTableUpdateCompanionBuilder =
+    SourceItemBlobsCompanion Function({
+      Value<String> id,
+      Value<String> sourceItemId,
+      Value<String> sourceItemName,
+      Value<String> type,
+      Value<Uint8List> bytes,
+      Value<int> rowid,
+    });
+
+class $$SourceItemBlobsTableFilterComposer
+    extends Composer<_$AppDatabase, $SourceItemBlobsTable> {
+  $$SourceItemBlobsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceItemId => $composableBuilder(
+    column: $table.sourceItemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceItemName => $composableBuilder(
+    column: $table.sourceItemName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get bytes => $composableBuilder(
+    column: $table.bytes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SourceItemBlobsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SourceItemBlobsTable> {
+  $$SourceItemBlobsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceItemId => $composableBuilder(
+    column: $table.sourceItemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceItemName => $composableBuilder(
+    column: $table.sourceItemName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get bytes => $composableBuilder(
+    column: $table.bytes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SourceItemBlobsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SourceItemBlobsTable> {
+  $$SourceItemBlobsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceItemId => $composableBuilder(
+    column: $table.sourceItemId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceItemName => $composableBuilder(
+    column: $table.sourceItemName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get bytes =>
+      $composableBuilder(column: $table.bytes, builder: (column) => column);
+}
+
+class $$SourceItemBlobsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SourceItemBlobsTable,
+          SourceItemBlob,
+          $$SourceItemBlobsTableFilterComposer,
+          $$SourceItemBlobsTableOrderingComposer,
+          $$SourceItemBlobsTableAnnotationComposer,
+          $$SourceItemBlobsTableCreateCompanionBuilder,
+          $$SourceItemBlobsTableUpdateCompanionBuilder,
+          (
+            SourceItemBlob,
+            BaseReferences<
+              _$AppDatabase,
+              $SourceItemBlobsTable,
+              SourceItemBlob
+            >,
+          ),
+          SourceItemBlob,
+          PrefetchHooks Function()
+        > {
+  $$SourceItemBlobsTableTableManager(
+    _$AppDatabase db,
+    $SourceItemBlobsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SourceItemBlobsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SourceItemBlobsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SourceItemBlobsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> sourceItemId = const Value.absent(),
+                Value<String> sourceItemName = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<Uint8List> bytes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SourceItemBlobsCompanion(
+                id: id,
+                sourceItemId: sourceItemId,
+                sourceItemName: sourceItemName,
+                type: type,
+                bytes: bytes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String sourceItemId,
+                required String sourceItemName,
+                required String type,
+                required Uint8List bytes,
+                Value<int> rowid = const Value.absent(),
+              }) => SourceItemBlobsCompanion.insert(
+                id: id,
+                sourceItemId: sourceItemId,
+                sourceItemName: sourceItemName,
+                type: type,
+                bytes: bytes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SourceItemBlobsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SourceItemBlobsTable,
+      SourceItemBlob,
+      $$SourceItemBlobsTableFilterComposer,
+      $$SourceItemBlobsTableOrderingComposer,
+      $$SourceItemBlobsTableAnnotationComposer,
+      $$SourceItemBlobsTableCreateCompanionBuilder,
+      $$SourceItemBlobsTableUpdateCompanionBuilder,
+      (
+        SourceItemBlob,
+        BaseReferences<_$AppDatabase, $SourceItemBlobsTable, SourceItemBlob>,
+      ),
+      SourceItemBlob,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1799,4 +2387,6 @@ class $AppDatabaseManager {
         _db,
         _db.studyMaterialPackItems,
       );
+  $$SourceItemBlobsTableTableManager get sourceItemBlobs =>
+      $$SourceItemBlobsTableTableManager(_db, _db.sourceItemBlobs);
 }
