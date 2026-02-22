@@ -483,7 +483,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
         ],
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           // Page indicator badge
           Container(
@@ -560,28 +560,10 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
         onTap: _toggleDrawer,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FaIcon(
-                FontAwesomeIcons.fileLines,
-                size: 16,
-                color: active
-                    ? cs.onPrimary
-                    : cs.onSurface.withValues(alpha: 0.7),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'View Text',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: active
-                      ? cs.onPrimary
-                      : cs.onSurface.withValues(alpha: 0.7),
-                ),
-              ),
-            ],
+          child: FaIcon(
+            FontAwesomeIcons.fileLines,
+            size: 16,
+            color: active ? cs.onPrimary : cs.onSurface.withValues(alpha: 0.7),
           ),
         ),
       ),
