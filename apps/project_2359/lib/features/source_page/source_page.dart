@@ -2,13 +2,15 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:project_2359/app_theme.dart';
-import 'package:project_2359/core/ai_helpers.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+
+import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/core/ai_helpers.dart';
 
 // ═══════════════════════════════════════════════════════════════════
 // Background PDF parsing
@@ -942,15 +944,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 2, 12, 16),
         children: [
-          SelectableText(
-            _indexedText!,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              height: 1.6,
-              color: cs.onSurface.withValues(alpha: 0.85),
-              letterSpacing: 0.1,
-            ),
-          ),
+          MarkdownBody(data: _indexedText!),
           if (_isIndexing)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -966,7 +960,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'AI is thinking...',
+                    'Generating index...',
                     style: tt.bodySmall?.copyWith(
                       fontStyle: FontStyle.italic,
                       color: cs.onSurface.withValues(alpha: 0.4),
