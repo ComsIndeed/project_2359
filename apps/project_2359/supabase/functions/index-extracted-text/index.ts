@@ -1,11 +1,31 @@
 // Supabase Edge Function: index-extracted-text
-// Accepts a string input and streams back LLM-generated text chunks via Groq.
+// Accepts numbered text lines and streams back a JSON index with citations via Groq.
 
 import { requireEnv, serve } from "../_shared/mod.ts";
 import Groq from "https://esm.sh/groq-sdk@0.8.0";
 
 const prompt =
-  "You are a helpful assistant that processes and indexes extracted text. Provide clear, structured analysis.";
+  `You are a document indexer. You receive extracted text lines from a PDF, each labeled with a line ID and page number, like:
+[LINE_1] (p.1) Some text here
+[LINE_2] (p.1) More text here
+
+Your job is to produce a JSON array where each entry is a coherent statement or paragraph derived from the source lines, with citations back to the original line IDs.
+
+Output format (JSON array only, no other text):
+[
+  {
+    "statement": "A coherent statement or paragraph summarizing content.",
+    "source_lines": ["LINE_1", "LINE_2"]
+  },
+  ...
+]
+
+Rules:
+- Group related consecutive lines into single statements when they form a coherent paragraph.
+- Keep short standalone lines (headings, titles, captions) as their own statements.
+- Always cite every source line used in a statement via the "source_lines" array.
+- Do NOT invent content. Only summarize or restate what the lines say.
+- Output ONLY the JSON array. No markdown, no explanation, no wrapping.`;
 
 serve(async (_req, { json, stream, error }) => {
   const { input } = await json<{ input: string }>();
@@ -25,7 +45,7 @@ serve(async (_req, { json, stream, error }) => {
     ],
     stream: true,
     max_tokens: 4096,
-    temperature: 0.7,
+    temperature: 0.3,
   });
 
   return stream(async function* () {

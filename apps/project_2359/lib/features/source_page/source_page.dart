@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
@@ -13,21 +12,23 @@ import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/ai_helpers.dart';
 
 // ═══════════════════════════════════════════════════════════════════
-// Background PDF parsing
+// Background PDF parsing (runs in isolate via compute)
 // ═══════════════════════════════════════════════════════════════════
 
-class _PdfInfo {
-  final int pageCount;
-  final String extractedText;
-  const _PdfInfo(this.pageCount, this.extractedText);
-}
+/// Each extracted line, serializable across isolates.
+typedef SourceLine = ({String text, int pageIndex});
 
-_PdfInfo _parsePdf(Uint8List bytes) {
+/// Returns (pageCount, lines). TextLine can't cross isolate boundaries,
+/// so we convert to simple records here.
+(int, List<SourceLine>) _parsePdf(Uint8List bytes) {
   final doc = PdfDocument(inputBytes: bytes);
   final pageCount = doc.pages.count;
-  final text = PdfTextExtractor(doc).extractText();
+  final textLines = PdfTextExtractor(doc).extractTextLines();
   doc.dispose();
-  return _PdfInfo(pageCount, text);
+  return (
+    pageCount,
+    textLines.map((tl) => (text: tl.text, pageIndex: tl.pageIndex)).toList(),
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -52,7 +53,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   // State
   bool _isDrawerOpen = false;
   bool _isMenuOpen = false;
-  String? _extractedText;
+  List<SourceLine>? _lines;
   String? _indexedText;
   bool _isIndexing = false;
   bool _isViewingIndexed = false;
@@ -73,11 +74,12 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(() => _pdfReady = true);
     });
-    compute(_parsePdf, widget.fileBytes).then((info) {
+    compute(_parsePdf, widget.fileBytes).then((result) {
       if (mounted) {
+        final (pageCount, lines) = result;
         setState(() {
-          _totalPages = info.pageCount;
-          _extractedText = info.extractedText;
+          _totalPages = pageCount;
+          _lines = lines;
         });
       }
     });
@@ -134,8 +136,21 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
 
   // ─── Indexing ─────────────────────────────────────────────────────
 
+  /// Formats lines with IDs for the LLM, e.g.:
+  ///   [LINE_1] (p.1) First line of text
+  ///   [LINE_2] (p.1) Second line of text
+  String _formatLinesForLlm() {
+    final buf = StringBuffer();
+    for (var i = 0; i < _lines!.length; i++) {
+      final line = _lines![i];
+      // pageIndex is 0-based, display as 1-based
+      buf.writeln('[LINE_${i + 1}] (p.${line.pageIndex + 1}) ${line.text}');
+    }
+    return buf.toString();
+  }
+
   Future<void> _startIndexing() async {
-    if (_extractedText == null || _extractedText!.isEmpty || _isIndexing) {
+    if (_lines == null || _lines!.isEmpty || _isIndexing) {
       return;
     }
 
@@ -146,7 +161,8 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
     });
 
     try {
-      final stream = AiHelpers.indexExtractedText(_extractedText!);
+      final formattedInput = _formatLinesForLlm();
+      final stream = AiHelpers.indexExtractedText(formattedInput);
       await for (final chunk in stream) {
         if (!mounted) break;
         setState(() {
@@ -752,7 +768,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
         side: BorderSide(color: cs.primary.withValues(alpha: 0.2), width: 0.5),
       ),
       child: InkWell(
-        onTap: (_extractedText == null || _isIndexing) ? null : _startIndexing,
+        onTap: (_lines == null || _isIndexing) ? null : _startIndexing,
         customBorder: const StadiumBorder(),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -792,7 +808,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   }
 
   Widget _buildExtractedContent(ColorScheme cs, TextTheme tt) {
-    if (_extractedText == null) {
+    if (_lines == null) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -817,7 +833,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
       );
     }
 
-    if (_extractedText!.isEmpty) {
+    if (_lines!.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -842,20 +858,75 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
     return Scrollbar(
       controller: _drawerScrollController,
       thumbVisibility: true,
-      child: ListView(
+      child: ListView.builder(
         controller: _drawerScrollController,
         padding: const EdgeInsets.fromLTRB(16, 2, 12, 16),
-        children: [
-          SelectableText(
-            _extractedText!,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              height: 1.6,
-              color: cs.onSurface.withValues(alpha: 0.85),
-              letterSpacing: 0.1,
+        itemCount: _lines!.length,
+        itemBuilder: (context, index) {
+          final line = _lines![index];
+          final lineNum = index + 1;
+          final pageNum = line.pageIndex + 1;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Line number badge
+                Container(
+                  margin: const EdgeInsets.only(right: 8, top: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '$lineNum',
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: cs.primary.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+                // Line text
+                Expanded(
+                  child: SelectableText(
+                    line.text,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      height: 1.6,
+                      color: cs.onSurface.withValues(alpha: 0.85),
+                      letterSpacing: 0.1,
+                    ),
+                  ),
+                ),
+                // Page badge
+                Container(
+                  margin: const EdgeInsets.only(left: 6, top: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: cs.onSurface.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'p.$pageNum',
+                    style: GoogleFonts.inter(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w500,
+                      color: cs.onSurface.withValues(alpha: 0.35),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -899,7 +970,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
-                onPressed: _extractedText == null ? null : _startIndexing,
+                onPressed: _lines == null ? null : _startIndexing,
                 icon: const FaIcon(FontAwesomeIcons.bolt, size: 14),
                 label: const Text('Index Now'),
                 style: ElevatedButton.styleFrom(
@@ -926,7 +997,14 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 2, 12, 16),
         children: [
-          MarkdownBody(data: _indexedText!),
+          SelectableText(
+            _indexedText!,
+            style: GoogleFonts.jetBrainsMono(
+              fontSize: 11,
+              height: 1.5,
+              color: cs.onSurface.withValues(alpha: 0.8),
+            ),
+          ),
           if (_isIndexing)
             Padding(
               padding: const EdgeInsets.only(top: 8),
