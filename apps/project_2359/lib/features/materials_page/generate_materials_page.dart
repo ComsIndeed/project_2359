@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
+import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
+import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_state.dart';
 
 class GenerateMaterialsPage extends StatefulWidget {
   const GenerateMaterialsPage({super.key});
@@ -11,7 +15,7 @@ class GenerateMaterialsPage extends StatefulWidget {
 }
 
 class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
-  final Set<String> _selectedSources = {'Biochem'};
+  final Set<String> _selectedSources = {};
   int _currentSourcePage = 0;
   String _searchQuery = '';
 
@@ -40,90 +44,41 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              _buildDummySourceContent(),
+              BlocBuilder<SourcesPageBloc, SourcesPageState>(
+                builder: (context, state) {
+                  if (state is SourcesPageStateInitial) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(40.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  if (state is SourcesPageStateLoaded) {
+                    final filteredSources = state.sources
+                        .where(
+                          (s) => s.label.toLowerCase().contains(
+                            _searchQuery.toLowerCase(),
+                          ),
+                        )
+                        .toList();
+
+                    if (filteredSources.isEmpty) {
+                      return _buildEmptyState();
+                    }
+
+                    return _buildSourceGrid(filteredSources);
+                  }
+
+                  return const SizedBox.shrink();
+                },
+              ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  Widget _buildDummySourceContent() {
-    final List<({IconData icon, String label, String subLabel, String id})>
-    dummySources = [
-      (
-        icon: FontAwesomeIcons.fileLines,
-        label: 'Biochemistry',
-        subLabel: 'PDF • 2.4MB',
-        id: 'Biochem',
-      ),
-      (
-        icon: FontAwesomeIcons.bookOpen,
-        label: 'Hist_Drama',
-        subLabel: 'Doc • 15KB',
-        id: 'Hist_Drama',
-      ),
-      (
-        icon: FontAwesomeIcons.link,
-        label: 'Web Resources',
-        subLabel: 'Link • 5 URLs',
-        id: 'WebRes',
-      ),
-      (
-        icon: FontAwesomeIcons.microphone,
-        label: 'Lecture Recording',
-        subLabel: 'MP3 • 45m',
-        id: 'Lecture',
-      ),
-      (
-        icon: FontAwesomeIcons.filePdf,
-        label: 'Human Anatomy',
-        subLabel: 'PDF • 12MB',
-        id: 'Anatomy',
-      ),
-      (
-        icon: FontAwesomeIcons.fileLines,
-        label: 'Neural Networks',
-        subLabel: 'Notes • 240KB',
-        id: 'Neural',
-      ),
-      (
-        icon: FontAwesomeIcons.filePowerpoint,
-        label: 'Cell Biology',
-        subLabel: 'PPT • 5.1MB',
-        id: 'CellBio',
-      ),
-      (
-        icon: FontAwesomeIcons.fileWord,
-        label: 'Lab Protocol',
-        subLabel: 'Doc • 42KB',
-        id: 'Lab',
-      ),
-      (
-        icon: FontAwesomeIcons.filePdf,
-        label: 'Organic Chemistry',
-        subLabel: 'PDF • 8.2MB',
-        id: 'OrgChem',
-      ),
-      (
-        icon: FontAwesomeIcons.link,
-        label: 'Research Papers',
-        subLabel: 'Link • 12 URLs',
-        id: 'Research',
-      ),
-    ];
-
-    final filteredSources = dummySources
-        .where(
-          (s) => s.label.toLowerCase().contains(_searchQuery.toLowerCase()),
-        )
-        .toList();
-
-    if (filteredSources.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return _buildSourceGrid(filteredSources);
   }
 
   Widget _buildEmptyState() {
@@ -141,7 +96,7 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
             const SizedBox(height: 16),
             Text(
               _searchQuery.isEmpty
-                  ? "No sources found."
+                  ? "No sources found. Add some in the Sources tab!"
                   : "No sources match your search.",
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
@@ -196,13 +151,8 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
     );
   }
 
-  Widget _buildSourceGrid(
-    List<({IconData icon, String label, String subLabel, String id})> sources,
-  ) {
-    final List<
-      List<({IconData icon, String label, String subLabel, String id})>
-    >
-    groupsOfFour = [];
+  Widget _buildSourceGrid(List<SourceItem> sources) {
+    final List<List<SourceItem>> groupsOfFour = [];
     for (var i = 0; i < sources.length; i += 4) {
       groupsOfFour.add(
         sources.sublist(i, i + 4 > sources.length ? sources.length : i + 4),
@@ -214,14 +164,17 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
     }
 
     final currentChunkSize = groupsOfFour[_currentSourcePage].length;
-    final double targetHeight = currentChunkSize * 72.0;
+    // Each item is 64px + 8px bottom padding = 72px.
+    // However, the last item doesn't really need that bottom padding for the height calculation
+    // if we want to minimize the gap to the search bar.
+    final double targetHeight = (currentChunkSize * 72.0) - 8.0;
 
     return Column(
       children: [
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          height: targetHeight,
+          height: targetHeight > 0 ? targetHeight : 0,
           child: PageView.builder(
             itemCount: groupsOfFour.length,
             onPageChanged: (index) =>
@@ -229,11 +182,16 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
             itemBuilder: (context, pageIndex) {
               final chunk = groupsOfFour[pageIndex];
               return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
-                children: chunk.map((source) {
+                children: chunk.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final source = entry.value;
                   final isSelected = _selectedSources.contains(source.id);
+                  // Remove bottom padding for the last item in the chunk to tighten it up
+                  final isLast = index == chunk.length - 1;
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: EdgeInsets.only(bottom: isLast ? 0 : 8),
                     child: _buildSourceCard(source, isSelected),
                   );
                 }).toList(),
@@ -241,7 +199,7 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
             },
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 12), // Small gap before the controls
         Row(
           children: [
             Expanded(child: _buildSubtleSearchBar()),
@@ -272,16 +230,36 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
     );
   }
 
-  Widget _buildSourceCard(
-    ({IconData icon, String label, String subLabel, String id}) source,
-    bool isSelected,
-  ) {
+  Widget _buildSourceCard(SourceItem source, bool isSelected) {
     final cs = Theme.of(context).colorScheme;
 
+    IconData icon;
+    switch (source.type.toLowerCase()) {
+      case 'document':
+        icon = FontAwesomeIcons.fileLines;
+        break;
+      case 'audio':
+        icon = FontAwesomeIcons.microphone;
+        break;
+      case 'video':
+        icon = FontAwesomeIcons.video;
+        break;
+      case 'image':
+        icon = FontAwesomeIcons.image;
+        break;
+      case 'link':
+        icon = FontAwesomeIcons.link;
+        break;
+      default:
+        icon = FontAwesomeIcons.file;
+    }
+
+    final subLabel = '${source.type.toUpperCase()} • Source';
+
     return CardButton(
-      icon: source.icon,
+      icon: icon,
       label: source.label,
-      subLabel: source.subLabel,
+      subLabel: subLabel,
       isCompact: true,
       layoutDirection: CardLayoutDirection.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
