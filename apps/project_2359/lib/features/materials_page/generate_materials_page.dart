@@ -206,7 +206,7 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
             icon: icon,
             label: label,
             subLabel: subLabel,
-            backgroundGenerator: GenerationSeed.fromString(id),
+            // backgroundGenerator: GenerationSeed.fromString(id),
             isCompact: true,
             layoutDirection: CardLayoutDirection.horizontal,
             padding: const EdgeInsets.only(
@@ -246,10 +246,12 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
                 ),
               ),
               child: isSelected
-                  ? const FaIcon(
-                      FontAwesomeIcons.check,
-                      size: 14,
-                      color: Colors.white,
+                  ? Center(
+                      child: const FaIcon(
+                        FontAwesomeIcons.check,
+                        size: 14,
+                        color: Colors.white,
+                      ),
                     )
                   : null,
             ),

@@ -58,6 +58,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   int _totalPages = 0;
   double _zoomLevel = 1.0;
   bool _pdfReady = false;
+  bool _pdfDocumentLoaded = false;
 
   // Constants
 
@@ -67,8 +68,8 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    // Defer PDF viewer init until after the route transition's first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Defer PDF viewer init until after the route transition completes
+    Future.delayed(const Duration(milliseconds: 150), () {
       if (mounted) setState(() => _pdfReady = true);
     });
     compute(_parsePdf, widget.fileBytes).then((result) {
@@ -386,6 +387,12 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                         canShowPageLoadingIndicator: true,
                         widget.fileBytes,
                         controller: _pdfController,
+                        onDocumentLoaded: (details) {
+                          setState(() {
+                            _totalPages = details.document.pages.count;
+                            _pdfDocumentLoaded = true;
+                          });
+                        },
                         onPageChanged: (details) {
                           setState(() => _currentPage = details.newPageNumber);
                         },
@@ -416,14 +423,71 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
             ),
           ),
 
-        if (_totalPages > 0)
-          Positioned(
-            left: 12,
-            right: 12,
-            bottom: 12,
-            child: Center(child: _buildBottomControls(cs)),
+        Positioned(
+          left: 12,
+          right: 12,
+          bottom: 12,
+          child: Center(
+            child: AnimatedSize(
+              duration: _animDuration,
+              curve: _animCurve,
+              child: _pdfDocumentLoaded
+                  ? _buildBottomControls(cs)
+                  : _buildLoadingPill(cs),
+            ),
           ),
+        ),
       ],
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Loading Pill (shown while PDF is loading, transitions to controls)
+  // ═══════════════════════════════════════════════════════════════════
+
+  Widget _buildLoadingPill(ColorScheme cs) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: cs.surface.withValues(alpha: 0.8),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: cs.onSurface.withValues(alpha: 0.12)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: cs.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Loading…',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
