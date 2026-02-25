@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
@@ -9,7 +10,6 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import 'package:project_2359/app_theme.dart';
-import 'package:project_2359/core/ai_helpers.dart';
 
 // ═══════════════════════════════════════════════════════════════════
 // Background PDF parsing (runs in isolate via compute)
@@ -54,9 +54,6 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   bool _isDrawerOpen = false;
   bool _isMenuOpen = false;
   List<SourceLine>? _lines;
-  String? _indexedText;
-  bool _isIndexing = false;
-  bool _isViewingIndexed = false;
   int _currentPage = 1;
   int _totalPages = 0;
   double _zoomLevel = 1.0;
@@ -133,55 +130,6 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
       _pdfController.zoomLevel = 1.0;
     });
   }
-
-  // ─── Indexing ─────────────────────────────────────────────────────
-
-  /// Formats lines with IDs for the LLM, e.g.:
-  ///   [LINE_1] (p.1) First line of text
-  ///   [LINE_2] (p.1) Second line of text
-  String _formatLinesForLlm() {
-    final buf = StringBuffer();
-    for (var i = 0; i < _lines!.length; i++) {
-      final line = _lines![i];
-      // pageIndex is 0-based, display as 1-based
-      buf.writeln('[LINE_${i + 1}] (p.${line.pageIndex + 1}) ${line.text}');
-    }
-    return buf.toString();
-  }
-
-  Future<void> _startIndexing() async {
-    if (_lines == null || _lines!.isEmpty || _isIndexing) {
-      return;
-    }
-
-    setState(() {
-      _isIndexing = true;
-      _indexedText = '';
-      _isViewingIndexed = true; // Auto-switch to indexed view
-    });
-
-    try {
-      final formattedInput = _formatLinesForLlm();
-      final stream = AiHelpers.indexExtractedText(formattedInput);
-      await for (final chunk in stream) {
-        if (!mounted) break;
-        setState(() {
-          _indexedText = (_indexedText ?? '') + chunk;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Indexing failed: $e')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isIndexing = false);
-      }
-    }
-  }
-
   // ═══════════════════════════════════════════════════════════════════
   // Build
   // ═══════════════════════════════════════════════════════════════════
@@ -468,13 +416,12 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
             ),
           ),
 
-        // Bottom controls bar
         if (_totalPages > 0)
           Positioned(
             left: 12,
             right: 12,
             bottom: 12,
-            child: _buildBottomControls(cs),
+            child: Center(child: _buildBottomControls(cs)),
           ),
       ],
     );
@@ -485,101 +432,165 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   // ═══════════════════════════════════════════════════════════════════
 
   Widget _buildBottomControls(ColorScheme cs) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-      decoration: ShapeDecoration(
-        color: cs.surface.withValues(alpha: 0.94),
-        shape: const StadiumBorder(),
-        shadows: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Page indicator badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: ShapeDecoration(
-              color: cs.onSurface.withValues(alpha: 0.05),
-              shape: const StadiumBorder(),
-            ),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 120),
-              child: Text(
-                '$_currentPage / $_totalPages',
-                key: ValueKey(_currentPage),
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface.withValues(alpha: 0.8),
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double width = constraints.maxWidth;
+        final bool isCompact = width < 380;
+        final bool isVeryCompact = width < 320;
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: isVeryCompact ? 4 : 8,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: cs.surface.withValues(alpha: 0.8),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: cs.onSurface.withValues(alpha: 0.12)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Page indicator badge
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isVeryCompact ? 8 : 12,
+                      vertical: 6,
+                    ),
+                    decoration: ShapeDecoration(
+                      color: cs.onSurface.withValues(alpha: 0.05),
+                      shape: const StadiumBorder(),
+                    ),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 120),
+                      child: Text(
+                        '$_currentPage / $_totalPages',
+                        key: ValueKey(_currentPage),
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(width: isVeryCompact ? 4 : 8),
+
+                  // Zoom controls group
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: ShapeDecoration(
+                      color: cs.onSurface.withValues(alpha: 0.05),
+                      shape: const StadiumBorder(),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _controlButton(
+                          cs,
+                          FontAwesomeIcons.minus,
+                          _zoomOut,
+                          size: isVeryCompact ? 12 : 14,
+                        ),
+                        if (!isCompact)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: SizedBox(
+                              width: 36,
+                              child: Text(
+                                '${(_zoomLevel * 100).round()}%',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: cs.onSurface.withValues(alpha: 0.6),
+                                ),
+                              ),
+                            ),
+                          ),
+                        _controlButton(
+                          cs,
+                          FontAwesomeIcons.plus,
+                          _zoomIn,
+                          size: isVeryCompact ? 12 : 14,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(width: isVeryCompact ? 4 : 8),
+
+                  // Action buttons
+                  _controlButton(
+                    cs,
+                    FontAwesomeIcons.expand,
+                    _zoomReset,
+                    useBackground: true,
+                    size: isVeryCompact ? 12 : 14,
+                  ),
+
+                  SizedBox(width: isVeryCompact ? 4 : 8),
+
+                  _extractTextButton(cs, isVeryCompact: isVeryCompact),
+                ],
               ),
             ),
           ),
-
-          const SizedBox(width: 8),
-
-          // Zoom controls group
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: ShapeDecoration(
-              color: cs.onSurface.withValues(alpha: 0.05),
-              shape: const StadiumBorder(),
-            ),
-            child: Row(
-              children: [
-                _controlButton(cs, FontAwesomeIcons.minus, _zoomOut),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: Text(
-                    '${(_zoomLevel * 100).round()}%',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ),
-                _controlButton(cs, FontAwesomeIcons.plus, _zoomIn),
-              ],
-            ),
-          ),
-
-          const SizedBox(width: 8),
-
-          // Action buttons
-          _controlButton(
-            cs,
-            FontAwesomeIcons.expand,
-            _zoomReset,
-            useBackground: true,
-          ),
-          const SizedBox(width: 8),
-          _extractTextButton(cs),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Material _extractTextButton(ColorScheme cs) {
+  Material _extractTextButton(ColorScheme cs, {bool isVeryCompact = false}) {
     final bool active = _isDrawerOpen;
     return Material(
       color: active ? cs.primary : cs.onSurface.withValues(alpha: 0.05),
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         onTap: _toggleDrawer,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: FaIcon(
-            FontAwesomeIcons.fileLines,
-            size: 16,
-            color: active ? cs.onPrimary : cs.onSurface.withValues(alpha: 0.7),
+          padding: EdgeInsets.symmetric(
+            horizontal: isVeryCompact ? 10 : 14,
+            vertical: 8,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FaIcon(
+                FontAwesomeIcons.fileLines,
+                size: isVeryCompact ? 13 : 15,
+                color: active
+                    ? cs.onPrimary
+                    : cs.onSurface.withValues(alpha: 0.7),
+              ),
+              if (!isVeryCompact) ...[
+                const SizedBox(width: 8),
+                Text(
+                  'Text',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: active
+                        ? cs.onPrimary
+                        : cs.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ),
@@ -591,6 +602,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
     IconData icon,
     VoidCallback onTap, {
     bool useBackground = false,
+    double size = 14,
   }) {
     return Material(
       color: useBackground
@@ -604,7 +616,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
           padding: const EdgeInsets.all(10),
           child: FaIcon(
             icon,
-            size: 16,
+            size: size,
             color: cs.onSurface.withValues(alpha: 0.7),
           ),
         ),
@@ -650,158 +662,49 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
               ),
             ),
 
-            // Header with Tabs and Index Button
+            // Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               child: Row(
                 children: [
-                  // Extracted Text Tab
-                  _buildTab(
-                    cs: cs,
-                    tt: tt,
-                    label: 'Extracted Text',
-                    icon: FontAwesomeIcons.fileLines,
-                    isActive: !_isViewingIndexed,
-                    onTap: () => setState(() => _isViewingIndexed = false),
-                  ),
-
-                  // Dotted Arrow + Index Button
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [const _DottedArrow(), _buildIndexButton(cs)],
-                      ),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: cs.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: FaIcon(
+                      FontAwesomeIcons.fileLines,
+                      color: cs.primary,
+                      size: 14,
                     ),
                   ),
-
-                  // Indexed Text Tab
-                  _buildTab(
-                    cs: cs,
-                    tt: tt,
-                    label: 'Indexed Text',
-                    icon: FontAwesomeIcons.brain,
-                    isActive: _isViewingIndexed,
-                    onTap: () => setState(() => _isViewingIndexed = true),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Extracted Text',
+                    style: tt.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                      letterSpacing: -0.2,
+                    ),
                   ),
                 ],
               ),
             ),
 
-            // Gradient divider
+            // Subtle divider
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Container(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+              child: Divider(
                 height: 1,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      cs.primary.withValues(alpha: 0.3),
-                      cs.primary.withValues(alpha: 0.05),
-                      cs.primary.withValues(alpha: 0.3),
-                    ],
-                  ),
-                ),
+                thickness: 1,
+                color: cs.onSurface.withValues(alpha: 0.05),
               ),
             ),
 
             // Content
-            Expanded(
-              child: _isViewingIndexed
-                  ? _buildIndexedContent(cs, tt)
-                  : _buildExtractedContent(cs, tt),
-            ),
+            Expanded(child: _buildExtractedContent(cs, tt)),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTab({
-    required ColorScheme cs,
-    required TextTheme tt,
-    required String label,
-    required IconData icon,
-    required bool isActive,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FaIcon(
-              icon,
-              color: isActive
-                  ? cs.primary
-                  : cs.onSurface.withValues(alpha: 0.4),
-              size: 14,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: tt.headlineMedium?.copyWith(
-                fontSize: 13,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive
-                    ? cs.onSurface
-                    : cs.onSurface.withValues(alpha: 0.5),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIndexButton(ColorScheme cs) {
-    return Material(
-      color: _isIndexing
-          ? cs.surface
-          : cs.surfaceContainerHighest.withValues(alpha: 0.8),
-      shape: StadiumBorder(
-        side: BorderSide(color: cs.primary.withValues(alpha: 0.2), width: 0.5),
-      ),
-      child: InkWell(
-        onTap: (_lines == null || _isIndexing) ? null : _startIndexing,
-        customBorder: const StadiumBorder(),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_isIndexing)
-                Container(
-                  width: 10,
-                  height: 10,
-                  margin: const EdgeInsets.only(right: 6),
-                  child: CircularProgressIndicator(
-                    strokeWidth: 1.5,
-                    color: cs.primary,
-                  ),
-                )
-              else
-                FaIcon(
-                  FontAwesomeIcons.bolt,
-                  size: 10,
-                  color: cs.primary.withValues(alpha: 0.8),
-                ),
-              if (!_isIndexing) const SizedBox(width: 4),
-              Text(
-                _isIndexing ? 'Indexing...' : 'Index',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: cs.primary.withValues(alpha: 0.9),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -931,109 +834,6 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildIndexedContent(ColorScheme cs, TextTheme tt) {
-    if (_indexedText == null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: cs.primary.withValues(alpha: 0.05),
-                  shape: BoxShape.circle,
-                ),
-                child: FaIcon(
-                  FontAwesomeIcons.brain,
-                  size: 32,
-                  color: cs.primary.withValues(alpha: 0.2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Not Indexed Yet',
-                style: tt.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface.withValues(alpha: 0.8),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Index this document to enjoy better search and smarter AI interactions.',
-                textAlign: TextAlign.center,
-                style: tt.bodyMedium?.copyWith(
-                  color: cs.onSurface.withValues(alpha: 0.5),
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: _lines == null ? null : _startIndexing,
-                icon: const FaIcon(FontAwesomeIcons.bolt, size: 14),
-                label: const Text('Index Now'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: cs.primary,
-                  foregroundColor: cs.onPrimary,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Scrollbar(
-      thumbVisibility: true,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 2, 12, 16),
-        children: [
-          SelectableText(
-            _indexedText!,
-            style: GoogleFonts.jetBrainsMono(
-              fontSize: 11,
-              height: 1.5,
-              color: cs.onSurface.withValues(alpha: 0.8),
-            ),
-          ),
-          if (_isIndexing)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 12,
-                    height: 12,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: cs.primary.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Generating index...',
-                    style: tt.bodySmall?.copyWith(
-                      fontStyle: FontStyle.italic,
-                      color: cs.onSurface.withValues(alpha: 0.4),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
   // ═══════════════════════════════════════════════════════════════════
   // Action Button (icon + label below)
   // ═══════════════════════════════════════════════════════════════════
@@ -1080,53 +880,4 @@ class _SuperellipseClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
-}
-
-class _DottedArrow extends StatelessWidget {
-  const _DottedArrow();
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return SizedBox(
-      height: 20,
-      width: double.infinity,
-      child: CustomPaint(
-        painter: _DottedArrowPainter(color: cs.primary.withValues(alpha: 0.2)),
-      ),
-    );
-  }
-}
-
-class _DottedArrowPainter extends CustomPainter {
-  final Color color;
-  _DottedArrowPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-
-    const dashWidth = 4.0;
-    const dashSpace = 3.0;
-    double startX = 0;
-    final y = size.height / 2;
-
-    while (startX < size.width) {
-      canvas.drawLine(Offset(startX, y), Offset(startX + dashWidth, y), paint);
-      startX += dashWidth + dashSpace;
-    }
-
-    // Draw arrow head
-    final path = Path()
-      ..moveTo(size.width - 6, y - 4)
-      ..lineTo(size.width, y)
-      ..lineTo(size.width - 6, y + 4);
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
