@@ -3,6 +3,50 @@ import 'dart:convert';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// ── Data classes ─────────────────────────────────────────────────────────────
+
+/// Metadata returned by the generate-material function after streaming completes.
+class GenerateMaterialMetadata {
+  final int inputTokens;
+  final int outputTokens;
+  final int totalTokens;
+
+  const GenerateMaterialMetadata({
+    required this.inputTokens,
+    required this.outputTokens,
+    required this.totalTokens,
+  });
+
+  factory GenerateMaterialMetadata.fromJson(Map<String, dynamic> json) {
+    return GenerateMaterialMetadata(
+      inputTokens: (json['inputTokens'] as num).toInt(),
+      outputTokens: (json['outputTokens'] as num).toInt(),
+      totalTokens: (json['totalTokens'] as num).toInt(),
+    );
+  }
+
+  @override
+  String toString() =>
+      'GenerateMaterialMetadata(in=$inputTokens, out=$outputTokens, total=$totalTokens)';
+}
+
+/// A single event emitted by [AiHelpers.generateMaterial].
+///
+/// Either a text [chunk] from the LLM or the final [metadata] summary.
+sealed class GenerateMaterialEvent {}
+
+class GenerateMaterialChunk extends GenerateMaterialEvent {
+  final String text;
+  GenerateMaterialChunk(this.text);
+}
+
+class GenerateMaterialMeta extends GenerateMaterialEvent {
+  final GenerateMaterialMetadata metadata;
+  GenerateMaterialMeta(this.metadata);
+}
+
+// ── Helper class ─────────────────────────────────────────────────────────────
+
 /// Helper class for AI-related Supabase Edge Function calls.
 class AiHelpers {
   AiHelpers._();
@@ -83,6 +127,95 @@ class AiHelpers {
         if (e is FormatException) {
           // If it's not valid JSON, yield the raw payload
           yield payload;
+        } else {
+          rethrow;
+        }
+      }
+    }
+  }
+
+  /// Invokes the `generate-material` edge function and returns a stream of
+  /// [GenerateMaterialEvent]s.
+  ///
+  /// Each [GenerateMaterialChunk] carries a text fragment from the LLM.
+  /// The final [GenerateMaterialMeta] carries usage metadata (token counts).
+  ///
+  /// Example:
+  /// ```dart
+  /// await for (final event in AiHelpers.generateMaterial(texts, prefs)) {
+  ///   switch (event) {
+  ///     case GenerateMaterialChunk(:final text) => buffer.write(text);
+  ///     case GenerateMaterialMeta(:final metadata) => print(metadata);
+  ///   }
+  /// }
+  /// ```
+  static Stream<GenerateMaterialEvent> generateMaterial({
+    required List<Map<String, String>> extractedTexts,
+    required Map<String, String> preferences,
+  }) async* {
+    final supabase = Supabase.instance.client;
+
+    final response = await supabase.functions.invoke(
+      'generate-material',
+      body: {'extractedTexts': extractedTexts, 'preferences': preferences},
+    );
+
+    final rawData = response.data;
+    Stream<String> linesStream;
+
+    if (rawData is String) {
+      linesStream = Stream.fromIterable(const LineSplitter().convert(rawData));
+    } else if (rawData is List<int>) {
+      linesStream = Stream.fromIterable(
+        const LineSplitter().convert(utf8.decode(rawData)),
+      );
+    } else if (rawData is Stream<List<int>>) {
+      linesStream = rawData
+          .transform(utf8.decoder)
+          .transform(const LineSplitter());
+    } else {
+      throw Exception(
+        'Unexpected response type from generate-material: '
+        '${rawData.runtimeType}',
+      );
+    }
+
+    yield* _parseSseEvents(linesStream);
+  }
+
+  /// Parses SSE lines and yields [GenerateMaterialEvent]s.
+  ///
+  /// Text chunks are wrapped in [GenerateMaterialChunk].
+  /// The optional trailing `[METADATA]:` line is parsed into [GenerateMaterialMeta].
+  static Stream<GenerateMaterialEvent> _parseSseEvents(
+    Stream<String> lines,
+  ) async* {
+    await for (final line in lines) {
+      if (!line.startsWith('data: ')) continue;
+
+      final payload = line.substring(6).trim();
+
+      if (payload == '[DONE]') continue; // metadata may follow, keep going
+
+      try {
+        final decoded = jsonDecode(payload);
+        if (decoded is String) {
+          // Check for the metadata trailer embedded in the text chunk
+          if (decoded.startsWith('\n[METADATA]:')) {
+            final jsonPart = decoded.substring('\n[METADATA]:'.length);
+            final meta = GenerateMaterialMetadata.fromJson(
+              jsonDecode(jsonPart) as Map<String, dynamic>,
+            );
+            yield GenerateMaterialMeta(meta);
+          } else {
+            yield GenerateMaterialChunk(decoded);
+          }
+        } else if (decoded is Map && decoded.containsKey('error')) {
+          throw Exception(decoded['error']);
+        }
+      } catch (e) {
+        if (e is FormatException) {
+          yield GenerateMaterialChunk(payload);
         } else {
           rethrow;
         }
