@@ -66,6 +66,7 @@ class CardButton extends StatelessWidget {
   final bool isCompact;
   final Color? accentColor;
   final GenerationSeed? iconColorGenerator;
+  final Widget? trailing;
 
   const CardButton({
     super.key,
@@ -84,6 +85,7 @@ class CardButton extends StatelessWidget {
     this.isCompact = false,
     this.accentColor,
     this.iconColorGenerator,
+    this.trailing,
   });
 
   @override
@@ -221,6 +223,7 @@ class CardButton extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
+        if (trailing != null) ...[const SizedBox(height: 8), trailing!],
       ],
     );
   }
@@ -260,6 +263,7 @@ class CardButton extends StatelessWidget {
             ],
           ),
         ),
+        if (trailing != null) ...[const SizedBox(width: 8), trailing!],
       ],
     );
   }
