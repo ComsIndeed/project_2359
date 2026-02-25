@@ -21,61 +21,165 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
+    final muted = cs.onSurface.withValues(alpha: 0.5);
+
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --- Custom Header ---
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 24),
-                    padding: const EdgeInsets.all(8),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    "Generate Materials",
-                    style: Theme.of(context).textTheme.displaySmall,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              BlocBuilder<SourcesPageBloc, SourcesPageState>(
-                builder: (context, state) {
-                  if (state is SourcesPageStateInitial) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(40.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  }
-
-                  if (state is SourcesPageStateLoaded) {
-                    final filteredSources = state.sources
-                        .where(
-                          (s) => s.label.toLowerCase().contains(
-                            _searchQuery.toLowerCase(),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 24.0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // --- Header ---
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: const FaIcon(
+                            FontAwesomeIcons.chevronLeft,
+                            size: 20,
                           ),
-                        )
-                        .toList();
+                          padding: const EdgeInsets.all(8),
+                          constraints: const BoxConstraints(),
+                          style: IconButton.styleFrom(
+                            backgroundColor: cs.surfaceContainerHighest,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Text("Generate", style: tt.displaySmall),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      "Source Selection",
+                      style: tt.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Choose the materials you want to use as context. The AI will use these to generate study notes, questions, and summaries tailored to your style.",
+                      style: tt.bodyMedium?.copyWith(color: muted, height: 1.5),
+                    ),
+                    const SizedBox(height: 32),
 
-                    if (filteredSources.isEmpty) {
-                      return _buildEmptyState();
-                    }
+                    // --- Selection Section ---
+                    BlocBuilder<SourcesPageBloc, SourcesPageState>(
+                      builder: (context, state) {
+                        if (state is SourcesPageStateInitial) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(40.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
 
-                    return _buildSourceGrid(filteredSources);
-                  }
+                        if (state is SourcesPageStateLoaded) {
+                          final filteredSources = state.sources
+                              .where(
+                                (s) => s.label.toLowerCase().contains(
+                                  _searchQuery.toLowerCase(),
+                                ),
+                              )
+                              .toList();
 
-                  return const SizedBox.shrink();
-                },
+                          return _buildSourceSection(filteredSources);
+                        }
+
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
+            ),
+
+            // --- Bottom Action Bar ---
+            if (_selectedSources.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: cs.surface,
+                  border: Border(
+                    top: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.05),
+                    ),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, -5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${_selectedSources.length} Selected",
+                          style: tt.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "Ready to generate",
+                          style: tt.labelSmall?.copyWith(color: muted),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // TODO: Implement generation trigger
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: cs.primary,
+                          foregroundColor: cs.onPrimary,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Continue",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            FaIcon(FontAwesomeIcons.arrowRight, size: 16),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -111,13 +215,13 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
 
   Widget _buildSubtleSearchBar() {
     final cs = Theme.of(context).colorScheme;
-    final muted = cs.onSurface.withValues(alpha: 0.3);
+    final muted = cs.onSurface.withValues(alpha: 0.4);
 
     return Container(
-      height: 36,
+      height: 48, // Slightly taller for better touch target
       decoration: BoxDecoration(
-        color: cs.surface.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.05),
           width: 1,
@@ -128,16 +232,16 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
           _searchQuery = value;
           _currentSourcePage = 0;
         }),
-        style: GoogleFonts.inter(color: cs.onSurface, fontSize: 13),
+        style: GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
         decoration: InputDecoration(
-          hintText: 'Filter sources...',
-          hintStyle: GoogleFonts.inter(color: muted, fontSize: 13),
+          hintText: 'Filter your sources...',
+          hintStyle: GoogleFonts.inter(color: muted, fontSize: 14),
           prefixIcon: Padding(
-            padding: const EdgeInsets.only(left: 12, right: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
             child: FaIcon(
               FontAwesomeIcons.magnifyingGlass,
               color: muted,
-              size: 12,
+              size: 14,
             ),
           ),
           prefixIconConstraints: const BoxConstraints(
@@ -145,9 +249,40 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
             minHeight: 0,
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.only(bottom: 12),
+          contentPadding: const EdgeInsets.symmetric(vertical: 11),
         ),
       ),
+    );
+  }
+
+  Widget _buildSourceSection(List<SourceItem> sources) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Your Library",
+              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            if (sources.isNotEmpty)
+              Text(
+                "${sources.length} total",
+                style: tt.labelSmall?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.4),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildSubtleSearchBar(),
+        const SizedBox(height: 24),
+        if (sources.isEmpty) _buildEmptyState() else _buildSourceGrid(sources),
+      ],
     );
   }
 
@@ -164,17 +299,16 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
     }
 
     final currentChunkSize = groupsOfFour[_currentSourcePage].length;
-    // Each item is 64px + 8px bottom padding = 72px.
-    // However, the last item doesn't really need that bottom padding for the height calculation
-    // if we want to minimize the gap to the search bar.
-    final double targetHeight = (currentChunkSize * 72.0) - 8.0;
+    // Standardize item height to prevent jumping
+    const double itemHeight = 72.0;
 
     return Column(
       children: [
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          height: targetHeight > 0 ? targetHeight : 0,
+          height:
+              (currentChunkSize * itemHeight) - (currentChunkSize > 0 ? 8 : 0),
           child: PageView.builder(
             itemCount: groupsOfFour.length,
             onPageChanged: (index) =>
@@ -183,12 +317,10 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
               final chunk = groupsOfFour[pageIndex];
               return Column(
                 mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: chunk.asMap().entries.map((entry) {
                   final index = entry.key;
                   final source = entry.value;
                   final isSelected = _selectedSources.contains(source.id);
-                  // Remove bottom padding for the last item in the chunk to tighten it up
                   final isLast = index == chunk.length - 1;
                   return Padding(
                     padding: EdgeInsets.only(bottom: isLast ? 0 : 8),
@@ -199,33 +331,30 @@ class _GenerateMaterialsPageState extends State<GenerateMaterialsPage> {
             },
           ),
         ),
-        const SizedBox(height: 12), // Small gap before the controls
-        Row(
-          children: [
-            Expanded(child: _buildSubtleSearchBar()),
-            const SizedBox(width: 16),
-            if (groupsOfFour.length > 1)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: List.generate(groupsOfFour.length, (index) {
-                  final cs = Theme.of(context).colorScheme;
-                  final isActive = index == _currentSourcePage;
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: isActive ? 24 : 8,
-                    height: 6,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: isActive
-                          ? cs.primary
-                          : cs.primary.withValues(alpha: 0.2),
-                    ),
-                  );
-                }),
-              ),
-          ],
-        ),
+        if (groupsOfFour.length > 1) ...[
+          const SizedBox(height: 24),
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(groupsOfFour.length, (index) {
+                final cs = Theme.of(context).colorScheme;
+                final isActive = index == _currentSourcePage;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: isActive ? 18 : 6,
+                  height: 6,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: isActive
+                        ? cs.primary
+                        : cs.primary.withValues(alpha: 0.2),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
       ],
     );
   }
