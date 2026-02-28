@@ -4,8 +4,17 @@ import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 
 // ---------------------------------------------------------------------------
-// Utility class – pure functions that return generated colours
+// Enums & Utilities
 // ---------------------------------------------------------------------------
+
+/// Different styles of procedurally generated backgrounds.
+enum SpecialBackgroundType {
+  /// The original style with wavy lines, geometry, and atmosphere.
+  wavedLines,
+
+  /// A modern mesh-style background with vibrant overlapping gradients.
+  vibrantGradients,
+}
 
 /// Static helpers that turn a [GenerationSeed] into deterministic colours.
 ///
@@ -26,6 +35,7 @@ class SpecialBackgroundUtils {
     String? subLabel,
     CardButtonStyle? style,
     bool isDisabled = false,
+    Brightness brightness = Brightness.dark,
   }) {
     final cardStyle = style ?? AppTheme.cardButtonStyle;
     final seedString = seed.resolve(label, icon, subLabel);
@@ -33,12 +43,24 @@ class SpecialBackgroundUtils {
     final r = Random(hash);
 
     final double hue = r.nextDouble() * 360;
-    final double saturation = isDisabled
+
+    // Adjust lightness based on theme
+    double saturation = isDisabled
         ? cardStyle.disabledSaturation
         : cardStyle.saturation;
-    final double lightness = isDisabled
+
+    double lightness = isDisabled
         ? cardStyle.disabledLightness
         : cardStyle.lightness;
+
+    if (brightness == Brightness.light) {
+      // For light mode, we want a very soft, light background (pastel)
+      // We flip from e.g. 0.05 to 0.95
+      lightness = 1.0 - lightness;
+      // Clamp to ensure it's readable and looks "light"
+      lightness = lightness.clamp(0.9, 0.97);
+      saturation = (saturation * 0.5).clamp(0.1, 0.4);
+    }
 
     final Color primary = HSLColor.fromAHSL(
       1.0,
@@ -52,7 +74,7 @@ class SpecialBackgroundUtils {
       1.0,
       secondaryHue,
       saturation,
-      lightness * 1.5,
+      brightness == Brightness.dark ? lightness * 1.5 : lightness * 0.9,
     ).toColor();
 
     return (primary: primary, secondary: secondary);
@@ -88,6 +110,7 @@ class SpecialBackgroundUtils {
     CardButtonStyle? style,
     bool isDisabled = false,
     double borderRadius = 24,
+    Brightness brightness = Brightness.dark,
   }) {
     final colors = gradientColors(
       seed: seed,
@@ -96,7 +119,10 @@ class SpecialBackgroundUtils {
       subLabel: subLabel,
       style: style,
       isDisabled: isDisabled,
+      brightness: brightness,
     );
+
+    final isDark = brightness == Brightness.dark;
 
     return BoxDecoration(
       gradient: LinearGradient(
@@ -106,13 +132,15 @@ class SpecialBackgroundUtils {
       ),
       borderRadius: BorderRadius.circular(borderRadius),
       border: Border.all(
-        color: Colors.white.withValues(alpha: isDisabled ? 0.05 : 0.15),
+        color: (isDark ? Colors.white : Colors.black).withValues(
+          alpha: isDisabled ? 0.05 : 0.1,
+        ),
         width: 1,
       ),
       boxShadow: [
         if (!isDisabled)
           BoxShadow(
-            color: colors.primary.withValues(alpha: 0.2),
+            color: colors.primary.withValues(alpha: isDark ? 0.2 : 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -166,8 +194,14 @@ class SpecialBackgroundGenerator extends StatelessWidget {
   /// Whether the background should use the disabled colour palette.
   final bool isDisabled;
 
+  /// Whether to show the outer border.
+  final bool showBorder;
+
   /// Border radius applied to the outer container and clip.
   final double borderRadius;
+
+  /// The style of the generated background.
+  final SpecialBackgroundType type;
 
   /// The widget rendered on top of the background.
   final Widget child;
@@ -180,20 +214,43 @@ class SpecialBackgroundGenerator extends StatelessWidget {
     this.subLabel,
     this.style,
     this.isDisabled = false,
+    this.showBorder = true,
     this.borderRadius = 24,
+    this.type = SpecialBackgroundType.wavedLines,
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colors = SpecialBackgroundUtils.gradientColors(
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+
+    var colors = SpecialBackgroundUtils.gradientColors(
       seed: seed,
       label: label,
       icon: icon,
       subLabel: subLabel,
       style: style,
       isDisabled: isDisabled,
+      brightness: brightness,
     );
+
+    // Decisive vibrancy boost - ensuring dark enough for white text protection
+    if (type == SpecialBackgroundType.vibrantGradients && !isDisabled) {
+      final hslPrimary = HSLColor.fromColor(colors.primary);
+      final hslSecondary = HSLColor.fromColor(colors.secondary);
+
+      colors = (
+        primary: hslPrimary
+            .withLightness(isDark ? 0.12 : 0.92)
+            .withSaturation(1.0)
+            .toColor(),
+        secondary: hslSecondary
+            .withLightness(isDark ? 0.18 : 0.88)
+            .withSaturation(1.0)
+            .toColor(),
+      );
+    }
 
     final hash = SpecialBackgroundUtils.painterHash(
       seed: seed,
@@ -209,14 +266,18 @@ class SpecialBackgroundGenerator extends StatelessWidget {
         colors: [colors.primary, colors.secondary],
       ),
       borderRadius: BorderRadius.circular(borderRadius),
-      border: Border.all(
-        color: Colors.white.withValues(alpha: isDisabled ? 0.05 : 0.15),
-        width: 1,
-      ),
+      border: showBorder
+          ? Border.all(
+              color: (isDark ? Colors.white : Colors.black).withValues(
+                alpha: isDisabled ? 0.05 : 0.08,
+              ),
+              width: 1,
+            )
+          : null,
       boxShadow: [
         if (!isDisabled)
           BoxShadow(
-            color: colors.primary.withValues(alpha: 0.2),
+            color: colors.primary.withValues(alpha: isDark ? 0.2 : 0.05),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -232,9 +293,40 @@ class SpecialBackgroundGenerator extends StatelessWidget {
             // Abstract art pattern layer
             Positioned.fill(
               child: CustomPaint(
-                painter: AbstractArtPainter(hash, colors.primary),
+                painter: AbstractArtPainter(
+                  hash,
+                  colors.primary,
+                  type,
+                  brightness,
+                ),
               ),
             ),
+            // Legibility overlay (PROTECTIVE GRADIENT)
+            if (type == SpecialBackgroundType.vibrantGradients)
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        (isDark ? Colors.black : Colors.white).withValues(
+                          alpha: 0.35,
+                        ),
+                        Colors.transparent,
+                        Colors.transparent,
+                        (isDark ? Colors.black : Colors.white).withValues(
+                          alpha: 0.45,
+                        ),
+                        (isDark ? Colors.black : Colors.white).withValues(
+                          alpha: 0.75,
+                        ),
+                      ],
+                      stops: const [0.0, 0.25, 0.6, 0.8, 1.0],
+                    ),
+                  ),
+                ),
+              ),
             // Content layer
             child,
           ],
@@ -254,14 +346,22 @@ class SpecialBackgroundGenerator extends StatelessWidget {
 class AbstractArtPainter extends CustomPainter {
   final int seed;
   final Color baseColor;
+  final SpecialBackgroundType type;
+  final Brightness brightness;
 
-  AbstractArtPainter(this.seed, this.baseColor);
+  AbstractArtPainter(this.seed, this.baseColor, this.type, this.brightness);
 
   @override
   void paint(Canvas canvas, Size size) {
     final r = Random(seed);
     final paint = Paint()..isAntiAlias = true;
-    final baseHue = HSLColor.fromColor(baseColor).hue;
+    final baseHSL = HSLColor.fromColor(baseColor);
+    final baseHue = baseHSL.hue;
+
+    if (type == SpecialBackgroundType.vibrantGradients) {
+      _drawVibrantGradients(canvas, size, r, paint, baseHue);
+      return;
+    }
 
     // Layer count: 3 to 6 layers for richness
     final int layerCount = 3 + (seed.abs() % 4);
@@ -459,6 +559,100 @@ class AbstractArtPainter extends CustomPainter {
       canvas.drawCircle(center, radius, paint);
       paint.shader = null;
     }
+  }
+
+  void _drawVibrantGradients(
+    Canvas canvas,
+    Size size,
+    Random r,
+    Paint paint,
+    double baseHue,
+  ) {
+    final isDark = brightness == Brightness.dark;
+
+    // 1. Draw Mesh Bubbles
+    final bubbleCount = 5 + r.nextInt(3);
+    for (int i = 0; i < bubbleCount; i++) {
+      final center = Offset(
+        r.nextDouble() * size.width,
+        r.nextDouble() * size.height,
+      );
+      final radius = size.width * (0.6 + r.nextDouble() * 0.4);
+
+      final hueOffset = (i * 72 + r.nextInt(30)) % 360;
+      final bubbleHue = (baseHue + hueOffset) % 360;
+
+      // Tight, bold color ranges - NO BLACK/WHITE CENTERS
+      // For Dark Mode, we use mid-tones (0.25-0.35) so they stay colored but protect white text
+      final double bubbleLightness = isDark
+          ? 0.25 + (r.nextDouble() * 0.1)
+          : 0.85;
+      final double opacity = isDark ? 0.6 : 0.4;
+      final double saturation = 1.0;
+
+      final gradient = RadialGradient(
+        colors: [
+          HSLColor.fromAHSL(
+            opacity,
+            bubbleHue,
+            saturation,
+            bubbleLightness,
+          ).toColor(),
+          HSLColor.fromAHSL(
+            0.0,
+            bubbleHue,
+            saturation,
+            bubbleLightness,
+          ).toColor(),
+        ],
+        stops: const [0.0, 1.0],
+      );
+
+      paint.shader = gradient.createShader(
+        Rect.fromCircle(center: center, radius: radius),
+      );
+      // Screen for light additive blending, but since colors are dark, it won't hit white
+      paint.blendMode = isDark ? BlendMode.screen : BlendMode.plus;
+      canvas.drawCircle(center, radius, paint);
+    }
+
+    // 2. Add extra colored "blobs" for central richness (no white highlights)
+    for (int i = 0; i < 2; i++) {
+      final center = Offset(
+        0.3 * size.width + r.nextDouble() * 0.4 * size.width,
+        0.3 * size.height + r.nextDouble() * 0.4 * size.height,
+      );
+      final radius = size.width * 0.5;
+
+      final blobHue = (baseHue + 180 + r.nextInt(40)) % 360;
+
+      final gradient = RadialGradient(
+        colors: [
+          HSLColor.fromAHSL(0.4, blobHue, 1.0, isDark ? 0.2 : 0.9).toColor(),
+          Colors.transparent,
+        ],
+      );
+
+      paint.shader = gradient.createShader(
+        Rect.fromCircle(center: center, radius: radius),
+      );
+      paint.blendMode = isDark ? BlendMode.overlay : BlendMode.softLight;
+      canvas.drawCircle(center, radius, paint);
+    }
+
+    // 3. Optional: Subtle Noise Grain
+    paint.shader = null;
+    paint.blendMode = isDark ? BlendMode.overlay : BlendMode.multiply;
+    for (int i = 0; i < 1500; i++) {
+      final x = r.nextDouble() * size.width;
+      final y = r.nextDouble() * size.height;
+      paint.color = (isDark ? Colors.white : Colors.black).withValues(
+        alpha: 0.04,
+      );
+      canvas.drawRect(Rect.fromLTWH(x, y, 1, 1), paint);
+    }
+
+    paint.blendMode = BlendMode.srcOver;
   }
 
   @override

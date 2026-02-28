@@ -68,6 +68,7 @@ class CardButton extends StatelessWidget {
   final Color? accentColor;
   final GenerationSeed? iconColorGenerator;
   final Widget? trailing;
+  final SpecialBackgroundType backgroundType;
 
   const CardButton({
     super.key,
@@ -88,6 +89,7 @@ class CardButton extends StatelessWidget {
     this.accentColor,
     this.iconColorGenerator,
     this.trailing,
+    this.backgroundType = SpecialBackgroundType.wavedLines,
   });
 
   @override
@@ -121,6 +123,7 @@ class CardButton extends StatelessWidget {
         subLabel: subLabel,
         style: style,
         isDisabled: isDisabled,
+        type: backgroundType,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -161,7 +164,7 @@ class CardButton extends StatelessWidget {
     return PressableScale(onTap: onTap, onLongPress: onLongPress, child: body);
   }
 
-  Widget _buildIconContainer() {
+  Widget _buildIconContainer(BuildContext context) {
     final double iconSize = isCompact ? 22 : 28;
     final double containerPadding = isCompact ? 8 : 10;
 
@@ -175,8 +178,14 @@ class CardButton extends StatelessWidget {
       );
     }
 
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool hasBg = backgroundGenerator != null;
+    final Color defaultContentColor = (hasBg && !isDark)
+        ? Theme.of(context).colorScheme.primary
+        : Colors.white;
+
     final Color effectiveIconColor =
-        accentColor ?? generatedColor ?? Colors.white;
+        accentColor ?? generatedColor ?? defaultContentColor;
 
     // Calculate bg/border based on the effective color
     final Color backgroundColor = effectiveIconColor == Colors.white
@@ -199,18 +208,31 @@ class CardButton extends StatelessWidget {
   }
 
   Widget _buildVerticalContent(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool hasBg = backgroundGenerator != null;
+    final Color? adaptiveColor = (hasBg && !isDark)
+        ? Theme.of(context).colorScheme.onSurface
+        : null;
+
     final cardStyle = style ?? AppTheme.cardButtonStyle;
     final effectiveLabelStyle = (labelStyle ?? cardStyle.labelStyle)?.copyWith(
       fontSize: labelFontSize,
+      color: labelStyle?.color ?? adaptiveColor ?? cardStyle.labelStyle?.color,
     );
     final effectiveSubLabelStyle = (subLabelStyle ?? cardStyle.subLabelStyle)
-        ?.copyWith(fontSize: subLabelFontSize);
+        ?.copyWith(
+          fontSize: subLabelFontSize,
+          color:
+              subLabelStyle?.color ??
+              (adaptiveColor?.withValues(alpha: 0.65)) ??
+              cardStyle.subLabelStyle?.color,
+        );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildIconContainer(),
+        _buildIconContainer(context),
         const SizedBox(height: 16),
         Text(
           label,
@@ -233,16 +255,29 @@ class CardButton extends StatelessWidget {
   }
 
   Widget _buildHorizontalContent(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool hasBg = backgroundGenerator != null;
+    final Color? adaptiveColor = (hasBg && !isDark)
+        ? Theme.of(context).colorScheme.onSurface
+        : null;
+
     final cardStyle = style ?? AppTheme.cardButtonStyle;
     final effectiveLabelStyle = (labelStyle ?? cardStyle.labelStyle)?.copyWith(
       fontSize: labelFontSize,
+      color: labelStyle?.color ?? adaptiveColor ?? cardStyle.labelStyle?.color,
     );
     final effectiveSubLabelStyle = (subLabelStyle ?? cardStyle.subLabelStyle)
-        ?.copyWith(fontSize: subLabelFontSize);
+        ?.copyWith(
+          fontSize: subLabelFontSize,
+          color:
+              subLabelStyle?.color ??
+              (adaptiveColor?.withValues(alpha: 0.65)) ??
+              cardStyle.subLabelStyle?.color,
+        );
 
     return Row(
       children: [
-        _buildIconContainer(),
+        _buildIconContainer(context),
         const SizedBox(width: 12),
         Expanded(
           child: Column(

@@ -28,19 +28,35 @@ class ActiveMaterialCard extends StatelessWidget {
     final accent = accentColor ?? cs.primary;
     final bool hasBackground = backgroundGenerator != null;
 
-    // Define colors based on whether we have a dark generated background or standard surface
-    final Color textColor = hasBackground ? Colors.white : cs.onSurface;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Define colors based on whether we have a generated background or standard surface
+    // If we have a background, we adapt text colors to the theme brightness since
+    // the background generator itself is now theme-aware.
+    final Color textColor = hasBackground
+        ? (isDark ? Colors.white : cs.onSurface)
+        : cs.onSurface;
     final Color subTextColor = hasBackground
-        ? Colors.white.withValues(alpha: 0.7)
+        ? (isDark
+              ? Colors.white.withValues(alpha: 0.7)
+              : cs.onSurface.withValues(alpha: 0.65))
         : cs.onSurface.withValues(alpha: 0.7);
     final Color iconBgColor = hasBackground
-        ? Colors.white.withValues(alpha: 0.15)
+        ? (isDark
+              ? Colors.white.withValues(alpha: 0.15)
+              : accent.withValues(alpha: 0.12))
         : accent.withValues(alpha: 0.15);
-    final Color iconColor = hasBackground ? Colors.white : accent;
+    final Color iconColor = hasBackground
+        ? (isDark ? Colors.white : accent)
+        : accent;
     final Color progressBarBg = hasBackground
-        ? Colors.white.withValues(alpha: 0.2)
+        ? (isDark
+              ? Colors.white.withValues(alpha: 0.2)
+              : accent.withValues(alpha: 0.15))
         : accent.withValues(alpha: 0.2);
-    final Color progressBarColor = hasBackground ? Colors.white : accent;
+    final Color progressBarColor = hasBackground
+        ? (isDark ? Colors.white : accent)
+        : accent;
 
     // The inner content of the card
     final Widget content = Padding(
@@ -62,6 +78,17 @@ class ActiveMaterialCard extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontSize: 18,
               color: textColor,
+              shadows: hasBackground
+                  ? [
+                      Shadow(
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.3 : 0.1,
+                        ),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ]
+                  : null,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -69,9 +96,21 @@ class ActiveMaterialCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontSize: 12, color: subTextColor),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 12,
+              color: subTextColor,
+              shadows: hasBackground
+                  ? [
+                      Shadow(
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.2 : 0.05,
+                        ),
+                        blurRadius: 2,
+                        offset: const Offset(0, 1),
+                      ),
+                    ]
+                  : null,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -92,6 +131,17 @@ class ActiveMaterialCard extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                   color: textColor,
+                  shadows: hasBackground
+                      ? [
+                          Shadow(
+                            color: Colors.black.withValues(
+                              alpha: isDark ? 0.25 : 0.1,
+                            ),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ]
+                      : null,
                 ),
               ),
             ],
@@ -117,6 +167,8 @@ class ActiveMaterialCard extends StatelessWidget {
           seed: backgroundGenerator!,
           label: title,
           icon: icon,
+          type: SpecialBackgroundType.vibrantGradients,
+          showBorder: false,
           child: content,
         ),
       );

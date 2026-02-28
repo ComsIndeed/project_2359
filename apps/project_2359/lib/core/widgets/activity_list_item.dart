@@ -22,6 +22,7 @@ class ActivityListItem extends StatefulWidget {
   final String? backgroundLabel;
   final IconData? backgroundIcon;
   final CardButtonStyle? backgroundStyle;
+  final SpecialBackgroundType backgroundType;
 
   const ActivityListItem({
     super.key,
@@ -39,6 +40,7 @@ class ActivityListItem extends StatefulWidget {
     this.backgroundLabel,
     this.backgroundIcon,
     this.backgroundStyle,
+    this.backgroundType = SpecialBackgroundType.wavedLines,
   });
 
   @override
@@ -115,6 +117,7 @@ class _ActivityListItemState extends State<ActivityListItem>
             icon: widget.backgroundIcon!,
             style: widget.backgroundStyle,
             isDisabled: isDisabled,
+            type: widget.backgroundType,
             child: Material(
               color: Colors.transparent,
               child: InkWell(
