@@ -1,0 +1,12 @@
+Analyzing project_2359...                                       
+
+   info - Use the null-aware marker '?' rather than a null check via an 'if' - lib\core\widgets\slide_fade_text.dart:36:15 - use_null_aware_elements
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\auth_page.dart:113:41 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\auth_page.dart:307:57 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\auth_page.dart:319:57 - use_build_context_synchronously
+  error - The getter 'backOut' isn't defined for the type 'Curves' - lib\features\materials_page\generation_wizard_page.dart:394:23 - undefined_getter
+  error - The named parameter 'surfaceTintColor' isn't defined - lib\features\materials_page\generation_wizard_page.dart:399:11 - undefined_named_parameter
+  error - The getter 'backOut' isn't defined for the type 'Curves' - lib\features\materials_page\generation_wizard_page.dart:411:25 - undefined_getter
+warning - A value for optional parameter 'trailing' isn't ever given - lib\features\settings_page\settings_page.dart:537:10 - unused_element_parameter
+
+

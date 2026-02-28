@@ -6,7 +6,7 @@ import 'package:project_2359/core/widgets/special_navigation_bar.dart';
 
 import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/home_page/home_page_content.dart';
-import 'package:project_2359/features/materials_page/select_source_materials_page.dart';
+import 'package:project_2359/features/materials_page/generation_wizard_page.dart';
 import 'package:project_2359/features/sources_page/sources_page.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/study_page/study_page_content.dart';
@@ -108,7 +108,7 @@ class _HomePageState extends State<HomePage> {
                           endIndent: 8,
                         ),
                         TapToSlide(
-                          page: const SelectSourceMaterialsPage(),
+                          page: const GenerateMaterialsWizardPage(),
                           direction: SlideDirection.up,
                           builder: (pushPage) {
                             return TextButton.icon(
