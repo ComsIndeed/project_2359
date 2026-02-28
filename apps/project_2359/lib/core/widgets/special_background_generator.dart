@@ -36,13 +36,21 @@ class SpecialBackgroundUtils {
     CardButtonStyle? style,
     bool isDisabled = false,
     Brightness brightness = Brightness.dark,
+    Color? adaptiveColor,
   }) {
     final cardStyle = style ?? AppTheme.cardButtonStyle;
     final seedString = seed.resolve(label, icon, subLabel);
     final hash = seedString.hashCode;
     final r = Random(hash);
 
-    final double hue = r.nextDouble() * 360;
+    double hue;
+    if (adaptiveColor != null) {
+      // Use theme color hue with a small deterministic offset (+/- 30 deg)
+      final baseHue = HSLColor.fromColor(adaptiveColor).hue;
+      hue = (baseHue + (r.nextDouble() * 60 - 30)) % 360;
+    } else {
+      hue = r.nextDouble() * 360;
+    }
 
     // Adjust lightness based on theme
     double saturation = isDisabled
@@ -194,6 +202,9 @@ class SpecialBackgroundGenerator extends StatelessWidget {
   /// Whether the background should use the disabled colour palette.
   final bool isDisabled;
 
+  /// Whether the background colors should be derived from the theme's primary color.
+  final bool isAdaptive;
+
   /// Whether to show the outer border.
   final bool showBorder;
 
@@ -214,6 +225,7 @@ class SpecialBackgroundGenerator extends StatelessWidget {
     this.subLabel,
     this.style,
     this.isDisabled = false,
+    this.isAdaptive = true,
     this.showBorder = true,
     this.borderRadius = 24,
     this.type = SpecialBackgroundType.wavedLines,
@@ -233,6 +245,7 @@ class SpecialBackgroundGenerator extends StatelessWidget {
       style: style,
       isDisabled: isDisabled,
       brightness: brightness,
+      adaptiveColor: isAdaptive ? Theme.of(context).colorScheme.primary : null,
     );
 
     // Decisive vibrancy boost - ensuring dark enough for white text protection
