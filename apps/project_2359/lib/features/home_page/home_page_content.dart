@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/activity_list_item.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
-import 'package:project_2359/core/widgets/tap_to_slide_up.dart';
+import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/auth/auth_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
 import 'package:project_2359/theme_notifier.dart';
@@ -74,8 +74,9 @@ class _HomeHeader extends StatelessWidget {
 
             return Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: TapToSlideUp(
+              child: TapToSlide(
                 page: const SettingsPage(),
+                direction: SlideDirection.up,
                 builder: (pushPage) => Material(
                   color: Colors.transparent,
                   shape: const StadiumBorder(),
@@ -119,8 +120,9 @@ class _HomeHeader extends StatelessWidget {
             );
           },
         ),
-        TapToSlideUp(
+        TapToSlide(
           page: const SettingsPage(),
+          direction: SlideDirection.up,
           builder: (pushPage) {
             return IconButton(
               onPressed: pushPage,
@@ -163,8 +165,9 @@ class _StatusPill extends StatelessWidget {
 
             // Case 2: Online but Logged Out
             if (!isLoggedIn) {
-              return TapToSlideUp(
+              return TapToSlide(
                 page: const AuthPage(initialIsLogin: false),
+                direction: SlideDirection.up,
                 builder: (pushPage) => _buildPill(
                   onTap: pushPage,
                   context,

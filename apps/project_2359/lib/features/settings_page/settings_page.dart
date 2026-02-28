@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
-import 'package:project_2359/core/widgets/tap_to_slide_left.dart';
-import 'package:project_2359/core/widgets/tap_to_slide_up.dart';
+import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/auth/auth_page.dart';
 import 'package:project_2359/features/credits/credits_page.dart';
 import 'package:project_2359/features/profile_page/profile_page.dart';
@@ -71,8 +70,9 @@ class SettingsPage extends StatelessWidget {
                     _SettingsCard(
                       children: [
                         if (!isLoggedIn)
-                          TapToSlideUp(
+                          TapToSlide(
                             page: const AuthPage(),
+                            direction: SlideDirection.up,
                             builder: (trigger) => _SettingsTile(
                               icon: FontAwesomeIcons.rightToBracket,
                               title: 'Sign In',
@@ -81,8 +81,9 @@ class SettingsPage extends StatelessWidget {
                             ),
                           )
                         else ...[
-                          TapToSlideLeft(
+                          TapToSlide(
                             page: const CreditsPage(),
+                            direction: SlideDirection.left,
                             builder: (trigger) => _SettingsTile(
                               icon: FontAwesomeIcons.coins,
                               title: 'Credits',
@@ -91,8 +92,9 @@ class SettingsPage extends StatelessWidget {
                             ),
                           ),
                           _divider(theme),
-                          TapToSlideLeft(
+                          TapToSlide(
                             page: const ProfilePage(),
+                            direction: SlideDirection.left,
                             builder: (trigger) => _SettingsTile(
                               icon: FontAwesomeIcons.user,
                               title: 'Profile',
@@ -310,12 +312,13 @@ class SettingsPage extends StatelessWidget {
                     _SectionTitle(title: 'Storage'),
                     _SettingsCard(
                       children: [
-                        TapToSlideLeft(
+                        TapToSlide(
                           page: StoragePage(
                             sourceService: context
                                 .read<SourcesPageBloc>()
                                 .sourceService,
                           ),
+                          direction: SlideDirection.left,
                           builder: (trigger) => _SettingsTile(
                             icon: FontAwesomeIcons.hardDrive,
                             title: 'Manage Files',

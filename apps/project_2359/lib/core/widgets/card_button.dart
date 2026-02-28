@@ -56,6 +56,7 @@ class CardButton extends StatelessWidget {
   final String? subLabel;
   final GenerationSeed? backgroundGenerator;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final CardButtonStyle? style;
   final CardLayoutDirection layoutDirection;
   final EdgeInsetsGeometry? padding;
@@ -75,6 +76,7 @@ class CardButton extends StatelessWidget {
     this.subLabel,
     this.backgroundGenerator,
     this.onTap,
+    this.onLongPress,
     this.style,
     this.layoutDirection = CardLayoutDirection.vertical,
     this.padding,
@@ -91,7 +93,7 @@ class CardButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool hasBackground = backgroundGenerator != null;
-    final bool isDisabled = onTap == null;
+    final bool isDisabled = onTap == null && onLongPress == null;
 
     // Content widget (shared between both paths)
     final contentWidget = Padding(
@@ -123,6 +125,7 @@ class CardButton extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
+            onLongPress: onLongPress,
             customBorder: AppTheme.cardShape,
             child: innerChild,
           ),
@@ -144,6 +147,7 @@ class CardButton extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
+            onLongPress: onLongPress,
             customBorder: AppTheme.cardShape,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
@@ -154,7 +158,7 @@ class CardButton extends StatelessWidget {
       );
     }
 
-    return PressableScale(onTap: onTap, child: body);
+    return PressableScale(onTap: onTap, onLongPress: onLongPress, child: body);
   }
 
   Widget _buildIconContainer() {

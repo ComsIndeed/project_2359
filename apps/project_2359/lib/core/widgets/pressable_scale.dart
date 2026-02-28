@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 class PressableScale extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final double scaleOnPress;
   final Duration duration;
 
@@ -12,6 +13,7 @@ class PressableScale extends StatefulWidget {
     super.key,
     required this.child,
     this.onTap,
+    this.onLongPress,
     this.scaleOnPress = 0.96,
     this.duration = const Duration(milliseconds: 100),
   });
@@ -61,32 +63,33 @@ class _PressableScaleState extends State<PressableScale>
   }
 
   void _onTapDown(TapDownDetails details) {
-    if (widget.onTap != null) {
+    if (widget.onTap != null || widget.onLongPress != null) {
       _controller.reverse();
     }
   }
 
   void _onTapUp(TapUpDetails details) {
-    if (widget.onTap != null) {
+    if (widget.onTap != null || widget.onLongPress != null) {
       _controller.forward();
     }
   }
 
   void _onTapCancel() {
-    if (widget.onTap != null) {
+    if (widget.onTap != null || widget.onLongPress != null) {
       _controller.forward();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isDisabled = widget.onTap == null;
+    final bool isDisabled = widget.onTap == null && widget.onLongPress == null;
 
     return GestureDetector(
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
       onTapCancel: _onTapCancel,
       onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
       behavior: HitTestBehavior.opaque,
       child: MouseRegion(
         cursor: isDisabled

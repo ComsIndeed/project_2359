@@ -8,7 +8,7 @@ import 'package:project_2359/features/sources_page/source_list_item.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
-import 'package:project_2359/core/widgets/tap_to_slide_left.dart';
+import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/source_page/source_page.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
@@ -150,11 +150,12 @@ class SourcesPage extends StatelessWidget {
                           itemBuilder: (context, index) {
                             final source = sources[index];
 
-                            return TapToSlideLeft(
+                            return TapToSlide(
                               page: _SourcePageLoader(
                                 sourceService: sourceService,
                                 source: source,
                               ),
+                              direction: SlideDirection.left,
                               builder: (pushPage) => SourceListItem(
                                 onTap: pushPage,
                                 icon: FontAwesomeIcons.fileLines,

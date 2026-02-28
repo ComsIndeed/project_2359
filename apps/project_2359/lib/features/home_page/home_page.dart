@@ -4,9 +4,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:project_2359/core/widgets/special_navigation_bar.dart';
 
-import 'package:project_2359/core/widgets/tap_to_slide_up.dart';
+import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/home_page/home_page_content.dart';
-import 'package:project_2359/features/materials_page/generate_materials_page.dart';
+import 'package:project_2359/features/materials_page/select_source_materials_page.dart';
 import 'package:project_2359/features/sources_page/sources_page.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/study_page/study_page_content.dart';
@@ -81,12 +81,13 @@ class _HomePageState extends State<HomePage> {
                     pageActions: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        TapToSlideUp(
+                        TapToSlide(
                           page: SourcesPage(
                             sourceService: context
                                 .read<SourcesPageBloc>()
                                 .sourceService,
                           ),
+                          direction: SlideDirection.up,
                           builder: (pushPage) {
                             return TextButton.icon(
                               onPressed: pushPage,
@@ -106,8 +107,9 @@ class _HomePageState extends State<HomePage> {
                           indent: 8,
                           endIndent: 8,
                         ),
-                        TapToSlideUp(
-                          page: GenerateMaterialsPage(),
+                        TapToSlide(
+                          page: const SelectSourceMaterialsPage(),
+                          direction: SlideDirection.up,
                           builder: (pushPage) {
                             return TextButton.icon(
                               onPressed: pushPage,
