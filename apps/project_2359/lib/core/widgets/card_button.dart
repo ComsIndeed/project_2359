@@ -172,8 +172,7 @@ class CardButton extends StatelessWidget {
   }
 
   Widget _buildIconContainer(BuildContext context) {
-    final double iconSize = isCompact ? 22 : 28;
-    final double containerPadding = isCompact ? 8 : 10;
+    final double iconSize = isCompact ? 28 : 34; // Slightly larger icons
 
     Color? generatedColor;
     if (iconColorGenerator != null) {
@@ -194,22 +193,8 @@ class CardButton extends StatelessWidget {
     final Color effectiveIconColor =
         accentColor ?? generatedColor ?? defaultContentColor;
 
-    // Calculate bg/border based on the effective color
-    final Color backgroundColor = effectiveIconColor == Colors.white
-        ? Colors.white.withValues(alpha: 0.12)
-        : effectiveIconColor.withValues(alpha: 0.15);
-
-    final Color borderColor = effectiveIconColor == Colors.white
-        ? Colors.white.withValues(alpha: 0.25)
-        : effectiveIconColor.withValues(alpha: 0.25);
-
     return Container(
-      padding: EdgeInsets.all(containerPadding),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        shape: BoxShape.circle,
-        border: Border.all(color: borderColor, width: 1),
-      ),
+      padding: EdgeInsets.zero, // Removed padding and decoration
       child: FaIcon(icon, color: effectiveIconColor, size: iconSize),
     );
   }

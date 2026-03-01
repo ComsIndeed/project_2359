@@ -31,15 +31,21 @@ class _GenerateMaterialsWizardPageState
   final Set<String> _selectedSources = {};
   final Set<String> _selectedGenerationTypes = {};
   String _sourceSearchQuery = '';
-  String _genSearchQuery = '';
+  final String _genSearchQuery = '';
   String _learningMode = 'Spaced'; // 'Cram' or 'Spaced'
   bool _showAddSources = false;
   bool _isExpanded = false;
 
   final Map<String, String> _generationOptions = {
-    'flashcards': 'Comprehensive',
-    'quizzes': '10 Questions',
-    'assessment': 'Full length',
+    'flashcards': 'Standard',
+    'quizzes': 'Standard',
+    'assessment': 'Standard',
+  };
+
+  final Map<String, String> _focusOptions = {
+    'flashcards': 'General',
+    'quizzes': 'General',
+    'assessment': 'General',
   };
 
   final List<Map<String, dynamic>> _generationTypes = [
@@ -96,33 +102,54 @@ class _GenerateMaterialsWizardPageState
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16.0,
-                    vertical: 8,
+                    vertical: 12,
                   ),
                   child: Column(
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          IconButton(
-                            onPressed: _currentPage == 0
-                                ? _exitWizard
-                                : _previousPage,
-                            icon: FaIcon(
-                              _currentPage == 0
-                                  ? FontAwesomeIcons.xmark
-                                  : FontAwesomeIcons.chevronLeft,
-                              size: 16,
-                            ),
-                            padding: const EdgeInsets.all(8),
-                            constraints: const BoxConstraints(),
-                            style: IconButton.styleFrom(
-                              backgroundColor: cs.surfaceContainerHighest
-                                  .withValues(alpha: 0.5),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
+                          _currentPage == 0
+                              ? TextButton.icon(
+                                  onPressed: _exitWizard,
+                                  icon: const FaIcon(
+                                    FontAwesomeIcons.xmark,
+                                    size: 14,
+                                  ),
+                                  label: const Text("Close"),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: cs.onSurface,
+                                    backgroundColor: cs.surfaceContainerHighest
+                                        .withValues(alpha: 0.5),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 10,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                )
+                              : TextButton.icon(
+                                  onPressed: _previousPage,
+                                  icon: const FaIcon(
+                                    FontAwesomeIcons.arrowUp,
+                                    size: 14,
+                                  ),
+                                  label: const Text("Back"),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: cs.onSurface,
+                                    backgroundColor: cs.surfaceContainerHighest
+                                        .withValues(alpha: 0.5),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 10,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
                           Text(
                             _currentPage == 0
                                 ? "Select Sources"
@@ -132,32 +159,40 @@ class _GenerateMaterialsWizardPageState
                               letterSpacing: -0.2,
                             ),
                           ),
-                          // Balance the row
-                          const SizedBox(width: 40),
+                          const SizedBox(width: 80), // Balance the row
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      // Thinner Progress Bar
-                      Stack(
+                      const SizedBox(height: 16),
+                      // Two Pills Progress Bar
+                      Row(
                         children: [
-                          Container(
-                            height: 3,
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(1.5),
+                          Expanded(
+                            flex: _currentPage == 0 ? 3 : 1,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeOutCubic,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: _currentPage >= 0
+                                    ? cs.primary
+                                    : cs.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
                           ),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeOutCubic,
-                            height: 3,
-                            width:
-                                MediaQuery.of(context).size.width *
-                                (_currentPage + 1) /
-                                2,
-                            decoration: BoxDecoration(
-                              color: cs.primary,
-                              borderRadius: BorderRadius.circular(1.5),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: _currentPage == 1 ? 3 : 1,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeOutCubic,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: _currentPage >= 1
+                                    ? cs.primary
+                                    : cs.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
                           ),
                         ],
@@ -275,7 +310,6 @@ class _GenerateMaterialsWizardPageState
 
   Widget _buildGenerationOptionsStep() {
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
 
     final filtered = _generationTypes
         .where(
@@ -291,11 +325,7 @@ class _GenerateMaterialsWizardPageState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSearchBar(
-            hint: 'Search formats...',
-            onChanged: (val) => setState(() => _genSearchQuery = val),
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           if (filtered.isEmpty)
             _buildEmptyState(isFormat: true)
           else
@@ -345,21 +375,37 @@ class _GenerateMaterialsWizardPageState
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  "Configuration",
-                                  style: tt.labelMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: cs.primary,
-                                  ),
+                                _buildRadioSwitch(
+                                  label: "Complexity",
+                                  options: const [
+                                    "Simple",
+                                    "Standard",
+                                    "Advanced",
+                                  ],
+                                  selectedOption:
+                                      _generationOptions[id] ?? "Standard",
+                                  onSelected: (val) {
+                                    setState(() {
+                                      _generationOptions[id] = val;
+                                    });
+                                  },
                                 ),
-                                const SizedBox(height: 12),
-                                _buildOptionRow(
-                                  "Complexity",
-                                  _generationOptions[id] ?? "Standard",
-                                  () {},
+                                const SizedBox(height: 16),
+                                _buildRadioSwitch(
+                                  label: "Focus Area",
+                                  options: const [
+                                    "General",
+                                    "Key Concepts",
+                                    "Deep Dive",
+                                  ],
+                                  selectedOption:
+                                      _focusOptions[id] ?? "General",
+                                  onSelected: (val) {
+                                    setState(() {
+                                      _focusOptions[id] = val;
+                                    });
+                                  },
                                 ),
-                                const SizedBox(height: 8),
-                                _buildOptionRow("Focus", "Everything", () {}),
                               ],
                             ),
                           ),
@@ -396,26 +442,59 @@ class _GenerateMaterialsWizardPageState
           ),
         ),
         Container(
-          padding: const EdgeInsets.all(4),
+          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
           ),
-          child: Row(
-            children: [
-              _buildModeOption(
-                label: "Cram Mode",
-                icon: FontAwesomeIcons.bolt,
-                isSelected: _learningMode == 'Cram',
-                onTap: () => setState(() => _learningMode = 'Cram'),
-              ),
-              _buildModeOption(
-                label: "Spaced Mode",
-                icon: FontAwesomeIcons.clockRotateLeft,
-                isSelected: _learningMode == 'Spaced',
-                onTap: () => setState(() => _learningMode = 'Spaced'),
-              ),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final segmentWidth = constraints.maxWidth / 2;
+              return Stack(
+                children: [
+                  AnimatedAlign(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeOutCubic,
+                    alignment: _learningMode == 'Cram'
+                        ? Alignment.centerLeft
+                        : Alignment.centerRight,
+                    child: Container(
+                      width: segmentWidth,
+                      height: 100, // Taller
+                      decoration: BoxDecoration(
+                        color: cs.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      _buildModeOption(
+                        label: "Cram Mode",
+                        description: "Best for quick reviews before exams.",
+                        icon: FontAwesomeIcons.bolt,
+                        isSelected: _learningMode == 'Cram',
+                        onTap: () => setState(() => _learningMode = 'Cram'),
+                      ),
+                      _buildModeOption(
+                        label: "Spaced Mode",
+                        description: "FSRS-based long term retention.",
+                        icon: FontAwesomeIcons.clockRotateLeft,
+                        isSelected: _learningMode == 'Spaced',
+                        onTap: () => setState(() => _learningMode = 'Spaced'),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ],
@@ -424,57 +503,162 @@ class _GenerateMaterialsWizardPageState
 
   Widget _buildModeOption({
     required String label,
+    required String description,
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? cs.surface : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            height: 100, // Taller
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FaIcon(
+                      icon,
+                      size: 16,
+                      color: isSelected
+                          ? cs.primary
+                          : cs.onSurface.withValues(alpha: 0.4),
                     ),
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FaIcon(
-                icon,
-                size: 14,
-                color: isSelected
-                    ? cs.primary
-                    : cs.onSurface.withValues(alpha: 0.4),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                  color: isSelected
-                      ? cs.onSurface
-                      : cs.onSurface.withValues(alpha: 0.4),
+                    const SizedBox(width: 8),
+                    Text(
+                      label,
+                      style: GoogleFonts.outfit(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected
+                            ? cs.onSurface
+                            : cs.onSurface.withValues(alpha: 0.4),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                Text(
+                  description,
+                  textAlign: TextAlign.center,
+                  style: tt.labelSmall?.copyWith(
+                    color: isSelected
+                        ? cs.onSurface.withValues(alpha: 0.7)
+                        : cs.onSurface.withValues(alpha: 0.35),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRadioSwitch({
+    required List<String> options,
+    required String selectedOption,
+    required ValueChanged<String> onSelected,
+    String? label,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (label != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 10),
+            child: Text(
+              label,
+              style: tt.labelMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: cs.onSurface.withValues(alpha: 0.6),
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        Container(
+          height: 48,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final segmentWidth = constraints.maxWidth / options.length;
+              final selectedIndex = options.indexOf(selectedOption);
+
+              return Stack(
+                children: [
+                  AnimatedAlign(
+                    duration: const Duration(milliseconds: 350),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment(
+                      -1 + (selectedIndex * 2 / (options.length - 1)),
+                      0,
+                    ),
+                    child: Container(
+                      width: segmentWidth,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        color: cs.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: options.map((opt) {
+                      final isSelected = opt == selectedOption;
+                      return Expanded(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => onSelected(opt),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Center(
+                              child: Text(
+                                opt,
+                                style: GoogleFonts.outfit(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: isSelected
+                                      ? cs.primary
+                                      : cs.onSurface.withValues(alpha: 0.4),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -575,48 +759,6 @@ class _GenerateMaterialsWizardPageState
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildOptionRow(String label, String value, VoidCallback onTap) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: tt.bodySmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: 0.6),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Row(
-              children: [
-                Text(
-                  value,
-                  style: tt.bodySmall?.copyWith(
-                    color: cs.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                FaIcon(
-                  FontAwesomeIcons.chevronRight,
-                  size: 10,
-                  color: cs.onSurface.withValues(alpha: 0.3),
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -765,14 +907,18 @@ class _GenerateMaterialsWizardPageState
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 14,
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
+                                    shape:
+                                        AppTheme.buttonShape as OutlinedBorder,
+                                    elevation: 8,
+                                    shadowColor: cs.primary.withValues(
+                                      alpha: 0.5,
                                     ),
-                                    elevation: 0,
                                   ),
                                   child: Center(
                                     child: Text(
-                                      _currentPage == 0 ? "Next" : "Generate",
+                                      _currentPage == 0
+                                          ? "Next"
+                                          : "Start the magic",
                                       style: GoogleFonts.outfit(
                                         fontWeight: FontWeight.w900,
                                         fontSize: 16,
