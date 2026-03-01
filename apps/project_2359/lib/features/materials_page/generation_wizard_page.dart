@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show compute;
+import 'package:llm_json_stream/llm_json_stream.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -16,7 +16,6 @@ import 'package:project_2359/features/sources_page/sources_page_bloc/sources_pag
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:project_2359/core/widgets/special_background_generator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
@@ -59,12 +58,14 @@ class _GenerateMaterialsWizardPageState
   bool _authNoticeDismissed = false;
 
   // Generation state
-  final StringBuffer _generatedText = StringBuffer();
+  final List<StreamedStudyCard> _streamedCards = [];
   bool _isGenerating = false;
   bool _isExtracting = false;
   String? _generationError;
   GenerateMaterialMetadata? _metadata;
   StreamSubscription<GenerateMaterialEvent>? _generationSub;
+  JsonStreamParser? _parser;
+  StreamController<String>? _llmStreamController;
 
   bool get _isLoggedIn => Supabase.instance.client.auth.currentUser != null;
 
@@ -115,6 +116,8 @@ class _GenerateMaterialsWizardPageState
   @override
   void dispose() {
     _generationSub?.cancel();
+    _parser?.dispose();
+    _llmStreamController?.close();
     _pageController.dispose();
     super.dispose();
   }
@@ -129,10 +132,15 @@ class _GenerateMaterialsWizardPageState
   Future<void> _startGeneration() async {
     final sourceService = context.read<SourcesPageBloc>().sourceService;
 
+    // Clean up previous run
+    _generationSub?.cancel();
+    _parser?.dispose();
+    _llmStreamController?.close();
+
     setState(() {
       _isExtracting = true;
       _isGenerating = true;
-      _generatedText.clear();
+      _streamedCards.clear();
       _generationError = null;
       _metadata = null;
     });
@@ -182,7 +190,79 @@ class _GenerateMaterialsWizardPageState
         preferences['${type}_focus'] = _focusOptions[type] ?? 'General';
       }
 
-      // 3. Stream from the API
+      // 3. Set up llm_json_stream parser
+      _llmStreamController = StreamController<String>();
+      _parser = JsonStreamParser(
+        _llmStreamController!.stream,
+        closeOnRootComplete: true,
+      );
+
+      // 4. Subscribe to study materials array reactively
+      _parser!.getListProperty('studyMaterials').onElement((element, index) {
+        if (!mounted) return;
+
+        // Create a placeholder card immediately
+        final card = StreamedStudyCard();
+        setState(() => _streamedCards.add(card));
+
+        final map = element.asMap;
+
+        // Subscribe to type
+        map.getStringProperty('type').stream.listen((chunk) {
+          if (!mounted) return;
+          setState(() => card.type = (card.type ?? '') + chunk);
+        });
+
+        // Subscribe to sourceId
+        map.getStringProperty('sourceId').stream.listen((chunk) {
+          if (!mounted) return;
+          setState(() => card.sourceId = (card.sourceId ?? '') + chunk);
+        });
+
+        // Flashcard fields
+        map.getStringProperty('frontContent').stream.listen((chunk) {
+          if (!mounted) return;
+          setState(() => card.frontContent += chunk);
+        });
+
+        map.getStringProperty('backContent').stream.listen((chunk) {
+          if (!mounted) return;
+          setState(() => card.backContent += chunk);
+        });
+
+        // Free-text fields
+        map.getStringProperty('question').stream.listen((chunk) {
+          if (!mounted) return;
+          setState(() => card.question += chunk);
+        });
+
+        map.getStringProperty('criteria').stream.listen((chunk) {
+          if (!mounted) return;
+          setState(() => card.criteria += chunk);
+        });
+
+        // MCQ fields
+        map.getListProperty('choices').onElement((choiceElement, choiceIndex) {
+          if (!mounted) return;
+          // Add empty slot
+          setState(() {
+            while (card.choices.length <= choiceIndex) {
+              card.choices.add('');
+            }
+          });
+          choiceElement.asStr.stream.listen((chunk) {
+            if (!mounted) return;
+            setState(() => card.choices[choiceIndex] += chunk);
+          });
+        });
+
+        map.getNumberProperty('correctAnswerIndex').future.then((value) {
+          if (!mounted) return;
+          setState(() => card.correctAnswerIndex = value.toInt());
+        });
+      });
+
+      // 5. Stream from the API and feed chunks to the parser
       final stream = AiHelpers.generateMaterial(
         extractedTexts: extractedTexts,
         preferences: preferences,
@@ -193,17 +273,14 @@ class _GenerateMaterialsWizardPageState
           if (!mounted) return;
           switch (event) {
             case GenerateMaterialChunk(:final text):
-              setState(() {
-                _generatedText.write(text);
-              });
+              _llmStreamController?.add(text);
             case GenerateMaterialMeta(:final metadata):
-              setState(() {
-                _metadata = metadata;
-              });
+              setState(() => _metadata = metadata);
           }
         },
         onError: (error) {
           if (!mounted) return;
+          _llmStreamController?.close();
           setState(() {
             _isGenerating = false;
             _generationError = error.toString();
@@ -211,13 +288,13 @@ class _GenerateMaterialsWizardPageState
         },
         onDone: () {
           if (!mounted) return;
-          setState(() {
-            _isGenerating = false;
-          });
+          _llmStreamController?.close();
+          setState(() => _isGenerating = false);
         },
       );
     } catch (e) {
       if (!mounted) return;
+      _llmStreamController?.close();
       setState(() {
         _isExtracting = false;
         _isGenerating = false;
@@ -949,7 +1026,7 @@ class _GenerateMaterialsWizardPageState
           ),
           child: Stack(
             children: [
-              // Animated background layer - fills edge-to-edge
+              // Solid background layer - fills edge-to-edge
               Positioned.fill(
                 child: AnimatedOpacity(
                   opacity: _isExpanded ? 1.0 : 0.0,
@@ -961,15 +1038,19 @@ class _GenerateMaterialsWizardPageState
                         _isExpanded ? 40 : 60,
                       ),
                     ),
-                    child: _isExpanded
-                        ? _GrowingRotatingBackground(
-                            seed: GenerationSeed.fromString(
-                              "generation_wizard",
-                            ),
-                            label: "Generating",
-                            icon: FontAwesomeIcons.wandMagicSparkles,
-                          )
-                        : const SizedBox.shrink(),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            cs.primary,
+                            Color.lerp(cs.primary, cs.tertiary, 0.6)!,
+                            cs.tertiary,
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -1104,6 +1185,8 @@ class _GenerateMaterialsWizardPageState
                 child: IconButton(
                   onPressed: () {
                     _generationSub?.cancel();
+                    _parser?.dispose();
+                    _llmStreamController?.close();
                     setState(() {
                       _isExpanded = false;
                       _isGenerating = false;
@@ -1148,8 +1231,8 @@ class _GenerateMaterialsWizardPageState
                       : _isExtracting
                       ? "Reading your sources..."
                       : _isGenerating
-                      ? "Generating magic..."
-                      : "Generation complete!",
+                      ? "Generating ${_streamedCards.length} cards..."
+                      : "${_streamedCards.length} cards generated!",
                   style: tt.titleLarge?.copyWith(
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.5,
@@ -1180,18 +1263,12 @@ class _GenerateMaterialsWizardPageState
             ),
           ),
           const SizedBox(height: 24),
-          // Streamed text area
+          // Streamed cards area
           Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-              ),
-              child: _generationError != null
-                  ? Center(
+            child: _generationError != null
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -1222,29 +1299,29 @@ class _GenerateMaterialsWizardPageState
                           ),
                         ],
                       ),
-                    )
-                  : _generatedText.isEmpty && !_isGenerating && !_isExtracting
-                  ? Center(
-                      child: Text(
-                        'Waiting for content...',
-                        style: tt.bodyMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.5),
-                        ),
-                      ),
-                    )
-                  : SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: SelectableText(
-                        _generatedText.toString(),
-                        style: GoogleFonts.outfit(
-                          fontSize: 14,
-                          height: 1.6,
-                          color: Colors.white.withValues(alpha: 0.9),
-                          fontWeight: FontWeight.w400,
-                        ),
+                    ),
+                  )
+                : _streamedCards.isEmpty && !_isGenerating && !_isExtracting
+                ? Center(
+                    child: Text(
+                      'Waiting for content...',
+                      style: tt.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.5),
                       ),
                     ),
-            ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: _streamedCards.length,
+                    itemBuilder: (context, index) {
+                      return _StreamedCardWidget(
+                        key: ValueKey('card_$index'),
+                        card: _streamedCards[index],
+                        index: index,
+                      );
+                    },
+                  ),
           ),
           const SizedBox(height: 16),
         ],
@@ -1567,91 +1644,407 @@ class _GenerateMaterialsWizardPageState
   }
 }
 
-class _GrowingRotatingBackground extends StatefulWidget {
-  final GenerationSeed seed;
-  final String label;
-  final IconData icon;
+/// A single streamed card widget with entrance animation.
+class _StreamedCardWidget extends StatefulWidget {
+  final StreamedStudyCard card;
+  final int index;
 
-  const _GrowingRotatingBackground({
-    required this.seed,
-    required this.label,
-    required this.icon,
+  const _StreamedCardWidget({
+    super.key,
+    required this.card,
+    required this.index,
   });
 
   @override
-  State<_GrowingRotatingBackground> createState() =>
-      _GrowingRotatingBackgroundState();
+  State<_StreamedCardWidget> createState() => _StreamedCardWidgetState();
 }
 
-class _GrowingRotatingBackgroundState extends State<_GrowingRotatingBackground>
-    with TickerProviderStateMixin {
-  late final AnimationController _rotationController;
-  late final AnimationController _scaleController;
+class _StreamedCardWidgetState extends State<_StreamedCardWidget>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animController;
+  late final Animation<double> _fadeAnim;
+  late final Animation<Offset> _slideAnim;
+  late final Animation<double> _scaleAnim;
 
   @override
   void initState() {
     super.initState();
-    _rotationController = AnimationController(
+    _animController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 40),
-    )..repeat();
+      duration: const Duration(milliseconds: 500),
+    );
 
-    _scaleController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 15),
-    )..repeat(reverse: true);
+    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
+    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
+        );
+    _scaleAnim = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(parent: _animController, curve: Curves.easeOutBack),
+    );
+
+    // Staggered delay based on index
+    Future.delayed(Duration(milliseconds: 50 * (widget.index % 5)), () {
+      if (mounted) _animController.forward();
+    });
   }
 
   @override
   void dispose() {
-    _rotationController.dispose();
-    _scaleController.dispose();
+    _animController.dispose();
     super.dispose();
+  }
+
+  IconData _getCardIcon(String? type) {
+    switch (type) {
+      case 'flashcard':
+        return FontAwesomeIcons.clone;
+      case 'multiple-choice-question':
+        return FontAwesomeIcons.listCheck;
+      case 'free-text':
+        return FontAwesomeIcons.penToSquare;
+      default:
+        return FontAwesomeIcons.spinner;
+    }
+  }
+
+  String _getCardLabel(String? type) {
+    switch (type) {
+      case 'flashcard':
+        return 'FLASHCARD';
+      case 'multiple-choice-question':
+        return 'MULTIPLE CHOICE';
+      case 'free-text':
+        return 'FREE TEXT';
+      default:
+        return 'LOADING...';
+    }
+  }
+
+  Color _getAccentColor(String? type, ColorScheme cs) {
+    switch (type) {
+      case 'flashcard':
+        return const Color(0xFF4ECDC4);
+      case 'multiple-choice-question':
+        return const Color(0xFFFF6B6B);
+      case 'free-text':
+        return const Color(0xFFFFE66D);
+      default:
+        return Colors.white;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Compute cover size: the diagonal * sqrt(2) ensures full coverage
-        // at all rotation angles.
-        final coverSize =
-            sqrt(
-              constraints.maxWidth * constraints.maxWidth +
-                  constraints.maxHeight * constraints.maxHeight,
-            ) *
-            1.42;
+    final card = widget.card;
+    final cs = Theme.of(context).colorScheme;
+    final accent = _getAccentColor(card.type, cs);
 
-        return AnimatedBuilder(
-          animation: Listenable.merge([_rotationController, _scaleController]),
-          builder: (context, child) {
-            final scale = 1.0 + (_scaleController.value * 0.5);
-            final rotation = _rotationController.value * 2 * pi;
+    return FadeTransition(
+      opacity: _fadeAnim,
+      child: SlideTransition(
+        position: _slideAnim,
+        child: ScaleTransition(
+          scale: _scaleAnim,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Card type badge
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          FaIcon(
+                            _getCardIcon(card.type),
+                            size: 11,
+                            color: accent,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _getCardLabel(card.type),
+                            style: GoogleFonts.outfit(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: accent,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '#${widget.index + 1}',
+                      style: GoogleFonts.outfit(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white.withValues(alpha: 0.3),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Card content based on type
+                _buildCardContent(card, accent),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-            // OverflowBox breaks out of parent constraints so the
-            // background can actually render as a large square.
-            return OverflowBox(
-              maxWidth: coverSize,
-              maxHeight: coverSize,
-              child: Transform.rotate(
-                angle: rotation,
-                child: Transform.scale(
-                  scale: scale,
-                  child: SpecialBackgroundGenerator(
-                    seed: widget.seed,
-                    label: widget.label,
-                    icon: widget.icon,
-                    type: SpecialBackgroundType.vibrantGradients,
-                    showBorder: false,
-                    borderRadius: 0,
-                    child: const SizedBox.expand(),
+  Widget _buildCardContent(StreamedStudyCard card, Color accent) {
+    switch (card.type) {
+      case 'flashcard':
+        return _buildFlashcardContent(card, accent);
+      case 'multiple-choice-question':
+        return _buildMcqContent(card, accent);
+      case 'free-text':
+        return _buildFreeTextContent(card, accent);
+      default:
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white.withValues(alpha: 0.5),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Detecting card type...',
+                style: GoogleFonts.outfit(
+                  fontSize: 13,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        );
+    }
+  }
+
+  Widget _buildFlashcardContent(StreamedStudyCard card, Color accent) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Front
+        Text(
+          'FRONT',
+          style: GoogleFonts.outfit(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            color: accent.withValues(alpha: 0.6),
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          card.frontContent.isEmpty ? '...' : card.frontContent,
+          style: GoogleFonts.outfit(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: Colors.white.withValues(alpha: 0.95),
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(height: 1, color: Colors.white.withValues(alpha: 0.08)),
+        const SizedBox(height: 12),
+        // Back
+        Text(
+          'BACK',
+          style: GoogleFonts.outfit(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            color: accent.withValues(alpha: 0.6),
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          card.backContent.isEmpty ? '...' : card.backContent,
+          style: GoogleFonts.outfit(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: Colors.white.withValues(alpha: 0.8),
+            height: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMcqContent(StreamedStudyCard card, Color accent) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Question
+        Text(
+          card.question.isEmpty ? '...' : card.question,
+          style: GoogleFonts.outfit(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: Colors.white.withValues(alpha: 0.95),
+            height: 1.4,
+          ),
+        ),
+        if (card.choices.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          ...card.choices.asMap().entries.map((entry) {
+            final choiceIndex = entry.key;
+            final choice = entry.value;
+            final isCorrect = card.correctAnswerIndex == choiceIndex;
+            final letter = String.fromCharCode(65 + choiceIndex); // A, B, C, D
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: isCorrect
+                      ? accent.withValues(alpha: 0.15)
+                      : Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isCorrect
+                        ? accent.withValues(alpha: 0.4)
+                        : Colors.white.withValues(alpha: 0.08),
                   ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isCorrect
+                            ? accent.withValues(alpha: 0.3)
+                            : Colors.white.withValues(alpha: 0.1),
+                      ),
+                      child: Center(
+                        child: Text(
+                          letter,
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: isCorrect
+                                ? accent
+                                : Colors.white.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        choice.isEmpty ? '...' : choice,
+                        style: GoogleFonts.outfit(
+                          fontSize: 13,
+                          fontWeight: isCorrect
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          color: isCorrect
+                              ? Colors.white.withValues(alpha: 0.95)
+                              : Colors.white.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ),
+                    if (isCorrect)
+                      FaIcon(
+                        FontAwesomeIcons.circleCheck,
+                        size: 14,
+                        color: accent,
+                      ),
+                  ],
                 ),
               ),
             );
-          },
-        );
-      },
+          }),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildFreeTextContent(StreamedStudyCard card, Color accent) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Question
+        Text(
+          'QUESTION',
+          style: GoogleFonts.outfit(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            color: accent.withValues(alpha: 0.6),
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          card.question.isEmpty ? '...' : card.question,
+          style: GoogleFonts.outfit(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: Colors.white.withValues(alpha: 0.95),
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(height: 1, color: Colors.white.withValues(alpha: 0.08)),
+        const SizedBox(height: 12),
+        // Criteria
+        Text(
+          'CRITERIA',
+          style: GoogleFonts.outfit(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            color: accent.withValues(alpha: 0.6),
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          card.criteria.isEmpty ? '...' : card.criteria,
+          style: GoogleFonts.outfit(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: Colors.white.withValues(alpha: 0.8),
+            height: 1.5,
+          ),
+        ),
+      ],
     );
   }
 }

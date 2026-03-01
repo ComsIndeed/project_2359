@@ -19,19 +19,41 @@ interface RequestBody {
 
 // ── Prompt ───────────────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT =
-  `You are a study material generator. You will receive one or more source texts along with user preferences, and your job is to generate high-quality study materials based on them.
+const SYSTEM_PROMPT = `# General Instruction
+Generate a list of study materials from the provided sources and information.
 
-You can generate any combination of the following material types:
-- **Flashcards**: A front (question/term) and back (answer/definition) pair.
-- **Multiple-Choice Questions (MCQ)**: A question with 4 options (A–D), one correct answer, and a brief explanation.
-- **Free-Form Questions**: An open-ended question with a model answer.
+# Format
+Must be in JSON; \`studyMaterials\` as an array of objects which has a source ID, study material type, proceeded by the properties of the card type.
+The following card types are:
+\`flashcard\` - Has \`frontContent\` and \`backContent\` as strings
+\`free-text\` - Has \`question\` and has \`criteria\` which serves as what's considered "close to correct"
+\`multiple-choice-question\` - Has \`question\`, has \`choices\` list, and has \`correctAnswerIndex\` int
+The full response must be valid JSON only. No intros, outros, codeblocks, or any invalid characters.
 
-Guidelines:
-- Only derive content from the provided source texts. Do not invent facts.
-- Tailor the material type, difficulty, quantity, and focus according to the user preferences.
-- Be thorough but concise — prioritize clarity and accuracy.
-- You may produce mixed types unless preferences restrict you to one type.`;
+# Example format:
+{
+  "studyMaterials": [
+    {
+      "sourceId": "tab-1",
+      "type": "flashcard",
+      "frontContent": "What is the capital of France?",
+      "backContent": "Paris"
+    },
+    {
+      "sourceId": "tab-1",
+      "type": "free-text",
+      "question": "Explain the process of photosynthesis.",
+      "criteria": "Mentions conversion of light energy into chemical energy, involves chlorophyll, produces glucose and oxygen."
+    },
+    {
+      "sourceId": "tab-1",
+      "type": "multiple-choice-question",
+      "question": "Which planet is known as the Red Planet?",
+      "choices": ["Earth", "Mars", "Jupiter", "Venus"],
+      "correctAnswerIndex": 1
+    }
+  ]
+}`;
 
 function buildUserMessage(
   extractedTexts: ExtractedText[],
@@ -71,7 +93,7 @@ serve(async (_req, { json, stream, error }) => {
   });
 
   const llmStream = await client.chat.completions.create({
-    model: "deepseek-reasoner",
+    model: "deepseek-chat",
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: buildUserMessage(extractedTexts, preferences) },

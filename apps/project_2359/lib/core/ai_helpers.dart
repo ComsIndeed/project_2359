@@ -30,6 +30,27 @@ class GenerateMaterialMetadata {
       'GenerateMaterialMetadata(in=$inputTokens, out=$outputTokens, total=$totalTokens)';
 }
 
+/// A single study material item parsed from the LLM JSON stream.
+///
+/// Fields are mutable because they are populated progressively as the
+/// streaming parser yields chunks.
+class StreamedStudyCard {
+  String? sourceId;
+  String? type;
+
+  // flashcard
+  String frontContent = '';
+  String backContent = '';
+
+  // free-text
+  String question = '';
+  String criteria = '';
+
+  // multiple-choice-question
+  List<String> choices = [];
+  int? correctAnswerIndex;
+}
+
 /// A single event emitted by [AiHelpers.generateMaterial].
 ///
 /// Either a text [chunk] from the LLM or the final [metadata] summary.
