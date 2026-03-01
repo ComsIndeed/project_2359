@@ -305,12 +305,14 @@ class SpecialBackgroundGenerator extends StatelessWidget {
           children: [
             // Abstract art pattern layer
             Positioned.fill(
-              child: CustomPaint(
-                painter: AbstractArtPainter(
-                  hash,
-                  colors.primary,
-                  type,
-                  brightness,
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: AbstractArtPainter(
+                    hash,
+                    colors.primary,
+                    type,
+                    brightness,
+                  ),
                 ),
               ),
             ),
@@ -653,22 +655,12 @@ class AbstractArtPainter extends CustomPainter {
       canvas.drawCircle(center, radius, paint);
     }
 
-    // 3. Optional: Subtle Noise Grain
-    paint.shader = null;
-    paint.blendMode = isDark ? BlendMode.overlay : BlendMode.multiply;
-    for (int i = 0; i < 1500; i++) {
-      final x = r.nextDouble() * size.width;
-      final y = r.nextDouble() * size.height;
-      paint.color = (isDark ? Colors.white : Colors.black).withValues(
-        alpha: 0.04,
-      );
-      canvas.drawRect(Rect.fromLTWH(x, y, 1, 1), paint);
-    }
-
     paint.blendMode = BlendMode.srcOver;
   }
 
   @override
   bool shouldRepaint(covariant AbstractArtPainter oldDelegate) =>
-      oldDelegate.seed != seed;
+      oldDelegate.seed != seed ||
+      oldDelegate.type != type ||
+      oldDelegate.brightness != brightness;
 }
