@@ -7,6 +7,9 @@ import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/features/home_page/home_page.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_state.dart';
+import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
+import 'package:project_2359/app_theme.dart';
+import 'package:file_picker/file_picker.dart';
 
 class GenerateMaterialsWizardPage extends StatefulWidget {
   const GenerateMaterialsWizardPage({super.key});
@@ -20,6 +23,7 @@ class _GenerateMaterialsWizardPageState
     extends State<GenerateMaterialsWizardPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  String _selectedTypeFilter = 'All';
 
   // Shared State
   final Set<String> _selectedSources = {};
@@ -27,6 +31,13 @@ class _GenerateMaterialsWizardPageState
   String _sourceSearchQuery = '';
   String _genSearchQuery = '';
   bool _useFSRS = true;
+  bool _showAddSources = false;
+
+  final Map<String, String> _generationOptions = {
+    'flashcards': 'Comprehensive',
+    'quizzes': '10 Questions',
+    'assessment': 'Full length',
+  };
 
   final List<Map<String, dynamic>> _generationTypes = [
     {
@@ -79,15 +90,16 @@ class _GenerateMaterialsWizardPageState
       body: SafeArea(
         child: Column(
           children: [
-            // --- Refined Header with Progress Indicator ---
+            // --- Modern Compact Header ---
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 16,
+                horizontal: 16.0,
+                vertical: 8,
               ),
               child: Column(
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
                         onPressed: _currentPage == 0
@@ -97,76 +109,51 @@ class _GenerateMaterialsWizardPageState
                           _currentPage == 0
                               ? FontAwesomeIcons.xmark
                               : FontAwesomeIcons.chevronLeft,
-                          size: 18,
+                          size: 16,
                         ),
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(8),
                         constraints: const BoxConstraints(),
                         style: IconButton.styleFrom(
                           backgroundColor: cs.surfaceContainerHighest
                               .withValues(alpha: 0.5),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _currentPage == 0
-                                  ? "Step 1: Sources"
-                                  : "Step 2: Format",
-                              style: tt.labelLarge?.copyWith(
-                                color: cs.primary,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            Text(
-                              _currentPage == 0
-                                  ? "What are we studying?"
-                                  : "How should we learn?",
-                              style: tt.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ],
+                      Text(
+                        _currentPage == 0 ? "Select Sources" : "Select Format",
+                        style: tt.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.2,
                         ),
                       ),
+                      // Balance the row
+                      const SizedBox(width: 40),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  // Progress Bar
+                  const SizedBox(height: 12),
+                  // Thinner Progress Bar
                   Stack(
                     children: [
                       Container(
-                        height: 4,
+                        height: 3,
                         decoration: BoxDecoration(
                           color: cs.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(2),
+                          borderRadius: BorderRadius.circular(1.5),
                         ),
                       ),
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 500),
                         curve: Curves.easeOutCubic,
-                        height: 4,
+                        height: 3,
                         width:
                             MediaQuery.of(context).size.width *
                             (_currentPage + 1) /
                             2,
                         decoration: BoxDecoration(
                           color: cs.primary,
-                          borderRadius: BorderRadius.circular(2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: cs.primary.withValues(alpha: 0.3),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                          borderRadius: BorderRadius.circular(1.5),
                         ),
                       ),
                     ],
@@ -178,6 +165,7 @@ class _GenerateMaterialsWizardPageState
             Expanded(
               child: PageView(
                 controller: _pageController,
+                scrollDirection: Axis.vertical,
                 physics: const NeverScrollableScrollPhysics(),
                 onPageChanged: (page) {
                   setState(() {
@@ -211,15 +199,19 @@ class _GenerateMaterialsWizardPageState
         if (state is SourcesPageStateLoaded) {
           final filteredSources = state.sources
               .where(
-                (s) => s.label.toLowerCase().contains(
-                  _sourceSearchQuery.toLowerCase(),
-                ),
+                (s) =>
+                    s.label.toLowerCase().contains(
+                      _sourceSearchQuery.toLowerCase(),
+                    ) &&
+                    (_selectedTypeFilter == 'All' ||
+                        s.type.toLowerCase() ==
+                            _selectedTypeFilter.toLowerCase()),
               )
               .toList();
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -227,7 +219,11 @@ class _GenerateMaterialsWizardPageState
                   hint: 'Filter your sources...',
                   onChanged: (val) => setState(() => _sourceSearchQuery = val),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
+                _buildFilterOptions(),
+                const SizedBox(height: 16),
+                _buildAddMoreSourcesSection(),
+                const SizedBox(height: 12),
                 if (filteredSources.isEmpty)
                   _buildEmptyState()
                 else
@@ -273,6 +269,9 @@ class _GenerateMaterialsWizardPageState
   // --- STEP 2: GENERATION OPTIONS ---
 
   Widget _buildGenerationOptionsStep() {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     final filtered = _generationTypes
         .where(
           (type) => type['label'].toString().toLowerCase().contains(
@@ -283,7 +282,7 @@ class _GenerateMaterialsWizardPageState
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -291,29 +290,78 @@ class _GenerateMaterialsWizardPageState
             hint: 'Search formats...',
             onChanged: (val) => setState(() => _genSearchQuery = val),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           if (filtered.isEmpty)
             _buildEmptyState(isFormat: true)
           else
             ...filtered.map((type) {
               final id = type['id'] as String;
               final isSelected = _selectedGenerationTypes.contains(id);
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: _buildSelectableCard(
-                  icon: type['icon'] as IconData,
-                  label: type['label'] as String,
-                  subLabel: type['subLabel'] as String,
-                  isSelected: isSelected,
-                  onTap: () {
-                    setState(() {
-                      if (isSelected) {
-                        _selectedGenerationTypes.remove(id);
-                      } else {
-                        _selectedGenerationTypes.add(id);
-                      }
-                    });
-                  },
+                child: Column(
+                  children: [
+                    _buildSelectableCard(
+                      icon: type['icon'] as IconData,
+                      label: type['label'] as String,
+                      subLabel: type['subLabel'] as String,
+                      isSelected: isSelected,
+                      backgroundGenerator: isSelected
+                          ? GenerationSeed.useLabel()
+                          : null,
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            _selectedGenerationTypes.remove(id);
+                          } else {
+                            _selectedGenerationTypes.add(id);
+                          }
+                        });
+                      },
+                    ),
+                    ClipRect(
+                      child: AnimatedAlign(
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeInOutCubic,
+                        alignment: Alignment.topCenter,
+                        heightFactor: isSelected ? 1.0 : 0.0,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHighest.withValues(
+                                alpha: 0.5,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Configuration",
+                                  style: tt.labelMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: cs.primary,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                _buildOptionRow(
+                                  "Complexity",
+                                  _generationOptions[id] ?? "Standard",
+                                  () {},
+                                ),
+                                const SizedBox(height: 8),
+                                _buildOptionRow("Focus", "Everything", () {}),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             }),
@@ -418,6 +466,8 @@ class _GenerateMaterialsWizardPageState
     required String subLabel,
     required bool isSelected,
     required VoidCallback onTap,
+    GenerationSeed? backgroundGenerator,
+    Widget? trailing,
   }) {
     final cs = Theme.of(context).colorScheme;
 
@@ -426,35 +476,84 @@ class _GenerateMaterialsWizardPageState
       label: label,
       subLabel: subLabel,
       isCompact: true,
+      backgroundGenerator: backgroundGenerator,
       layoutDirection: CardLayoutDirection.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       onTap: onTap,
-      trailing: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutBack,
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: isSelected ? cs.primary : Colors.transparent,
-          border: Border.all(
-            color: isSelected
-                ? cs.primary
-                : cs.onSurface.withValues(alpha: 0.1),
-            width: 2,
-          ),
-        ),
-        child: AnimatedScale(
-          scale: isSelected ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutBack,
-          child: const Center(
-            child: FaIcon(
-              FontAwesomeIcons.check,
-              size: 14,
-              color: Colors.white,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (trailing != null) ...[trailing, const SizedBox(width: 8)],
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutBack,
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isSelected ? cs.primary : Colors.transparent,
+              border: Border.all(
+                color: isSelected
+                    ? cs.primary
+                    : cs.onSurface.withValues(alpha: 0.1),
+                width: 2,
+              ),
+            ),
+            child: AnimatedScale(
+              scale: isSelected ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutBack,
+              child: const Center(
+                child: FaIcon(
+                  FontAwesomeIcons.check,
+                  size: 14,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOptionRow(String label, String value, VoidCallback onTap) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurface.withValues(alpha: 0.6),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Row(
+              children: [
+                Text(
+                  value,
+                  style: tt.bodySmall?.copyWith(
+                    color: cs.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                FaIcon(
+                  FontAwesomeIcons.chevronRight,
+                  size: 10,
+                  color: cs.onSurface.withValues(alpha: 0.3),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -477,15 +576,15 @@ class _GenerateMaterialsWizardPageState
         opacity: isVisible ? 1.0 : 0.0,
         duration: const Duration(milliseconds: 400),
         child: Container(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: cs.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 30,
-                offset: const Offset(0, -5),
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
               ),
             ],
           ),
@@ -498,65 +597,48 @@ class _GenerateMaterialsWizardPageState
                   Text(
                     _currentPage == 0
                         ? "${_selectedSources.length} Selected"
-                        : "Ready to Create",
-                    style: tt.titleLarge?.copyWith(
+                        : "Format Details",
+                    style: tt.titleSmall?.copyWith(
                       fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
+                      letterSpacing: -0.2,
                     ),
                   ),
                   Text(
-                    _currentPage == 0
-                        ? "Let's move to formats"
-                        : "This will use AI intelligence",
+                    _currentPage == 0 ? "Source Selection" : "Ready to Create",
                     style: tt.labelSmall?.copyWith(
                       color: muted,
+                      fontSize: 10,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(width: 24),
+              const SizedBox(width: 16),
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: cs.primary.withValues(alpha: 0.3),
-                        blurRadius: 15,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: ElevatedButton(
                     onPressed: _currentPage == 0 ? _nextPage : () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: cs.primary,
                       foregroundColor: cs.onPrimary,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 0,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _currentPage == 0 ? "Continue" : "Generate Now",
-                          style: GoogleFonts.outfit(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18,
-                          ),
+                    child: Center(
+                      child: Text(
+                        _currentPage == 0 ? "Next" : "Generate",
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                          letterSpacing: 0.5,
                         ),
-                        const SizedBox(width: 12),
-                        FaIcon(
-                          _currentPage == 0
-                              ? FontAwesomeIcons.arrowRight
-                              : FontAwesomeIcons.wandSparkles,
-                          size: 16,
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -600,6 +682,176 @@ class _GenerateMaterialsWizardPageState
         ),
       ),
     );
+  }
+
+  Widget _buildFilterOptions() {
+    final types = ['All', 'Document', 'Video', 'Audio', 'Image', 'Text'];
+    final cs = Theme.of(context).colorScheme;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children: types.map((type) {
+          final isSelected = _selectedTypeFilter == type;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              label: Text(
+                type,
+                style: GoogleFonts.outfit(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                ),
+              ),
+              selected: isSelected,
+              onSelected: (val) {
+                if (val) setState(() => _selectedTypeFilter = type);
+              },
+              backgroundColor: cs.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
+              selectedColor: cs.primary,
+              labelStyle: TextStyle(
+                color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
+              ),
+              showCheckmark: false,
+              side: BorderSide.none,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildAddMoreSourcesSection() {
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      children: [
+        CardButton(
+          icon: _showAddSources
+              ? FontAwesomeIcons.minus
+              : FontAwesomeIcons.plus,
+          label: "Add More Sources",
+          subLabel: "Expand to see import options",
+          isCompact: true,
+          layoutDirection: CardLayoutDirection.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          onTap: () {
+            setState(() {
+              _showAddSources = !_showAddSources;
+            });
+          },
+          accentColor: _showAddSources ? null : cs.primary,
+          trailing: FaIcon(
+            _showAddSources
+                ? FontAwesomeIcons.chevronUp
+                : FontAwesomeIcons.chevronDown,
+            size: 14,
+            color: cs.onSurface.withValues(alpha: 0.5),
+          ),
+        ),
+        AnimatedCrossFade(
+          firstChild: const SizedBox(width: double.infinity),
+          secondChild: Container(
+            margin: const EdgeInsets.only(top: 8),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 2.8,
+              padding: const EdgeInsets.all(8),
+              children: [
+                _buildAddSourceMiniCard(
+                  icon: FontAwesomeIcons.fileLines,
+                  label: "Document",
+                  color: cs.primary,
+                  onTap: () => _importDocument(context),
+                ),
+                _buildAddSourceMiniCard(
+                  icon: FontAwesomeIcons.photoFilm,
+                  label: "Media",
+                  color: const Color(0xFFFF9F43),
+                  onTap: () {},
+                ),
+                _buildAddSourceMiniCard(
+                  icon: FontAwesomeIcons.clone,
+                  label: "Flashcards",
+                  color: AppTheme.success,
+                  onTap: () {},
+                ),
+                _buildAddSourceMiniCard(
+                  icon: FontAwesomeIcons.cloud,
+                  label: "Cloud",
+                  color: const Color(0xFF00D2D3),
+                  onTap: () {},
+                ),
+                _buildAddSourceMiniCard(
+                  icon: FontAwesomeIcons.link,
+                  label: "Website",
+                  color: const Color(0xFF5f27cd),
+                  onTap: () {},
+                ),
+                _buildAddSourceMiniCard(
+                  icon: FontAwesomeIcons.penToSquare,
+                  label: "Note App",
+                  color: AppTheme.warning,
+                  onTap: () {},
+                ),
+              ],
+            ),
+          ),
+          crossFadeState: _showAddSources
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 300),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddSourceMiniCard({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return CardButton(
+      icon: icon,
+      label: label,
+      isCompact: true,
+      layoutDirection: CardLayoutDirection.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      onTap: onTap,
+      accentColor: color,
+      labelFontSize: 13,
+    );
+  }
+
+  void _importDocument(BuildContext context) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: true,
+      withData: true,
+      onFileLoading: (status) {},
+      allowedExtensions: ["pdf", "docx", "pptx"],
+    );
+
+    if (result == null) return;
+
+    if (context.mounted) {
+      context.read<SourcesPageBloc>().add(ImportDocumentsEvent(result.files));
+    }
   }
 
   IconData _getSourceIcon(String type) {

@@ -89,7 +89,7 @@ class CardButton extends StatelessWidget {
     this.accentColor,
     this.iconColorGenerator,
     this.trailing,
-    this.backgroundType = SpecialBackgroundType.wavedLines,
+    this.backgroundType = SpecialBackgroundType.vibrantGradients,
   });
 
   @override
@@ -107,61 +107,68 @@ class CardButton extends StatelessWidget {
           : _buildVerticalContent(context),
     );
 
-    // Inner child: opacity + InkWell
-    Widget innerChild = Opacity(
-      opacity: isDisabled ? 0.4 : 1.0,
-      child: contentWidget,
+    final cs = Theme.of(context).colorScheme;
+    final effectiveSeed =
+        backgroundGenerator ?? GenerationSeed.fromString("idle");
+
+    return PressableScale(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          color: cs.surface.withValues(alpha: hasBackground ? 0.0 : 0.6),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color:
+                (hasBackground
+                        ? Colors.transparent
+                        : Colors.white.withValues(alpha: 0.08))
+                    .withValues(alpha: isDisabled ? 0.04 : null),
+            width: 1,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Stack(
+            children: [
+              // Background Layer
+              Positioned.fill(
+                child: AnimatedOpacity(
+                  opacity: hasBackground ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                  child: SpecialBackgroundGenerator(
+                    seed: effectiveSeed,
+                    label: label,
+                    icon: icon,
+                    subLabel: subLabel,
+                    style: style,
+                    isDisabled: isDisabled,
+                    type: backgroundType,
+                    showBorder: false,
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+              ),
+              // Content Layer
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onTap,
+                  onLongPress: onLongPress,
+                  customBorder: AppTheme.cardShape,
+                  child: Opacity(
+                    opacity: isDisabled ? 0.4 : 1.0,
+                    child: contentWidget,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
-
-    // Wrap with the generated background or a plain surface container
-    Widget body;
-    if (hasBackground) {
-      body = SpecialBackgroundGenerator(
-        seed: backgroundGenerator!,
-        label: label,
-        icon: icon,
-        subLabel: subLabel,
-        style: style,
-        isDisabled: isDisabled,
-        type: backgroundType,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            onLongPress: onLongPress,
-            customBorder: AppTheme.cardShape,
-            child: innerChild,
-          ),
-        ),
-      );
-    } else {
-      final plainDecoration = BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
-          width: 1,
-        ),
-      );
-
-      body = Container(
-        decoration: plainDecoration,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            onLongPress: onLongPress,
-            customBorder: AppTheme.cardShape,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: innerChild,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return PressableScale(onTap: onTap, onLongPress: onLongPress, child: body);
   }
 
   Widget _buildIconContainer(BuildContext context) {
@@ -275,34 +282,39 @@ class CardButton extends StatelessWidget {
               cardStyle.subLabelStyle?.color,
         );
 
-    return Row(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        _buildIconContainer(context),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: effectiveLabelStyle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+        Row(
+          children: [
+            _buildIconContainer(context),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: effectiveLabelStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (subLabel != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subLabel!,
+                      style: effectiveSubLabelStyle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
               ),
-              if (subLabel != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  subLabel!,
-                  style: effectiveSubLabelStyle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ],
-          ),
+            ),
+            if (trailing != null) ...[const SizedBox(width: 8), trailing!],
+          ],
         ),
-        if (trailing != null) ...[const SizedBox(width: 8), trailing!],
       ],
     );
   }

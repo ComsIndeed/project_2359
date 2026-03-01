@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
@@ -214,6 +215,12 @@ class SpecialBackgroundGenerator extends StatelessWidget {
   /// The style of the generated background.
   final SpecialBackgroundType type;
 
+  /// Whether to apply a drop-shadow clone of the child for depth.
+  ///
+  /// When enabled, a dark, blurred, slightly-offset copy of [child] is
+  /// rendered behind the real content, giving uniform depth to all elements.
+  final bool applyContentShadow;
+
   /// The widget rendered on top of the background.
   final Widget child;
 
@@ -229,6 +236,7 @@ class SpecialBackgroundGenerator extends StatelessWidget {
     this.showBorder = true,
     this.borderRadius = 24,
     this.type = SpecialBackgroundType.wavedLines,
+    this.applyContentShadow = false,
     required this.child,
   });
 
@@ -342,12 +350,43 @@ class SpecialBackgroundGenerator extends StatelessWidget {
                   ),
                 ),
               ),
-            // Content layer
-            child,
+            // Content layer with optional shadow clone
+            if (applyContentShadow) ..._buildShadowedContent(isDark) else child,
           ],
         ),
       ),
     );
+  }
+
+  /// Builds a shadow clone + the real child in a Stack.
+  List<Widget> _buildShadowedContent(bool isDark) {
+    return [
+      // Shadow clone: non-interactive, invisible to a11y
+      Positioned.fill(
+        child: IgnorePointer(
+          child: ExcludeSemantics(
+            child: Transform.translate(
+              offset: const Offset(0, 2),
+              child: ImageFiltered(
+                imageFilter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                child: Opacity(
+                  opacity: isDark ? 0.45 : 0.2,
+                  child: ColorFiltered(
+                    colorFilter: const ColorFilter.mode(
+                      Colors.black,
+                      BlendMode.srcIn,
+                    ),
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      // Real content on top
+      child,
+    ];
   }
 }
 
