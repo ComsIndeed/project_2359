@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,6 +11,7 @@ import 'package:project_2359/features/sources_page/sources_page_bloc/sources_pag
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:project_2359/core/widgets/special_background_generator.dart';
 
 class GenerateMaterialsWizardPage extends StatefulWidget {
   const GenerateMaterialsWizardPage({super.key});
@@ -30,8 +32,9 @@ class _GenerateMaterialsWizardPageState
   final Set<String> _selectedGenerationTypes = {};
   String _sourceSearchQuery = '';
   String _genSearchQuery = '';
-  bool _useFSRS = true;
+  String _learningMode = 'Spaced'; // 'Cram' or 'Spaced'
   bool _showAddSources = false;
+  bool _isExpanded = false;
 
   final Map<String, String> _generationOptions = {
     'flashcards': 'Comprehensive',
@@ -60,16 +63,13 @@ class _GenerateMaterialsWizardPageState
     },
   ];
 
-  void _nextPage() {
-    _pageController.nextPage(
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.fastOutSlowIn,
-    );
+  void _nextPage({Duration duration = const Duration(milliseconds: 400)}) {
+    _pageController.nextPage(duration: duration, curve: Curves.fastOutSlowIn);
   }
 
-  void _previousPage() {
+  void _previousPage({Duration duration = const Duration(milliseconds: 400)}) {
     _pageController.previousPage(
-      duration: const Duration(milliseconds: 400),
+      duration: duration,
       curve: Curves.fastOutSlowIn,
     );
   }
@@ -88,98 +88,103 @@ class _GenerateMaterialsWizardPageState
 
     return Scaffold(
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            // --- Modern Compact Header ---
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8,
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Column(
+              children: [
+                // --- Modern Compact Header ---
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8,
+                  ),
+                  child: Column(
                     children: [
-                      IconButton(
-                        onPressed: _currentPage == 0
-                            ? _exitWizard
-                            : _previousPage,
-                        icon: FaIcon(
-                          _currentPage == 0
-                              ? FontAwesomeIcons.xmark
-                              : FontAwesomeIcons.chevronLeft,
-                          size: 16,
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        constraints: const BoxConstraints(),
-                        style: IconButton.styleFrom(
-                          backgroundColor: cs.surfaceContainerHighest
-                              .withValues(alpha: 0.5),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            onPressed: _currentPage == 0
+                                ? _exitWizard
+                                : _previousPage,
+                            icon: FaIcon(
+                              _currentPage == 0
+                                  ? FontAwesomeIcons.xmark
+                                  : FontAwesomeIcons.chevronLeft,
+                              size: 16,
+                            ),
+                            padding: const EdgeInsets.all(8),
+                            constraints: const BoxConstraints(),
+                            style: IconButton.styleFrom(
+                              backgroundColor: cs.surfaceContainerHighest
+                                  .withValues(alpha: 0.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
                           ),
-                        ),
+                          Text(
+                            _currentPage == 0
+                                ? "Select Sources"
+                                : "Select Format",
+                            style: tt.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          // Balance the row
+                          const SizedBox(width: 40),
+                        ],
                       ),
-                      Text(
-                        _currentPage == 0 ? "Select Sources" : "Select Format",
-                        style: tt.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.2,
-                        ),
+                      const SizedBox(height: 12),
+                      // Thinner Progress Bar
+                      Stack(
+                        children: [
+                          Container(
+                            height: 3,
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(1.5),
+                            ),
+                          ),
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeOutCubic,
+                            height: 3,
+                            width:
+                                MediaQuery.of(context).size.width *
+                                (_currentPage + 1) /
+                                2,
+                            decoration: BoxDecoration(
+                              color: cs.primary,
+                              borderRadius: BorderRadius.circular(1.5),
+                            ),
+                          ),
+                        ],
                       ),
-                      // Balance the row
-                      const SizedBox(width: 40),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  // Thinner Progress Bar
-                  Stack(
+                ),
+
+                Expanded(
+                  child: PageView(
+                    controller: _pageController,
+                    scrollDirection: Axis.vertical,
+                    physics: const NeverScrollableScrollPhysics(),
+                    onPageChanged: (page) {
+                      setState(() {
+                        _currentPage = page;
+                      });
+                    },
                     children: [
-                      Container(
-                        height: 3,
-                        decoration: BoxDecoration(
-                          color: cs.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(1.5),
-                        ),
-                      ),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 500),
-                        curve: Curves.easeOutCubic,
-                        height: 3,
-                        width:
-                            MediaQuery.of(context).size.width *
-                            (_currentPage + 1) /
-                            2,
-                        decoration: BoxDecoration(
-                          color: cs.primary,
-                          borderRadius: BorderRadius.circular(1.5),
-                        ),
-                      ),
+                      _buildSourceSelectionStep(),
+                      _buildGenerationOptionsStep(),
+                      const SizedBox.shrink(), // Empty page for expansion
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                scrollDirection: Axis.vertical,
-                physics: const NeverScrollableScrollPhysics(),
-                onPageChanged: (page) {
-                  setState(() {
-                    _currentPage = page;
-                  });
-                },
-                children: [
-                  _buildSourceSelectionStep(),
-                  _buildGenerationOptionsStep(),
-                ],
-              ),
-            ),
-
-            // --- Animated Bottom Action Bar ---
             _buildAnimatedBottomBar(),
           ],
         ),
@@ -390,29 +395,86 @@ class _GenerateMaterialsWizardPageState
             ),
           ),
         ),
-        CardButton(
-          icon: FontAwesomeIcons.clockRotateLeft,
-          label: "Spaced Repetition",
-          subLabel: "Optimize review cycles using FSRS algorithm",
-          isCompact: true,
-          layoutDirection: CardLayoutDirection.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          onTap: () {
-            setState(() {
-              _useFSRS = !_useFSRS;
-            });
-          },
-          trailing: Switch(
-            value: _useFSRS,
-            onChanged: (val) {
-              setState(() {
-                _useFSRS = val;
-              });
-            },
-            activeThumbColor: cs.primary,
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              _buildModeOption(
+                label: "Cram Mode",
+                icon: FontAwesomeIcons.bolt,
+                isSelected: _learningMode == 'Cram',
+                onTap: () => setState(() => _learningMode = 'Cram'),
+              ),
+              _buildModeOption(
+                label: "Spaced Mode",
+                icon: FontAwesomeIcons.clockRotateLeft,
+                isSelected: _learningMode == 'Spaced',
+                onTap: () => setState(() => _learningMode = 'Spaced'),
+              ),
+            ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildModeOption({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? cs.surface : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FaIcon(
+                icon,
+                size: 14,
+                color: isSelected
+                    ? cs.primary
+                    : cs.onSurface.withValues(alpha: 0.4),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.outfit(
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                  color: isSelected
+                      ? cs.onSurface
+                      : cs.onSurface.withValues(alpha: 0.4),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -565,87 +627,239 @@ class _GenerateMaterialsWizardPageState
     final muted = cs.onSurface.withValues(alpha: 0.5);
 
     final bool isVisible =
+        _isExpanded ||
         (_currentPage == 0 && _selectedSources.isNotEmpty) ||
         (_currentPage == 1 && _selectedGenerationTypes.isNotEmpty);
 
-    return AnimatedSlide(
-      offset: isVisible ? Offset.zero : const Offset(0, 1),
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.fastOutSlowIn,
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return AnimatedPositioned(
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOutCubic,
+      bottom: isVisible ? 0 : -200,
+      left: 0,
+      right: 0,
+      height: _isExpanded ? screenHeight * 0.95 : 100,
       child: AnimatedOpacity(
         opacity: isVisible ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 400),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        duration: const Duration(milliseconds: 300),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOutCubic,
           decoration: BoxDecoration(
             color: cs.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.elliptical(screenWidth * 1.5, _isExpanded ? 40 : 60),
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, -4),
+                blurRadius: 30,
+                offset: const Offset(0, -10),
               ),
             ],
           ),
-          child: Row(
+          child: Stack(
             children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _currentPage == 0
-                        ? "${_selectedSources.length} Selected"
-                        : "Format Details",
-                    style: tt.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.2,
+              // Animated background layer - fills edge-to-edge
+              Positioned.fill(
+                child: AnimatedOpacity(
+                  opacity: _isExpanded ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 800),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.elliptical(
+                        screenWidth * 1.5,
+                        _isExpanded ? 40 : 60,
+                      ),
                     ),
+                    child: _isExpanded
+                        ? _GrowingRotatingBackground(
+                            seed: GenerationSeed.fromString(
+                              "generation_wizard",
+                            ),
+                            label: "Generating",
+                            icon: FontAwesomeIcons.wandMagicSparkles,
+                          )
+                        : const SizedBox.shrink(),
                   ),
-                  Text(
-                    _currentPage == 0 ? "Source Selection" : "Ready to Create",
-                    style: tt.labelSmall?.copyWith(
-                      color: muted,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: _currentPage == 0 ? _nextPage : () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: cs.primary,
-                      foregroundColor: cs.onPrimary,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+              // Content layer with crossfade - has padding
+              Padding(
+                padding: EdgeInsets.only(
+                  left: _isExpanded ? 0 : 16,
+                  right: _isExpanded ? 0 : 16,
+                  top: _isExpanded ? 0 : 24,
+                  bottom: _isExpanded ? 0 : 12,
+                ),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.1),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
                       ),
-                      elevation: 0,
-                    ),
-                    child: Center(
-                      child: Text(
-                        _currentPage == 0 ? "Next" : "Generate",
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16,
-                          letterSpacing: 0.5,
+                    );
+                  },
+                  child: _isExpanded
+                      ? _buildExpansionContent()
+                      : SizedBox(
+                          key: const ValueKey('collapsed'),
+                          height: 56,
+                          child: Row(
+                            children: [
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _currentPage == 0
+                                        ? "${_selectedSources.length} Selected"
+                                        : "Format Details",
+                                    style: tt.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                  Text(
+                                    _currentPage == 0
+                                        ? "Source Selection"
+                                        : "Ready to Create",
+                                    style: tt.labelSmall?.copyWith(
+                                      color: muted,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    if (_currentPage == 0) {
+                                      _nextPage();
+                                    } else {
+                                      setState(() {
+                                        _isExpanded = true;
+                                      });
+                                      _nextPage(
+                                        duration: const Duration(
+                                          milliseconds: 1200,
+                                        ),
+                                      ); // Slow scroll to empty page
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: cs.primary,
+                                    foregroundColor: cs.onPrimary,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      _currentPage == 0 ? "Next" : "Generate",
+                                      style: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 16,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildExpansionContent() {
+    final tt = Theme.of(context).textTheme;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return SizedBox(
+      key: const ValueKey('expanded'),
+      height: screenHeight * 0.95 - 24, // match container minus padding
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0, top: 8.0),
+                child: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _isExpanded = false;
+                    });
+                    _previousPage(); // Go back to selection page
+                  },
+                  icon: const FaIcon(
+                    FontAwesomeIcons.xmark,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.white.withValues(alpha: 0.15),
+                    padding: const EdgeInsets.all(12),
+                    shape: const CircleBorder(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Center(
+            child: Column(
+              children: [
+                FaIcon(
+                  FontAwesomeIcons.wandMagicSparkles,
+                  size: 64,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  "Generating Magic...",
+                  style: tt.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "We're crafting your personalized learning materials.",
+                  textAlign: TextAlign.center,
+                  style: tt.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Spacer(flex: 2),
+        ],
       ),
     );
   }
@@ -869,5 +1083,94 @@ class _GenerateMaterialsWizardPageState
       default:
         return FontAwesomeIcons.file;
     }
+  }
+}
+
+class _GrowingRotatingBackground extends StatefulWidget {
+  final GenerationSeed seed;
+  final String label;
+  final IconData icon;
+
+  const _GrowingRotatingBackground({
+    required this.seed,
+    required this.label,
+    required this.icon,
+  });
+
+  @override
+  State<_GrowingRotatingBackground> createState() =>
+      _GrowingRotatingBackgroundState();
+}
+
+class _GrowingRotatingBackgroundState extends State<_GrowingRotatingBackground>
+    with TickerProviderStateMixin {
+  late final AnimationController _rotationController;
+  late final AnimationController _scaleController;
+
+  @override
+  void initState() {
+    super.initState();
+    _rotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 40),
+    )..repeat();
+
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 15),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Compute cover size: the diagonal * sqrt(2) ensures full coverage
+        // at all rotation angles.
+        final coverSize =
+            sqrt(
+              constraints.maxWidth * constraints.maxWidth +
+                  constraints.maxHeight * constraints.maxHeight,
+            ) *
+            1.42;
+
+        return AnimatedBuilder(
+          animation: Listenable.merge([_rotationController, _scaleController]),
+          builder: (context, child) {
+            final scale = 1.0 + (_scaleController.value * 0.5);
+            final rotation = _rotationController.value * 2 * pi;
+
+            // OverflowBox breaks out of parent constraints so the
+            // background can actually render as a large square.
+            return OverflowBox(
+              maxWidth: coverSize,
+              maxHeight: coverSize,
+              child: Transform.rotate(
+                angle: rotation,
+                child: Transform.scale(
+                  scale: scale,
+                  child: SpecialBackgroundGenerator(
+                    seed: widget.seed,
+                    label: widget.label,
+                    icon: widget.icon,
+                    type: SpecialBackgroundType.vibrantGradients,
+                    showBorder: false,
+                    borderRadius: 0,
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }
