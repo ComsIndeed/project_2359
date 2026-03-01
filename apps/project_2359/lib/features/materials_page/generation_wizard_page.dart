@@ -1,17 +1,36 @@
+import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_2359/app_database.dart';
+import 'package:project_2359/core/ai_helpers.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/features/home_page/home_page.dart';
+import 'package:project_2359/features/materials_page/create_flashcards_page.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_state.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:project_2359/core/widgets/special_background_generator.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+
+/// Parses PDF bytes in an isolate. Returns list of text strings per page.
+List<String> _extractPdfText(Uint8List bytes) {
+  final doc = PdfDocument(inputBytes: bytes);
+  final extractor = PdfTextExtractor(doc);
+  final pages = <String>[];
+  for (int i = 0; i < doc.pages.count; i++) {
+    pages.add(extractor.extractText(startPageIndex: i, endPageIndex: i));
+  }
+  doc.dispose();
+  return pages;
+}
 
 class GenerateMaterialsWizardPage extends StatefulWidget {
   const GenerateMaterialsWizardPage({super.key});
@@ -35,6 +54,19 @@ class _GenerateMaterialsWizardPageState
   String _learningMode = 'Spaced'; // 'Cram' or 'Spaced'
   bool _showAddSources = false;
   bool _isExpanded = false;
+
+  // Auth state
+  bool _authNoticeDismissed = false;
+
+  // Generation state
+  final StringBuffer _generatedText = StringBuffer();
+  bool _isGenerating = false;
+  bool _isExtracting = false;
+  String? _generationError;
+  GenerateMaterialMetadata? _metadata;
+  StreamSubscription<GenerateMaterialEvent>? _generationSub;
+
+  bool get _isLoggedIn => Supabase.instance.client.auth.currentUser != null;
 
   final Map<String, String> _generationOptions = {
     'flashcards': 'Standard',
@@ -80,11 +112,118 @@ class _GenerateMaterialsWizardPageState
     );
   }
 
+  @override
+  void dispose() {
+    _generationSub?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
   void _exitWizard() {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const HomePage()),
       (route) => false,
     );
+  }
+
+  Future<void> _startGeneration() async {
+    final sourceService = context.read<SourcesPageBloc>().sourceService;
+
+    setState(() {
+      _isExtracting = true;
+      _isGenerating = true;
+      _generatedText.clear();
+      _generationError = null;
+      _metadata = null;
+    });
+
+    try {
+      // 1. Extract text from selected sources on-the-fly
+      final extractedTexts = <Map<String, String>>[];
+
+      for (final sourceId in _selectedSources) {
+        final blob = await sourceService.getSourceBlobBySourceId(sourceId);
+        final source = await sourceService.getSourceById(sourceId);
+        if (blob == null || source == null) continue;
+
+        // Parse PDF in isolate to avoid jank
+        final pages = await compute(
+          _extractPdfText,
+          Uint8List.fromList(blob.bytes),
+        );
+        final fullText = pages.join('\n');
+
+        if (fullText.trim().isNotEmpty) {
+          extractedTexts.add({'sourceName': source.label, 'content': fullText});
+        }
+      }
+
+      if (extractedTexts.isEmpty) {
+        setState(() {
+          _isExtracting = false;
+          _isGenerating = false;
+          _generationError =
+              'No text could be extracted from the selected sources.';
+        });
+        return;
+      }
+
+      setState(() => _isExtracting = false);
+
+      // 2. Build preferences from wizard state
+      final preferences = <String, String>{
+        'generationTypes': _selectedGenerationTypes.join(','),
+        'learningMode': _learningMode,
+      };
+
+      for (final type in _selectedGenerationTypes) {
+        preferences['${type}_complexity'] =
+            _generationOptions[type] ?? 'Standard';
+        preferences['${type}_focus'] = _focusOptions[type] ?? 'General';
+      }
+
+      // 3. Stream from the API
+      final stream = AiHelpers.generateMaterial(
+        extractedTexts: extractedTexts,
+        preferences: preferences,
+      );
+
+      _generationSub = stream.listen(
+        (event) {
+          if (!mounted) return;
+          switch (event) {
+            case GenerateMaterialChunk(:final text):
+              setState(() {
+                _generatedText.write(text);
+              });
+            case GenerateMaterialMeta(:final metadata):
+              setState(() {
+                _metadata = metadata;
+              });
+          }
+        },
+        onError: (error) {
+          if (!mounted) return;
+          setState(() {
+            _isGenerating = false;
+            _generationError = error.toString();
+          });
+        },
+        onDone: () {
+          if (!mounted) return;
+          setState(() {
+            _isGenerating = false;
+          });
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isExtracting = false;
+        _isGenerating = false;
+        _generationError = e.toString();
+      });
+    }
   }
 
   @override
@@ -200,6 +339,12 @@ class _GenerateMaterialsWizardPageState
                     ],
                   ),
                 ),
+                // --- Auth Notice ---
+                if (!_isLoggedIn && !_authNoticeDismissed)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: _buildAuthNotice(cs),
+                  ),
 
                 Expanded(
                   child: PageView(
@@ -898,7 +1043,9 @@ class _GenerateMaterialsWizardPageState
                                         duration: const Duration(
                                           milliseconds: 1200,
                                         ),
-                                      ); // Slow scroll to empty page
+                                      );
+                                      // Start generation after expansion animation
+                                      _startGeneration();
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -946,7 +1093,7 @@ class _GenerateMaterialsWizardPageState
 
     return SizedBox(
       key: const ValueKey('expanded'),
-      height: screenHeight * 0.95 - 24, // match container minus padding
+      height: screenHeight * 0.95 - 24,
       child: Column(
         children: [
           Row(
@@ -956,10 +1103,12 @@ class _GenerateMaterialsWizardPageState
                 padding: const EdgeInsets.only(right: 8.0, top: 8.0),
                 child: IconButton(
                   onPressed: () {
+                    _generationSub?.cancel();
                     setState(() {
                       _isExpanded = false;
+                      _isGenerating = false;
                     });
-                    _previousPage(); // Go back to selection page
+                    _previousPage();
                   },
                   icon: const FaIcon(
                     FontAwesomeIcons.xmark,
@@ -975,37 +1124,223 @@ class _GenerateMaterialsWizardPageState
               ),
             ],
           ),
-          const Spacer(),
-          Center(
+          const SizedBox(height: 16),
+          // Status header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               children: [
                 FaIcon(
-                  FontAwesomeIcons.wandMagicSparkles,
-                  size: 64,
+                  _generationError != null
+                      ? FontAwesomeIcons.triangleExclamation
+                      : _isExtracting
+                      ? FontAwesomeIcons.fileLines
+                      : _isGenerating
+                      ? FontAwesomeIcons.wandMagicSparkles
+                      : FontAwesomeIcons.circleCheck,
+                  size: 48,
                   color: Colors.white,
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 Text(
-                  "Generating Magic...",
-                  style: tt.headlineSmall?.copyWith(
+                  _generationError != null
+                      ? "Something went wrong"
+                      : _isExtracting
+                      ? "Reading your sources..."
+                      : _isGenerating
+                      ? "Generating magic..."
+                      : "Generation complete!",
+                  style: tt.titleLarge?.copyWith(
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.5,
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  "We're crafting your personalized learning materials.",
-                  textAlign: TextAlign.center,
-                  style: tt.bodyMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.8),
+                if (_isGenerating || _isExtracting) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: 120,
+                    child: LinearProgressIndicator(
+                      backgroundColor: Colors.white.withValues(alpha: 0.2),
+                      valueColor: const AlwaysStoppedAnimation(Colors.white),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+                if (_metadata != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    '${_metadata!.totalTokens} tokens used',
+                    style: tt.labelSmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Streamed text area
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              ),
+              child: _generationError != null
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _generationError!,
+                            textAlign: TextAlign.center,
+                            style: tt.bodyMedium?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.8),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton.icon(
+                            onPressed: _startGeneration,
+                            icon: const FaIcon(
+                              FontAwesomeIcons.arrowRotateRight,
+                              size: 14,
+                            ),
+                            label: const Text('Retry'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.2,
+                              ),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : _generatedText.isEmpty && !_isGenerating && !_isExtracting
+                  ? Center(
+                      child: Text(
+                        'Waiting for content...',
+                        style: tt.bodyMedium?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: SelectableText(
+                        _generatedText.toString(),
+                        style: GoogleFonts.outfit(
+                          fontSize: 14,
+                          height: 1.6,
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAuthNotice(ColorScheme cs) {
+    final tt = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: cs.errorContainer.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: cs.error.withValues(alpha: 0.2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                FaIcon(
+                  FontAwesomeIcons.circleExclamation,
+                  size: 16,
+                  color: cs.error,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    "Sign in to generate content with AI",
+                    style: tt.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: cs.error,
+                    ),
+                  ),
+                ),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() => _authNoticeDismissed = true);
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: FaIcon(
+                        FontAwesomeIcons.xmark,
+                        size: 14,
+                        color: cs.onSurface.withValues(alpha: 0.4),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-          const Spacer(flex: 2),
-        ],
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(left: 26),
+              child: Text(
+                "You can still create your own study materials.",
+                style: tt.bodySmall?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.only(left: 26),
+              child: TextButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const CreateFlashcardsPage(),
+                    ),
+                  );
+                },
+                icon: const FaIcon(FontAwesomeIcons.penToSquare, size: 14),
+                label: const Text("Create your own"),
+                style: TextButton.styleFrom(
+                  foregroundColor: cs.primary,
+                  backgroundColor: cs.primary.withValues(alpha: 0.1),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

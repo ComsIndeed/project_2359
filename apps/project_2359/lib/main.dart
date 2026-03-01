@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:project_2359/app_database.dart';
+import 'package:project_2359/core/study_material_service.dart';
 import 'package:project_2359/features/home_page/home_page.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
@@ -28,16 +29,24 @@ Future<void> main() async {
 
   final database = AppDatabase();
   final sourceService = SourceService(database);
+  final studyMaterialService = StudyMaterialService(database);
 
   runApp(
-    MultiBlocProvider(
+    MultiRepositoryProvider(
       providers: [
-        BlocProvider(
-          create: (context) =>
-              SourcesPageBloc(sourceService)..add(const LoadSourcesEvent()),
+        RepositoryProvider<StudyMaterialService>.value(
+          value: studyMaterialService,
         ),
       ],
-      child: MainApp(sourceService: sourceService),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) =>
+                SourcesPageBloc(sourceService)..add(const LoadSourcesEvent()),
+          ),
+        ],
+        child: MainApp(sourceService: sourceService),
+      ),
     ),
   );
 }

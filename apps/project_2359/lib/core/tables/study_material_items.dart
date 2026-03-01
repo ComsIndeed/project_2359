@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 /// The type of study material.
 enum StudyMaterialType {
+  flashcard,
   multipleChoiceQuestion,
   freeTextQuestion,
   imageOcclusion,
@@ -16,6 +17,7 @@ class StudyMaterialItems extends Table {
   TextColumn get citationJson => text().nullable()();
 
   /// Fields are nullable because not all types use the same properties.
+  /// - Flashcard: question (front), answer (back)
   /// - MCQ: question, optionsListJson, answer
   /// - Free-Text: question, answer
   /// - Image Occlusion: (not yet implemented)
