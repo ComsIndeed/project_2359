@@ -101,7 +101,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Web
-        run: flutter build web --release --base-href "/"
+        run: flutter build web --release --base-href "/project_2359/"
 
       - name: Upload Web Artifact
         uses: actions/upload-artifact@v4
