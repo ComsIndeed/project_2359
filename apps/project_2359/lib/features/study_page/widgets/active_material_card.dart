@@ -169,7 +169,7 @@ class ActiveMaterialCard extends StatelessWidget {
           icon: icon,
           type: SpecialBackgroundType.vibrantGradients,
           showBorder: false,
-          applyContentShadow: true,
+          applyContentShadow: false,
           child: content,
         ),
       );
