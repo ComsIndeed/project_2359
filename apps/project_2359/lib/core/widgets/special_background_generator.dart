@@ -183,7 +183,7 @@ class SpecialBackgroundUtils {
 ///   child: Text('Hello'),
 /// )
 /// ```
-class SpecialBackgroundGenerator extends StatelessWidget {
+class SpecialBackgroundGenerator extends StatefulWidget {
   /// The generation seed that drives the deterministic background.
   final GenerationSeed seed;
 
@@ -241,23 +241,110 @@ class SpecialBackgroundGenerator extends StatelessWidget {
   });
 
   @override
+  State<SpecialBackgroundGenerator> createState() =>
+      _SpecialBackgroundGeneratorState();
+}
+
+class _SpecialBackgroundGeneratorState
+    extends State<SpecialBackgroundGenerator> {
+  /// Global cache of pre-rendered art images, keyed by a composite hash.
+  /// Shared across all instances so duplicate seeds/sizes reuse the same image.
+  static final Map<int, ui.Image> _imageCache = {};
+
+  ui.Image? _cachedImage;
+  int? _cacheKey;
+
+  /// Builds a composite cache key from all inputs that affect the painted output.
+  int _buildCacheKey(
+    int hash,
+    double width,
+    double height,
+    SpecialBackgroundType type,
+    Brightness brightness,
+  ) {
+    return Object.hash(hash, width.round(), height.round(), type, brightness);
+  }
+
+  /// Paints the [AbstractArtPainter] to an offscreen [ui.Image] and caches it.
+  void _renderToImage(
+    int painterHash,
+    Color baseColor,
+    Size size,
+    SpecialBackgroundType type,
+    Brightness brightness,
+  ) {
+    final key = _buildCacheKey(
+      painterHash,
+      size.width,
+      size.height,
+      type,
+      brightness,
+    );
+
+    // Already cached (either by us or another instance with the same key).
+    if (key == _cacheKey && _cachedImage != null) return;
+
+    final existing = _imageCache[key];
+    if (existing != null) {
+      setState(() {
+        _cacheKey = key;
+        _cachedImage = existing;
+      });
+      return;
+    }
+
+    // Paint to an offscreen picture.
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final painter = AbstractArtPainter(
+      painterHash,
+      baseColor,
+      type,
+      brightness,
+    );
+    painter.paint(canvas, size);
+    final picture = recorder.endRecording();
+    final image = picture.toImageSync(size.width.round(), size.height.round());
+    picture.dispose();
+
+    _imageCache[key] = image;
+
+    setState(() {
+      _cacheKey = key;
+      _cachedImage = image;
+    });
+  }
+
+  @override
+  void dispose() {
+    // We do NOT dispose images from the static cache here — they may be shared.
+    // Flutter's image cache will handle memory pressure.
+    _cachedImage = null;
+    _cacheKey = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     final isDark = brightness == Brightness.dark;
 
     var colors = SpecialBackgroundUtils.gradientColors(
-      seed: seed,
-      label: label,
-      icon: icon,
-      subLabel: subLabel,
-      style: style,
-      isDisabled: isDisabled,
+      seed: widget.seed,
+      label: widget.label,
+      icon: widget.icon,
+      subLabel: widget.subLabel,
+      style: widget.style,
+      isDisabled: widget.isDisabled,
       brightness: brightness,
-      adaptiveColor: isAdaptive ? Theme.of(context).colorScheme.primary : null,
+      adaptiveColor: widget.isAdaptive
+          ? Theme.of(context).colorScheme.primary
+          : null,
     );
 
     // Decisive vibrancy boost - ensuring dark enough for white text protection
-    if (type == SpecialBackgroundType.vibrantGradients && !isDisabled) {
+    if (widget.type == SpecialBackgroundType.vibrantGradients &&
+        !widget.isDisabled) {
       final hslPrimary = HSLColor.fromColor(colors.primary);
       final hslSecondary = HSLColor.fromColor(colors.secondary);
 
@@ -274,10 +361,10 @@ class SpecialBackgroundGenerator extends StatelessWidget {
     }
 
     final hash = SpecialBackgroundUtils.painterHash(
-      seed: seed,
-      label: label,
-      icon: icon,
-      subLabel: subLabel,
+      seed: widget.seed,
+      label: widget.label,
+      icon: widget.icon,
+      subLabel: widget.subLabel,
     );
 
     final decoration = BoxDecoration(
@@ -286,17 +373,17 @@ class SpecialBackgroundGenerator extends StatelessWidget {
         end: Alignment.bottomRight,
         colors: [colors.primary, colors.secondary],
       ),
-      borderRadius: BorderRadius.circular(borderRadius),
-      border: showBorder
+      borderRadius: BorderRadius.circular(widget.borderRadius),
+      border: widget.showBorder
           ? Border.all(
               color: (isDark ? Colors.white : Colors.black).withValues(
-                alpha: isDisabled ? 0.05 : 0.08,
+                alpha: widget.isDisabled ? 0.05 : 0.08,
               ),
               width: 1,
             )
           : null,
       boxShadow: [
-        if (!isDisabled)
+        if (!widget.isDisabled)
           BoxShadow(
             color: colors.primary.withValues(alpha: isDark ? 0.2 : 0.05),
             blurRadius: 12,
@@ -308,24 +395,61 @@ class SpecialBackgroundGenerator extends StatelessWidget {
     return Container(
       decoration: decoration,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: BorderRadius.circular(widget.borderRadius),
         child: Stack(
           children: [
-            // Abstract art pattern layer
+            // Abstract art pattern layer – rendered from cached image
             Positioned.fill(
               child: RepaintBoundary(
-                child: CustomPaint(
-                  painter: AbstractArtPainter(
-                    hash,
-                    colors.primary,
-                    type,
-                    brightness,
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final size = Size(
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                    );
+
+                    // Only render when we have a real size.
+                    if (size.width > 0 && size.height > 0) {
+                      // Synchronously build/fetch the cached image.
+                      final key = _buildCacheKey(
+                        hash,
+                        size.width,
+                        size.height,
+                        widget.type,
+                        brightness,
+                      );
+                      if (key != _cacheKey || _cachedImage == null) {
+                        // Schedule the render after this build frame.
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            _renderToImage(
+                              hash,
+                              colors.primary,
+                              size,
+                              widget.type,
+                              brightness,
+                            );
+                          }
+                        });
+                      }
+                    }
+
+                    if (_cachedImage != null) {
+                      return CustomPaint(
+                        painter: _CachedImagePainter(_cachedImage!),
+                        isComplex: false,
+                        willChange: false,
+                      );
+                    }
+
+                    // First frame: nothing to show yet (gradient behind is visible).
+                    return const SizedBox.expand();
+                  },
                 ),
               ),
             ),
             // Legibility overlay (PROTECTIVE GRADIENT)
-            if (type == SpecialBackgroundType.vibrantGradients)
+            if (widget.type == SpecialBackgroundType.vibrantGradients)
               Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -351,7 +475,10 @@ class SpecialBackgroundGenerator extends StatelessWidget {
                 ),
               ),
             // Content layer with optional shadow clone
-            if (applyContentShadow) ..._buildShadowedContent(isDark) else child,
+            if (widget.applyContentShadow)
+              ..._buildShadowedContent(isDark)
+            else
+              widget.child,
           ],
         ),
       ),
@@ -376,7 +503,7 @@ class SpecialBackgroundGenerator extends StatelessWidget {
                       Colors.black,
                       BlendMode.srcIn,
                     ),
-                    child: child,
+                    child: widget.child,
                   ),
                 ),
               ),
@@ -385,9 +512,31 @@ class SpecialBackgroundGenerator extends StatelessWidget {
         ),
       ),
       // Real content on top
-      child,
+      widget.child,
     ];
   }
+}
+
+/// A trivial painter that just blits a pre-rendered [ui.Image].
+class _CachedImagePainter extends CustomPainter {
+  final ui.Image image;
+
+  _CachedImagePainter(this.image);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    paintImage(
+      canvas: canvas,
+      rect: Offset.zero & size,
+      image: image,
+      fit: BoxFit.fill,
+      filterQuality: FilterQuality.low,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _CachedImagePainter oldDelegate) =>
+      oldDelegate.image != image;
 }
 
 // ---------------------------------------------------------------------------
