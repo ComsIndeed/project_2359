@@ -10,17 +10,23 @@ class StudyPageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 16),
-          _buildActiveMaterialsSection(context),
-          const SizedBox(height: 32),
-          _buildSourceLibrarySection(context),
-          const SizedBox(height: 100),
-        ],
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      color: isDark ? theme.colorScheme.surface : Colors.white,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            _buildActiveMaterialsSection(context),
+            const SizedBox(height: 32),
+            _buildSourceLibrarySection(context),
+            const SizedBox(height: 100),
+          ],
+        ),
       ),
     );
   }

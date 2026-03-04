@@ -60,6 +60,7 @@ class _HomePageState extends State<HomePage> {
             // Main Content Layer with PageView for swipe and slide animations
             PageView(
               controller: _pageController,
+              scrollDirection: Axis.vertical,
               onPageChanged: _onPageChanged,
               children: const [HomePageContent(), StudyPageContent()],
             ),
