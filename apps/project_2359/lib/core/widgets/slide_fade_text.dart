@@ -31,10 +31,7 @@ class SlideFadeText extends StatelessWidget {
             alignment: textAlign == TextAlign.center
                 ? Alignment.center
                 : Alignment.centerLeft,
-            children: [
-              ...previousChildren,
-              if (currentChild != null) currentChild,
-            ],
+            children: [...previousChildren, ?currentChild],
           );
         },
         transitionBuilder: (child, animation) {

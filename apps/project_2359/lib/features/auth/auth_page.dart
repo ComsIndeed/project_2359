@@ -110,7 +110,7 @@ class _AuthPageState extends State<AuthPage> {
               _isError = false;
             });
             Future.delayed(const Duration(milliseconds: 1500), () {
-              if (mounted) Navigator.of(context).pop();
+              if (context.mounted) Navigator.of(context).pop();
             });
           } else if (state is AuthFailure) {
             setState(() {
@@ -124,46 +124,54 @@ class _AuthPageState extends State<AuthPage> {
             });
 
             if (state.isUserAlreadyExists) {
-              ScaffoldMessenger.of(context).clearMaterialBanners();
-              ScaffoldMessenger.of(context).showMaterialBanner(
-                MaterialBanner(
-                  content: const Text(
-                    'An account with this email already exists.',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).hideCurrentMaterialBanner();
-                        setState(() => _isLogin = true);
-                      },
-                      child: const Text('SIGN IN'),
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).clearMaterialBanners();
+                ScaffoldMessenger.of(context).showMaterialBanner(
+                  MaterialBanner(
+                    content: const Text(
+                      'An account with this email already exists.',
                     ),
-                    TextButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).hideCurrentMaterialBanner();
-                      },
-                      child: const Text('DISMISS'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(
+                              context,
+                            ).hideCurrentMaterialBanner();
+                          }
+                          setState(() => _isLogin = true);
+                        },
+                        child: const Text('SIGN IN'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(
+                              context,
+                            ).hideCurrentMaterialBanner();
+                          }
+                        },
+                        child: const Text('DISMISS'),
+                      ),
+                    ],
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
+                    contentTextStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
-                  ],
-                  backgroundColor: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer,
-                  contentTextStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
-                ),
-              );
+                );
+              }
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                ),
-              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                );
+              }
             }
           }
         },
@@ -301,30 +309,32 @@ class _AuthPageState extends State<AuthPage> {
                                                 .resetPassword(
                                                   _emailController.text,
                                                 )
-                                                .then(
-                                                  (_) =>
-                                                      ScaffoldMessenger.of(
-                                                        context,
-                                                      ).showSnackBar(
-                                                        const SnackBar(
-                                                          content: Text(
-                                                            'Password reset email sent',
-                                                          ),
+                                                .then((_) {
+                                                  if (context.mounted) {
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                          'Password reset email sent',
                                                         ),
                                                       ),
-                                                )
-                                                .catchError(
-                                                  (e) =>
-                                                      ScaffoldMessenger.of(
-                                                        context,
-                                                      ).showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(
-                                                            'Error: ${e.toString()}',
-                                                          ),
+                                                    );
+                                                  }
+                                                })
+                                                .catchError((e) {
+                                                  if (context.mounted) {
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'Error: ${e.toString()}',
                                                         ),
                                                       ),
-                                                );
+                                                    );
+                                                  }
+                                                });
                                           },
                                     child: Text(
                                       'Forgot Password?',

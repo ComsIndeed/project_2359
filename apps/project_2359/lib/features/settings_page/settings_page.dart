@@ -527,14 +527,12 @@ class _SettingsTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final String? subtitle;
-  final Widget? trailing;
   final VoidCallback? onTap;
 
   const _SettingsTile({
     required this.icon,
     required this.title,
     this.subtitle,
-    this.trailing,
     this.onTap,
   });
 
@@ -563,7 +561,6 @@ class _SettingsTile extends StatelessWidget {
                 ],
               ),
             ),
-            if (trailing != null) ...[trailing!, const SizedBox(width: 8)],
             FaIcon(
               FontAwesomeIcons.chevronRight,
               size: 14,

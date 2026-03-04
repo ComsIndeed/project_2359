@@ -309,10 +309,11 @@ class _GenerateMaterialsWizardPageState
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Column(
+      body: Stack(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: Column(
               children: [
                 // --- Modern Compact Header ---
                 Padding(
@@ -442,9 +443,33 @@ class _GenerateMaterialsWizardPageState
                 ),
               ],
             ),
-            _buildAnimatedBottomBar(),
-          ],
-        ),
+          ),
+          // Blur fade effect for streamed cards list
+          if (_currentPage == 2)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Theme.of(
+                          context,
+                        ).scaffoldBackgroundColor.withValues(alpha: 0.0),
+                        Theme.of(context).scaffoldBackgroundColor,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          _buildAnimatedBottomBar(),
+        ],
       ),
     );
   }
@@ -472,7 +497,7 @@ class _GenerateMaterialsWizardPageState
               .toList();
 
           return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -542,7 +567,7 @@ class _GenerateMaterialsWizardPageState
         .toList();
 
     return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1004,7 +1029,7 @@ class _GenerateMaterialsWizardPageState
       bottom: isVisible ? 0 : -200,
       left: 0,
       right: 0,
-      height: _isExpanded ? screenHeight * 0.95 : 100,
+      height: _isExpanded ? screenHeight : 100,
       child: AnimatedOpacity(
         opacity: isVisible ? 1.0 : 0.0,
         duration: const Duration(milliseconds: 300),
@@ -1014,7 +1039,7 @@ class _GenerateMaterialsWizardPageState
           decoration: BoxDecoration(
             color: cs.surface,
             borderRadius: BorderRadius.vertical(
-              top: Radius.elliptical(screenWidth * 1.5, _isExpanded ? 40 : 60),
+              top: Radius.elliptical(screenWidth * 1.5, _isExpanded ? 0 : 60),
             ),
             boxShadow: [
               BoxShadow(
@@ -1035,7 +1060,7 @@ class _GenerateMaterialsWizardPageState
                     borderRadius: BorderRadius.vertical(
                       top: Radius.elliptical(
                         screenWidth * 1.5,
-                        _isExpanded ? 40 : 60,
+                        _isExpanded ? 0 : 60,
                       ),
                     ),
                     child: Container(
@@ -1043,11 +1068,22 @@ class _GenerateMaterialsWizardPageState
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
-                            cs.primary,
-                            Color.lerp(cs.primary, cs.tertiary, 0.6)!,
-                            cs.tertiary,
-                          ],
+                          colors:
+                              Theme.of(context).brightness == Brightness.dark
+                              ? [
+                                  Color.lerp(cs.primary, Colors.black, 0.4)!,
+                                  Color.lerp(
+                                    cs.primary,
+                                    cs.tertiary,
+                                    0.3,
+                                  )!.withValues(alpha: 0.8),
+                                  Color.lerp(cs.tertiary, Colors.black, 0.5)!,
+                                ]
+                              : [
+                                  cs.primary,
+                                  Color.lerp(cs.primary, cs.tertiary, 0.6)!,
+                                  cs.tertiary,
+                                ],
                         ),
                       ),
                     ),
@@ -1172,96 +1208,122 @@ class _GenerateMaterialsWizardPageState
     final tt = Theme.of(context).textTheme;
     final screenHeight = MediaQuery.of(context).size.height;
 
+    final statusIcon = _isExtracting
+        ? FontAwesomeIcons.fileLines
+        : (_isGenerating
+              ? FontAwesomeIcons.wandMagicSparkles
+              : FontAwesomeIcons.circleCheck);
+
+    final statusText = _isExtracting
+        ? "Reading sources..."
+        : (_isGenerating
+              ? "Generating ${_streamedCards.length} cards..."
+              : "${_streamedCards.length} cards generated!");
+
     return SizedBox(
       key: const ValueKey('expanded'),
-      height: screenHeight * 0.95 - 24,
+      height: screenHeight,
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 8.0, top: 8.0),
-                child: IconButton(
-                  onPressed: () {
-                    _generationSub?.cancel();
-                    _parser?.dispose();
-                    _llmStreamController?.close();
-                    setState(() {
-                      _isExpanded = false;
-                      _isGenerating = false;
-                    });
-                    _previousPage();
-                  },
-                  icon: const FaIcon(
-                    FontAwesomeIcons.xmark,
-                    size: 20,
-                    color: Colors.white,
-                  ),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.white.withValues(alpha: 0.15),
-                    padding: const EdgeInsets.all(12),
-                    shape: const CircleBorder(),
+          SafeArea(
+            bottom: false,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0, top: 8.0),
+                  child: IconButton(
+                    onPressed: () {
+                      _generationSub?.cancel();
+                      _parser?.dispose();
+                      _llmStreamController?.close();
+                      setState(() {
+                        _isExpanded = false;
+                        _isGenerating = false;
+                      });
+                      _previousPage();
+                    },
+                    icon: const FaIcon(
+                      FontAwesomeIcons.xmark,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.white.withValues(alpha: 0.15),
+                      padding: const EdgeInsets.all(12),
+                      shape: const CircleBorder(),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           // Status header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                FaIcon(
-                  _generationError != null
-                      ? FontAwesomeIcons.triangleExclamation
-                      : _isExtracting
-                      ? FontAwesomeIcons.fileLines
-                      : _isGenerating
-                      ? FontAwesomeIcons.wandMagicSparkles
-                      : FontAwesomeIcons.circleCheck,
-                  size: 48,
-                  color: Colors.white,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  _generationError != null
-                      ? "Something went wrong"
-                      : _isExtracting
-                      ? "Reading your sources..."
-                      : _isGenerating
-                      ? "Generating ${_streamedCards.length} cards..."
-                      : "${_streamedCards.length} cards generated!",
-                  style: tt.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.5,
-                    color: Colors.white,
+            child: _generationError != null
+                ? Column(
+                    children: [
+                      const FaIcon(
+                        FontAwesomeIcons.triangleExclamation,
+                        size: 48,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Something went wrong",
+                        style: tt.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FaIcon(statusIcon, size: 24, color: Colors.white),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          statusText,
+                          style: tt.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                            color: Colors.white,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                if (_isGenerating || _isExtracting) ...[
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: 120,
-                    child: LinearProgressIndicator(
-                      backgroundColor: Colors.white.withValues(alpha: 0.2),
-                      valueColor: const AlwaysStoppedAnimation(Colors.white),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ],
-                if (_metadata != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    '${_metadata!.totalTokens} tokens used',
-                    style: tt.labelSmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ],
-            ),
           ),
+          if (_isGenerating || _isExtracting) ...[
+            const SizedBox(height: 12),
+            Center(
+              child: SizedBox(
+                width: 120,
+                child: LinearProgressIndicator(
+                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                  valueColor: const AlwaysStoppedAnimation(Colors.white),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+          ],
+          if (_metadata != null) ...[
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                '${_metadata!.totalTokens} tokens used',
+                style: tt.labelSmall?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           // Streamed cards area
           Expanded(
@@ -1310,17 +1372,43 @@ class _GenerateMaterialsWizardPageState
                       ),
                     ),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: _streamedCards.length,
-                    itemBuilder: (context, index) {
-                      return _StreamedCardWidget(
-                        key: ValueKey('card_$index'),
-                        card: _streamedCards[index],
-                        index: index,
-                      );
-                    },
+                : Stack(
+                    children: [
+                      ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 32, 16, 120),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: _streamedCards.length,
+                        itemBuilder: (context, index) {
+                          return _StreamedCardWidget(
+                            key: ValueKey('card_$index'),
+                            card: _streamedCards[index],
+                            index: index,
+                          );
+                        },
+                      ),
+                      // Blur fadeout effect at top
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: 60,
+                        child: IgnorePointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  // Use a subtle white fade as the content is on a colored background
+                                  Colors.white.withValues(alpha: 0.1),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
           ),
           const SizedBox(height: 16),
