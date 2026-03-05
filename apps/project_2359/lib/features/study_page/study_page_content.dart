@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_2359/core/widgets/page_aware_scroll_view.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
 import 'package:project_2359/core/widgets/activity_list_item.dart';
@@ -6,7 +7,9 @@ import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/features/study_page/widgets/active_material_card.dart';
 
 class StudyPageContent extends StatelessWidget {
-  const StudyPageContent({super.key});
+  final PageController pageController;
+
+  const StudyPageContent({super.key, required this.pageController});
 
   @override
   Widget build(BuildContext context) {
@@ -15,18 +18,21 @@ class StudyPageContent extends StatelessWidget {
 
     return Container(
       color: isDark ? theme.colorScheme.surface : Colors.white,
-      child: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            _buildActiveMaterialsSection(context),
-            const SizedBox(height: 32),
-            _buildSourceLibrarySection(context),
-            const SizedBox(height: 100),
-          ],
+      child: PageAwareScrollView(
+        pageController: pageController,
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              _buildActiveMaterialsSection(context),
+              const SizedBox(height: 32),
+              _buildSourceLibrarySection(context),
+              const SizedBox(height: 100),
+            ],
+          ),
         ),
       ),
     );

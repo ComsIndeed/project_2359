@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:project_2359/core/widgets/page_aware_scroll_view.dart';
+
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/core/widgets/activity_list_item.dart';
@@ -13,7 +15,9 @@ import 'package:project_2359/features/auth/auth_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
 
 class HomePageContent extends StatefulWidget {
-  const HomePageContent({super.key});
+  final PageController pageController;
+
+  const HomePageContent({super.key, required this.pageController});
 
   @override
   State<HomePageContent> createState() => _HomePageContentState();
@@ -82,22 +86,25 @@ class _HomePageContentState extends State<HomePageContent> {
             ),
 
             // MAIN CONTENT
-            ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              physics: const ClampingScrollPhysics(),
-              children: [
-                SizedBox(height: topBgHeight * 0.7),
-                const _HomeHeader(),
-                const SizedBox(height: 24),
-                const _StatusPill(),
-                const SizedBox(height: 16),
-                const _RecentActivitySection(),
-                const SizedBox(height: 24),
-                const _QuickActionsSection(),
-                const SizedBox(height: 48),
-                const _ScrollIndicator(),
-                const SizedBox(height: 100), // Bottom padding for Nav
-              ],
+            PageAwareScrollView(
+              pageController: widget.pageController,
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                physics: const ClampingScrollPhysics(),
+                children: [
+                  SizedBox(height: topBgHeight * 0.7),
+                  const _HomeHeader(),
+                  const SizedBox(height: 24),
+                  const _StatusPill(),
+                  const SizedBox(height: 16),
+                  const _RecentActivitySection(),
+                  const SizedBox(height: 24),
+                  const _QuickActionsSection(),
+                  const SizedBox(height: 48),
+                  const _ScrollIndicator(),
+                  const SizedBox(height: 100), // Bottom padding for Nav
+                ],
+              ),
             ),
           ],
         );
