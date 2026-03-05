@@ -84,7 +84,7 @@ class _HomePageContentState extends State<HomePageContent> {
             // MAIN CONTENT
             ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              physics: const BouncingScrollPhysics(),
+              physics: const ClampingScrollPhysics(),
               children: [
                 SizedBox(height: topBgHeight * 0.7),
                 const _HomeHeader(),

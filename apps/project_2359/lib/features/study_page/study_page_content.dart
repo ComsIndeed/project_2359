@@ -16,6 +16,7 @@ class StudyPageContent extends StatelessWidget {
     return Container(
       color: isDark ? theme.colorScheme.surface : Colors.white,
       child: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

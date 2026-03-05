@@ -224,62 +224,6 @@ jobs:
             echo "success=false" >> $env:GITHUB_OUTPUT
           }
 
-  # ============================================================================
-  # Build Project 2359 - Linux
-  # ============================================================================
-  build-project-2359-linux:
-    needs: check-trigger
-    if: needs.check-trigger.outputs.should_build == 'true' && needs.check-trigger.outputs.project_2359_changed == 'true'
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    defaults:
-      run:
-        working-directory: apps/project_2359
-    outputs:
-      success: ${{ steps.set_success.outputs.success }}
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build libgtk-3-dev libsqlite3-dev
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          cache: true
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Build Linux
-        run: flutter build linux --release
-
-      - name: Create Linux Archive
-        run: |
-          cd build/linux/x64/release/bundle
-          tar -czvf ../../../../../project_2359-linux.tar.gz *
-
-      - name: Upload Linux Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: project-2359-linux
-          path: apps/project_2359/project_2359-linux.tar.gz
-          retention-days: 1
-
-      - name: Set success status
-        id: set_success
-        if: always()
-        run: |
-          if [ "${{ job.status }}" == "success" ]; then
-            echo "success=true" >> $GITHUB_OUTPUT
-          else
-            echo "success=false" >> $GITHUB_OUTPUT
-          fi
 
   # ============================================================================
   # Build Playground - Web Only
@@ -441,14 +385,13 @@ jobs:
   # Create Release for Project 2359
   # ============================================================================
   create-release-project-2359:
-    needs: [check-trigger, build-project-2359-android, build-project-2359-windows, build-project-2359-linux, deploy-web]
+    needs: [check-trigger, build-project-2359-android, build-project-2359-windows, deploy-web]
     if: |
       always() && 
       needs.check-trigger.outputs.should_build == 'true' && 
       needs.check-trigger.outputs.project_2359_changed == 'true' &&
       (needs.build-project-2359-android.outputs.success == 'true' || 
-       needs.build-project-2359-windows.outputs.success == 'true' || 
-       needs.build-project-2359-linux.outputs.success == 'true')
+       needs.build-project-2359-windows.outputs.success == 'true')
     runs-on: ubuntu-latest
     
     permissions:
@@ -472,12 +415,6 @@ jobs:
           name: project-2359-windows
           path: ./release-assets
 
-      - name: Download Linux Build
-        if: needs.build-project-2359-linux.outputs.success == 'true'
-        uses: actions/download-artifact@v4
-        with:
-          name: project-2359-linux
-          path: ./release-assets
 
       - name: Rename APK
         if: needs.build-project-2359-android.outputs.success == 'true'
@@ -504,21 +441,18 @@ jobs:
         run: |
           ANDROID_SUCCESS="${{ needs.build-project-2359-android.outputs.success }}"
           WINDOWS_SUCCESS="${{ needs.build-project-2359-windows.outputs.success }}"
-          LINUX_SUCCESS="${{ needs.build-project-2359-linux.outputs.success }}"
           WEB_SUCCESS="${{ needs.deploy-web.outputs.success }}"
           
           echo "android_success=${ANDROID_SUCCESS}" >> $GITHUB_OUTPUT
           echo "windows_success=${WINDOWS_SUCCESS}" >> $GITHUB_OUTPUT
-          echo "linux_success=${LINUX_SUCCESS}" >> $GITHUB_OUTPUT
           echo "web_success=${WEB_SUCCESS}" >> $GITHUB_OUTPUT
           
           SUCCESS_COUNT=0
           [ "$ANDROID_SUCCESS" == "true" ] && SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
           [ "$WINDOWS_SUCCESS" == "true" ] && SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-          [ "$LINUX_SUCCESS" == "true" ] && SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
           [ "$WEB_SUCCESS" == "true" ] && SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
           
-          if [ $SUCCESS_COUNT -eq 4 ]; then
+          if [ $SUCCESS_COUNT -eq 3 ]; then
             echo "release_type=Complete" >> $GITHUB_OUTPUT
           elif [ $SUCCESS_COUNT -eq 0 ]; then
             echo "release_type=Failed" >> $GITHUB_OUTPUT
@@ -554,7 +488,6 @@ jobs:
           |----------|--------|-------------|
           | 🤖 Android | ${{ steps.build_status.outputs.android_success == 'true' && '✅' || '❌' }} | Release APK |
           | 🪟 Windows | ${{ steps.build_status.outputs.windows_success == 'true' && '✅' || '❌' }} | Portable executable |
-          | 🐧 Linux | ${{ steps.build_status.outputs.linux_success == 'true' && '✅' || '❌' }} | Linux bundle |
           | 🌐 Web | ${{ steps.build_status.outputs.web_success == 'true' && '✅' || '❌' }} | [Open Web App](${PAGES_URL}) |
           
           ---
@@ -570,7 +503,6 @@ jobs:
           files: |
             ./release-assets/project_2359-android.apk
             ./release-assets/project_2359-windows.zip
-            ./release-assets/project_2359-linux.tar.gz
           draft: false
           prerelease: true
           fail_on_unmatched_files: false

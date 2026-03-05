@@ -61,6 +61,9 @@ class _HomePageState extends State<HomePage> {
             PageView(
               controller: _pageController,
               scrollDirection: Axis.vertical,
+              physics: const FastPageScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
               onPageChanged: _onPageChanged,
               children: const [HomePageContent(), StudyPageContent()],
             ),
@@ -133,4 +136,19 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+class FastPageScrollPhysics extends PageScrollPhysics {
+  const FastPageScrollPhysics({super.parent});
+
+  @override
+  FastPageScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return FastPageScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double get minFlingVelocity => 20.0;
+
+  @override
+  double get minFlingDistance => 5.0;
 }
