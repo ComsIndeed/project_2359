@@ -1,159 +1,212 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import 'package:project_2359/core/widgets/special_navigation_bar.dart';
+import 'package:project_2359/core/widgets/card_button.dart';
+import 'package:project_2359/core/widgets/special_background_generator.dart';
+import 'package:project_2359/core/widgets/tap_to_slide.dart';
+import 'package:project_2359/features/settings_page/settings_page.dart';
 
-import 'package:project_2359/features/home_page/home_page_content.dart';
-import 'package:project_2359/features/materials_page/generation_wizard_page.dart';
-import 'package:project_2359/features/sources_page/sources_page.dart';
-import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
-import 'package:project_2359/features/study_page/study_page_content.dart';
-
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-  late PageController _pageController;
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        bottom: false,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final screenHeight = constraints.maxHeight;
+            final topBgHeight = screenHeight * 0.10;
 
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: _selectedIndex);
-  }
+            return Stack(
+              children: [
+                // BRIGHTER CONTAINER BACKGROUND
+                Positioned.fill(
+                  top: topBgHeight * 0.6,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? theme.colorScheme.surface : Colors.white,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(32),
+                      ),
+                      boxShadow: [
+                        if (!isDark)
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 20,
+                            offset: const Offset(0, -10),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
+                // TOP GENERATED BACKGROUND
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: screenHeight * 0.35,
+                  child: ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.white, Colors.transparent],
+                        stops: [0.28, 1.0],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: SpecialBackgroundGenerator(
+                      seed: GenerationSeed.fromString("home_v2"),
+                      label: "Project 2359",
+                      icon: FontAwesomeIcons.bolt,
+                      type: SpecialBackgroundType.vibrantGradients,
+                      showBorder: false,
+                      borderRadius: 0,
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+                ),
 
-  void _onPageChanged(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  void _onNavBarTap(int index) {
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOutCubic,
+                // MAIN CONTENT
+                ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  physics: const ClampingScrollPhysics(),
+                  children: [
+                    SizedBox(height: topBgHeight * 0.3), // Reduced top padding
+                    const _HomeHeader(),
+                    const SizedBox(height: 32), // Reduced bottom padding
+                    Center(
+                      child: Text(
+                        "Homepage Content",
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.3,
+                          ),
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
+}
+
+class _HomeHeader extends StatelessWidget {
+  const _HomeHeader();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      // Removed Scaffolds bottomNavigationBar to use Stack for overlay effect
-      body: SafeArea(
-        bottom: false, // Allow content to go behind the custom nav bar area
-        child: Stack(
-          children: [
-            // Main Content Layer with PageView for swipe and slide animations
-            PageView(
-              controller: _pageController,
-              scrollDirection: Axis.vertical,
-              physics: const NeverScrollableScrollPhysics(),
-              onPageChanged: _onPageChanged,
-              children: [
-                HomePageContent(pageController: _pageController),
-                StudyPageContent(pageController: _pageController),
-              ],
-            ),
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-            // Navigation Bar Overlay Layer
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: SpecialNavigationBar(
-                currentIndex: 0,
-                onTap: (index) {
-                  _onNavBarTap(_selectedIndex == 0 ? 1 : 0);
-                },
-                items: [
-                  SpecialNavigationItem(
-                    icon: _selectedIndex == 0
-                        ? FontAwesomeIcons.chevronDown
-                        : FontAwesomeIcons.chevronUp,
-                    label: _selectedIndex == 0 ? "Library" : "Dashboard",
-                    pageActions: _selectedIndex == 1
-                        ? Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => SourcesPage(
-                                        sourceService: context
-                                            .read<SourcesPageBloc>()
-                                            .sourceService,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                behavior: HitTestBehavior.opaque,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                  ),
-                                  child: FaIcon(
-                                    FontAwesomeIcons.layerGroup,
-                                    color: Colors.white.withValues(alpha: 0.8),
-                                    size: 16,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                width: 1.5,
-                                height: 16,
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(1),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const GenerateMaterialsWizardPage(),
-                                    ),
-                                  );
-                                },
-                                behavior: HitTestBehavior.opaque,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                  ),
-                                  child: FaIcon(
-                                    FontAwesomeIcons.wandSparkles,
-                                    color: Colors.white.withValues(alpha: 0.8),
-                                    size: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        : null,
-                  ),
-                ],
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // App icon collection for "more alive" look
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              ),
+            ),
+            Hero(
+              tag: 'app_icon',
+              child: Image.asset(
+                isDark
+                    ? 'assets/images/app_icon_light_nobg.png'
+                    : 'assets/images/app_icon_nobg.png',
+                height: 36,
               ),
             ),
           ],
         ),
-      ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Project 2359",
+                style: theme.textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                  color: theme.colorScheme.onSurface,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      offset: const Offset(0, 1),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                "Your second brain",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                  fontWeight: FontWeight.w500,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      offset: const Offset(0, 0.5),
+                      blurRadius: 1,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Settings Action
+        const _HeaderActions(),
+      ],
+    );
+  }
+}
+
+class _HeaderActions extends StatelessWidget {
+  const _HeaderActions();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TapToSlide(
+          page: const SettingsPage(),
+          direction: SlideDirection.up,
+          builder: (pushPage) => IconButton.outlined(
+            onPressed: pushPage,
+            icon: const FaIcon(FontAwesomeIcons.gear, size: 16),
+            style: IconButton.styleFrom(
+              side: BorderSide(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.1),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
