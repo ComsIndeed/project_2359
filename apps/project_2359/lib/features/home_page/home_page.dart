@@ -12,76 +12,53 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        bottom: false,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final screenHeight = constraints.maxHeight;
-            final topBgHeight = screenHeight * 0.10;
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final topBgHeight = constraints.maxHeight * 0.10;
 
-            return Stack(
-              children: [
-                // BRIGHTER CONTAINER BACKGROUND
-                Positioned.fill(
-                  top: topBgHeight * 0.6,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isDark ? theme.colorScheme.surface : Colors.white,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(32),
-                      ),
-                      boxShadow: [
-                        if (!isDark)
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 20,
-                            offset: const Offset(0, -10),
-                          ),
+          return Stack(
+            children: [
+              // TOP GENERATED BACKGROUND (FULL SCREEN)
+              Positioned.fill(
+                child: ShaderMask(
+                  shaderCallback: (Rect bounds) {
+                    return LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.5),
+                        Colors.white.withValues(alpha: 0.12),
+                        Colors.white.withValues(alpha: 0.05),
                       ],
-                    ),
+                      stops: const [0.0, 0.3, 1.0],
+                    ).createShader(bounds);
+                  },
+                  blendMode: BlendMode.dstIn,
+                  child: SpecialBackgroundGenerator(
+                    seed: GenerationSeed.fromString("home_v2"),
+                    label: "Project 2359",
+                    icon: FontAwesomeIcons.bolt,
+                    type: SpecialBackgroundType.vibrantGradients,
+                    showBorder: false,
+                    borderRadius: 0,
+                    child: const SizedBox.expand(),
                   ),
                 ),
+              ),
 
-                // TOP GENERATED BACKGROUND
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: screenHeight * 0.35,
-                  child: ShaderMask(
-                    shaderCallback: (Rect bounds) {
-                      return const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.white, Colors.transparent],
-                        stops: [0.28, 1.0],
-                      ).createShader(bounds);
-                    },
-                    blendMode: BlendMode.dstIn,
-                    child: SpecialBackgroundGenerator(
-                      seed: GenerationSeed.fromString("home_v2"),
-                      label: "Project 2359",
-                      icon: FontAwesomeIcons.bolt,
-                      type: SpecialBackgroundType.vibrantGradients,
-                      showBorder: false,
-                      borderRadius: 0,
-                      child: const SizedBox.expand(),
-                    ),
-                  ),
-                ),
-
-                // MAIN CONTENT
-                ListView(
+              // MAIN CONTENT
+              SafeArea(
+                bottom: false,
+                child: ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   physics: const ClampingScrollPhysics(),
                   children: [
-                    SizedBox(height: topBgHeight * 0.3), // Reduced top padding
+                    SizedBox(height: topBgHeight * 0.3),
                     const _HomeHeader(),
-                    const SizedBox(height: 32), // Reduced bottom padding
+                    const SizedBox(height: 32),
                     Center(
                       child: Text(
                         "Homepage Content",
@@ -96,10 +73,10 @@ class HomePage extends StatelessWidget {
                     ),
                   ],
                 ),
-              ],
-            );
-          },
-        ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
