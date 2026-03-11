@@ -59,19 +59,29 @@ class HomePage extends StatelessWidget {
                   children: [
                     SizedBox(height: topBgHeight * 0.3),
                     const _HomeHeader(),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     // REFINED SEARCH BAR
                     const _HomeSearchBar(),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 48),
 
                     // PINNED SECTION
                     const _SectionHeader(title: "Pinned"),
                     const SizedBox(height: 8),
                     ProjectListTile.simple(
                       label: "University Physics",
-                      subLabel: "2:40 PM • 12 sources",
-                      icon: FontAwesomeIcons.folderOpen,
-                      onTap: () {},
+                      emoji: "⚛️",
+                      date: "2:40 PM",
+                      sources: [
+                        (
+                          label: "Mechanics.pdf",
+                          icon: FontAwesomeIcons.filePdf,
+                        ),
+                        (label: "Waves.doc", icon: FontAwesomeIcons.fileWord),
+                        (label: "Notes", icon: FontAwesomeIcons.fileLines),
+                      ],
+                      onTap: () {
+                        debugPrint("Pinned item tapped");
+                      },
                       isSingle: true,
                       showChevron: false,
                       backgroundColor: theme.colorScheme.surfaceContainer,
@@ -105,12 +115,18 @@ class HomePage extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {},
         elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: theme.colorScheme.primary,
-        child: const FaIcon(FontAwesomeIcons.penToSquare),
+        backgroundColor: theme.colorScheme.primaryContainer.withValues(
+          alpha: 0.8,
+        ),
+        foregroundColor: theme.colorScheme.onPrimaryContainer,
+        icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
+        label: const Text(
+          "New",
+          style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.2),
+        ),
       ),
     );
   }
@@ -123,30 +139,35 @@ class _HomeSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      height: 38,
+      height: 42,
       decoration: BoxDecoration(
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+          width: 0.5,
+        ),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () {},
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
-                Icon(
-                  Icons.search,
-                  size: 18,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                FaIcon(
+                  FontAwesomeIcons.magnifyingGlass,
+                  size: 13,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 8),
                 Text(
                   "Search",
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                    letterSpacing: 0.1,
                   ),
                 ),
               ],
@@ -167,13 +188,14 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 4),
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Text(
         title,
-        style: theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-          letterSpacing: -0.5,
+        style: theme.textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+          letterSpacing: 0.5,
+          fontSize: 12,
         ),
       ),
     );
@@ -189,20 +211,63 @@ class _FolderList extends StatelessWidget {
     final folders = [
       (
         label: "Machine Learning",
-        subLabel: "Yesterday • 8 sources",
-        icon: FontAwesomeIcons.brain,
+        date: "2:40 PM",
+        sources: [
+          (label: "ML_Foundations.pdf", icon: FontAwesomeIcons.filePdf),
+          (label: "Dataset_v2.csv", icon: FontAwesomeIcons.fileCsv),
+          (label: "Summary", icon: FontAwesomeIcons.fileLines),
+        ],
+        dueCount: 12,
       ),
       (
-        label: "Japanese N1",
-        subLabel: "Tuesday • 5 sources",
-        icon: FontAwesomeIcons.language,
+        label: "Japanese N1 Grammar",
+        date: "Yesterday",
+        sources: [
+          (label: "Particles.doc", icon: FontAwesomeIcons.fileWord),
+          (label: "Kanji_List", icon: FontAwesomeIcons.fileLines),
+        ],
+        dueCount: 45,
       ),
       (
-        label: "Cooking Recipes",
-        subLabel: "Oct 12 • 3 sources",
-        icon: FontAwesomeIcons.utensils,
+        label: "Organic Chemistry",
+        date: "Monday",
+        sources: [
+          (label: "Reactions.pdf", icon: FontAwesomeIcons.filePdf),
+          (label: "LabNotes.txt", icon: FontAwesomeIcons.fileCode),
+          (label: "Diagrams", icon: FontAwesomeIcons.fileImage),
+        ],
+        dueCount: 0,
+      ),
+      (
+        label: "World History v2",
+        date: "Oct 12",
+        sources: [
+          (label: "Timeline", icon: FontAwesomeIcons.fileLines),
+          (label: "Map_Data", icon: FontAwesomeIcons.map),
+        ],
+        dueCount: 0,
+      ),
+      (
+        label: "Cooking Secrets",
+        date: "Sept 30",
+        sources: [
+          (label: "French_Base", icon: FontAwesomeIcons.fileLines),
+          (label: "Spices_Table", icon: FontAwesomeIcons.fileCsv),
+        ],
+        dueCount: 8,
+      ),
+      (
+        label: "Guitar Theory",
+        date: "Aug 15",
+        sources: [
+          (label: "Scales.pdf", icon: FontAwesomeIcons.filePdf),
+          (label: "Modes_Guide", icon: FontAwesomeIcons.fileLines),
+        ],
+        dueCount: 0,
       ),
     ];
+
+    final theme = Theme.of(context);
 
     return ProjectListGroup(
       backgroundColor: backgroundColor,
@@ -210,10 +275,14 @@ class _FolderList extends StatelessWidget {
         for (int i = 0; i < folders.length; i++) ...[
           ProjectListTile.simple(
             label: folders[i].label,
-            subLabel: folders[i].subLabel,
-            icon: folders[i].icon,
-            onTap: () {},
+            date: folders[i].date,
+            sources: folders[i].sources,
+            dueCount: folders[i].dueCount,
+            onTap: () {
+              debugPrint("Folder tapped: ${folders[i].label}");
+            },
             showDivider: i < folders.length - 1,
+            showChevron: false,
           ),
         ],
       ],
@@ -232,64 +301,25 @@ class _HomeHeader extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // App icon collection for "more alive" look
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              ),
-            ),
-            Hero(
-              tag: 'app_icon',
-              child: Image.asset(
-                isDark
-                    ? 'assets/images/app_icon_light_nobg.png'
-                    : 'assets/images/app_icon_nobg.png',
-                height: 36,
-              ),
-            ),
-          ],
+        // Compact App Icon
+        Hero(
+          tag: 'app_icon',
+          child: Image.asset(
+            isDark
+                ? 'assets/images/app_icon_light_nobg.png'
+                : 'assets/images/app_icon_nobg.png',
+            height: 28, // More compact icon
+          ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 10),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Project 2359",
-                style: theme.textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
-                  color: theme.colorScheme.onSurface,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      offset: const Offset(0, 1),
-                      blurRadius: 2,
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                "Your second brain",
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  fontWeight: FontWeight.w500,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      offset: const Offset(0, 0.5),
-                      blurRadius: 1,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          child: Text(
+            "Project 2359",
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.4,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.95),
+            ),
           ),
         ),
         // Settings Action
@@ -310,15 +340,23 @@ class _HeaderActions extends StatelessWidget {
         TapToSlide(
           page: const SettingsPage(),
           direction: SlideDirection.up,
-          builder: (pushPage) => IconButton.outlined(
-            onPressed: pushPage,
-            icon: const FaIcon(FontAwesomeIcons.gear, size: 16),
-            style: IconButton.styleFrom(
-              side: BorderSide(
+          builder: (pushPage) => Container(
+            decoration: BoxDecoration(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              onPressed: pushPage,
+              icon: FaIcon(
+                FontAwesomeIcons.gear,
+                size: 15,
                 color: Theme.of(
                   context,
-                ).colorScheme.onSurface.withValues(alpha: 0.1),
+                ).colorScheme.onSurface.withValues(alpha: 0.4),
               ),
+              visualDensity: VisualDensity.compact,
             ),
           ),
         ),
