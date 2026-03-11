@@ -573,6 +573,7 @@ class StudyMaterialItem extends DataClass
   final String? citationJson;
 
   /// Fields are nullable because not all types use the same properties.
+  /// - Flashcard: question (front), answer (back)
   /// - MCQ: question, optionsListJson, answer
   /// - Free-Text: question, answer
   /// - Image Occlusion: (not yet implemented)
@@ -853,12 +854,12 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
   }
 }
 
-class $StudyMaterialPackItemsTable extends StudyMaterialPackItems
-    with TableInfo<$StudyMaterialPackItemsTable, StudyMaterialPackItem> {
+class $StudyFolderItemsTable extends StudyFolderItems
+    with TableInfo<$StudyFolderItemsTable, StudyFolderItem> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $StudyMaterialPackItemsTable(this.attachedDatabase, [this._alias]);
+  $StudyFolderItemsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -888,16 +889,44 @@ class $StudyMaterialPackItemsTable extends StudyMaterialPackItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, description];
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    description,
+    createdAt,
+    updatedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'study_material_pack_items';
+  static const String $name = 'study_folder_items';
   @override
   VerificationContext validateIntegrity(
-    Insertable<StudyMaterialPackItem> instance, {
+    Insertable<StudyFolderItem> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -924,15 +953,31 @@ class $StudyMaterialPackItemsTable extends StudyMaterialPackItems
         ),
       );
     }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
     return context;
   }
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  StudyMaterialPackItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+  StudyFolderItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return StudyMaterialPackItem(
+    return StudyFolderItem(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -945,24 +990,35 @@ class $StudyMaterialPackItemsTable extends StudyMaterialPackItems
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
     );
   }
 
   @override
-  $StudyMaterialPackItemsTable createAlias(String alias) {
-    return $StudyMaterialPackItemsTable(attachedDatabase, alias);
+  $StudyFolderItemsTable createAlias(String alias) {
+    return $StudyFolderItemsTable(attachedDatabase, alias);
   }
 }
 
-class StudyMaterialPackItem extends DataClass
-    implements Insertable<StudyMaterialPackItem> {
+class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
   final String id;
   final String name;
   final String? description;
-  const StudyMaterialPackItem({
+  final String createdAt;
+  final String updatedAt;
+  const StudyFolderItem({
     required this.id,
     required this.name,
     this.description,
+    required this.createdAt,
+    required this.updatedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -972,28 +1028,34 @@ class StudyMaterialPackItem extends DataClass
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
     }
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
     return map;
   }
 
-  StudyMaterialPackItemsCompanion toCompanion(bool nullToAbsent) {
-    return StudyMaterialPackItemsCompanion(
+  StudyFolderItemsCompanion toCompanion(bool nullToAbsent) {
+    return StudyFolderItemsCompanion(
       id: Value(id),
       name: Value(name),
       description: description == null && nullToAbsent
           ? const Value.absent()
           : Value(description),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
     );
   }
 
-  factory StudyMaterialPackItem.fromJson(
+  factory StudyFolderItem.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return StudyMaterialPackItem(
+    return StudyFolderItem(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
     );
   }
   @override
@@ -1003,94 +1065,119 @@ class StudyMaterialPackItem extends DataClass
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
     };
   }
 
-  StudyMaterialPackItem copyWith({
+  StudyFolderItem copyWith({
     String? id,
     String? name,
     Value<String?> description = const Value.absent(),
-  }) => StudyMaterialPackItem(
+    String? createdAt,
+    String? updatedAt,
+  }) => StudyFolderItem(
     id: id ?? this.id,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
   );
-  StudyMaterialPackItem copyWithCompanion(
-    StudyMaterialPackItemsCompanion data,
-  ) {
-    return StudyMaterialPackItem(
+  StudyFolderItem copyWithCompanion(StudyFolderItemsCompanion data) {
+    return StudyFolderItem(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       description: data.description.present
           ? data.description.value
           : this.description,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('StudyMaterialPackItem(')
+    return (StringBuffer('StudyFolderItem(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description);
+  int get hashCode => Object.hash(id, name, description, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is StudyMaterialPackItem &&
+      (other is StudyFolderItem &&
           other.id == this.id &&
           other.name == this.name &&
-          other.description == this.description);
+          other.description == this.description &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
 }
 
-class StudyMaterialPackItemsCompanion
-    extends UpdateCompanion<StudyMaterialPackItem> {
+class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
   final Value<String> id;
   final Value<String> name;
   final Value<String?> description;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
   final Value<int> rowid;
-  const StudyMaterialPackItemsCompanion({
+  const StudyFolderItemsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  StudyMaterialPackItemsCompanion.insert({
+  StudyFolderItemsCompanion.insert({
     required String id,
     required String name,
     this.description = const Value.absent(),
+    required String createdAt,
+    required String updatedAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       name = Value(name);
-  static Insertable<StudyMaterialPackItem> custom({
+       name = Value(name),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<StudyFolderItem> custom({
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? description,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  StudyMaterialPackItemsCompanion copyWith({
+  StudyFolderItemsCompanion copyWith({
     Value<String>? id,
     Value<String>? name,
     Value<String?>? description,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
     Value<int>? rowid,
   }) {
-    return StudyMaterialPackItemsCompanion(
+    return StudyFolderItemsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1107,6 +1194,12 @@ class StudyMaterialPackItemsCompanion
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1115,10 +1208,12 @@ class StudyMaterialPackItemsCompanion
 
   @override
   String toString() {
-    return (StringBuffer('StudyMaterialPackItemsCompanion(')
+    return (StringBuffer('StudyFolderItemsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1505,8 +1600,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SourceItemsTable sourceItems = $SourceItemsTable(this);
   late final $StudyMaterialItemsTable studyMaterialItems =
       $StudyMaterialItemsTable(this);
-  late final $StudyMaterialPackItemsTable studyMaterialPackItems =
-      $StudyMaterialPackItemsTable(this);
+  late final $StudyFolderItemsTable studyFolderItems = $StudyFolderItemsTable(
+    this,
+  );
   late final $SourceItemBlobsTable sourceItemBlobs = $SourceItemBlobsTable(
     this,
   );
@@ -1517,7 +1613,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     sourceItems,
     studyMaterialItems,
-    studyMaterialPackItems,
+    studyFolderItems,
     sourceItemBlobs,
   ];
 }
@@ -1981,24 +2077,28 @@ typedef $$StudyMaterialItemsTableProcessedTableManager =
       StudyMaterialItem,
       PrefetchHooks Function()
     >;
-typedef $$StudyMaterialPackItemsTableCreateCompanionBuilder =
-    StudyMaterialPackItemsCompanion Function({
+typedef $$StudyFolderItemsTableCreateCompanionBuilder =
+    StudyFolderItemsCompanion Function({
       required String id,
       required String name,
       Value<String?> description,
+      required String createdAt,
+      required String updatedAt,
       Value<int> rowid,
     });
-typedef $$StudyMaterialPackItemsTableUpdateCompanionBuilder =
-    StudyMaterialPackItemsCompanion Function({
+typedef $$StudyFolderItemsTableUpdateCompanionBuilder =
+    StudyFolderItemsCompanion Function({
       Value<String> id,
       Value<String> name,
       Value<String?> description,
+      Value<String> createdAt,
+      Value<String> updatedAt,
       Value<int> rowid,
     });
 
-class $$StudyMaterialPackItemsTableFilterComposer
-    extends Composer<_$AppDatabase, $StudyMaterialPackItemsTable> {
-  $$StudyMaterialPackItemsTableFilterComposer({
+class $$StudyFolderItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $StudyFolderItemsTable> {
+  $$StudyFolderItemsTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2019,11 +2119,21 @@ class $$StudyMaterialPackItemsTableFilterComposer
     column: $table.description,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
-class $$StudyMaterialPackItemsTableOrderingComposer
-    extends Composer<_$AppDatabase, $StudyMaterialPackItemsTable> {
-  $$StudyMaterialPackItemsTableOrderingComposer({
+class $$StudyFolderItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StudyFolderItemsTable> {
+  $$StudyFolderItemsTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2044,11 +2154,21 @@ class $$StudyMaterialPackItemsTableOrderingComposer
     column: $table.description,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
-class $$StudyMaterialPackItemsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $StudyMaterialPackItemsTable> {
-  $$StudyMaterialPackItemsTableAnnotationComposer({
+class $$StudyFolderItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StudyFolderItemsTable> {
+  $$StudyFolderItemsTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2065,62 +2185,63 @@ class $$StudyMaterialPackItemsTableAnnotationComposer
     column: $table.description,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
 
-class $$StudyMaterialPackItemsTableTableManager
+class $$StudyFolderItemsTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $StudyMaterialPackItemsTable,
-          StudyMaterialPackItem,
-          $$StudyMaterialPackItemsTableFilterComposer,
-          $$StudyMaterialPackItemsTableOrderingComposer,
-          $$StudyMaterialPackItemsTableAnnotationComposer,
-          $$StudyMaterialPackItemsTableCreateCompanionBuilder,
-          $$StudyMaterialPackItemsTableUpdateCompanionBuilder,
+          $StudyFolderItemsTable,
+          StudyFolderItem,
+          $$StudyFolderItemsTableFilterComposer,
+          $$StudyFolderItemsTableOrderingComposer,
+          $$StudyFolderItemsTableAnnotationComposer,
+          $$StudyFolderItemsTableCreateCompanionBuilder,
+          $$StudyFolderItemsTableUpdateCompanionBuilder,
           (
-            StudyMaterialPackItem,
+            StudyFolderItem,
             BaseReferences<
               _$AppDatabase,
-              $StudyMaterialPackItemsTable,
-              StudyMaterialPackItem
+              $StudyFolderItemsTable,
+              StudyFolderItem
             >,
           ),
-          StudyMaterialPackItem,
+          StudyFolderItem,
           PrefetchHooks Function()
         > {
-  $$StudyMaterialPackItemsTableTableManager(
+  $$StudyFolderItemsTableTableManager(
     _$AppDatabase db,
-    $StudyMaterialPackItemsTable table,
+    $StudyFolderItemsTable table,
   ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$StudyMaterialPackItemsTableFilterComposer(
-                $db: db,
-                $table: table,
-              ),
+              $$StudyFolderItemsTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$StudyMaterialPackItemsTableOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
+              $$StudyFolderItemsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$StudyMaterialPackItemsTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+              $$StudyFolderItemsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => StudyMaterialPackItemsCompanion(
+              }) => StudyFolderItemsCompanion(
                 id: id,
                 name: name,
                 description: description,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2128,11 +2249,15 @@ class $$StudyMaterialPackItemsTableTableManager
                 required String id,
                 required String name,
                 Value<String?> description = const Value.absent(),
+                required String createdAt,
+                required String updatedAt,
                 Value<int> rowid = const Value.absent(),
-              }) => StudyMaterialPackItemsCompanion.insert(
+              }) => StudyFolderItemsCompanion.insert(
                 id: id,
                 name: name,
                 description: description,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2143,25 +2268,21 @@ class $$StudyMaterialPackItemsTableTableManager
       );
 }
 
-typedef $$StudyMaterialPackItemsTableProcessedTableManager =
+typedef $$StudyFolderItemsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $StudyMaterialPackItemsTable,
-      StudyMaterialPackItem,
-      $$StudyMaterialPackItemsTableFilterComposer,
-      $$StudyMaterialPackItemsTableOrderingComposer,
-      $$StudyMaterialPackItemsTableAnnotationComposer,
-      $$StudyMaterialPackItemsTableCreateCompanionBuilder,
-      $$StudyMaterialPackItemsTableUpdateCompanionBuilder,
+      $StudyFolderItemsTable,
+      StudyFolderItem,
+      $$StudyFolderItemsTableFilterComposer,
+      $$StudyFolderItemsTableOrderingComposer,
+      $$StudyFolderItemsTableAnnotationComposer,
+      $$StudyFolderItemsTableCreateCompanionBuilder,
+      $$StudyFolderItemsTableUpdateCompanionBuilder,
       (
-        StudyMaterialPackItem,
-        BaseReferences<
-          _$AppDatabase,
-          $StudyMaterialPackItemsTable,
-          StudyMaterialPackItem
-        >,
+        StudyFolderItem,
+        BaseReferences<_$AppDatabase, $StudyFolderItemsTable, StudyFolderItem>,
       ),
-      StudyMaterialPackItem,
+      StudyFolderItem,
       PrefetchHooks Function()
     >;
 typedef $$SourceItemBlobsTableCreateCompanionBuilder =
@@ -2382,11 +2503,8 @@ class $AppDatabaseManager {
       $$SourceItemsTableTableManager(_db, _db.sourceItems);
   $$StudyMaterialItemsTableTableManager get studyMaterialItems =>
       $$StudyMaterialItemsTableTableManager(_db, _db.studyMaterialItems);
-  $$StudyMaterialPackItemsTableTableManager get studyMaterialPackItems =>
-      $$StudyMaterialPackItemsTableTableManager(
-        _db,
-        _db.studyMaterialPackItems,
-      );
+  $$StudyFolderItemsTableTableManager get studyFolderItems =>
+      $$StudyFolderItemsTableTableManager(_db, _db.studyFolderItems);
   $$SourceItemBlobsTableTableManager get sourceItemBlobs =>
       $$SourceItemBlobsTableTableManager(_db, _db.sourceItemBlobs);
 }

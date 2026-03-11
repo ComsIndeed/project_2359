@@ -132,7 +132,7 @@ class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
       final service = context.read<StudyMaterialService>();
       final packId = const Uuid().v4();
 
-      final pack = StudyMaterialPackItemsCompanion(
+      final pack = StudyFolderItemsCompanion(
         id: Value(packId),
         name: Value(deckName),
       );

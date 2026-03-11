@@ -1,34 +1,34 @@
 import 'package:project_2359/app_database.dart';
 
-/// Service for CRUD operations on study material packs and items.
+/// Service for CRUD operations on study folders and items.
 class StudyMaterialService {
   final AppDatabase _db;
 
   StudyMaterialService(this._db);
 
-  // --- Packs ---
+  // --- Folders ---
 
-  Future<List<StudyMaterialPackItem>> getAllPacks() async {
-    return await _db.select(_db.studyMaterialPackItems).get();
+  Future<List<StudyFolderItem>> getAllPacks() async {
+    return await _db.select(_db.studyFolderItems).get();
   }
 
-  Future<StudyMaterialPackItem?> getPackById(String id) async {
+  Future<StudyFolderItem?> getPackById(String id) async {
     return await (_db.select(
-      _db.studyMaterialPackItems,
+      _db.studyFolderItems,
     )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
-  Future<void> insertPack(StudyMaterialPackItemsCompanion pack) async {
-    await _db.into(_db.studyMaterialPackItems).insert(pack);
+  Future<void> insertPack(StudyFolderItemsCompanion pack) async {
+    await _db.into(_db.studyFolderItems).insert(pack);
   }
 
   Future<void> deletePack(String id) async {
-    // Delete all items in the pack first, then delete the pack
+    // Delete all items in the folder first, then delete the folder
     await (_db.delete(
       _db.studyMaterialItems,
     )..where((t) => t.packId.equals(id))).go();
     await (_db.delete(
-      _db.studyMaterialPackItems,
+      _db.studyFolderItems,
     )..where((t) => t.id.equals(id))).go();
   }
 
@@ -56,13 +56,13 @@ class StudyMaterialService {
     )..where((t) => t.id.equals(id))).go();
   }
 
-  /// Creates a pack and all its items in a single transaction.
+  /// Creates a folder and all its items in a single transaction.
   Future<void> createPackWithItems({
-    required StudyMaterialPackItemsCompanion pack,
+    required StudyFolderItemsCompanion pack,
     required List<StudyMaterialItemsCompanion> items,
   }) async {
     await _db.transaction(() async {
-      await _db.into(_db.studyMaterialPackItems).insert(pack);
+      await _db.into(_db.studyFolderItems).insert(pack);
       await _db.batch((batch) {
         batch.insertAll(_db.studyMaterialItems, items);
       });
