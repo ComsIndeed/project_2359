@@ -73,7 +73,6 @@ class HomePage extends StatelessWidget {
                       children: [
                         ProjectListTile.simple(
                           label: "University Physics",
-                          emoji: "⚛️",
                           date: "2:40 PM",
                           sources: [
                             (
@@ -88,7 +87,6 @@ class HomePage extends StatelessWidget {
                           ],
                           targetPage: const FolderPage(
                             initialFolderName: "University Physics",
-                            emoji: "⚛️",
                           ),
                           transitionType: ProjectTransitionType.dropUp,
                           showChevron: false,
@@ -220,65 +218,53 @@ class _FolderList extends StatelessWidget {
     final folders = [
       (
         label: "Machine Learning",
-        emoji: "🤖",
         date: "2:40 PM",
         sources: [
           (label: "ML_Foundations.pdf", icon: FontAwesomeIcons.filePdf),
           (label: "Dataset_v2.csv", icon: FontAwesomeIcons.fileCsv),
           (label: "Summary", icon: FontAwesomeIcons.fileLines),
         ],
-        dueCount: 12,
       ),
       (
         label: "Japanese N1 Grammar",
-        emoji: "🏮",
         date: "Yesterday",
         sources: [
           (label: "Particles.doc", icon: FontAwesomeIcons.fileWord),
           (label: "Kanji_List", icon: FontAwesomeIcons.fileLines),
         ],
-        dueCount: 45,
       ),
       (
         label: "Organic Chemistry",
-        emoji: "🧪",
         date: "Monday",
         sources: [
           (label: "Reactions.pdf", icon: FontAwesomeIcons.filePdf),
           (label: "LabNotes.txt", icon: FontAwesomeIcons.fileCode),
           (label: "Diagrams", icon: FontAwesomeIcons.fileImage),
         ],
-        dueCount: 0,
       ),
       (
         label: "World History v2",
-        emoji: "🌍",
         date: "Oct 12",
         sources: [
           (label: "Timeline", icon: FontAwesomeIcons.fileLines),
           (label: "Map_Data", icon: FontAwesomeIcons.map),
         ],
-        dueCount: 0,
       ),
       (
         label: "Cooking Secrets",
-        emoji: "🍳",
         date: "Sept 30",
         sources: [
           (label: "French_Base", icon: FontAwesomeIcons.fileLines),
           (label: "Spices_Table", icon: FontAwesomeIcons.fileCsv),
         ],
-        dueCount: 8,
       ),
       (
         label: "Guitar Theory",
-        emoji: "🎸",
         date: "Aug 15",
         sources: [
           (label: "Scales.pdf", icon: FontAwesomeIcons.filePdf),
           (label: "Modes_Guide", icon: FontAwesomeIcons.fileLines),
         ],
-        dueCount: 0,
       ),
     ];
 
@@ -288,14 +274,9 @@ class _FolderList extends StatelessWidget {
         for (int i = 0; i < folders.length; i++) ...[
           ProjectListTile.simple(
             label: folders[i].label,
-            emoji: folders[i].emoji,
             date: folders[i].date,
             sources: folders[i].sources,
-            dueCount: folders[i].dueCount,
-            targetPage: FolderPage(
-              initialFolderName: folders[i].label,
-              emoji: folders[i].emoji,
-            ),
+            targetPage: FolderPage(initialFolderName: folders[i].label),
             transitionType: ProjectTransitionType.slideLeft,
             showDivider: i < folders.length - 1,
             showChevron: false,

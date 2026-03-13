@@ -38,9 +38,7 @@ class ProjectListTile extends StatelessWidget {
   final String? date;
   final List<({String label, IconData icon})>? sources;
   final Widget? expandedContent;
-  final String? emoji;
   final bool isAlert;
-  final int? dueCount;
   final Widget? targetPage;
   final ProjectTransitionType? transitionType;
 
@@ -60,8 +58,6 @@ class ProjectListTile extends StatelessWidget {
     this.sources,
     this.isAlert = false,
     this.expandedContent,
-    this.emoji,
-    this.dueCount,
     this.targetPage,
     this.transitionType,
   });
@@ -82,8 +78,6 @@ class ProjectListTile extends StatelessWidget {
     List<({String label, IconData icon})>? sources,
     bool isAlert = false,
     Widget? expandedContent,
-    String? emoji,
-    int? dueCount,
     Widget? targetPage,
     ProjectTransitionType? transitionType,
   }) {
@@ -102,8 +96,6 @@ class ProjectListTile extends StatelessWidget {
       sources: sources,
       isAlert: isAlert,
       expandedContent: expandedContent,
-      emoji: emoji,
-      dueCount: dueCount,
       targetPage: targetPage,
       transitionType: transitionType,
     );
@@ -264,18 +256,11 @@ class ProjectListTile extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (emoji != null || leading != null) ...[
-                if (emoji != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: Text(emoji!, style: const TextStyle(fontSize: 22)),
-                  )
-                else if (leading != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: leading!,
-                  ),
-              ],
+              if (leading != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: leading!,
+                ),
               Expanded(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -294,34 +279,6 @@ class ProjectListTile extends StatelessWidget {
                         child: title,
                       ),
                     ),
-                    if (dueCount != null && dueCount! > 0) ...[
-                      const SizedBox(width: 8),
-                      // Small indicator
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          FaIcon(
-                            FontAwesomeIcons.circleExclamation,
-                            size: 9,
-                            color: theme.colorScheme.error.withValues(
-                              alpha: 0.7,
-                            ),
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            "$dueCount",
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.error.withValues(
-                                alpha: 0.8,
-                              ),
-                              fontWeight: FontWeight.w700,
-                              fontSize: 10,
-                              letterSpacing: 0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
                   ],
                 ),
               ),

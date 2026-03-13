@@ -6,13 +6,8 @@ import 'package:project_2359/core/widgets/special_background_generator.dart';
 
 class FolderPage extends StatefulWidget {
   final String initialFolderName;
-  final String emoji;
 
-  const FolderPage({
-    super.key,
-    required this.initialFolderName,
-    this.emoji = "📁",
-  });
+  const FolderPage({super.key, required this.initialFolderName});
 
   @override
   State<FolderPage> createState() => _FolderPageState();
@@ -217,8 +212,12 @@ class _FolderPageState extends State<FolderPage> {
       onTap: () => setState(() => _isEditingTitle = true),
       child: Row(
         children: [
-          Text(widget.emoji, style: theme.textTheme.headlineSmall),
-          const SizedBox(width: 8),
+          FaIcon(
+            FontAwesomeIcons.folder,
+            size: 20,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               folderName,
