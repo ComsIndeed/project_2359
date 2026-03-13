@@ -1,5 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'tap_to_fade.dart';
+import 'tap_to_grow.dart';
+import 'tap_to_slide.dart';
+import 'tap_to_drop.dart';
+
+enum ProjectTransitionType {
+  fade,
+  grow,
+  slideUp,
+  slideDown,
+  slideLeft,
+  slideRight,
+  slideLeftUp,
+  slideLeftDown,
+  slideRightUp,
+  slideRightDown,
+  dropUp,
+  dropDown,
+  dropLeft,
+  dropRight,
+}
 
 /// A reusable list tile widget that follows the project's iOS-inspired
 /// grouped layout and border rules.
@@ -20,6 +41,8 @@ class ProjectListTile extends StatelessWidget {
   final String? emoji;
   final bool isAlert;
   final int? dueCount;
+  final Widget? targetPage;
+  final ProjectTransitionType? transitionType;
 
   const ProjectListTile({
     super.key,
@@ -39,6 +62,8 @@ class ProjectListTile extends StatelessWidget {
     this.expandedContent,
     this.emoji,
     this.dueCount,
+    this.targetPage,
+    this.transitionType,
   });
 
   /// Shorthand constructor for a simple text-based tile
@@ -59,6 +84,8 @@ class ProjectListTile extends StatelessWidget {
     Widget? expandedContent,
     String? emoji,
     int? dueCount,
+    Widget? targetPage,
+    ProjectTransitionType? transitionType,
   }) {
     return ProjectListTile(
       key: key,
@@ -77,11 +104,150 @@ class ProjectListTile extends StatelessWidget {
       expandedContent: expandedContent,
       emoji: emoji,
       dueCount: dueCount,
+      targetPage: targetPage,
+      transitionType: transitionType,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (targetPage != null && transitionType != null) {
+      void effectiveOnTap() {
+        onTap?.call();
+      }
+
+      switch (transitionType!) {
+        case ProjectTransitionType.fade:
+          return TapToFade(
+            page: targetPage!,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.grow:
+          return TapToGrow(
+            page: targetPage!,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.slideUp:
+          return TapToSlide(
+            page: targetPage!,
+            direction: SlideDirection.up,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.slideDown:
+          return TapToSlide(
+            page: targetPage!,
+            direction: SlideDirection.down,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.slideLeft:
+          return TapToSlide(
+            page: targetPage!,
+            direction: SlideDirection.left,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.slideRight:
+          return TapToSlide(
+            page: targetPage!,
+            direction: SlideDirection.right,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.slideLeftUp:
+          return TapToSlide(
+            page: targetPage!,
+            direction: SlideDirection.upLeft,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.slideLeftDown:
+          return TapToSlide(
+            page: targetPage!,
+            direction: SlideDirection.downLeft,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.slideRightUp:
+          return TapToSlide(
+            page: targetPage!,
+            direction: SlideDirection.upRight,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.slideRightDown:
+          return TapToSlide(
+            page: targetPage!,
+            direction: SlideDirection.downRight,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.dropUp:
+          return TapToDrop(
+            page: targetPage!,
+            direction: DropDirection.up,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.dropDown:
+          return TapToDrop(
+            page: targetPage!,
+            direction: DropDirection.down,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.dropLeft:
+          return TapToDrop(
+            page: targetPage!,
+            direction: DropDirection.left,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+        case ProjectTransitionType.dropRight:
+          return TapToDrop(
+            page: targetPage!,
+            direction: DropDirection.right,
+            builder: (trigger) => _buildTile(context, () {
+              effectiveOnTap();
+              trigger();
+            }),
+          );
+      }
+    }
+
+    return _buildTile(context, onTap);
+  }
+
+  Widget _buildTile(BuildContext context, VoidCallback? onTap) {
     final theme = Theme.of(context);
 
     // Decoration logic
@@ -98,6 +264,18 @@ class ProjectListTile extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              if (emoji != null || leading != null) ...[
+                if (emoji != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Text(emoji!, style: const TextStyle(fontSize: 22)),
+                  )
+                else if (leading != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: leading!,
+                  ),
+              ],
               Expanded(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

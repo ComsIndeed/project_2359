@@ -5,6 +5,7 @@ import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/core/widgets/special_background_generator.dart';
 import 'package:project_2359/core/widgets/tap_to_slide.dart';
+import 'package:project_2359/features/folder_page/folder_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -67,24 +68,32 @@ class HomePage extends StatelessWidget {
                     // PINNED SECTION
                     const _SectionHeader(title: "Pinned"),
                     const SizedBox(height: 8),
-                    ProjectListTile.simple(
-                      label: "University Physics",
-                      emoji: "⚛️",
-                      date: "2:40 PM",
-                      sources: [
-                        (
-                          label: "Mechanics.pdf",
-                          icon: FontAwesomeIcons.filePdf,
-                        ),
-                        (label: "Waves.doc", icon: FontAwesomeIcons.fileWord),
-                        (label: "Notes", icon: FontAwesomeIcons.fileLines),
-                      ],
-                      onTap: () {
-                        debugPrint("Pinned item tapped");
-                      },
-                      isSingle: true,
-                      showChevron: false,
+                    ProjectListGroup(
                       backgroundColor: theme.colorScheme.surfaceContainer,
+                      children: [
+                        ProjectListTile.simple(
+                          label: "University Physics",
+                          emoji: "⚛️",
+                          date: "2:40 PM",
+                          sources: [
+                            (
+                              label: "Mechanics.pdf",
+                              icon: FontAwesomeIcons.filePdf,
+                            ),
+                            (
+                              label: "Waves.doc",
+                              icon: FontAwesomeIcons.fileWord,
+                            ),
+                            (label: "Notes", icon: FontAwesomeIcons.fileLines),
+                          ],
+                          targetPage: const FolderPage(
+                            initialFolderName: "University Physics",
+                            emoji: "⚛️",
+                          ),
+                          transitionType: ProjectTransitionType.dropUp,
+                          showChevron: false,
+                        ),
+                      ],
                     ),
 
                     const SizedBox(height: 24),
@@ -211,6 +220,7 @@ class _FolderList extends StatelessWidget {
     final folders = [
       (
         label: "Machine Learning",
+        emoji: "🤖",
         date: "2:40 PM",
         sources: [
           (label: "ML_Foundations.pdf", icon: FontAwesomeIcons.filePdf),
@@ -221,6 +231,7 @@ class _FolderList extends StatelessWidget {
       ),
       (
         label: "Japanese N1 Grammar",
+        emoji: "🏮",
         date: "Yesterday",
         sources: [
           (label: "Particles.doc", icon: FontAwesomeIcons.fileWord),
@@ -230,6 +241,7 @@ class _FolderList extends StatelessWidget {
       ),
       (
         label: "Organic Chemistry",
+        emoji: "🧪",
         date: "Monday",
         sources: [
           (label: "Reactions.pdf", icon: FontAwesomeIcons.filePdf),
@@ -240,6 +252,7 @@ class _FolderList extends StatelessWidget {
       ),
       (
         label: "World History v2",
+        emoji: "🌍",
         date: "Oct 12",
         sources: [
           (label: "Timeline", icon: FontAwesomeIcons.fileLines),
@@ -249,6 +262,7 @@ class _FolderList extends StatelessWidget {
       ),
       (
         label: "Cooking Secrets",
+        emoji: "🍳",
         date: "Sept 30",
         sources: [
           (label: "French_Base", icon: FontAwesomeIcons.fileLines),
@@ -258,6 +272,7 @@ class _FolderList extends StatelessWidget {
       ),
       (
         label: "Guitar Theory",
+        emoji: "🎸",
         date: "Aug 15",
         sources: [
           (label: "Scales.pdf", icon: FontAwesomeIcons.filePdf),
@@ -267,20 +282,21 @@ class _FolderList extends StatelessWidget {
       ),
     ];
 
-    final theme = Theme.of(context);
-
     return ProjectListGroup(
       backgroundColor: backgroundColor,
       children: [
         for (int i = 0; i < folders.length; i++) ...[
           ProjectListTile.simple(
             label: folders[i].label,
+            emoji: folders[i].emoji,
             date: folders[i].date,
             sources: folders[i].sources,
             dueCount: folders[i].dueCount,
-            onTap: () {
-              debugPrint("Folder tapped: ${folders[i].label}");
-            },
+            targetPage: FolderPage(
+              initialFolderName: folders[i].label,
+              emoji: folders[i].emoji,
+            ),
+            transitionType: ProjectTransitionType.slideLeft,
             showDivider: i < folders.length - 1,
             showChevron: false,
           ),

@@ -5,6 +5,10 @@ enum SlideDirection {
   right, // Slides from Left to Right
   up, // Slides from Bottom to Top
   down, // Slides from Top to Bottom
+  upLeft, // Slides from Bottom-Right to Top-Left
+  upRight, // Slides from Bottom-Left to Top-Right
+  downLeft, // Slides from Top-Right to Bottom-Left
+  downRight, // Slides from Top-Left to Bottom-Right
 }
 
 enum NavigationType { push, pushReplacement, pushAndRemoveUntil }
@@ -49,6 +53,18 @@ class TapToSlide extends StatelessWidget {
               break;
             case SlideDirection.down:
               begin = const Offset(0.0, -1.0);
+              break;
+            case SlideDirection.upLeft:
+              begin = const Offset(1.0, 1.0);
+              break;
+            case SlideDirection.upRight:
+              begin = const Offset(-1.0, 1.0);
+              break;
+            case SlideDirection.downLeft:
+              begin = const Offset(1.0, -1.0);
+              break;
+            case SlideDirection.downRight:
+              begin = const Offset(-1.0, -1.0);
               break;
           }
           const end = Offset.zero;
