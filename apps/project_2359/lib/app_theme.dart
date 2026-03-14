@@ -235,3 +235,33 @@ class CardButtonStyle {
     );
   }
 }
+
+extension AppThemeExtension on ThemeData {
+  /// Returns an alternative scaffold background color that is adaptive to the current theme.
+  ///
+  /// This color is specifically designed for pages that need a distinct, solid feel
+  /// (like folder pages) while still feeling part of the same theme family correctly.
+  ///
+  /// RULES FOR ALTERNATIVE COLORS (for future developers):
+  /// 1. ADAPTIVE: They must be derived from the base colors (e.g., via [Color.lerp])
+  ///    to ensure they automatically change when the user shifts BackgroundTones (Ocean, Stark, etc.).
+  /// 2. CONTRAST: They should provide a subtle but noticeable shift from the main background
+  ///    to signify a change in context (like entering a specific folder or sub-page).
+  /// 3. SOLIDITY: For this specific "alt" background, we aim for a "solid dark grey" feel
+  ///    in dark mode, which is achieved by lerping the theme's base background with a neutral grey.
+  Color get scaffoldBackgroundAlt {
+    final isDark = brightness == Brightness.dark;
+    final base = scaffoldBackgroundColor;
+
+    if (isDark) {
+      // Derive a "Solid Dark Grey" for dark mode.
+      // We lerp with a neutral deep grey (0xFF1A1A1A) to pull the themed background (like Ocean or Warm)
+      // towards a more neutral, solid grey state without completely losing the original tint.
+      return Color.lerp(base, const Color(0xFF1A1A1A), 0.6)!;
+    } else {
+      // For light mode, we create a slightly deeper, "paper-like" grey alternative.
+      // This helps content pop more on pages with lots of tiles.
+      return Color.lerp(base, const Color(0xFFE8E8E8), 0.4)!;
+    }
+  }
+}

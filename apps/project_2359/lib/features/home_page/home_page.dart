@@ -7,6 +7,7 @@ import 'package:project_2359/core/widgets/special_background_generator.dart';
 import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/folder_page/folder_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
+import 'package:project_2359/core/widgets/floating_action_pill.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -88,7 +89,7 @@ class HomePage extends StatelessWidget {
                           targetPage: const FolderPage(
                             initialFolderName: "University Physics",
                           ),
-                          transitionType: ProjectTransitionType.dropUp,
+                          transitionType: ProjectTransitionType.slideLeft,
                           showChevron: false,
                         ),
                       ],
@@ -122,18 +123,12 @@ class HomePage extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        elevation: 0,
-        backgroundColor: theme.colorScheme.primaryContainer.withValues(
-          alpha: 0.8,
-        ),
-        foregroundColor: theme.colorScheme.onPrimaryContainer,
-        icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
-        label: const Text(
-          "New",
-          style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.2),
-        ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionPill(
+        label: "New",
+        icon: FontAwesomeIcons.plus,
+        isPrimary: false,
+        onTap: () {},
       ),
     );
   }
