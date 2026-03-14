@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -38,6 +39,7 @@ class ExpandableFab extends StatefulWidget {
   final String label;
   final IconData icon;
   final bool isPrimary;
+  final Color? backgroundColor;
   final List<FabAction> actions;
 
   const ExpandableFab({
@@ -47,6 +49,7 @@ class ExpandableFab extends StatefulWidget {
     required this.icon,
     required this.actions,
     this.isPrimary = true,
+    this.backgroundColor,
   });
 
   @override
@@ -64,17 +67,17 @@ class _ExpandableFabState extends State<ExpandableFab>
     super.initState();
     _expandCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 580),
-      reverseDuration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 500),
+      reverseDuration: const Duration(milliseconds: 400),
     );
     _rotateCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 14),
+      duration: const Duration(seconds: 20),
     );
     _expandAnim = CurvedAnimation(
       parent: _expandCtrl,
-      curve: Curves.elasticOut,
-      reverseCurve: Curves.easeIn,
+      curve: Curves.easeInOutCubic,
+      reverseCurve: Curves.easeInOutCubic,
     );
   }
 
@@ -137,8 +140,17 @@ class _ExpandableFabState extends State<ExpandableFab>
                   behavior: HitTestBehavior.opaque,
                   onTapUp: (d) => _handleScrimTap(d, screenSize),
                   child: Container(
-                    color: Colors.black.withValues(
-                      alpha: (0.38 * t).clamp(0.0, 0.38),
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment.bottomCenter,
+                        radius: 1.5,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.75 * t),
+                          Colors.black.withValues(alpha: 0.55 * t),
+                          Colors.black.withValues(alpha: 0.95 * t),
+                        ],
+                        stops: const [0.0, 0.4, 1.0],
+                      ),
                     ),
                   ),
                 ),
@@ -178,6 +190,8 @@ class _ExpandableFabState extends State<ExpandableFab>
                       expandedHeight: expandedHeight,
                       actions: widget.actions,
                       onClose: _close,
+                      isPrimary: widget.isPrimary,
+                      backgroundColor: widget.backgroundColor,
                     ),
                   ),
                 ),
@@ -195,6 +209,7 @@ class _ExpandableFabState extends State<ExpandableFab>
                     icon: widget.icon,
                     isPrimary: widget.isPrimary,
                     onTap: widget.actions.isNotEmpty ? _open : null,
+                    backgroundColor: widget.backgroundColor,
                   ),
                 ),
               ),
@@ -216,6 +231,8 @@ class _ExpandedPanel extends StatelessWidget {
   final double expandedHeight;
   final List<FabAction> actions;
   final VoidCallback onClose;
+  final bool isPrimary;
+  final Color? backgroundColor;
 
   const _ExpandedPanel({
     required this.t,
@@ -224,6 +241,8 @@ class _ExpandedPanel extends StatelessWidget {
     required this.expandedHeight,
     required this.actions,
     required this.onClose,
+    required this.isPrimary,
+    this.backgroundColor,
   });
 
   static const double _pillWidth = 148.0;
@@ -235,12 +254,13 @@ class _ExpandedPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final bgColor = _getFabBackgroundColor(context, isPrimary, backgroundColor);
     final width = _lerp(_pillWidth, expandedWidth, t);
     final height = _lerp(_pillHeight, expandedHeight, t);
-    final radius = _lerp(28.0, 20.0, t);
+    final radius = _lerp(28.0, 24.0, t);
 
     // Subtle downward bump at the peak of the spring (weight feel)
-    final shiftDown = sin(t * pi) * 7.0;
+    final shiftDown = sin(t * pi) * 10.0;
 
     // Content appears after the panel is mostly open
     final contentT = ((t - 0.45) / 0.4).clamp(0.0, 1.0);
@@ -251,46 +271,58 @@ class _ExpandedPanel extends StatelessWidget {
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
+          color: bgColor.withValues(alpha: 0.85 * t),
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.1 * t),
-            width: 0.6,
+            color:
+                (isPrimary
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurface)
+                    .withValues(alpha: 0.15 * t),
+            width: 0.8,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.20 * t),
-              blurRadius: 28 * t,
-              offset: Offset(0, 10 * t),
+              color: Colors.black.withValues(alpha: 0.25 * t),
+              blurRadius: 40 * t,
+              spreadRadius: 2 * t,
+              offset: Offset(0, 15 * t),
             ),
           ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(radius),
-          child: Stack(
-            children: [
-              // Actions list
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 72,
-                child: Opacity(
-                  opacity: contentT,
-                  child: _ActionsList(actions: actions, t: t, onClose: onClose),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12 * t, sigmaY: 12 * t),
+            child: Stack(
+              children: [
+                // Actions list
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 80,
+                  child: Opacity(
+                    opacity: contentT,
+                    child: _ActionsList(
+                      actions: actions,
+                      t: t,
+                      onClose: onClose,
+                    ),
+                  ),
                 ),
-              ),
-              // Cancel button pinned at bottom
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Opacity(
-                  opacity: contentT,
-                  child: _CancelRow(onClose: onClose),
+                // Cancel button pinned at bottom
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Opacity(
+                    opacity: contentT,
+                    child: _CancelRow(onClose: onClose),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -315,22 +347,15 @@ class _ActionsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+      physics: const BouncingScrollPhysics(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           for (int i = 0; i < actions.length; i++) ...[
             _ActionRow(action: actions[i], index: i, t: t, onClose: onClose),
-            if (i < actions.length - 1)
-              Divider(
-                height: 1,
-                thickness: 0.5,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.07),
-              ),
+            if (i < actions.length - 1) const SizedBox(height: 12),
           ],
         ],
       ),
@@ -370,41 +395,59 @@ class _ActionRow extends StatelessWidget {
       onTap: () {
         onClose();
         // Fire the action after a short delay so the user sees the collapse
-        Future.delayed(const Duration(milliseconds: 120), action.onTap);
+        Future.delayed(const Duration(milliseconds: 150), action.onTap);
       },
       child: Opacity(
         opacity: itemT,
         child: Transform.translate(
           offset: Offset(0, slideOffset),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 13),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.04),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.03),
+                width: 0.5,
+              ),
+            ),
             child: Row(
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
+                    gradient: LinearGradient(
+                      colors: [
+                        accentColor.withValues(alpha: 0.2),
+                        accentColor.withValues(alpha: 0.08),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                    child: FaIcon(action.icon, size: 15, color: accentColor),
+                    child: FaIcon(action.icon, size: 18, color: accentColor),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Text(
                     action.label,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.95,
+                      ),
+                      letterSpacing: -0.2,
                     ),
                   ),
                 ),
                 FaIcon(
                   FontAwesomeIcons.chevronRight,
-                  size: 11,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.22),
+                  size: 12,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
               ],
             ),
@@ -429,26 +472,31 @@ class _CancelRow extends StatelessWidget {
     return GestureDetector(
       onTap: onClose,
       child: Container(
-        height: 56,
-        margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+        height: 60,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         decoration: BoxDecoration(
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(18),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+            width: 0.5,
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             FaIcon(
               FontAwesomeIcons.xmark,
-              size: 13,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+              size: 14,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
             Text(
-              "Cancel",
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+              "Dismiss",
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                letterSpacing: 0.5,
               ),
             ),
           ],
@@ -467,47 +515,38 @@ class _CollapsedPill extends StatelessWidget {
   final IconData icon;
   final bool isPrimary;
   final VoidCallback? onTap;
+  final Color? backgroundColor;
 
   const _CollapsedPill({
     required this.label,
     required this.icon,
     this.isPrimary = true,
     this.onTap,
+    this.backgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
 
-    final activeColor = isDark
-        ? Color.lerp(cs.primary, Colors.black, 0.4)!
-        : Color.lerp(cs.primary, Colors.white, 0.15)!;
-
-    final bgColor = isPrimary
-        ? activeColor.withValues(alpha: 0.92)
-        : isDark
-        ? Color.lerp(
-            theme.scaffoldBackgroundColor,
-            Colors.white,
-            0.10,
-          )!.withValues(alpha: 0.95)
-        : Color.lerp(
-            theme.scaffoldBackgroundColor,
-            Colors.black,
-            0.04,
-          )!.withValues(alpha: 0.95);
-
+    final bgColor = _getFabBackgroundColor(context, isPrimary, backgroundColor);
     final borderColor = isPrimary
-        ? cs.primary.withValues(alpha: 0.3)
-        : cs.onSurface.withValues(alpha: 0.1);
+        ? cs.primary.withValues(alpha: 0.4)
+        : cs.onSurface.withValues(alpha: 0.15);
 
     return Container(
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: borderColor, width: 0.6),
+        border: Border.all(color: borderColor, width: 0.8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -544,6 +583,42 @@ class _CollapsedPill extends StatelessWidget {
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// HELPER: SHARED BACKGROUND COLOR LOGIC
+// ---------------------------------------------------------------------------
+
+Color _getFabBackgroundColor(
+  BuildContext context,
+  bool isPrimary,
+  Color? overrideColor,
+) {
+  if (overrideColor != null) return overrideColor;
+
+  final theme = Theme.of(context);
+  final cs = theme.colorScheme;
+  final isDark = theme.brightness == Brightness.dark;
+
+  final activeColor = isDark
+      ? Color.lerp(cs.primary, Colors.black, 0.35)!
+      : Color.lerp(cs.primary, Colors.white, 0.1)!;
+
+  if (isPrimary) {
+    return activeColor.withValues(alpha: 0.96);
+  }
+
+  return isDark
+      ? Color.lerp(
+          theme.scaffoldBackgroundColor,
+          Colors.white,
+          0.08,
+        )!.withValues(alpha: 0.95)
+      : Color.lerp(
+          theme.scaffoldBackgroundColor,
+          Colors.black,
+          0.03,
+        )!.withValues(alpha: 0.95);
 }
 
 // ---------------------------------------------------------------------------
