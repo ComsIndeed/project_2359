@@ -3,7 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 
 import 'package:project_2359/app_theme.dart';
-import 'package:project_2359/core/widgets/floating_action_pill.dart';
+import 'package:project_2359/core/widgets/expandable_fab.dart';
 
 class FolderPage extends StatefulWidget {
   final String initialFolderName;
@@ -29,43 +29,57 @@ class _FolderPageState extends State<FolderPage> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundAlt,
-      extendBody: true,
-      body: CustomScrollView(
-        physics: const ClampingScrollPhysics(),
-        slivers: [
-          // COLLAPSING HEADER → APPBAR
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _CollapsingHeaderDelegate(
-              folderName: folderName,
-              topPadding: MediaQuery.of(context).padding.top,
-              onBack: () => Navigator.pop(context),
-              onSourcesTap: () => _SourcesBottomSheet.show(context),
-              onSettingsTap: () {},
-            ),
-          ),
-
-          // SECTION LABEL
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverToBoxAdapter(
-              child: const _SectionLabel(title: "Study Materials"),
-            ),
-          ),
-
-          // MATERIALS LIST
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-            sliver: SliverToBoxAdapter(child: const _StudyMaterialsList()),
-          ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionPill(
+      body: ExpandableFab(
         label: "Create",
         icon: FontAwesomeIcons.circlePlus,
         isPrimary: false,
-        onTap: () {},
+        actions: [
+          FabAction(
+            label: "Flashcards",
+            icon: FontAwesomeIcons.clone,
+            onTap: () {},
+          ),
+          FabAction(
+            label: "Quiz",
+            icon: FontAwesomeIcons.clipboardCheck,
+            onTap: () {},
+          ),
+          FabAction(
+            label: "Summary",
+            icon: FontAwesomeIcons.fileLines,
+            onTap: () {},
+          ),
+        ],
+        child: CustomScrollView(
+          physics: const ClampingScrollPhysics(),
+          slivers: [
+            // COLLAPSING HEADER → APPBAR
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _CollapsingHeaderDelegate(
+                folderName: folderName,
+                topPadding: MediaQuery.of(context).padding.top,
+                onBack: () => Navigator.pop(context),
+                onSourcesTap: () => _SourcesBottomSheet.show(context),
+                onSettingsTap: () {},
+              ),
+            ),
+
+            // SECTION LABEL
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverToBoxAdapter(
+                child: const _SectionLabel(title: "Study Materials"),
+              ),
+            ),
+
+            // MATERIALS LIST
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+              sliver: SliverToBoxAdapter(child: const _StudyMaterialsList()),
+            ),
+          ],
+        ),
       ),
     );
   }

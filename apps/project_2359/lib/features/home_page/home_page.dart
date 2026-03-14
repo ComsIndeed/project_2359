@@ -7,7 +7,7 @@ import 'package:project_2359/core/widgets/special_background_generator.dart';
 import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/folder_page/folder_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
-import 'package:project_2359/core/widgets/floating_action_pill.dart';
+import 'package:project_2359/core/widgets/expandable_fab.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -18,117 +18,130 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final topBgHeight = constraints.maxHeight * 0.10;
-
-          return Stack(
-            children: [
-              // TOP GENERATED BACKGROUND (FULL SCREEN)
-              Positioned.fill(
-                child: ShaderMask(
-                  shaderCallback: (Rect bounds) {
-                    return LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.white.withValues(alpha: 0.5),
-                        Colors.white.withValues(alpha: 0.12),
-                        Colors.white.withValues(alpha: 0.05),
-                      ],
-                      stops: const [0.0, 0.3, 1.0],
-                    ).createShader(bounds);
-                  },
-                  blendMode: BlendMode.dstIn,
-                  child: SpecialBackgroundGenerator(
-                    seed: GenerationSeed.fromString("home_v2"),
-                    label: "Project 2359",
-                    icon: FontAwesomeIcons.bolt,
-                    type: SpecialBackgroundType.vibrantGradients,
-                    showBorder: false,
-                    borderRadius: 0,
-                    child: const SizedBox.expand(),
-                  ),
-                ),
-              ),
-
-              // MAIN CONTENT
-              SafeArea(
-                bottom: false,
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  physics: const ClampingScrollPhysics(),
-                  children: [
-                    SizedBox(height: topBgHeight * 0.3),
-                    const _HomeHeader(),
-                    const SizedBox(height: 24),
-                    // REFINED SEARCH BAR
-                    const _HomeSearchBar(),
-                    const SizedBox(height: 48),
-
-                    // PINNED SECTION
-                    const _SectionHeader(title: "Pinned"),
-                    const SizedBox(height: 8),
-                    ProjectListGroup(
-                      backgroundColor: theme.colorScheme.surfaceContainer,
-                      children: [
-                        ProjectListTile.simple(
-                          label: "University Physics",
-                          date: "2:40 PM",
-                          sources: [
-                            (
-                              label: "Mechanics.pdf",
-                              icon: FontAwesomeIcons.filePdf,
-                            ),
-                            (
-                              label: "Waves.doc",
-                              icon: FontAwesomeIcons.fileWord,
-                            ),
-                            (label: "Notes", icon: FontAwesomeIcons.fileLines),
-                          ],
-                          targetPage: const FolderPage(
-                            initialFolderName: "University Physics",
-                          ),
-                          transitionType: ProjectTransitionType.slideLeft,
-                          showChevron: false,
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // ALL COLLECTIONS SECTION
-                    const _SectionHeader(title: "Today"),
-                    const SizedBox(height: 8),
-                    _FolderList(
-                      backgroundColor: theme.colorScheme.surfaceContainer,
-                    ),
-                    const SizedBox(height: 48),
-                    Center(
-                      child: Text(
-                        "4 Collections",
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.4,
-                          ),
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionPill(
+      body: ExpandableFab(
         label: "New",
         icon: FontAwesomeIcons.plus,
         isPrimary: false,
-        onTap: () {},
+        actions: [
+          FabAction(
+            label: "New Folder",
+            icon: FontAwesomeIcons.folderPlus,
+            onTap: () {},
+          ),
+          FabAction(
+            label: "Import File",
+            icon: FontAwesomeIcons.fileImport,
+            onTap: () {},
+          ),
+        ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final topBgHeight = constraints.maxHeight * 0.10;
+
+            return Stack(
+              children: [
+                // TOP GENERATED BACKGROUND (FULL SCREEN)
+                Positioned.fill(
+                  child: ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withValues(alpha: 0.5),
+                          Colors.white.withValues(alpha: 0.12),
+                          Colors.white.withValues(alpha: 0.05),
+                        ],
+                        stops: const [0.0, 0.3, 1.0],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: SpecialBackgroundGenerator(
+                      seed: GenerationSeed.fromString("home_v2"),
+                      label: "Project 2359",
+                      icon: FontAwesomeIcons.bolt,
+                      type: SpecialBackgroundType.vibrantGradients,
+                      showBorder: false,
+                      borderRadius: 0,
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+                ),
+
+                // MAIN CONTENT
+                SafeArea(
+                  bottom: false,
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    physics: const ClampingScrollPhysics(),
+                    children: [
+                      SizedBox(height: topBgHeight * 0.3),
+                      const _HomeHeader(),
+                      const SizedBox(height: 24),
+                      // REFINED SEARCH BAR
+                      const _HomeSearchBar(),
+                      const SizedBox(height: 48),
+
+                      // PINNED SECTION
+                      const _SectionHeader(title: "Pinned"),
+                      const SizedBox(height: 8),
+                      ProjectListGroup(
+                        backgroundColor: theme.colorScheme.surfaceContainer,
+                        children: [
+                          ProjectListTile.simple(
+                            label: "University Physics",
+                            date: "2:40 PM",
+                            sources: [
+                              (
+                                label: "Mechanics.pdf",
+                                icon: FontAwesomeIcons.filePdf,
+                              ),
+                              (
+                                label: "Waves.doc",
+                                icon: FontAwesomeIcons.fileWord,
+                              ),
+                              (
+                                label: "Notes",
+                                icon: FontAwesomeIcons.fileLines,
+                              ),
+                            ],
+                            targetPage: const FolderPage(
+                              initialFolderName: "University Physics",
+                            ),
+                            transitionType: ProjectTransitionType.slideLeft,
+                            showChevron: false,
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // ALL COLLECTIONS SECTION
+                      const _SectionHeader(title: "Today"),
+                      const SizedBox(height: 8),
+                      _FolderList(
+                        backgroundColor: theme.colorScheme.surfaceContainer,
+                      ),
+                      const SizedBox(height: 48),
+                      Center(
+                        child: Text(
+                          "4 Collections",
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.4,
+                            ),
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
