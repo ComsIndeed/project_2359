@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:project_2359/core/widgets/card_button.dart';
+import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/core/widgets/special_background_generator.dart';
+import 'package:project_2359/core/widgets/special_search_bar.dart';
 import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/folder_page/folder_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
-import 'package:project_2359/core/widgets/expandable_fab.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -19,22 +20,21 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: ExpandableFab(
-        label: "New",
-        icon: FontAwesomeIcons.plus,
-        isPrimary: false,
-        actions: [
-          FabAction(
-            label: "New Folder",
-            icon: FontAwesomeIcons.folderPlus,
-            onTap: () {},
-          ),
-          FabAction(
-            label: "Import File",
-            icon: FontAwesomeIcons.fileImport,
-            onTap: () {},
-          ),
-        ],
-        child: LayoutBuilder(
+        collapsed: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FaIcon(FontAwesomeIcons.plus, size: 14),
+            SizedBox(width: 8),
+            Text(
+              "New",
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        expanded: const _NewButtonExpandedContent(),
+        body: LayoutBuilder(
           builder: (context, constraints) {
             final topBgHeight = constraints.maxHeight * 0.10;
 
@@ -79,7 +79,7 @@ class HomePage extends StatelessWidget {
                       const _HomeHeader(),
                       const SizedBox(height: 24),
                       // REFINED SEARCH BAR
-                      const _HomeSearchBar(),
+                      const SpecialSearchBar(),
                       const SizedBox(height: 48),
 
                       // PINNED SECTION
@@ -141,53 +141,6 @@ class HomePage extends StatelessWidget {
               ],
             );
           },
-        ),
-      ),
-    );
-  }
-}
-
-class _HomeSearchBar extends StatelessWidget {
-  const _HomeSearchBar();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      height: 42,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
-          width: 0.5,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {},
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                FaIcon(
-                  FontAwesomeIcons.magnifyingGlass,
-                  size: 13,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  "Search",
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                    letterSpacing: 0.1,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
@@ -366,6 +319,90 @@ class _HeaderActions extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _NewButtonExpandedContent extends StatelessWidget {
+  const _NewButtonExpandedContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Text(
+              "Create New",
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          ProjectListGroup(
+            backgroundColor: theme.colorScheme.surfaceContainer,
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            children: [
+              ProjectListTile.simple(
+                label: "New Collection",
+                icon: FontAwesomeIcons.folderPlus,
+                showDivider: true,
+                onTap: () {},
+                showChevron: false,
+              ),
+              ProjectListTile.simple(
+                label: "Scan Documents",
+                icon: FontAwesomeIcons.camera,
+                showDivider: true,
+                onTap: () {},
+                showChevron: false,
+              ),
+              ProjectListTile.simple(
+                label: "Upload File",
+                icon: FontAwesomeIcons.fileArrowUp,
+                showDivider: false,
+                onTap: () {},
+                showChevron: false,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // A suggested action area
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              "Recent suggestions",
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          ProjectListGroup(
+            backgroundColor: theme.colorScheme.surfaceContainer.withValues(
+              alpha: 0.5,
+            ),
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            children: [
+              ProjectListTile.simple(
+                label: "Summarize Physics Notes",
+                icon: FontAwesomeIcons.wandMagicSparkles,
+                onTap: () {},
+                showChevron: false,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
     );
   }
 }
