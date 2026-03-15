@@ -165,11 +165,20 @@ class _ExpandableFabState extends State<ExpandableFab> {
                             : () => setState(() => _isOpen = true),
                         child: Padding(
                           key: _isOpen ? null : _collapsedKey,
-                          padding: const EdgeInsets.all(16.0),
+                          padding: EdgeInsets.all(_isOpen ? 8.0 : 16.0),
                           child: ClipRect(
-                            child: Center(
+                            child: Align(
+                              alignment: Alignment.bottomCenter,
                               child: AnimatedSwitcher(
                                 duration: widget.duration,
+                                layoutBuilder:
+                                    (currentChild, previousChildren) => Stack(
+                                      alignment: Alignment.bottomCenter,
+                                      children: [
+                                        ...previousChildren,
+                                        ?currentChild,
+                                      ],
+                                    ),
                                 child: _isOpen
                                     ? KeyedSubtree(
                                         key: const ValueKey("expanded"),

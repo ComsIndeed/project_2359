@@ -542,107 +542,44 @@ class _FolderFabContentState extends State<_FolderFabContent> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    // Adaptive primary color that isn't too "punchy", matching FloatingActionPill
+    final actionColor = isDark
+        ? Color.lerp(cs.primary, Colors.black, 0.4)!
+        : Color.lerp(cs.primary, Colors.white, 0.15)!;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // HEADER
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: cs.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: FaIcon(
-                  FontAwesomeIcons.wandMagicSparkles,
-                  size: 16,
-                  color: cs.primary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Generate Materials",
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  Text(
-                    "Select format and sources to begin",
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: cs.onSurface.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // SECTION 1: FORMATS
-          const _SubHeader(title: "Choose Formats"),
-          const SizedBox(height: 8),
+          // SECTION 1: SOURCES
+          const SizedBox(height: 4),
           ProjectListGroup(
-            backgroundColor: cs.surfaceContainer.withValues(alpha: 0.5),
-            children: [
-              for (int i = 0; i < _types.length; i++)
-                ProjectListTile.simple(
-                  label: _types[i].label,
-                  icon: _types[i].icon,
-                  showDivider: i < _types.length - 1,
-                  backgroundColor: Colors.transparent,
-                  onTap: () {
-                    setState(() {
-                      if (_selectedTypes.contains(_types[i].id)) {
-                        if (_selectedTypes.length > 1) {
-                          _selectedTypes.remove(_types[i].id);
-                        }
-                      } else {
-                        _selectedTypes.add(_types[i].id);
-                      }
-                    });
-                  },
-                  trailing: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: _selectedTypes.contains(_types[i].id)
-                        ? FaIcon(
-                            FontAwesomeIcons.circleCheck,
-                            size: 18,
-                            color: cs.primary,
-                            key: const ValueKey('checked'),
-                          )
-                        : FaIcon(
-                            FontAwesomeIcons.circle,
-                            size: 18,
-                            color: cs.onSurface.withValues(alpha: 0.1),
-                            key: const ValueKey('unchecked'),
-                          ),
-                  ),
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // SECTION 2: SOURCES
-          const _SubHeader(title: "Select Sources"),
-          const SizedBox(height: 8),
-          ProjectListGroup(
-            backgroundColor: cs.surfaceContainer.withValues(alpha: 0.5),
+            backgroundColor: cs.onSurface.withValues(alpha: 0.04),
             children: [
               for (int i = 0; i < _folderSources.length; i++)
-                ProjectListTile.simple(
-                  label: _folderSources[i].name,
-                  icon: _folderSources[i].icon,
+                ProjectListTile(
+                  title: Text(
+                    _folderSources[i].name,
+                    style: TextStyle(
+                      color: _selectedSources.contains(i)
+                          ? cs.onSurface
+                          : cs.onSurface.withValues(alpha: 0.25),
+                    ),
+                  ),
+                  leading: FaIcon(
+                    _folderSources[i].icon,
+                    size: 18,
+                    color: _selectedSources.contains(i)
+                        ? cs.onSurface
+                        : cs.onSurface.withValues(alpha: 0.25),
+                  ),
                   showDivider: i < _folderSources.length - 1,
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: _selectedSources.contains(i)
+                      ? Colors.green.withValues(alpha: 0.08)
+                      : Colors.transparent,
                   onTap: () {
                     setState(() {
                       if (_selectedSources.contains(i)) {
@@ -652,35 +589,51 @@ class _FolderFabContentState extends State<_FolderFabContent> {
                       }
                     });
                   },
-                  trailing: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: _selectedSources.contains(i)
-                        ? FaIcon(
-                            FontAwesomeIcons.squareCheck,
-                            size: 18,
-                            color: cs.primary,
-                            key: const ValueKey('checked'),
-                          )
-                        : FaIcon(
-                            FontAwesomeIcons.square,
-                            size: 18,
-                            color: cs.onSurface.withValues(alpha: 0.1),
-                            key: const ValueKey('unchecked'),
-                          ),
+                  trailing: FaIcon(
+                    _selectedSources.contains(i)
+                        ? FontAwesomeIcons.circleCheck
+                        : FontAwesomeIcons.circle,
+                    size: 16,
+                    color: _selectedSources.contains(i)
+                        ? (isDark ? Colors.greenAccent : Colors.green)
+                        : cs.onSurface.withValues(alpha: 0.1),
                   ),
                 ),
             ],
           ),
 
-          const SizedBox(height: 24),
+          // SECTION 2: FORMATS
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              for (int i = 0; i < _types.length; i++) ...[
+                Expanded(
+                  child: _FormatTile(
+                    label: _types[i].label,
+                    icon: _types[i].icon,
+                    isSelected: _selectedTypes.contains(_types[i].id),
+                    onTap: () {
+                      setState(() {
+                        if (_selectedTypes.contains(_types[i].id)) {
+                          _selectedTypes.remove(_types[i].id);
+                        } else {
+                          _selectedTypes.add(_types[i].id);
+                        }
+                      });
+                    },
+                  ),
+                ),
+                if (i < _types.length - 1) const SizedBox(width: 8),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
 
           // SECTION 3: STRATEGY
-          const _SubHeader(title: "Learning Strategy"),
-          const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: cs.surfaceContainer.withValues(alpha: 0.5),
+              color: cs.onSurface.withValues(alpha: 0.04),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: cs.onSurface.withValues(alpha: 0.05)),
             ),
@@ -688,13 +641,11 @@ class _FolderFabContentState extends State<_FolderFabContent> {
               children: [
                 _StrategyButton(
                   label: "Spaced",
-                  icon: FontAwesomeIcons.clockRotateLeft,
                   isSelected: _strategy == 'Spaced',
                   onTap: () => setState(() => _strategy = 'Spaced'),
                 ),
                 _StrategyButton(
                   label: "Cram",
-                  icon: FontAwesomeIcons.bolt,
                   isSelected: _strategy == 'Cram',
                   onTap: () => setState(() => _strategy = 'Cram'),
                 ),
@@ -702,60 +653,62 @@ class _FolderFabContentState extends State<_FolderFabContent> {
             ),
           ),
 
-          const SizedBox(height: 32),
-
           // GENERATE BUTTON
-          ElevatedButton(
-            onPressed: _selectedSources.isEmpty || _selectedTypes.isEmpty
-                ? null
-                : () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: cs.primary,
-              foregroundColor: cs.onPrimary,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [actionColor, actionColor.withValues(alpha: 0.8)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              elevation: 0,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const FaIcon(FontAwesomeIcons.wandSparkles, size: 14),
-                const SizedBox(width: 10),
-                Text(
-                  "Begin Generation",
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: cs.onPrimary,
-                  ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: actionColor.withValues(alpha: 0.25),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
+            child: ElevatedButton(
+              onPressed: _selectedSources.isEmpty || _selectedTypes.isEmpty
+                  ? null
+                  : () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                foregroundColor: cs.onPrimary,
+                shadowColor: Colors.transparent,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 0,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Begin Generation",
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: cs.onPrimary,
+                      letterSpacing: 0.5,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  FaIcon(
+                    FontAwesomeIcons.chevronRight,
+                    size: 14,
+                    color: cs.onPrimary.withValues(alpha: 0.7),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
         ],
-      ),
-    );
-  }
-}
-
-class _SubHeader extends StatelessWidget {
-  final String title;
-  const _SubHeader({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        title.toUpperCase(),
-        style: theme.textTheme.labelSmall?.copyWith(
-          fontWeight: FontWeight.w800,
-          letterSpacing: 1.0,
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-        ),
       ),
     );
   }
@@ -763,13 +716,11 @@ class _SubHeader extends StatelessWidget {
 
 class _StrategyButton extends StatelessWidget {
   final String label;
-  final IconData icon;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _StrategyButton({
     required this.label,
-    required this.icon,
     required this.isSelected,
     required this.onTap,
   });
@@ -783,10 +734,12 @@ class _StrategyButton extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? cs.surface : Colors.transparent,
+            color: isSelected
+                ? theme.scaffoldBackgroundColor
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             boxShadow: isSelected
                 ? [
@@ -798,24 +751,82 @@ class _StrategyButton extends StatelessWidget {
                   ]
                 : null,
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Center(
+            child: Text(
+              label,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: isSelected
+                    ? cs.onSurface
+                    : cs.onSurface.withValues(alpha: 0.25),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FormatTile extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _FormatTile({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Material(
+      color: isSelected
+          ? Colors.green.withValues(alpha: 0.08)
+          : cs.onSurface.withValues(alpha: 0.04),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? (isDark ? Colors.greenAccent : Colors.green).withValues(
+                      alpha: 0.2,
+                    )
+                  : cs.onSurface.withValues(alpha: 0.05),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               FaIcon(
                 icon,
-                size: 12,
+                size: 20,
                 color: isSelected
-                    ? cs.primary
-                    : cs.onSurface.withValues(alpha: 0.4),
+                    ? (isDark ? Colors.greenAccent : Colors.green)
+                    : cs.onSurface.withValues(alpha: 0.25),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(height: 8),
               Text(
                 label,
-                style: theme.textTheme.labelMedium?.copyWith(
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 10,
                   color: isSelected
                       ? cs.onSurface
-                      : cs.onSurface.withValues(alpha: 0.4),
+                      : cs.onSurface.withValues(alpha: 0.25),
                 ),
               ),
             ],
