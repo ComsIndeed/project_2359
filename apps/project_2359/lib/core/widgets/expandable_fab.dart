@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:project_2359/app_theme.dart';
 
 /// An expandable FAB that smoothly animates between collapsed and expanded sizes.
 ///
@@ -21,8 +20,8 @@ class ExpandableFab extends StatefulWidget {
     required this.body,
     super.key,
     this.backgroundColor,
-    this.duration = const Duration(milliseconds: 800),
-    this.curve = Curves.easeOutBack,
+    this.duration = const Duration(milliseconds: 400),
+    this.curve = const Cubic(0.4, 0.0, 0.2, 1.12),
     required this.collapsed,
     required this.expanded,
   });
@@ -74,59 +73,102 @@ class _ExpandableFabState extends State<ExpandableFab> {
         ? (_isOpen ? expandedHeight : _collapsedSize!.height)
         : null;
 
-    return Stack(
-      children: [
-        widget.body,
-        AnimatedPositioned(
-          bottom: _isOpen ? 8 : 24,
-          left: 0,
-          right: 0,
-          duration: widget.duration,
-          curve: widget.curve,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: IntrinsicWidth(
+    return PopScope(
+      canPop: !_isOpen,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_isOpen) {
+          setState(() => _isOpen = false);
+        }
+      },
+      child: Container(
+        color: Colors.black,
+        child: Stack(
+          children: [
+            AnimatedScale(
+              scale: _isOpen ? 0.98 : 1.0,
+              duration: widget.duration,
+              curve: widget.curve,
               child: AnimatedContainer(
-                width: targetWidth,
-                height: targetHeight,
-                decoration: ShapeDecoration(
-                  color:
-                      widget.backgroundColor ??
-                      Theme.of(context).colorScheme.surface,
-                  shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-                  ),
-                ),
                 duration: widget.duration,
                 curve: widget.curve,
                 clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: () => setState(() => _isOpen = !_isOpen),
-                  child: Padding(
-                    key: _isOpen ? null : _collapsedKey,
-                    padding: const EdgeInsets.all(16.0),
-                    child: ClipRect(
-                      child: Center(
-                        child: AnimatedSwitcher(
-                          duration: widget.duration,
-                          child: _isOpen
-                              ? KeyedSubtree(
-                                  key: const ValueKey("expanded"),
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      maxWidth: expandedWidth,
-                                      maxHeight: expandedHeight,
-                                    ),
-                                    child: widget.expanded,
-                                  ),
-                                )
-                              : KeyedSubtree(
-                                  key: const ValueKey("collapsed"),
-                                  child: widget.collapsed,
-                                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(_isOpen ? 32 : 0),
+                ),
+                child: widget.body,
+              ),
+            ),
+            IgnorePointer(
+              ignoring: !_isOpen,
+              child: GestureDetector(
+                onTap: () => setState(() => _isOpen = false),
+                behavior: HitTestBehavior.opaque,
+                child: AnimatedOpacity(
+                  opacity: _isOpen ? 0.7 : 0.0,
+                  duration: widget.duration,
+                  curve: widget.curve,
+                  child: Container(color: Colors.black),
+                ),
+              ),
+            ),
+            AnimatedPositioned(
+              bottom: _isOpen ? 8 : 24,
+              left: 0,
+              right: 0,
+              duration: widget.duration,
+              curve: widget.curve,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: IntrinsicWidth(
+                  child: AnimatedContainer(
+                    width: targetWidth,
+                    height: targetHeight,
+                    decoration: ShapeDecoration(
+                      color:
+                          widget.backgroundColor ??
+                          Theme.of(context).colorScheme.surface,
+                      shape: RoundedSuperellipseBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                    ),
+                    duration: widget.duration,
+                    curve: widget.curve,
+                    clipBehavior: Clip.antiAlias,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _isOpen
+                            ? null
+                            : () => setState(() => _isOpen = true),
+                        child: Padding(
+                          key: _isOpen ? null : _collapsedKey,
+                          padding: const EdgeInsets.all(16.0),
+                          child: ClipRect(
+                            child: Center(
+                              child: AnimatedSwitcher(
+                                duration: widget.duration,
+                                child: _isOpen
+                                    ? KeyedSubtree(
+                                        key: const ValueKey("expanded"),
+                                        child: ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxWidth: expandedWidth,
+                                            maxHeight: expandedHeight,
+                                          ),
+                                          child: widget.expanded,
+                                        ),
+                                      )
+                                    : KeyedSubtree(
+                                        key: const ValueKey("collapsed"),
+                                        child: widget.collapsed,
+                                      ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -134,9 +176,9 @@ class _ExpandableFabState extends State<ExpandableFab> {
                 ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
