@@ -30,8 +30,8 @@ class _FolderPageState extends State<FolderPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundAlt,
       body: ExpandableFab(
-        expandedWidth: MediaQuery.of(context).size.width * 0.92,
-        expandedHeight: MediaQuery.of(context).size.height * 0.8,
+        // expandedWidth: MediaQuery.of(context).size.width * 0.92,
+        // expandedHeight: MediaQuery.of(context).size.height * 0.8,
         collapsed: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -617,7 +617,7 @@ class _FolderFabContentState extends State<_FolderFabContent> {
       layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
         return Stack(children: [...previousChildren, ?currentChild]);
       },
-      child: SizedBox.expand(key: key, child: currentWidget),
+      child: KeyedSubtree(key: key, child: currentWidget),
     );
   }
 
