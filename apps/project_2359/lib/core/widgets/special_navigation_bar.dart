@@ -34,7 +34,6 @@ class _SpecialNavigationBarState extends State<SpecialNavigationBar>
     with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final activeItem = widget.items[widget.currentIndex];
     final hasActions = activeItem.pageActions != null;
 

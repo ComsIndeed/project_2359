@@ -9,6 +9,9 @@ import 'package:project_2359/core/widgets/special_search_bar.dart';
 import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/folder_page/folder_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
+import 'package:project_2359/core/study_material_service.dart';
+import 'package:project_2359/app_database.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -105,7 +108,8 @@ class HomePage extends StatelessWidget {
                                 icon: FontAwesomeIcons.fileLines,
                               ),
                             ],
-                            targetPage: const FolderPage(
+                            targetPage: FolderPage(
+                              folderId: 'physics_dummy',
                               initialFolderName: "University Physics",
                             ),
                             transitionType: ProjectTransitionType.slideLeft,
@@ -176,74 +180,54 @@ class _FolderList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final folders = [
-      (
-        label: "Machine Learning",
-        date: "2:40 PM",
-        sources: [
-          (label: "ML_Foundations.pdf", icon: FontAwesomeIcons.filePdf),
-          (label: "Dataset_v2.csv", icon: FontAwesomeIcons.fileCsv),
-          (label: "Summary", icon: FontAwesomeIcons.fileLines),
-        ],
-      ),
-      (
-        label: "Japanese N1 Grammar",
-        date: "Yesterday",
-        sources: [
-          (label: "Particles.doc", icon: FontAwesomeIcons.fileWord),
-          (label: "Kanji_List", icon: FontAwesomeIcons.fileLines),
-        ],
-      ),
-      (
-        label: "Organic Chemistry",
-        date: "Monday",
-        sources: [
-          (label: "Reactions.pdf", icon: FontAwesomeIcons.filePdf),
-          (label: "LabNotes.txt", icon: FontAwesomeIcons.fileCode),
-          (label: "Diagrams", icon: FontAwesomeIcons.fileImage),
-        ],
-      ),
-      (
-        label: "World History v2",
-        date: "Oct 12",
-        sources: [
-          (label: "Timeline", icon: FontAwesomeIcons.fileLines),
-          (label: "Map_Data", icon: FontAwesomeIcons.map),
-        ],
-      ),
-      (
-        label: "Cooking Secrets",
-        date: "Sept 30",
-        sources: [
-          (label: "French_Base", icon: FontAwesomeIcons.fileLines),
-          (label: "Spices_Table", icon: FontAwesomeIcons.fileCsv),
-        ],
-      ),
-      (
-        label: "Guitar Theory",
-        date: "Aug 15",
-        sources: [
-          (label: "Scales.pdf", icon: FontAwesomeIcons.filePdf),
-          (label: "Modes_Guide", icon: FontAwesomeIcons.fileLines),
-        ],
-      ),
-    ];
+    final theme = Theme.of(context);
+    final service = context.read<StudyMaterialService>();
 
-    return ProjectListGroup(
-      backgroundColor: backgroundColor,
-      children: [
-        for (int i = 0; i < folders.length; i++) ...[
-          ProjectListTile.simple(
-            label: folders[i].label,
-            date: folders[i].date,
-            sources: folders[i].sources,
-            targetPage: FolderPage(initialFolderName: folders[i].label),
-            transitionType: ProjectTransitionType.slideLeft,
-            showDivider: i < folders.length - 1,
-            showChevron: false,
-          ),
-        ],
-      ],
+    return StreamBuilder<List<StudyFolderItem>>(
+      stream: service.watchAllFolders(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final folders = snapshot.data ?? [];
+
+        if (folders.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: Text(
+                "No collections yet. Create one below!",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                ),
+              ),
+            ),
+          );
+        }
+
+        return ProjectListGroup(
+          backgroundColor: backgroundColor,
+          children: [
+            for (int i = 0; i < folders.length; i++) ...[
+              ProjectListTile.simple(
+                label: folders[i].name,
+                date:
+                    "Recent", // In a real app, you'd format folders[i].updatedAt
+                sources:
+                    const [], // TODO: Link sources to folders and display here
+                targetPage: FolderPage(
+                  folderId: folders[i].id,
+                  initialFolderName: folders[i].name,
+                ),
+                transitionType: ProjectTransitionType.slideLeft,
+                showDivider: i < folders.length - 1,
+                showChevron: false,
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 }
@@ -323,15 +307,73 @@ class _HeaderActions extends StatelessWidget {
   }
 }
 
-class _NewButtonExpandedContent extends StatelessWidget {
+class _NewButtonExpandedContent extends StatefulWidget {
   const _NewButtonExpandedContent();
+
+  @override
+  State<_NewButtonExpandedContent> createState() =>
+      _NewButtonExpandedContentState();
+}
+
+class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
+  final TextEditingController _folderNameController = TextEditingController();
+  bool _isCreatingFolder = false;
+
+  Future<void> _createFolder() async {
+    final name = _folderNameController.text.trim();
+    if (name.isEmpty) return;
+
+    setState(() => _isCreatingFolder = true);
+    try {
+      final service = context.read<StudyMaterialService>();
+      final id = DateTime.now().millisecondsSinceEpoch.toString();
+      await service.insertFolder(
+        StudyFolderItemsCompanion.insert(
+          id: id,
+          name: name,
+          createdAt: DateTime.now().toIso8601String(),
+          updatedAt: DateTime.now().toIso8601String(),
+        ),
+      );
+      _folderNameController.clear();
+      if (mounted) {
+        // Close FAB (assuming it's controlled via a scaffold or state)
+        // For now, just show success
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Collection '$name' created!"),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error: $e"),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isCreatingFolder = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _folderNameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.only(bottom: 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -339,24 +381,125 @@ class _NewButtonExpandedContent extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Text(
-              "Create New",
+              "Quick Access",
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 letterSpacing: -0.5,
               ),
             ),
           ),
+
+          // PREMIUM FOLDER CREATION BOX
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cs.primary.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: cs.primary.withValues(alpha: 0.1)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    FaIcon(
+                      FontAwesomeIcons.folderPlus,
+                      size: 14,
+                      color: cs.primary,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      "NEW COLLECTION",
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: cs.primary,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _folderNameController,
+                  decoration: InputDecoration(
+                    hintText: "Enter Name...",
+                    hintStyle: TextStyle(
+                      color: cs.onSurface.withValues(alpha: 0.2),
+                    ),
+                    filled: true,
+                    fillColor: theme.scaffoldBackgroundColor,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: cs.onSurface.withValues(alpha: 0.05),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: cs.onSurface.withValues(alpha: 0.05),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: cs.primary, width: 1.5),
+                    ),
+                  ),
+                  onSubmitted: (_) => _createFolder(),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isCreatingFolder ? null : _createFolder,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: cs.primary,
+                      foregroundColor: cs.onPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: _isCreatingFolder
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                            ),
+                          )
+                        : const Text(
+                            "Create Collection",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              "More Options",
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
           ProjectListGroup(
             backgroundColor: theme.colorScheme.surfaceContainer,
             margin: const EdgeInsets.symmetric(horizontal: 8),
             children: [
-              ProjectListTile.simple(
-                label: "New Collection",
-                icon: FontAwesomeIcons.folderPlus,
-                showDivider: true,
-                onTap: () {},
-                showChevron: false,
-              ),
               ProjectListTile.simple(
                 label: "Scan Documents",
                 icon: FontAwesomeIcons.camera,
@@ -378,7 +521,7 @@ class _NewButtonExpandedContent extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              "Recent suggestions",
+              "Recent Suggestions",
               style: theme.textTheme.labelMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                 fontWeight: FontWeight.w600,
@@ -400,7 +543,6 @@ class _NewButtonExpandedContent extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );

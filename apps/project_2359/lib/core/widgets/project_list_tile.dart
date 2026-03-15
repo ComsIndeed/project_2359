@@ -64,7 +64,7 @@ class ProjectListTile extends StatelessWidget {
 
   /// Shorthand constructor for a simple text-based tile
   factory ProjectListTile.simple({
-    key,
+    Key? key,
     required String label,
     String? subLabel,
     IconData? icon,

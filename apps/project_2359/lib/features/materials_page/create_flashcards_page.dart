@@ -27,9 +27,9 @@ class _FlashcardEntry {
 }
 
 class CreateFlashcardsPage extends StatefulWidget {
-  final String folderId;
+  final String? folderId;
 
-  const CreateFlashcardsPage({super.key, required this.folderId});
+  const CreateFlashcardsPage({super.key, this.folderId});
 
   @override
   State<CreateFlashcardsPage> createState() => _CreateFlashcardsPageState();
@@ -134,9 +134,30 @@ class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
       final service = context.read<StudyMaterialService>();
       final materialId = const Uuid().v4();
 
+      String finalFolderId;
+      if (widget.folderId != null) {
+        finalFolderId = widget.folderId!;
+      } else {
+        final folders = await service.getAllFolders();
+        if (folders.isEmpty) {
+          // Create a default folder
+          finalFolderId = 'default_folder';
+          await service.insertFolder(
+            StudyFolderItemsCompanion.insert(
+              id: finalFolderId,
+              name: 'Unorganized',
+              createdAt: DateTime.now().toIso8601String(),
+              updatedAt: DateTime.now().toIso8601String(),
+            ),
+          );
+        } else {
+          finalFolderId = folders.first.id;
+        }
+      }
+
       final material = StudyMaterialItemsCompanion(
         id: Value(materialId),
-        folderId: Value(widget.folderId),
+        folderId: Value(finalFolderId),
         name: Value(materialName),
       );
 

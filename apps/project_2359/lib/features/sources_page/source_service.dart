@@ -9,6 +9,22 @@ class SourceService {
     return await _db.select(_db.sourceItems).get();
   }
 
+  Stream<List<SourceItem>> watchAllSources() {
+    return _db.select(_db.sourceItems).watch();
+  }
+
+  Future<List<SourceItem>> getSourcesByFolderId(String folderId) async {
+    return await (_db.select(
+      _db.sourceItems,
+    )..where((t) => t.folderId.equals(folderId))).get();
+  }
+
+  Stream<List<SourceItem>> watchSourcesByFolderId(String folderId) {
+    return (_db.select(
+      _db.sourceItems,
+    )..where((t) => t.folderId.equals(folderId))).watch();
+  }
+
   Future<SourceItem?> getSourceById(String id) async {
     return await (_db.select(
       _db.sourceItems,

@@ -37,11 +37,28 @@ class ExpandableFab extends StatefulWidget {
   });
 
   @override
-  State<ExpandableFab> createState() => _ExpandableFabState();
+  State<ExpandableFab> createState() => ExpandableFabState();
+
+  static ExpandableFabState of(BuildContext context) {
+    final state = context.findAncestorStateOfType<ExpandableFabState>();
+    if (state == null) {
+      throw FlutterError(
+        'ExpandableFab.of() called with a context that does not contain an ExpandableFab.',
+      );
+    }
+    return state;
+  }
 }
 
-class _ExpandableFabState extends State<ExpandableFab> {
+class ExpandableFabState extends State<ExpandableFab> {
   bool _isOpen = false;
+
+  void close() {
+    if (_isOpen) {
+      setState(() => _isOpen = false);
+    }
+  }
+
   Size? _collapsedSize;
   Size? _expandedSize;
 

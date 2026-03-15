@@ -19,7 +19,9 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
     LoadSourcesEvent event,
     Emitter<SourcesPageState> emit,
   ) async {
-    final sources = await sourceService.getAllSources();
+    final sources = event.folderId != null
+        ? await sourceService.getSourcesByFolderId(event.folderId!)
+        : await sourceService.getAllSources();
     emit(SourcesPageStateLoaded(sources: sources));
   }
 
@@ -40,6 +42,7 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
       await sourceService.insertSource(
         SourceItemsCompanion.insert(
           id: sourceId,
+          folderId: Value(event.folderId),
           label: file.name,
           path: Value(file.path),
           type: 'document',
@@ -57,7 +60,9 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
       );
     }
 
-    final sources = await sourceService.getAllSources();
+    final sources = event.folderId != null
+        ? await sourceService.getSourcesByFolderId(event.folderId!)
+        : await sourceService.getAllSources();
     emit(SourcesPageStateLoaded(sources: sources));
   }
 

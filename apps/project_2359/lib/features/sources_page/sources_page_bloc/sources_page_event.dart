@@ -5,12 +5,14 @@ abstract class SourcesPageEvent {
 }
 
 class LoadSourcesEvent extends SourcesPageEvent {
-  const LoadSourcesEvent();
+  final String? folderId;
+  const LoadSourcesEvent({this.folderId});
 }
 
 class ImportDocumentsEvent extends SourcesPageEvent {
   final List<PlatformFile> files;
-  const ImportDocumentsEvent(this.files);
+  final String? folderId;
+  const ImportDocumentsEvent(this.files, {this.folderId});
 }
 
 class DeleteSourceEvent extends SourcesPageEvent {

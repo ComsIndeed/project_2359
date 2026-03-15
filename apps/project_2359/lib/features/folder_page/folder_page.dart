@@ -1,15 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
+import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show compute;
+import 'package:llm_json_stream/llm_json_stream.dart';
+import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/core/ai_helpers.dart';
+import 'package:project_2359/core/study_material_service.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
+import 'package:provider/provider.dart';
+import 'package:project_2359/features/folder_page/folder_sources_page.dart';
+import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:uuid/uuid.dart';
 
 class FolderPage extends StatefulWidget {
+  final String folderId;
   final String initialFolderName;
 
-  const FolderPage({super.key, required this.initialFolderName});
+  const FolderPage({
+    super.key,
+    required this.folderId,
+    required this.initialFolderName,
+  });
 
   @override
   State<FolderPage> createState() => _FolderPageState();
@@ -47,7 +65,7 @@ class _FolderPageState extends State<FolderPage> {
             ),
           ],
         ),
-        expanded: const _FolderFabContent(),
+        expanded: _FolderFabContent(folderId: widget.folderId),
         body: CustomScrollView(
           physics: const ClampingScrollPhysics(),
           slivers: [
@@ -58,7 +76,11 @@ class _FolderPageState extends State<FolderPage> {
                 folderName: folderName,
                 topPadding: MediaQuery.of(context).padding.top,
                 onBack: () => Navigator.pop(context),
-                onSourcesTap: () => _SourcesBottomSheet.show(context),
+                onSourcesTap: () => FolderSourcesPage.show(
+                  context,
+                  widget.folderId,
+                  folderName,
+                ),
                 onSettingsTap: () {},
               ),
             ),
@@ -74,7 +96,9 @@ class _FolderPageState extends State<FolderPage> {
             // MATERIALS LIST
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
-              sliver: SliverToBoxAdapter(child: const _StudyMaterialsList()),
+              sliver: SliverToBoxAdapter(
+                child: _StudyMaterialsList(folderId: widget.folderId),
+              ),
             ),
           ],
         ),
@@ -351,50 +375,64 @@ class _ActionButtonChip extends StatelessWidget {
 }
 
 class _StudyMaterialsList extends StatelessWidget {
-  const _StudyMaterialsList();
+  final String folderId;
+  const _StudyMaterialsList({required this.folderId});
 
   @override
   Widget build(BuildContext context) {
-    final materials = [
-      (
-        name: "Key Concepts Flashcards",
-        type: "Flashcards",
-        count: 24,
-        icon: FontAwesomeIcons.clone,
-      ),
-      (
-        name: "Introduction Quiz",
-        type: "Quiz",
-        count: 15,
-        icon: FontAwesomeIcons.clipboardCheck,
-      ),
-      (
-        name: "Research_Summary",
-        type: "Summary",
-        count: 1,
-        icon: FontAwesomeIcons.fileLines,
-      ),
-      for (int i = 1; i <= 15; i++)
-        (
-          name: "Extra Material #$i",
-          type: "Study Guide",
-          count: i * 2,
-          icon: FontAwesomeIcons.bookOpen,
-        ),
-    ];
+    final theme = Theme.of(context);
+    final service = context.read<StudyMaterialService>();
 
-    return ProjectListGroup(
-      children: [
-        for (int i = 0; i < materials.length; i++)
-          ProjectListTile.simple(
-            label: materials[i].name,
-            subLabel: "${materials[i].type} • ${materials[i].count} items",
-            icon: materials[i].icon,
-            showDivider: i < materials.length - 1,
-            onTap: () {},
-            showChevron: true,
-          ),
-      ],
+    return StreamBuilder<List<StudyMaterialItem>>(
+      stream: service.watchMaterialsByFolderId(folderId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final materials = snapshot.data ?? [];
+
+        if (materials.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            child: Center(
+              child: Column(
+                children: [
+                  FaIcon(
+                    FontAwesomeIcons.inbox,
+                    size: 40,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "No study materials yet.\nCreate some with the button below!",
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return ProjectListGroup(
+          children: [
+            for (int i = 0; i < materials.length; i++)
+              ProjectListTile.simple(
+                label: materials[i].name,
+                subLabel: materials[i].description ?? "Material Pack",
+                icon: FontAwesomeIcons.clone,
+                showDivider: i < materials.length - 1,
+                onTap: () {
+                  // TODO: Navigate to study / view material
+                },
+                showChevron: true,
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -417,93 +455,15 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-class _SourcesBottomSheet extends StatelessWidget {
-  const _SourcesBottomSheet();
-
-  static void show(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => const _SourcesBottomSheet(),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final sources = [
-      (name: "Lecture_Notes_W1.pdf", icon: FontAwesomeIcons.filePdf),
-      (name: "Diagrams_Final.png", icon: FontAwesomeIcons.fileImage),
-      (name: "Research_Summary", icon: FontAwesomeIcons.fileLines),
-    ];
-
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Source Materials",
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              IconButton(
-                icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
-                onPressed: () {},
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ProjectListGroup(
-            children: [
-              for (int i = 0; i < sources.length; i++)
-                ProjectListTile.simple(
-                  label: sources[i].name,
-                  icon: sources[i].icon,
-                  subLabel: "Added Mar 10 • 2.4 MB",
-                  showDivider: i < sources.length - 1,
-                  onTap: () {},
-                  trailing: IconButton(
-                    icon: const FaIcon(
-                      FontAwesomeIcons.ellipsisVertical,
-                      size: 14,
-                    ),
-                    onPressed: () {},
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
+// DELETED _SourcesBottomSheet
 
 // ---------------------------------------------------------------------------
 // COMPACT GENERATION WIZARD CONTENT
 // ---------------------------------------------------------------------------
 
 class _FolderFabContent extends StatefulWidget {
-  const _FolderFabContent();
+  final String folderId;
+  const _FolderFabContent({required this.folderId});
 
   @override
   State<_FolderFabContent> createState() => _FolderFabContentState();
@@ -512,6 +472,17 @@ class _FolderFabContent extends StatefulWidget {
 class _FolderFabContentState extends State<_FolderFabContent> {
   int _currentStep = 1; // 1: Source, 2: Config, 3: Generation
   bool _showManualBranch = false;
+
+  // Generation State
+  bool _isExtracting = false;
+  bool _isGenerating = false;
+  final List<StreamedStudyCard> _streamedCards = [];
+  String? _generationError;
+  GenerateMaterialMetadata? _metadata;
+
+  StreamSubscription? _generationSub;
+  JsonStreamParser? _parser;
+  StreamController<String>? _llmStreamController;
 
   // Tracking for animation direction
   int _prevStep = 1;
@@ -527,7 +498,7 @@ class _FolderFabContentState extends State<_FolderFabContent> {
   }
 
   final Set<String> _selectedTypes = {'flashcards'};
-  final Set<int> _selectedSources = {0, 2};
+  final Set<String> _selectedSources = {}; // Use IDs
   String _strategy = 'Spaced'; // 'Spaced' or 'Cram'
 
   final List<({String id, String label, IconData icon, Color color})> _types = [
@@ -551,11 +522,209 @@ class _FolderFabContentState extends State<_FolderFabContent> {
     ),
   ];
 
-  final List<({String name, IconData icon})> _folderSources = [
-    (name: "Lecture_Notes_W1.pdf", icon: FontAwesomeIcons.filePdf),
-    (name: "Diagrams_Final.png", icon: FontAwesomeIcons.fileImage),
-    (name: "Research_Summary", icon: FontAwesomeIcons.fileLines),
-  ];
+  Future<void> _startGeneration() async {
+    final sourceService = context.read<SourceService>();
+
+    // Clean up previous run
+    _generationSub?.cancel();
+    _parser?.dispose();
+    _llmStreamController?.close();
+
+    setState(() {
+      _isExtracting = true;
+      _isGenerating = true;
+      _streamedCards.clear();
+      _generationError = null;
+      _metadata = null;
+      _currentStep = 3; // Move to generation step
+    });
+
+    try {
+      // 1. Extract text
+      final extractedTexts = <Map<String, String>>[];
+      for (final sourceId in _selectedSources) {
+        final blob = await sourceService.getSourceBlobBySourceId(sourceId);
+        final source = await sourceService.getSourceById(sourceId);
+        if (blob == null || source == null) continue;
+
+        final pages = await compute(
+          _extractPdfTextInIsolate,
+          Uint8List.fromList(blob.bytes),
+        );
+        final fullText = pages.join('\n');
+        if (fullText.trim().isNotEmpty) {
+          extractedTexts.add({'sourceName': source.label, 'content': fullText});
+        }
+      }
+
+      if (extractedTexts.isEmpty) {
+        setState(() {
+          _isExtracting = false;
+          _isGenerating = false;
+          _generationError =
+              'No text could be extracted from selected sources.';
+        });
+        return;
+      }
+
+      setState(() => _isExtracting = false);
+
+      // 2. Preferences
+      final preferences = {
+        'generationTypes': _selectedTypes.join(','),
+        'learningMode': _strategy,
+      };
+
+      // 3. Parser
+      _llmStreamController = StreamController<String>();
+      _parser = JsonStreamParser(
+        _llmStreamController!.stream,
+        closeOnRootComplete: true,
+      );
+
+      _parser!.getListProperty('studyMaterials').onElement((element, index) {
+        if (!mounted) return;
+        final card = StreamedStudyCard();
+        setState(() => _streamedCards.add(card));
+
+        final map = element.asMap;
+        map
+            .getStringProperty('type')
+            .stream
+            .listen(
+              (chunk) => setState(() => card.type = (card.type ?? '') + chunk),
+            );
+        map
+            .getStringProperty('frontContent')
+            .stream
+            .listen((chunk) => setState(() => card.frontContent += chunk));
+        map
+            .getStringProperty('backContent')
+            .stream
+            .listen((chunk) => setState(() => card.backContent += chunk));
+        map
+            .getStringProperty('question')
+            .stream
+            .listen((chunk) => setState(() => card.question += chunk));
+        map
+            .getStringProperty('criteria')
+            .stream
+            .listen((chunk) => setState(() => card.criteria += chunk));
+        map.getListProperty('choices').onElement((choiceElement, choiceIndex) {
+          setState(() {
+            while (card.choices.length <= choiceIndex) {
+              card.choices.add('');
+            }
+          });
+          choiceElement.asStr.stream.listen(
+            (chunk) => setState(() => card.choices[choiceIndex] += chunk),
+          );
+        });
+        map
+            .getNumberProperty('correctAnswerIndex')
+            .future
+            .then(
+              (val) => setState(() => card.correctAnswerIndex = val.toInt()),
+            );
+      });
+
+      // 4. Stream from AI
+      final stream = AiHelpers.generateMaterial(
+        extractedTexts: extractedTexts,
+        preferences: preferences,
+      );
+
+      _generationSub = stream.listen(
+        (event) {
+          if (!mounted) return;
+          switch (event) {
+            case GenerateMaterialChunk(:final text):
+              _llmStreamController?.add(text);
+            case GenerateMaterialMeta(:final metadata):
+              setState(() => _metadata = metadata);
+          }
+        },
+        onError: (e) {
+          _llmStreamController?.close();
+          setState(() {
+            _isGenerating = false;
+            _generationError = e.toString();
+          });
+        },
+        onDone: () {
+          _llmStreamController?.close();
+          setState(() => _isGenerating = false);
+        },
+      );
+    } catch (e) {
+      _llmStreamController?.close();
+      setState(() {
+        _isExtracting = false;
+        _isGenerating = false;
+        _generationError = e.toString();
+      });
+    }
+  }
+
+  Future<void> _saveMaterial() async {
+    if (_streamedCards.isEmpty) return;
+
+    final materialService = context.read<StudyMaterialService>();
+    final materialId = const Uuid().v4();
+
+    // Create material entry
+    final material = StudyMaterialItemsCompanion.insert(
+      id: materialId,
+      folderId: widget.folderId,
+      name: "Generated Pack - ${DateTime.now().toString().substring(5, 16)}",
+      description: const Value("AI Generated materials"),
+    );
+
+    // Create cards entries
+    final cards = _streamedCards
+        .map(
+          (c) => StudyCardItemsCompanion.insert(
+            id: const Uuid().v4(),
+            materialId: materialId,
+            type: c.type ?? 'flashcard',
+            question: Value(
+              c.frontContent.isNotEmpty ? c.frontContent : c.question,
+            ),
+            answer: Value(
+              c.backContent.isNotEmpty
+                  ? c.backContent
+                  : (c.choices.isNotEmpty
+                        ? c.choices[c.correctAnswerIndex ?? 0]
+                        : c.criteria),
+            ),
+            optionsListJson: Value(
+              c.choices.isNotEmpty ? jsonEncode(c.choices) : null,
+            ),
+          ),
+        )
+        .toList();
+
+    await materialService.createMaterialWithCards(
+      material: material,
+      cards: cards,
+    );
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Materials saved to folder!')),
+      );
+      // We can either close or go back to start
+      ExpandableFab.of(context).close();
+    }
+  }
+
+  @override
+  void dispose() {
+    _generationSub?.cancel();
+    _parser?.dispose();
+    _llmStreamController?.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -628,154 +797,169 @@ class _FolderFabContentState extends State<_FolderFabContent> {
   Widget _buildStep1(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // MANUAL NOTICE
-          GestureDetector(
-            onTap: () => _updateStep(_currentStep, manual: true),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: cs.primary.withValues(alpha: 0.1)),
-              ),
-              child: Row(
-                children: [
-                  FaIcon(
-                    FontAwesomeIcons.lightbulb,
-                    size: 14,
-                    color: cs.primary,
+    return StreamBuilder<List<SourceItem>>(
+      stream: context.read<SourceService>().watchSourcesByFolderId(
+        widget.folderId,
+      ),
+      builder: (context, snapshot) {
+        final sources = snapshot.data ?? [];
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // MANUAL NOTICE
+              GestureDetector(
+                onTap: () => _updateStep(_currentStep, manual: true),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: cs.primary.withValues(alpha: 0.1),
+                    ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'You can manually create your own materials too if that\'s what you like',
-                      style: theme.textTheme.bodySmall?.copyWith(
+                  child: Row(
+                    children: [
+                      FaIcon(
+                        FontAwesomeIcons.lightbulb,
+                        size: 14,
                         color: cs.primary,
-                        fontWeight: FontWeight.w500,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'You can manually create your own materials too',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      FaIcon(
+                        FontAwesomeIcons.chevronRight,
+                        size: 10,
+                        color: cs.primary.withValues(alpha: 0.5),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _SectionLabel(title: "Select Sources"),
+              const SizedBox(height: 8),
+
+              if (sources.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Text(
+                      "No sources in this folder yet.\nImport some below!",
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
-                  FaIcon(
-                    FontAwesomeIcons.chevronRight,
-                    size: 10,
-                    color: cs.primary.withValues(alpha: 0.5),
+                )
+              else
+                ProjectListGroup(
+                  backgroundColor: cs.onSurface.withValues(alpha: 0.04),
+                  children: [
+                    for (var i = 0; i < sources.length; i++)
+                      ProjectListTile(
+                        title: Text(
+                          sources[i].label,
+                          style: TextStyle(
+                            color: _selectedSources.contains(sources[i].id)
+                                ? cs.onSurface
+                                : cs.onSurface.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        leading: FaIcon(
+                          FontAwesomeIcons.filePdf,
+                          size: 18,
+                          color: _selectedSources.contains(sources[i].id)
+                              ? cs.primary
+                              : cs.onSurface.withValues(alpha: 0.25),
+                        ),
+                        showDivider: i < sources.length - 1,
+                        backgroundColor:
+                            _selectedSources.contains(sources[i].id)
+                            ? cs.primary.withValues(alpha: 0.08)
+                            : Colors.transparent,
+                        onTap: () {
+                          setState(() {
+                            if (_selectedSources.contains(sources[i].id)) {
+                              _selectedSources.remove(sources[i].id);
+                            } else {
+                              _selectedSources.add(sources[i].id);
+                            }
+                          });
+                        },
+                        trailing: FaIcon(
+                          _selectedSources.contains(sources[i].id)
+                              ? FontAwesomeIcons.circleCheck
+                              : FontAwesomeIcons.circle,
+                          size: 16,
+                          color: _selectedSources.contains(sources[i].id)
+                              ? cs.primary
+                              : cs.onSurface.withValues(alpha: 0.1),
+                        ),
+                      ),
+                  ],
+                ),
+
+              const SizedBox(height: 24),
+              _SectionLabel(title: "Import New Sources"),
+              const SizedBox(height: 8),
+
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                childAspectRatio: 2.5,
+                children: [
+                  CardButton(
+                    icon: FontAwesomeIcons.filePdf,
+                    label: "PDF File",
+                    subLabel: "Upload doc",
+                    layoutDirection: CardLayoutDirection.horizontal,
+                    isCompact: true,
+                    onTap: () => FolderSourcesPage.show(
+                      context,
+                      widget.folderId,
+                      "Folder",
+                    ),
+                  ),
+                  CardButton(
+                    icon: FontAwesomeIcons.youtube,
+                    label: "YouTube",
+                    subLabel: "Paste link",
+                    layoutDirection: CardLayoutDirection.horizontal,
+                    isCompact: true,
+                    onTap: () {},
                   ),
                 ],
               ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _SectionLabel(title: "Select Sources"),
-          const SizedBox(height: 8),
 
-          ProjectListGroup(
-            backgroundColor: cs.onSurface.withValues(alpha: 0.04),
-            children: [
-              for (int i = 0; i < _folderSources.length; i++)
-                ProjectListTile(
-                  title: Text(
-                    _folderSources[i].name,
-                    style: TextStyle(
-                      color: _selectedSources.contains(i)
-                          ? cs.onSurface
-                          : cs.onSurface.withValues(alpha: 0.25),
-                    ),
-                  ),
-                  leading: FaIcon(
-                    _folderSources[i].icon,
-                    size: 18,
-                    color: _selectedSources.contains(i)
-                        ? cs.onSurface
-                        : cs.onSurface.withValues(alpha: 0.25),
-                  ),
-                  showDivider: i < _folderSources.length - 1,
-                  backgroundColor: _selectedSources.contains(i)
-                      ? Colors.green.withValues(alpha: 0.08)
-                      : Colors.transparent,
-                  onTap: () {
-                    setState(() {
-                      if (_selectedSources.contains(i)) {
-                        _selectedSources.remove(i);
-                      } else {
-                        _selectedSources.add(i);
-                      }
-                    });
-                  },
-                  trailing: FaIcon(
-                    _selectedSources.contains(i)
-                        ? FontAwesomeIcons.circleCheck
-                        : FontAwesomeIcons.circle,
-                    size: 16,
-                    color: _selectedSources.contains(i)
-                        ? (isDark ? Colors.greenAccent : Colors.green)
-                        : cs.onSurface.withValues(alpha: 0.1),
-                  ),
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-          _SectionLabel(title: "Import New Sources"),
-          const SizedBox(height: 8),
-
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 2.5,
-            children: [
-              CardButton(
-                icon: FontAwesomeIcons.filePdf,
-                label: "PDF File",
-                subLabel: "Upload doc",
-                layoutDirection: CardLayoutDirection.horizontal,
-                isCompact: true,
-                onTap: () {},
-              ),
-              CardButton(
-                icon: FontAwesomeIcons.youtube,
-                label: "YouTube",
-                subLabel: "Paste link",
-                layoutDirection: CardLayoutDirection.horizontal,
-                isCompact: true,
-                onTap: () {},
-              ),
-              CardButton(
-                icon: FontAwesomeIcons.microphone,
-                label: "Recording",
-                subLabel: "Voice note",
-                layoutDirection: CardLayoutDirection.horizontal,
-                isCompact: true,
-                onTap: () {},
-              ),
-              CardButton(
-                icon: FontAwesomeIcons.link,
-                label: "Website",
-                subLabel: "Web article",
-                layoutDirection: CardLayoutDirection.horizontal,
-                isCompact: true,
-                onTap: () {},
+              const SizedBox(height: 16),
+              _WizardButton(
+                label: "Continue",
+                onPressed: _selectedSources.isEmpty
+                    ? null
+                    : () => _updateStep(2),
+                icon: FontAwesomeIcons.chevronDown,
               ),
             ],
           ),
-
-          const SizedBox(height: 16),
-          _WizardButton(
-            label: "Continue",
-            onPressed: _selectedSources.isEmpty ? null : () => _updateStep(2),
-            icon: FontAwesomeIcons.chevronDown,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -860,7 +1044,7 @@ class _FolderFabContentState extends State<_FolderFabContent> {
           const SizedBox(height: 16),
           _WizardButton(
             label: "Begin Generation",
-            onPressed: _selectedTypes.isEmpty ? null : () => _updateStep(3),
+            onPressed: _selectedTypes.isEmpty ? null : _startGeneration,
             icon: FontAwesomeIcons.chevronDown,
           ),
         ],
@@ -872,79 +1056,153 @@ class _FolderFabContentState extends State<_FolderFabContent> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
+    if (_generationError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FaIcon(
+                FontAwesomeIcons.circleExclamation,
+                color: cs.error,
+                size: 40,
+              ),
+              const SizedBox(height: 16),
+              Text("Generation Failed", style: theme.textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Text(
+                _generationError!,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall,
+              ),
+              const SizedBox(height: 24),
+              _WizardButton(
+                label: "Try Again",
+                onPressed: () => _updateStep(2),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 20),
-          // MOCK LOADING WIDGET
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: cs.primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: SizedBox(
-                width: 40,
-                height: 40,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(cs.primary),
+          Row(
+            children: [
+              if (_isGenerating || _isExtracting)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                FaIcon(
+                  FontAwesomeIcons.circleCheck,
+                  color: Colors.green,
+                  size: 20,
+                ),
+              const SizedBox(width: 12),
+              Text(
+                _isGenerating ? "AI is generating..." : "Generation Complete",
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
+            ],
           ),
           const SizedBox(height: 24),
-          Text(
-            "Generating Materials...",
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "Our AI is synthesizing your lecture notes into flashcards and quizzes.",
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: cs.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-          const SizedBox(height: 32),
 
-          // GENERATION PROGRESS LIST
           ProjectListGroup(
             backgroundColor: cs.onSurface.withValues(alpha: 0.02),
             children: [
               _GenerationProgressTile(
                 label: "Parsing PDF Content",
-                status: "Complete",
-                progress: 1.0,
-                isDone: true,
+                status: _isExtracting ? "In Progress" : "Complete",
+                progress: _isExtracting ? 0.5 : 1.0,
+                isDone: !_isExtracting,
               ),
               _GenerationProgressTile(
-                label: "Extracting Key Concepts",
-                status: "In Progress",
-                progress: 0.65,
-                isDone: false,
-              ),
-              _GenerationProgressTile(
-                label: "Drafting Flashcards",
-                status: "Pending",
-                progress: 0.0,
-                isDone: false,
+                label: "Material Generation",
+                status: _isGenerating ? "Synthesizing" : "Complete",
+                progress: _isGenerating ? 0.8 : 1.0,
+                isDone: !_isGenerating,
               ),
             ],
           ),
 
+          if (_streamedCards.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Text(
+              "Preview (${_streamedCards.length} items)",
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: cs.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _streamedCards.length,
+                itemBuilder: (context, index) {
+                  final card = _streamedCards[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: cs.onSurface.withValues(alpha: 0.04),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      card.frontContent.isNotEmpty
+                          ? card.frontContent
+                          : (card.question.isNotEmpty
+                                ? card.question
+                                : "Generating..."),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+
+          if (!_isGenerating && _metadata != null) ...[
+            const SizedBox(height: 16),
+            Text(
+              "Generation completed with ${_metadata?.totalTokens ?? 0} tokens",
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onSurface.withValues(alpha: 0.5),
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+
           const SizedBox(height: 32),
-          _WizardButton(
-            label: "Cancel Generation",
-            onPressed: () => _updateStep(2),
-            isSecondary: true,
-          ),
+          if (!_isGenerating && !_isExtracting && _streamedCards.isNotEmpty)
+            _WizardButton(
+              label: "Save to Folder",
+              onPressed: _saveMaterial,
+              icon: FontAwesomeIcons.floppyDisk,
+            )
+          else
+            _WizardButton(
+              label: "Cancel",
+              onPressed: () {
+                _generationSub?.cancel();
+                _updateStep(2);
+              },
+              isSecondary: true,
+            ),
         ],
       ),
     );
@@ -1373,4 +1631,15 @@ class _StrategyButton extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<List<String>> _extractPdfTextInIsolate(Uint8List bytes) async {
+  final document = PdfDocument(inputBytes: bytes);
+  final List<String> pages = [];
+  final PdfTextExtractor extractor = PdfTextExtractor(document);
+  for (int i = 0; i < document.pages.count; i++) {
+    pages.add(extractor.extractText(startPageIndex: i, endPageIndex: i));
+  }
+  document.dispose();
+  return pages;
 }

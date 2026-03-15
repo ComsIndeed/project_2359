@@ -1,5 +1,4 @@
 import 'package:project_2359/app_database.dart';
-import 'package:drift/drift.dart';
 
 /// Service for CRUD operations on study folders, materials (packs), and cards.
 class StudyMaterialService {
@@ -11,6 +10,10 @@ class StudyMaterialService {
 
   Future<List<StudyFolderItem>> getAllFolders() async {
     return await _db.select(_db.studyFolderItems).get();
+  }
+
+  Stream<List<StudyFolderItem>> watchAllFolders() {
+    return _db.select(_db.studyFolderItems).watch();
   }
 
   Future<StudyFolderItem?> getFolderById(String id) async {
@@ -54,6 +57,21 @@ class StudyMaterialService {
     });
   }
 
+  /// Fetches all folders and joins them with their associated sources.
+  Future<List<(StudyFolderItem, List<SourceItem>)>>
+  getFoldersWithSources() async {
+    final folders = await getAllFolders();
+    final result = <(StudyFolderItem, List<SourceItem>)>[];
+
+    for (final folder in folders) {
+      final sources = await (_db.select(
+        _db.sourceItems,
+      )..where((t) => t.folderId.equals(folder.id))).get();
+      result.add((folder, sources));
+    }
+    return result;
+  }
+
   // --- Materials (Packs) ---
 
   Future<List<StudyMaterialItem>> getMaterialsByFolderId(
@@ -62,6 +80,12 @@ class StudyMaterialService {
     return await (_db.select(
       _db.studyMaterialItems,
     )..where((t) => t.folderId.equals(folderId))).get();
+  }
+
+  Stream<List<StudyMaterialItem>> watchMaterialsByFolderId(String folderId) {
+    return (_db.select(
+      _db.studyMaterialItems,
+    )..where((t) => t.folderId.equals(folderId))).watch();
   }
 
   Future<void> insertMaterial(StudyMaterialItemsCompanion material) async {
