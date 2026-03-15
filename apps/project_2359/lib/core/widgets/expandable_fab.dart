@@ -1,12 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 /// An expandable FAB that smoothly animates between collapsed and expanded sizes.
 ///
-/// Uses a [GlobalKey] to measure the collapsed child's natural size after the
-/// first frame, so [AnimatedContainer] always has concrete start/end values to
-/// interpolate — avoiding the snap that happens when going from `null` to a
-/// concrete size.
+/// Uses [AnimatedSize] to automatically animate between whatever size the
+/// current child (collapsed or expanded) occupies. When [expandedWidth] and/or
+/// [expandedHeight] are provided the expanded content is forced to those exact
+/// dimensions (static mode); when omitted the content sizes itself up to
+/// sensible screen-based maximums (dynamic mode).
+///
+/// A [_SizeReporter] render object tracks each child's laid-out size and
+/// exposes the values via [collapsedSize], [expandedSize], and their streams.
 class ExpandableFab extends StatefulWidget {
   final Widget body;
   final Color? backgroundColor;
@@ -35,49 +42,69 @@ class ExpandableFab extends StatefulWidget {
 
 class _ExpandableFabState extends State<ExpandableFab> {
   bool _isOpen = false;
-  final GlobalKey _collapsedKey = GlobalKey();
   Size? _collapsedSize;
+  Size? _expandedSize;
 
-  @override
-  void initState() {
-    super.initState();
-    // Measure the collapsed child after the first frame is laid out.
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      _measureCollapsed();
-    });
+  final _collapsedSizeController = StreamController<Size>.broadcast();
+  final _expandedSizeController = StreamController<Size>.broadcast();
+
+  /// The last measured size of the collapsed widget content.
+  Size? get collapsedSize => _collapsedSize;
+
+  /// The last measured size of the expanded widget content.
+  Size? get expandedSize => _expandedSize;
+
+  /// Emits the collapsed widget's size whenever it changes.
+  Stream<Size> get collapsedSizeStream => _collapsedSizeController.stream;
+
+  /// Emits the expanded widget's size whenever it changes.
+  Stream<Size> get expandedSizeStream => _expandedSizeController.stream;
+
+  void _onCollapsedSizeChanged(Size size) {
+    if (size != _collapsedSize) {
+      setState(() => _collapsedSize = size);
+      _collapsedSizeController.add(size);
+    }
   }
 
-  void _measureCollapsed() {
-    final renderBox =
-        _collapsedKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null && renderBox.hasSize) {
-      setState(() {
-        // Add a small buffer to account for border decoration consuming space.
-        _collapsedSize = renderBox.size + const Offset(4, 4);
-      });
+  void _onExpandedSizeChanged(Size size) {
+    if (size != _expandedSize) {
+      _expandedSize = size;
+      _expandedSizeController.add(size);
     }
+  }
+
+  @override
+  void dispose() {
+    _collapsedSizeController.close();
+    _expandedSizeController.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context);
-    final expandedWidth = widget.expandedWidth ?? screenSize.width * .9;
-    final expandedHeight = widget.expandedHeight ?? screenSize.height * .7;
-
-    // Before measurement, let the collapsed child render naturally so we can
-    // grab its size. After measurement, always supply concrete dimensions.
-    final bool hasMeasured = _collapsedSize != null;
-
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Use concrete dimensions if we have them, otherwise let it be null for measurement.
-    final double? targetWidth = hasMeasured
-        ? (_isOpen ? expandedWidth : _collapsedSize!.width)
-        : null;
-    final double? targetHeight = hasMeasured
-        ? (_isOpen ? expandedHeight : _collapsedSize!.height)
-        : null;
+    // Static mode: force exact dimensions. Dynamic mode: size to content
+    // with screen-based max constraints.
+    final Widget expandedChild;
+    if (widget.expandedWidth != null || widget.expandedHeight != null) {
+      expandedChild = SizedBox(
+        width: widget.expandedWidth,
+        height: widget.expandedHeight,
+        child: widget.expanded,
+      );
+    } else {
+      expandedChild = ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: screenSize.width * .9,
+          maxHeight: screenSize.height * .7,
+        ),
+        child: widget.expanded,
+      );
+    }
 
     return PopScope(
       canPop: !_isOpen,
@@ -126,78 +153,75 @@ class _ExpandableFabState extends State<ExpandableFab> {
               curve: widget.curve,
               child: Align(
                 alignment: Alignment.bottomCenter,
-                child: IntrinsicWidth(
-                  child: AnimatedContainer(
-                    width: targetWidth,
-                    height: targetHeight,
-                    decoration: ShapeDecoration(
-                      color:
-                          widget.backgroundColor ??
-                          theme.colorScheme.surfaceContainerHighest.withValues(
-                            alpha: 0.98,
-                          ),
-                      shadows: [
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: isDark ? 0.4 : 0.12,
-                          ),
-                          blurRadius: 18,
-                          offset: const Offset(0, 6),
-                          spreadRadius: -2,
+                child: Container(
+                  decoration: ShapeDecoration(
+                    color:
+                        widget.backgroundColor ??
+                        theme.colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.98,
                         ),
-                      ],
-                      shape: RoundedSuperellipseBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        side: BorderSide(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.2,
-                          ),
-                          width: 1.0,
+                    shadows: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.4 : 0.12,
                         ),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
+                        spreadRadius: -2,
+                      ),
+                    ],
+                    shape: RoundedSuperellipseBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      side: BorderSide(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.2,
+                        ),
+                        width: 1.0,
                       ),
                     ),
-                    duration: widget.duration,
-                    curve: widget.curve,
-                    clipBehavior: Clip.antiAlias,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: _isOpen
-                            ? null
-                            : () => setState(() => _isOpen = true),
-                        child: Padding(
-                          key: _isOpen ? null : _collapsedKey,
-                          padding: EdgeInsets.all(_isOpen ? 4.0 : 16.0),
-                          child: ClipRect(
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: AnimatedSwitcher(
-                                duration: widget.duration,
-                                layoutBuilder:
-                                    (currentChild, previousChildren) => Stack(
-                                      alignment: Alignment.bottomCenter,
-                                      children: [
-                                        ...previousChildren,
-                                        ?currentChild,
-                                      ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _isOpen
+                          ? null
+                          : () => setState(() => _isOpen = true),
+                      child: AnimatedPadding(
+                        duration: widget.duration,
+                        curve: widget.curve,
+                        padding: EdgeInsets.all(_isOpen ? 4.0 : 16.0),
+                        child: AnimatedSize(
+                          duration: widget.duration,
+                          curve: widget.curve,
+                          alignment: Alignment.bottomCenter,
+                          clipBehavior: Clip.antiAlias,
+                          child: AnimatedSwitcher(
+                            duration: widget.duration,
+                            layoutBuilder: (currentChild, previousChildren) =>
+                                Stack(
+                                  alignment: Alignment.bottomCenter,
+                                  children: [
+                                    for (final child in previousChildren)
+                                      Positioned(child: child),
+                                    ?currentChild,
+                                  ],
+                                ),
+                            child: _isOpen
+                                ? KeyedSubtree(
+                                    key: const ValueKey("expanded"),
+                                    child: _SizeReporter(
+                                      onSizeChanged: _onExpandedSizeChanged,
+                                      child: expandedChild,
                                     ),
-                                child: _isOpen
-                                    ? KeyedSubtree(
-                                        key: const ValueKey("expanded"),
-                                        child: ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxWidth: expandedWidth,
-                                            maxHeight: expandedHeight,
-                                          ),
-                                          child: widget.expanded,
-                                        ),
-                                      )
-                                    : KeyedSubtree(
-                                        key: const ValueKey("collapsed"),
-                                        child: widget.collapsed,
-                                      ),
-                              ),
-                            ),
+                                  )
+                                : KeyedSubtree(
+                                    key: const ValueKey("collapsed"),
+                                    child: _SizeReporter(
+                                      onSizeChanged: _onCollapsedSizeChanged,
+                                      child: widget.collapsed,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
@@ -210,5 +234,46 @@ class _ExpandableFabState extends State<ExpandableFab> {
         ),
       ),
     );
+  }
+}
+
+/// Reports its child's rendered size whenever it changes.
+class _SizeReporter extends SingleChildRenderObjectWidget {
+  final ValueChanged<Size> onSizeChanged;
+
+  const _SizeReporter({
+    required this.onSizeChanged,
+    required Widget super.child,
+  });
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderSizeReporter(onSizeChanged);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderSizeReporter renderObject,
+  ) {
+    renderObject.onSizeChanged = onSizeChanged;
+  }
+}
+
+class _RenderSizeReporter extends RenderProxyBox {
+  ValueChanged<Size> onSizeChanged;
+  Size? _previousSize;
+
+  _RenderSizeReporter(this.onSizeChanged);
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (size != _previousSize) {
+      _previousSize = size;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        onSizeChanged(size);
+      });
+    }
   }
 }
