@@ -30,6 +30,8 @@ class _FolderPageState extends State<FolderPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundAlt,
       body: ExpandableFab(
+        expandedWidth: MediaQuery.of(context).size.width * 0.92,
+        expandedHeight: MediaQuery.of(context).size.height * 0.8,
         collapsed: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -507,6 +509,22 @@ class _FolderFabContent extends StatefulWidget {
 }
 
 class _FolderFabContentState extends State<_FolderFabContent> {
+  int _currentStep = 1; // 1: Source, 2: Config, 3: Generation
+  bool _showManualBranch = false;
+
+  // Tracking for animation direction
+  int _prevStep = 1;
+  bool _prevManual = false;
+
+  void _updateStep(int nextStep, {bool? manual}) {
+    setState(() {
+      _prevStep = _currentStep;
+      _prevManual = _showManualBranch;
+      _currentStep = nextStep;
+      if (manual != null) _showManualBranch = manual;
+    });
+  }
+
   final Set<String> _selectedTypes = {'flashcards'};
   final Set<int> _selectedSources = {0, 2};
   String _strategy = 'Spaced'; // 'Spaced' or 'Cram'
@@ -540,22 +558,119 @@ class _FolderFabContentState extends State<_FolderFabContent> {
 
   @override
   Widget build(BuildContext context) {
+    // Determine the active widget and its key for AnimatedSwitcher
+    final Widget currentWidget;
+    final ValueKey key;
+
+    if (_showManualBranch) {
+      currentWidget = _buildManualBranch(context);
+      key = const ValueKey('manual');
+    } else {
+      key = ValueKey(_currentStep);
+      switch (_currentStep) {
+        case 1:
+          currentWidget = _buildStep1(context);
+          break;
+        case 2:
+          currentWidget = _buildStep2(context);
+          break;
+        case 3:
+          currentWidget = _buildStep3(context);
+          break;
+        default:
+          currentWidget = _buildStep1(context);
+      }
+    }
+
+    // Progression logic: forward if step increased OR if we entered manual branch
+    final bool isForward =
+        (_showManualBranch && !_prevManual) ||
+        (!_showManualBranch && !_prevManual && _currentStep > _prevStep);
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 400),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        final bool isEntering = child.key == key;
+
+        // Offset for the child being entered
+        var beginOffset = isForward
+            ? const Offset(1.0, 0.0)
+            : const Offset(-1.0, 0.0);
+
+        // If it's the child LEAVING, it should go the opposite way
+        if (!isEntering) {
+          beginOffset = isForward
+              ? const Offset(-1.0, 0.0)
+              : const Offset(1.0, 0.0);
+        }
+
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: beginOffset,
+            end: Offset.zero,
+          ).animate(animation),
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+      layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+        return Stack(children: [...previousChildren, ?currentChild]);
+      },
+      child: SizedBox.expand(key: key, child: currentWidget),
+    );
+  }
+
+  Widget _buildStep1(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-
-    // Adaptive primary color that isn't too "punchy", matching FloatingActionPill
-    final actionColor = isDark
-        ? Color.lerp(cs.primary, Colors.black, 0.4)!
-        : Color.lerp(cs.primary, Colors.white, 0.15)!;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // SECTION 1: SOURCES
-          const SizedBox(height: 4),
+          // MANUAL NOTICE
+          GestureDetector(
+            onTap: () => _updateStep(_currentStep, manual: true),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: cs.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: cs.primary.withValues(alpha: 0.1)),
+              ),
+              child: Row(
+                children: [
+                  FaIcon(
+                    FontAwesomeIcons.lightbulb,
+                    size: 14,
+                    color: cs.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'You can manually create your own materials too if that\'s what you like',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  FaIcon(
+                    FontAwesomeIcons.chevronRight,
+                    size: 10,
+                    color: cs.primary.withValues(alpha: 0.5),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _SectionLabel(title: "Select Sources"),
+          const SizedBox(height: 8),
+
           ProjectListGroup(
             backgroundColor: cs.onSurface.withValues(alpha: 0.04),
             children: [
@@ -602,34 +717,64 @@ class _FolderFabContentState extends State<_FolderFabContent> {
             ],
           ),
 
-          // SECTION 2: FORMATS
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          _WizardButton(
+            label: "Continue",
+            onPressed: _selectedSources.isEmpty ? null : () => _updateStep(2),
+            icon: FontAwesomeIcons.chevronRight,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep2(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           Row(
             children: [
-              for (int i = 0; i < _types.length; i++) ...[
-                Expanded(
-                  child: _FormatTile(
-                    label: _types[i].label,
-                    icon: _types[i].icon,
-                    isSelected: _selectedTypes.contains(_types[i].id),
-                    onTap: () {
-                      setState(() {
-                        if (_selectedTypes.contains(_types[i].id)) {
-                          _selectedTypes.remove(_types[i].id);
-                        } else {
-                          _selectedTypes.add(_types[i].id);
-                        }
-                      });
-                    },
-                  ),
+              IconButton(
+                icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 14),
+                onPressed: () => _updateStep(1),
+                visualDensity: VisualDensity.compact,
+              ),
+              const SizedBox(width: 4),
+              _SectionLabel(title: "Configure Materials"),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // TYPES CONFIG
+          Column(
+            children: [
+              for (var type in _types) ...[
+                _ConfigurableTypeTile(
+                  type: type,
+                  isSelected: _selectedTypes.contains(type.id),
+                  onToggle: () {
+                    setState(() {
+                      if (_selectedTypes.contains(type.id)) {
+                        _selectedTypes.remove(type.id);
+                      } else {
+                        _selectedTypes.add(type.id);
+                      }
+                    });
+                  },
                 ),
-                if (i < _types.length - 1) const SizedBox(width: 8),
+                const SizedBox(height: 8),
               ],
             ],
           ),
-          const SizedBox(height: 12),
 
-          // SECTION 3: STRATEGY
+          const SizedBox(height: 12),
+          _SectionLabel(title: "Studying Strategy"),
+          const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
@@ -653,61 +798,476 @@ class _FolderFabContentState extends State<_FolderFabContent> {
             ),
           ),
 
-          // GENERATE BUTTON
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
+          _WizardButton(
+            label: "Begin Generation",
+            onPressed: _selectedTypes.isEmpty ? null : () => _updateStep(3),
+            icon: FontAwesomeIcons.wandSparkles,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep3(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 20),
+          // MOCK LOADING WIDGET
           Container(
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [actionColor, actionColor.withValues(alpha: 0.8)],
+              color: cs.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(cs.primary),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            "Generating Materials...",
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Our AI is synthesizing your lecture notes into flashcards and quizzes.",
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // GENERATION PROGRESS LIST
+          ProjectListGroup(
+            backgroundColor: cs.onSurface.withValues(alpha: 0.02),
+            children: [
+              _GenerationProgressTile(
+                label: "Parsing PDF Content",
+                status: "Complete",
+                progress: 1.0,
+                isDone: true,
+              ),
+              _GenerationProgressTile(
+                label: "Extracting Key Concepts",
+                status: "In Progress",
+                progress: 0.65,
+                isDone: false,
+              ),
+              _GenerationProgressTile(
+                label: "Drafting Flashcards",
+                status: "Pending",
+                progress: 0.0,
+                isDone: false,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 32),
+          _WizardButton(
+            label: "Cancel Generation",
+            onPressed: () => _updateStep(2),
+            isSecondary: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildManualBranch(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 14),
+                onPressed: () => _updateStep(_currentStep, manual: false),
+                visualDensity: VisualDensity.compact,
+              ),
+              const SizedBox(width: 4),
+              _SectionLabel(title: "Manual Creation"),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // MOCK MANUAL CREATION FORM
+          TextField(
+            decoration: InputDecoration(
+              labelText: "Title",
+              hintText: "Enter material title...",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              filled: true,
+              fillColor: cs.onSurface.withValues(alpha: 0.04),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          DropdownButtonFormField<String>(
+            decoration: InputDecoration(
+              labelText: "Type",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              filled: true,
+              fillColor: cs.onSurface.withValues(alpha: 0.04),
+            ),
+            items: const [
+              DropdownMenuItem(value: "flash", child: Text("Flashcards")),
+              DropdownMenuItem(value: "quiz", child: Text("Quiz")),
+            ],
+            onChanged: (v) {},
+          ),
+          const SizedBox(height: 12),
+
+          TextField(
+            maxLines: 5,
+            decoration: InputDecoration(
+              labelText: "Content",
+              hintText: "Paste or type your content here...",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              filled: true,
+              fillColor: cs.onSurface.withValues(alpha: 0.04),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          _WizardButton(
+            label: "Create Material",
+            onPressed: () {},
+            icon: FontAwesomeIcons.plus,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WizardButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+  final IconData? icon;
+  final bool isSecondary;
+
+  const _WizardButton({
+    required this.label,
+    this.onPressed,
+    this.icon,
+    this.isSecondary = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final baseColor = isSecondary
+        ? cs.onSurface.withValues(alpha: 0.05)
+        : (isDark
+              ? Color.lerp(cs.primary, Colors.black, 0.4)!
+              : Color.lerp(cs.primary, Colors.white, 0.15)!);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isSecondary ? baseColor : null,
+        gradient: isSecondary
+            ? null
+            : LinearGradient(
+                colors: [baseColor, baseColor.withValues(alpha: 0.8)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: !isSecondary && onPressed != null
+            ? [
                 BoxShadow(
-                  color: actionColor.withValues(alpha: 0.25),
+                  color: baseColor.withValues(alpha: 0.25),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),
-              ],
-            ),
-            child: ElevatedButton(
-              onPressed: _selectedSources.isEmpty || _selectedTypes.isEmpty
-                  ? null
-                  : () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                foregroundColor: cs.onPrimary,
-                shadowColor: Colors.transparent,
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 0,
+              ]
+            : null,
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          foregroundColor: isSecondary ? cs.onSurface : cs.onPrimary,
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: isSecondary ? cs.onSurface : cs.onPrimary,
+                letterSpacing: 0.5,
+                fontSize: 15,
               ),
+            ),
+            if (icon != null) ...[
+              const SizedBox(width: 10),
+              FaIcon(
+                icon,
+                size: 14,
+                color: (isSecondary ? cs.onSurface : cs.onPrimary).withValues(
+                  alpha: 0.7,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ConfigurableTypeTile extends StatefulWidget {
+  final ({String id, String label, IconData icon, Color color}) type;
+  final bool isSelected;
+  final VoidCallback onToggle;
+
+  const _ConfigurableTypeTile({
+    required this.type,
+    required this.isSelected,
+    required this.onToggle,
+  });
+
+  @override
+  State<_ConfigurableTypeTile> createState() => _ConfigurableTypeTileState();
+}
+
+class _ConfigurableTypeTileState extends State<_ConfigurableTypeTile> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Column(
+      children: [
+        Material(
+          color: widget.isSelected
+              ? Colors.green.withValues(alpha: 0.08)
+              : cs.onSurface.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            onTap: widget.onToggle,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    "Begin Generation",
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: cs.onPrimary,
-                      letterSpacing: 0.5,
-                      fontSize: 15,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: widget.type.color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: FaIcon(
+                        widget.type.icon,
+                        size: 18,
+                        color: widget.type.color,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.type.label,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: widget.isSelected
+                                ? cs.onSurface
+                                : cs.onSurface.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        if (widget.isSelected)
+                          Text(
+                            "Tap to configure options",
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: cs.onSurface.withValues(alpha: 0.5),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (widget.isSelected)
+                    IconButton(
+                      icon: FaIcon(
+                        _isExpanded
+                            ? FontAwesomeIcons.chevronUp
+                            : FontAwesomeIcons.sliders,
+                        size: 14,
+                        color: cs.onSurface.withValues(alpha: 0.4),
+                      ),
+                      onPressed: () =>
+                          setState(() => _isExpanded = !_isExpanded),
+                    ),
+                  const SizedBox(width: 8),
                   FaIcon(
-                    FontAwesomeIcons.chevronRight,
-                    size: 14,
-                    color: cs.onPrimary.withValues(alpha: 0.7),
+                    widget.isSelected
+                        ? FontAwesomeIcons.circleCheck
+                        : FontAwesomeIcons.circle,
+                    size: 18,
+                    color: widget.isSelected
+                        ? (isDark ? Colors.greenAccent : Colors.green)
+                        : cs.onSurface.withValues(alpha: 0.1),
                   ),
                 ],
               ),
             ),
           ),
+        ),
+        if (widget.isSelected && _isExpanded)
+          Container(
+            margin: const EdgeInsets.only(top: 4, left: 8, right: 8),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cs.onSurface.withValues(alpha: 0.02),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(12),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildConfigItem(context, "Difficulty", "Medium"),
+                const SizedBox(height: 12),
+                _buildConfigItem(context, "Item Count", "20 Items"),
+                const SizedBox(height: 12),
+                _buildConfigItem(context, "Focus Area", "Summarization"),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildConfigItem(BuildContext context, String label, String value) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: theme.textTheme.bodySmall),
+        Row(
+          children: [
+            Text(
+              value,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 8),
+            FaIcon(
+              FontAwesomeIcons.chevronRight,
+              size: 10,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _GenerationProgressTile extends StatelessWidget {
+  final String label;
+  final String status;
+  final double progress;
+  final bool isDone;
+
+  const _GenerationProgressTile({
+    required this.label,
+    required this.status,
+    required this.progress,
+    required this.isDone,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDone
+                      ? cs.onSurface
+                      : cs.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+              Text(
+                status,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: isDone ? Colors.green : cs.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: cs.onSurface.withValues(alpha: 0.05),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isDone ? Colors.green : cs.primary,
+              ),
+              minHeight: 6,
+            ),
+          ),
         ],
       ),
     );
@@ -761,75 +1321,6 @@ class _StrategyButton extends StatelessWidget {
                     : cs.onSurface.withValues(alpha: 0.25),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FormatTile extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FormatTile({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Material(
-      color: isSelected
-          ? Colors.green.withValues(alpha: 0.08)
-          : cs.onSurface.withValues(alpha: 0.04),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? (isDark ? Colors.greenAccent : Colors.green).withValues(
-                      alpha: 0.2,
-                    )
-                  : cs.onSurface.withValues(alpha: 0.05),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FaIcon(
-                icon,
-                size: 20,
-                color: isSelected
-                    ? (isDark ? Colors.greenAccent : Colors.green)
-                    : cs.onSurface.withValues(alpha: 0.25),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  fontSize: 10,
-                  color: isSelected
-                      ? cs.onSurface
-                      : cs.onSurface.withValues(alpha: 0.25),
-                ),
-              ),
-            ],
           ),
         ),
       ),

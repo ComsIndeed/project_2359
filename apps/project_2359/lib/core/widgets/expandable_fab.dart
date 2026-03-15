@@ -12,9 +12,10 @@ class ExpandableFab extends StatefulWidget {
   final Color? backgroundColor;
   final Duration duration;
   final Curve curve;
-
   final Widget collapsed;
   final Widget expanded;
+  final double? expandedWidth;
+  final double? expandedHeight;
 
   const ExpandableFab({
     required this.body,
@@ -24,6 +25,8 @@ class ExpandableFab extends StatefulWidget {
     this.curve = const Cubic(0.4, 0.0, 0.2, 1.12),
     required this.collapsed,
     required this.expanded,
+    this.expandedWidth,
+    this.expandedHeight,
   });
 
   @override
@@ -58,8 +61,8 @@ class _ExpandableFabState extends State<ExpandableFab> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context);
-    final expandedWidth = screenSize.width * .9;
-    final expandedHeight = screenSize.height * .7;
+    final expandedWidth = widget.expandedWidth ?? screenSize.width * .9;
+    final expandedHeight = widget.expandedHeight ?? screenSize.height * .7;
 
     // Before measurement, let the collapsed child render naturally so we can
     // grab its size. After measurement, always supply concrete dimensions.
@@ -147,10 +150,9 @@ class _ExpandableFabState extends State<ExpandableFab> {
                         borderRadius: BorderRadius.circular(24),
                         side: BorderSide(
                           color: theme.colorScheme.onSurface.withValues(
-                            alpha:
-                                0.2, // Slightly more prominent than 0.1 used elsewhere
+                            alpha: 0.2,
                           ),
-                          width: 1.0, // Slightly thicker to stand out
+                          width: 1.0,
                         ),
                       ),
                     ),
@@ -165,7 +167,7 @@ class _ExpandableFabState extends State<ExpandableFab> {
                             : () => setState(() => _isOpen = true),
                         child: Padding(
                           key: _isOpen ? null : _collapsedKey,
-                          padding: EdgeInsets.all(_isOpen ? 8.0 : 16.0),
+                          padding: EdgeInsets.all(_isOpen ? 4.0 : 16.0),
                           child: ClipRect(
                             child: Align(
                               alignment: Alignment.bottomCenter,
