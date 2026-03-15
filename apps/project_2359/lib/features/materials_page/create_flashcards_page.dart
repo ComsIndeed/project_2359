@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/study_material_service.dart';
-import 'package:project_2359/core/tables/study_material_items.dart';
+import 'package:project_2359/core/tables/study_card.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,15 +27,17 @@ class _FlashcardEntry {
 }
 
 class CreateFlashcardsPage extends StatefulWidget {
-  const CreateFlashcardsPage({super.key});
+  final String folderId;
+
+  const CreateFlashcardsPage({super.key, required this.folderId});
 
   @override
   State<CreateFlashcardsPage> createState() => _CreateFlashcardsPageState();
 }
 
 class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
-  final TextEditingController _deckNameController = TextEditingController();
-  final FocusNode _deckNameFocus = FocusNode();
+  final TextEditingController _materialNameController = TextEditingController();
+  final FocusNode _materialNameFocus = FocusNode();
   final List<_FlashcardEntry> _cards = [];
   bool _isSaving = false;
   final ScrollController _scrollController = ScrollController();
@@ -49,8 +51,8 @@ class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
 
   @override
   void dispose() {
-    _deckNameController.dispose();
-    _deckNameFocus.dispose();
+    _materialNameController.dispose();
+    _materialNameFocus.dispose();
     _scrollController.dispose();
     for (final card in _cards) {
       card.dispose();
@@ -86,13 +88,13 @@ class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
 
   Future<void> _saveCards() async {
     // Validate
-    final deckName = _deckNameController.text.trim();
-    if (deckName.isEmpty) {
-      _deckNameFocus.requestFocus();
+    final materialName = _materialNameController.text.trim();
+    if (materialName.isEmpty) {
+      _materialNameFocus.requestFocus();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Give your deck a name first',
+            'Give your study material a name first',
             style: GoogleFonts.outfit(),
           ),
           behavior: SnackBarBehavior.floating,
@@ -114,7 +116,7 @@ class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Add at least one flashcard with content on both sides',
+            'Add at least one card with content on both sides',
             style: GoogleFonts.outfit(),
           ),
           behavior: SnackBarBehavior.floating,
@@ -130,31 +132,32 @@ class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
 
     try {
       final service = context.read<StudyMaterialService>();
-      final packId = const Uuid().v4();
+      final materialId = const Uuid().v4();
 
-      final pack = StudyFolderItemsCompanion(
-        id: Value(packId),
-        name: Value(deckName),
+      final material = StudyMaterialItemsCompanion(
+        id: Value(materialId),
+        folderId: Value(widget.folderId),
+        name: Value(materialName),
       );
 
-      final items = validCards.map((c) {
-        return StudyMaterialItemsCompanion(
+      final cards = validCards.map((c) {
+        return StudyCardItemsCompanion(
           id: Value(const Uuid().v4()),
-          packId: Value(packId),
-          materialType: Value(StudyMaterialType.flashcard.name),
+          materialId: Value(materialId),
+          type: Value(StudyCardType.flashcard.name),
           question: Value(c.frontController.text.trim()),
           answer: Value(c.backController.text.trim()),
         );
       }).toList();
 
-      await service.createPackWithItems(pack: pack, items: items);
+      await service.createMaterialWithCards(material: material, cards: cards);
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${validCards.length} flashcards created!',
+            '${validCards.length} cards created!',
             style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
           ),
           behavior: SnackBarBehavior.floating,
@@ -215,7 +218,7 @@ class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(
-                      "Create Flashcards",
+                      "Create Cards",
                       style: tt.titleMedium?.copyWith(
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.2,
@@ -254,7 +257,7 @@ class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Deck name
+                    // Deck (Material) name
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -270,7 +273,7 @@ class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Deck Name",
+                            "Material Name",
                             style: tt.labelMedium?.copyWith(
                               fontWeight: FontWeight.w900,
                               color: cs.onSurface.withValues(alpha: 0.5),
@@ -279,8 +282,8 @@ class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
                           ),
                           const SizedBox(height: 8),
                           TextField(
-                            controller: _deckNameController,
-                            focusNode: _deckNameFocus,
+                            controller: _materialNameController,
+                            focusNode: _materialNameFocus,
                             style: GoogleFonts.outfit(
                               fontSize: 20,
                               fontWeight: FontWeight.w700,
@@ -406,7 +409,7 @@ class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
                             ),
                           )
                         : Text(
-                            "Save Flashcards",
+                            "Save Material",
                             style: GoogleFonts.outfit(
                               fontWeight: FontWeight.w900,
                               fontSize: 16,

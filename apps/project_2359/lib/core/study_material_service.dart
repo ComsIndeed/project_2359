@@ -1,6 +1,7 @@
 import 'package:project_2359/app_database.dart';
+import 'package:drift/drift.dart';
 
-/// Service for CRUD operations on study folders and items.
+/// Service for CRUD operations on study folders, materials (packs), and cards.
 class StudyMaterialService {
   final AppDatabase _db;
 
@@ -8,63 +9,111 @@ class StudyMaterialService {
 
   // --- Folders ---
 
-  Future<List<StudyFolderItem>> getAllPacks() async {
+  Future<List<StudyFolderItem>> getAllFolders() async {
     return await _db.select(_db.studyFolderItems).get();
   }
 
-  Future<StudyFolderItem?> getPackById(String id) async {
+  Future<StudyFolderItem?> getFolderById(String id) async {
     return await (_db.select(
       _db.studyFolderItems,
     )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
-  Future<void> insertPack(StudyFolderItemsCompanion pack) async {
-    await _db.into(_db.studyFolderItems).insert(pack);
+  Future<void> insertFolder(StudyFolderItemsCompanion folder) async {
+    await _db.into(_db.studyFolderItems).insert(folder);
   }
 
-  Future<void> deletePack(String id) async {
-    // Delete all items in the folder first, then delete the folder
-    await (_db.delete(
-      _db.studyMaterialItems,
-    )..where((t) => t.packId.equals(id))).go();
-    await (_db.delete(
-      _db.studyFolderItems,
-    )..where((t) => t.id.equals(id))).go();
-  }
+  Future<void> deleteFolder(String id) async {
+    await _db.transaction(() async {
+      // 1. Get all materials (packs) in this folder
+      final materials = await (_db.select(
+        _db.studyMaterialItems,
+      )..where((t) => t.folderId.equals(id))).get();
 
-  // --- Items ---
+      // 2. For each material, delete its cards
+      for (final material in materials) {
+        await (_db.delete(
+          _db.studyCardItems,
+        )..where((t) => t.materialId.equals(material.id))).go();
+      }
 
-  Future<List<StudyMaterialItem>> getItemsByPackId(String packId) async {
-    return await (_db.select(
-      _db.studyMaterialItems,
-    )..where((t) => t.packId.equals(packId))).get();
-  }
+      // 3. Delete materials
+      await (_db.delete(
+        _db.studyMaterialItems,
+      )..where((t) => t.folderId.equals(id))).go();
 
-  Future<void> insertItem(StudyMaterialItemsCompanion item) async {
-    await _db.into(_db.studyMaterialItems).insert(item);
-  }
+      // 4. Delete sources (if they also belong to folders)
+      await (_db.delete(
+        _db.sourceItems,
+      )..where((t) => t.folderId.equals(id))).go();
 
-  Future<void> insertItems(List<StudyMaterialItemsCompanion> items) async {
-    await _db.batch((batch) {
-      batch.insertAll(_db.studyMaterialItems, items);
+      // 5. Finally, delete the folder
+      await (_db.delete(
+        _db.studyFolderItems,
+      )..where((t) => t.id.equals(id))).go();
     });
   }
 
-  Future<void> deleteItem(String id) async {
-    await (_db.delete(
+  // --- Materials (Packs) ---
+
+  Future<List<StudyMaterialItem>> getMaterialsByFolderId(
+    String folderId,
+  ) async {
+    return await (_db.select(
       _db.studyMaterialItems,
-    )..where((t) => t.id.equals(id))).go();
+    )..where((t) => t.folderId.equals(folderId))).get();
   }
 
-  /// Creates a folder and all its items in a single transaction.
-  Future<void> createPackWithItems({
-    required StudyFolderItemsCompanion pack,
-    required List<StudyMaterialItemsCompanion> items,
+  Future<void> insertMaterial(StudyMaterialItemsCompanion material) async {
+    await _db.into(_db.studyMaterialItems).insert(material);
+  }
+
+  Future<void> deleteMaterial(String id) async {
+    await _db.transaction(() async {
+      // Delete cards first
+      await (_db.delete(
+        _db.studyCardItems,
+      )..where((t) => t.materialId.equals(id))).go();
+      // Then delete material
+      await (_db.delete(
+        _db.studyMaterialItems,
+      )..where((t) => t.id.equals(id))).go();
+    });
+  }
+
+  // --- Cards ---
+
+  Future<List<StudyCardItem>> getCardsByMaterialId(String materialId) async {
+    return await (_db.select(
+      _db.studyCardItems,
+    )..where((t) => t.materialId.equals(materialId))).get();
+  }
+
+  Future<void> insertCard(StudyCardItemsCompanion card) async {
+    await _db.into(_db.studyCardItems).insert(card);
+  }
+
+  Future<void> insertCards(List<StudyCardItemsCompanion> cards) async {
+    await _db.batch((batch) {
+      batch.insertAll(_db.studyCardItems, cards);
+    });
+  }
+
+  Future<void> deleteCard(String id) async {
+    await (_db.delete(_db.studyCardItems)..where((t) => t.id.equals(id))).go();
+  }
+
+  // --- Combined Operations ---
+
+  /// Creates a material (pack) and all its cards in a single transaction.
+  Future<void> createMaterialWithCards({
+    required StudyMaterialItemsCompanion material,
+    required List<StudyCardItemsCompanion> cards,
   }) async {
     await _db.transaction(() async {
-      await _db.into(_db.studyFolderItems).insert(pack);
+      await _db.into(_db.studyMaterialItems).insert(material);
       await _db.batch((batch) {
-        batch.insertAll(_db.studyMaterialItems, items);
+        batch.insertAll(_db.studyCardItems, cards);
       });
     });
   }

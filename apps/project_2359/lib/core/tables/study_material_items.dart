@@ -1,29 +1,11 @@
 import 'package:drift/drift.dart';
+import 'package:project_2359/core/tables/study_folder_items.dart';
 
-/// The type of study material.
-enum StudyMaterialType {
-  flashcard,
-  multipleChoiceQuestion,
-  freeTextQuestion,
-  imageOcclusion,
-}
-
-/// Study material items table.
-/// Use [StudyMaterialType.name] to store type as string.
 class StudyMaterialItems extends Table {
   TextColumn get id => text()();
-  TextColumn get packId => text()();
-  TextColumn get materialType => text()(); // Store as StudyMaterialType.name
-  TextColumn get citationJson => text().nullable()();
-
-  /// Fields are nullable because not all types use the same properties.
-  /// - Flashcard: question (front), answer (back)
-  /// - MCQ: question, optionsListJson, answer
-  /// - Free-Text: question, answer
-  /// - Image Occlusion: (not yet implemented)
-  TextColumn get question => text().nullable()();
-  TextColumn get optionsListJson => text().nullable()(); // List<String>
-  TextColumn get answer => text().nullable()();
+  TextColumn get folderId => text().references(StudyFolderItems, #id)();
+  TextColumn get name => text()();
+  TextColumn get description => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
