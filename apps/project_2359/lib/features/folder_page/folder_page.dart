@@ -30,8 +30,21 @@ class _FolderPageState extends State<FolderPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundAlt,
       body: ExpandableFab(
-        collapsed: Row(children: [Icon(Icons.add), Text('Create')]),
-        expanded: SizedBox.shrink(),
+        collapsed: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const FaIcon(FontAwesomeIcons.plus, size: 14),
+            const SizedBox(width: 10),
+            Text(
+              'Create',
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
+        expanded: const _FolderFabContent(),
         body: CustomScrollView(
           physics: const ClampingScrollPhysics(),
           slivers: [
@@ -477,6 +490,337 @@ class _SourcesBottomSheet extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// COMPACT GENERATION WIZARD CONTENT
+// ---------------------------------------------------------------------------
+
+class _FolderFabContent extends StatefulWidget {
+  const _FolderFabContent();
+
+  @override
+  State<_FolderFabContent> createState() => _FolderFabContentState();
+}
+
+class _FolderFabContentState extends State<_FolderFabContent> {
+  final Set<String> _selectedTypes = {'flashcards'};
+  final Set<int> _selectedSources = {0, 2};
+  String _strategy = 'Spaced'; // 'Spaced' or 'Cram'
+
+  final List<({String id, String label, IconData icon, Color color})> _types = [
+    (
+      id: 'flashcards',
+      label: 'Flashcards',
+      icon: FontAwesomeIcons.layerGroup,
+      color: const Color(0xFF4ECDC4),
+    ),
+    (
+      id: 'quizzes',
+      label: 'Practice Quiz',
+      icon: FontAwesomeIcons.listCheck,
+      color: const Color(0xFFFF6B6B),
+    ),
+    (
+      id: 'assessment',
+      label: 'Assessment',
+      icon: FontAwesomeIcons.fileCircleExclamation,
+      color: const Color(0xFFF1C40F),
+    ),
+  ];
+
+  final List<({String name, IconData icon})> _folderSources = [
+    (name: "Lecture_Notes_W1.pdf", icon: FontAwesomeIcons.filePdf),
+    (name: "Diagrams_Final.png", icon: FontAwesomeIcons.fileImage),
+    (name: "Research_Summary", icon: FontAwesomeIcons.fileLines),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // HEADER
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: FaIcon(
+                  FontAwesomeIcons.wandMagicSparkles,
+                  size: 16,
+                  color: cs.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Generate Materials",
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  Text(
+                    "Select format and sources to begin",
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: cs.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // SECTION 1: FORMATS
+          const _SubHeader(title: "Choose Formats"),
+          const SizedBox(height: 8),
+          ProjectListGroup(
+            backgroundColor: cs.surfaceContainer.withValues(alpha: 0.5),
+            children: [
+              for (int i = 0; i < _types.length; i++)
+                ProjectListTile.simple(
+                  label: _types[i].label,
+                  icon: _types[i].icon,
+                  showDivider: i < _types.length - 1,
+                  backgroundColor: Colors.transparent,
+                  onTap: () {
+                    setState(() {
+                      if (_selectedTypes.contains(_types[i].id)) {
+                        if (_selectedTypes.length > 1) {
+                          _selectedTypes.remove(_types[i].id);
+                        }
+                      } else {
+                        _selectedTypes.add(_types[i].id);
+                      }
+                    });
+                  },
+                  trailing: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: _selectedTypes.contains(_types[i].id)
+                        ? FaIcon(
+                            FontAwesomeIcons.circleCheck,
+                            size: 18,
+                            color: cs.primary,
+                            key: const ValueKey('checked'),
+                          )
+                        : FaIcon(
+                            FontAwesomeIcons.circle,
+                            size: 18,
+                            color: cs.onSurface.withValues(alpha: 0.1),
+                            key: const ValueKey('unchecked'),
+                          ),
+                  ),
+                ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // SECTION 2: SOURCES
+          const _SubHeader(title: "Select Sources"),
+          const SizedBox(height: 8),
+          ProjectListGroup(
+            backgroundColor: cs.surfaceContainer.withValues(alpha: 0.5),
+            children: [
+              for (int i = 0; i < _folderSources.length; i++)
+                ProjectListTile.simple(
+                  label: _folderSources[i].name,
+                  icon: _folderSources[i].icon,
+                  showDivider: i < _folderSources.length - 1,
+                  backgroundColor: Colors.transparent,
+                  onTap: () {
+                    setState(() {
+                      if (_selectedSources.contains(i)) {
+                        _selectedSources.remove(i);
+                      } else {
+                        _selectedSources.add(i);
+                      }
+                    });
+                  },
+                  trailing: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: _selectedSources.contains(i)
+                        ? FaIcon(
+                            FontAwesomeIcons.squareCheck,
+                            size: 18,
+                            color: cs.primary,
+                            key: const ValueKey('checked'),
+                          )
+                        : FaIcon(
+                            FontAwesomeIcons.square,
+                            size: 18,
+                            color: cs.onSurface.withValues(alpha: 0.1),
+                            key: const ValueKey('unchecked'),
+                          ),
+                  ),
+                ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // SECTION 3: STRATEGY
+          const _SubHeader(title: "Learning Strategy"),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainer.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: cs.onSurface.withValues(alpha: 0.05)),
+            ),
+            child: Row(
+              children: [
+                _StrategyButton(
+                  label: "Spaced",
+                  icon: FontAwesomeIcons.clockRotateLeft,
+                  isSelected: _strategy == 'Spaced',
+                  onTap: () => setState(() => _strategy = 'Spaced'),
+                ),
+                _StrategyButton(
+                  label: "Cram",
+                  icon: FontAwesomeIcons.bolt,
+                  isSelected: _strategy == 'Cram',
+                  onTap: () => setState(() => _strategy = 'Cram'),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          // GENERATE BUTTON
+          ElevatedButton(
+            onPressed: _selectedSources.isEmpty || _selectedTypes.isEmpty
+                ? null
+                : () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: cs.primary,
+              foregroundColor: cs.onPrimary,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const FaIcon(FontAwesomeIcons.wandSparkles, size: 14),
+                const SizedBox(width: 10),
+                Text(
+                  "Begin Generation",
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: cs.onPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+}
+
+class _SubHeader extends StatelessWidget {
+  final String title;
+  const _SubHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        title.toUpperCase(),
+        style: theme.textTheme.labelSmall?.copyWith(
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.0,
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+        ),
+      ),
+    );
+  }
+}
+
+class _StrategyButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _StrategyButton({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? cs.surface : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FaIcon(
+                icon,
+                size: 12,
+                color: isSelected
+                    ? cs.primary
+                    : cs.onSurface.withValues(alpha: 0.4),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected
+                      ? cs.onSurface
+                      : cs.onSurface.withValues(alpha: 0.4),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

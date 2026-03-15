@@ -59,11 +59,14 @@ class _ExpandableFabState extends State<ExpandableFab> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context);
     final expandedWidth = screenSize.width * .9;
-    final expandedHeight = screenSize.height * .5;
+    final expandedHeight = screenSize.height * .7;
 
     // Before measurement, let the collapsed child render naturally so we can
     // grab its size. After measurement, always supply concrete dimensions.
     final bool hasMeasured = _collapsedSize != null;
+
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     // Use concrete dimensions if we have them, otherwise let it be null for measurement.
     final double? targetWidth = hasMeasured
@@ -127,11 +130,27 @@ class _ExpandableFabState extends State<ExpandableFab> {
                     decoration: ShapeDecoration(
                       color:
                           widget.backgroundColor ??
-                          Theme.of(context).colorScheme.surface,
+                          theme.colorScheme.surfaceContainerHighest.withValues(
+                            alpha: 0.98,
+                          ),
+                      shadows: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: isDark ? 0.4 : 0.12,
+                          ),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
+                          spreadRadius: -2,
+                        ),
+                      ],
                       shape: RoundedSuperellipseBorder(
                         borderRadius: BorderRadius.circular(24),
                         side: BorderSide(
-                          color: Theme.of(context).colorScheme.outline,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha:
+                                0.2, // Slightly more prominent than 0.1 used elsewhere
+                          ),
+                          width: 1.0, // Slightly thicker to stand out
                         ),
                       ),
                     ),
