@@ -29,7 +29,7 @@ class ExpandableFab extends StatefulWidget {
     super.key,
     this.backgroundColor,
     this.duration = const Duration(milliseconds: 400),
-    this.curve = const Cubic(0.4, 0.0, 0.2, 1.12),
+    this.curve = Curves.easeOutBack,
     required this.collapsed,
     required this.expanded,
     this.expandedWidth,
@@ -198,6 +198,8 @@ class _ExpandableFabState extends State<ExpandableFab> {
                           clipBehavior: Clip.antiAlias,
                           child: AnimatedSwitcher(
                             duration: widget.duration,
+                            switchInCurve: widget.curve,
+                            switchOutCurve: widget.curve,
                             layoutBuilder: (currentChild, previousChildren) =>
                                 Stack(
                                   alignment: Alignment.bottomCenter,

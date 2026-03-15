@@ -16,7 +16,7 @@ class SlideFadeText extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
+      curve: Curves.easeOutBack,
       alignment: textAlign == TextAlign.center
           ? Alignment.center
           : textAlign == TextAlign.right
@@ -24,8 +24,8 @@ class SlideFadeText extends StatelessWidget {
           : Alignment.centerLeft,
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 350),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
+        switchInCurve: Curves.easeOutBack,
+        switchOutCurve: Curves.easeOutBack,
         layoutBuilder: (currentChild, previousChildren) {
           return Stack(
             alignment: textAlign == TextAlign.center

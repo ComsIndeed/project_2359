@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
+import 'package:project_2359/core/widgets/card_button.dart';
 
 class FolderPage extends StatefulWidget {
   final String initialFolderName;
@@ -596,14 +597,14 @@ class _FolderFabContentState extends State<_FolderFabContent> {
 
         // Offset for the child being entered
         var beginOffset = isForward
-            ? const Offset(1.0, 0.0)
-            : const Offset(-1.0, 0.0);
+            ? const Offset(0.0, 1.0)
+            : const Offset(0.0, -1.0);
 
         // If it's the child LEAVING, it should go the opposite way
         if (!isEntering) {
           beginOffset = isForward
-              ? const Offset(-1.0, 0.0)
-              : const Offset(1.0, 0.0);
+              ? const Offset(0.0, -1.0)
+              : const Offset(0.0, 1.0);
         }
 
         return SlideTransition(
@@ -615,7 +616,10 @@ class _FolderFabContentState extends State<_FolderFabContent> {
         );
       },
       layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-        return Stack(children: [...previousChildren, ?currentChild]);
+        return Stack(
+          alignment: Alignment.bottomCenter,
+          children: [...previousChildren, ?currentChild],
+        );
       },
       child: KeyedSubtree(key: key, child: currentWidget),
     );
@@ -717,11 +721,58 @@ class _FolderFabContentState extends State<_FolderFabContent> {
             ],
           ),
 
+          const SizedBox(height: 24),
+          _SectionLabel(title: "Import New Sources"),
+          const SizedBox(height: 8),
+
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 2.5,
+            children: [
+              CardButton(
+                icon: FontAwesomeIcons.filePdf,
+                label: "PDF File",
+                subLabel: "Upload doc",
+                layoutDirection: CardLayoutDirection.horizontal,
+                isCompact: true,
+                onTap: () {},
+              ),
+              CardButton(
+                icon: FontAwesomeIcons.youtube,
+                label: "YouTube",
+                subLabel: "Paste link",
+                layoutDirection: CardLayoutDirection.horizontal,
+                isCompact: true,
+                onTap: () {},
+              ),
+              CardButton(
+                icon: FontAwesomeIcons.microphone,
+                label: "Recording",
+                subLabel: "Voice note",
+                layoutDirection: CardLayoutDirection.horizontal,
+                isCompact: true,
+                onTap: () {},
+              ),
+              CardButton(
+                icon: FontAwesomeIcons.link,
+                label: "Website",
+                subLabel: "Web article",
+                layoutDirection: CardLayoutDirection.horizontal,
+                isCompact: true,
+                onTap: () {},
+              ),
+            ],
+          ),
+
           const SizedBox(height: 16),
           _WizardButton(
             label: "Continue",
             onPressed: _selectedSources.isEmpty ? null : () => _updateStep(2),
-            icon: FontAwesomeIcons.chevronRight,
+            icon: FontAwesomeIcons.chevronDown,
           ),
         ],
       ),
@@ -740,11 +791,19 @@ class _FolderFabContentState extends State<_FolderFabContent> {
           Row(
             children: [
               IconButton(
-                icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 14),
                 onPressed: () => _updateStep(1),
-                visualDensity: VisualDensity.compact,
+                icon: FaIcon(
+                  FontAwesomeIcons.chevronUp,
+                  size: 16,
+                  color: cs.secondary,
+                ),
+                style: IconButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(32, 32),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 8),
               _SectionLabel(title: "Configure Materials"),
             ],
           ),
@@ -802,7 +861,7 @@ class _FolderFabContentState extends State<_FolderFabContent> {
           _WizardButton(
             label: "Begin Generation",
             onPressed: _selectedTypes.isEmpty ? null : () => _updateStep(3),
-            icon: FontAwesomeIcons.wandSparkles,
+            icon: FontAwesomeIcons.chevronDown,
           ),
         ],
       ),
@@ -903,11 +962,19 @@ class _FolderFabContentState extends State<_FolderFabContent> {
           Row(
             children: [
               IconButton(
-                icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 14),
                 onPressed: () => _updateStep(_currentStep, manual: false),
-                visualDensity: VisualDensity.compact,
+                icon: FaIcon(
+                  FontAwesomeIcons.chevronUp,
+                  size: 16,
+                  color: cs.secondary,
+                ),
+                style: IconButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(32, 32),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 8),
               _SectionLabel(title: "Manual Creation"),
             ],
           ),
@@ -1072,13 +1139,10 @@ class _ConfigurableTypeTile extends StatefulWidget {
 }
 
 class _ConfigurableTypeTileState extends State<_ConfigurableTypeTile> {
-  bool _isExpanded = false;
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       children: [
@@ -1125,7 +1189,7 @@ class _ConfigurableTypeTileState extends State<_ConfigurableTypeTile> {
                         ),
                         if (widget.isSelected)
                           Text(
-                            "Tap to configure options",
+                            "Configure options below",
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: cs.onSurface.withValues(alpha: 0.5),
                             ),
@@ -1133,54 +1197,37 @@ class _ConfigurableTypeTileState extends State<_ConfigurableTypeTile> {
                       ],
                     ),
                   ),
-                  if (widget.isSelected)
-                    IconButton(
-                      icon: FaIcon(
-                        _isExpanded
-                            ? FontAwesomeIcons.chevronUp
-                            : FontAwesomeIcons.sliders,
-                        size: 14,
-                        color: cs.onSurface.withValues(alpha: 0.4),
-                      ),
-                      onPressed: () =>
-                          setState(() => _isExpanded = !_isExpanded),
-                    ),
-                  const SizedBox(width: 8),
-                  FaIcon(
-                    widget.isSelected
-                        ? FontAwesomeIcons.circleCheck
-                        : FontAwesomeIcons.circle,
-                    size: 18,
-                    color: widget.isSelected
-                        ? (isDark ? Colors.greenAccent : Colors.green)
-                        : cs.onSurface.withValues(alpha: 0.1),
-                  ),
                 ],
               ),
             ),
           ),
         ),
-        if (widget.isSelected && _isExpanded)
-          Container(
-            margin: const EdgeInsets.only(top: 4, left: 8, right: 8),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cs.onSurface.withValues(alpha: 0.02),
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(12),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildConfigItem(context, "Difficulty", "Medium"),
-                const SizedBox(height: 12),
-                _buildConfigItem(context, "Item Count", "20 Items"),
-                const SizedBox(height: 12),
-                _buildConfigItem(context, "Focus Area", "Summarization"),
-              ],
-            ),
-          ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: widget.isSelected
+              ? Container(
+                  margin: const EdgeInsets.only(top: 4, left: 8, right: 8),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: cs.onSurface.withValues(alpha: 0.02),
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(12),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildConfigItem(context, "Difficulty", "Medium"),
+                      const SizedBox(height: 12),
+                      _buildConfigItem(context, "Item Count", "20 Items"),
+                      const SizedBox(height: 12),
+                      _buildConfigItem(context, "Focus Area", "Summarization"),
+                    ],
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
       ],
     );
   }
