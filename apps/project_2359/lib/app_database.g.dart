@@ -49,8 +49,29 @@ class $StudyFolderItemsTable extends StudyFolderItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _isPinnedMeta = const VerificationMeta(
+    'isPinned',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, createdAt, updatedAt];
+  late final GeneratedColumn<bool> isPinned = GeneratedColumn<bool>(
+    'is_pinned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_pinned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    createdAt,
+    updatedAt,
+    isPinned,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -92,6 +113,12 @@ class $StudyFolderItemsTable extends StudyFolderItems
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('is_pinned')) {
+      context.handle(
+        _isPinnedMeta,
+        isPinned.isAcceptableOrUnknown(data['is_pinned']!, _isPinnedMeta),
+      );
+    }
     return context;
   }
 
@@ -117,6 +144,10 @@ class $StudyFolderItemsTable extends StudyFolderItems
         DriftSqlType.string,
         data['${effectivePrefix}updated_at'],
       )!,
+      isPinned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_pinned'],
+      )!,
     );
   }
 
@@ -131,11 +162,13 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
   final String name;
   final String createdAt;
   final String updatedAt;
+  final bool isPinned;
   const StudyFolderItem({
     required this.id,
     required this.name,
     required this.createdAt,
     required this.updatedAt,
+    required this.isPinned,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -144,6 +177,7 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
     map['name'] = Variable<String>(name);
     map['created_at'] = Variable<String>(createdAt);
     map['updated_at'] = Variable<String>(updatedAt);
+    map['is_pinned'] = Variable<bool>(isPinned);
     return map;
   }
 
@@ -153,6 +187,7 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
       name: Value(name),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      isPinned: Value(isPinned),
     );
   }
 
@@ -166,6 +201,7 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
       name: serializer.fromJson<String>(json['name']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
       updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      isPinned: serializer.fromJson<bool>(json['isPinned']),
     );
   }
   @override
@@ -176,6 +212,7 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
       'name': serializer.toJson<String>(name),
       'createdAt': serializer.toJson<String>(createdAt),
       'updatedAt': serializer.toJson<String>(updatedAt),
+      'isPinned': serializer.toJson<bool>(isPinned),
     };
   }
 
@@ -184,11 +221,13 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
     String? name,
     String? createdAt,
     String? updatedAt,
+    bool? isPinned,
   }) => StudyFolderItem(
     id: id ?? this.id,
     name: name ?? this.name,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    isPinned: isPinned ?? this.isPinned,
   );
   StudyFolderItem copyWithCompanion(StudyFolderItemsCompanion data) {
     return StudyFolderItem(
@@ -196,6 +235,7 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
       name: data.name.present ? data.name.value : this.name,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
     );
   }
 
@@ -205,13 +245,14 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isPinned: $isPinned')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, createdAt, updatedAt);
+  int get hashCode => Object.hash(id, name, createdAt, updatedAt, isPinned);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -219,7 +260,8 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
           other.id == this.id &&
           other.name == this.name &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.isPinned == this.isPinned);
 }
 
 class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
@@ -227,12 +269,14 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
   final Value<String> name;
   final Value<String> createdAt;
   final Value<String> updatedAt;
+  final Value<bool> isPinned;
   final Value<int> rowid;
   const StudyFolderItemsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.isPinned = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   StudyFolderItemsCompanion.insert({
@@ -240,6 +284,7 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
     required String name,
     required String createdAt,
     required String updatedAt,
+    this.isPinned = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -250,6 +295,7 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
     Expression<String>? name,
     Expression<String>? createdAt,
     Expression<String>? updatedAt,
+    Expression<bool>? isPinned,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -257,6 +303,7 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
       if (name != null) 'name': name,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (isPinned != null) 'is_pinned': isPinned,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -266,6 +313,7 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
     Value<String>? name,
     Value<String>? createdAt,
     Value<String>? updatedAt,
+    Value<bool>? isPinned,
     Value<int>? rowid,
   }) {
     return StudyFolderItemsCompanion(
@@ -273,6 +321,7 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
       name: name ?? this.name,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      isPinned: isPinned ?? this.isPinned,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -292,6 +341,9 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<String>(updatedAt.value);
     }
+    if (isPinned.present) {
+      map['is_pinned'] = Variable<bool>(isPinned.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -305,6 +357,7 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
           ..write('name: $name, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('isPinned: $isPinned, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -378,6 +431,21 @@ class $SourceItemsTable extends SourceItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _isPinnedMeta = const VerificationMeta(
+    'isPinned',
+  );
+  @override
+  late final GeneratedColumn<bool> isPinned = GeneratedColumn<bool>(
+    'is_pinned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_pinned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -386,6 +454,7 @@ class $SourceItemsTable extends SourceItems
     path,
     type,
     extractedContent,
+    isPinned,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -441,6 +510,12 @@ class $SourceItemsTable extends SourceItems
         ),
       );
     }
+    if (data.containsKey('is_pinned')) {
+      context.handle(
+        _isPinnedMeta,
+        isPinned.isAcceptableOrUnknown(data['is_pinned']!, _isPinnedMeta),
+      );
+    }
     return context;
   }
 
@@ -474,6 +549,10 @@ class $SourceItemsTable extends SourceItems
         DriftSqlType.string,
         data['${effectivePrefix}extracted_content'],
       ),
+      isPinned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_pinned'],
+      )!,
     );
   }
 
@@ -490,6 +569,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
   final String? path;
   final String type;
   final String? extractedContent;
+  final bool isPinned;
   const SourceItem({
     required this.id,
     this.folderId,
@@ -497,6 +577,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
     this.path,
     required this.type,
     this.extractedContent,
+    required this.isPinned,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -513,6 +594,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
     if (!nullToAbsent || extractedContent != null) {
       map['extracted_content'] = Variable<String>(extractedContent);
     }
+    map['is_pinned'] = Variable<bool>(isPinned);
     return map;
   }
 
@@ -528,6 +610,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
       extractedContent: extractedContent == null && nullToAbsent
           ? const Value.absent()
           : Value(extractedContent),
+      isPinned: Value(isPinned),
     );
   }
 
@@ -543,6 +626,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
       path: serializer.fromJson<String?>(json['path']),
       type: serializer.fromJson<String>(json['type']),
       extractedContent: serializer.fromJson<String?>(json['extractedContent']),
+      isPinned: serializer.fromJson<bool>(json['isPinned']),
     );
   }
   @override
@@ -555,6 +639,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
       'path': serializer.toJson<String?>(path),
       'type': serializer.toJson<String>(type),
       'extractedContent': serializer.toJson<String?>(extractedContent),
+      'isPinned': serializer.toJson<bool>(isPinned),
     };
   }
 
@@ -565,6 +650,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
     Value<String?> path = const Value.absent(),
     String? type,
     Value<String?> extractedContent = const Value.absent(),
+    bool? isPinned,
   }) => SourceItem(
     id: id ?? this.id,
     folderId: folderId.present ? folderId.value : this.folderId,
@@ -574,6 +660,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
     extractedContent: extractedContent.present
         ? extractedContent.value
         : this.extractedContent,
+    isPinned: isPinned ?? this.isPinned,
   );
   SourceItem copyWithCompanion(SourceItemsCompanion data) {
     return SourceItem(
@@ -585,6 +672,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
       extractedContent: data.extractedContent.present
           ? data.extractedContent.value
           : this.extractedContent,
+      isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
     );
   }
 
@@ -596,14 +684,15 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
           ..write('label: $label, ')
           ..write('path: $path, ')
           ..write('type: $type, ')
-          ..write('extractedContent: $extractedContent')
+          ..write('extractedContent: $extractedContent, ')
+          ..write('isPinned: $isPinned')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, folderId, label, path, type, extractedContent);
+      Object.hash(id, folderId, label, path, type, extractedContent, isPinned);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -613,7 +702,8 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
           other.label == this.label &&
           other.path == this.path &&
           other.type == this.type &&
-          other.extractedContent == this.extractedContent);
+          other.extractedContent == this.extractedContent &&
+          other.isPinned == this.isPinned);
 }
 
 class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
@@ -623,6 +713,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
   final Value<String?> path;
   final Value<String> type;
   final Value<String?> extractedContent;
+  final Value<bool> isPinned;
   final Value<int> rowid;
   const SourceItemsCompanion({
     this.id = const Value.absent(),
@@ -631,6 +722,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
     this.path = const Value.absent(),
     this.type = const Value.absent(),
     this.extractedContent = const Value.absent(),
+    this.isPinned = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SourceItemsCompanion.insert({
@@ -640,6 +732,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
     this.path = const Value.absent(),
     required String type,
     this.extractedContent = const Value.absent(),
+    this.isPinned = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        label = Value(label),
@@ -651,6 +744,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
     Expression<String>? path,
     Expression<String>? type,
     Expression<String>? extractedContent,
+    Expression<bool>? isPinned,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -660,6 +754,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
       if (path != null) 'path': path,
       if (type != null) 'type': type,
       if (extractedContent != null) 'extracted_content': extractedContent,
+      if (isPinned != null) 'is_pinned': isPinned,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -671,6 +766,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
     Value<String?>? path,
     Value<String>? type,
     Value<String?>? extractedContent,
+    Value<bool>? isPinned,
     Value<int>? rowid,
   }) {
     return SourceItemsCompanion(
@@ -680,6 +776,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
       path: path ?? this.path,
       type: type ?? this.type,
       extractedContent: extractedContent ?? this.extractedContent,
+      isPinned: isPinned ?? this.isPinned,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -705,6 +802,9 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
     if (extractedContent.present) {
       map['extracted_content'] = Variable<String>(extractedContent.value);
     }
+    if (isPinned.present) {
+      map['is_pinned'] = Variable<bool>(isPinned.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -720,6 +820,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
           ..write('path: $path, ')
           ..write('type: $type, ')
           ..write('extractedContent: $extractedContent, ')
+          ..write('isPinned: $isPinned, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -775,8 +876,29 @@ class $StudyMaterialItemsTable extends StudyMaterialItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _isPinnedMeta = const VerificationMeta(
+    'isPinned',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, folderId, name, description];
+  late final GeneratedColumn<bool> isPinned = GeneratedColumn<bool>(
+    'is_pinned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_pinned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    folderId,
+    name,
+    description,
+    isPinned,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -819,6 +941,12 @@ class $StudyMaterialItemsTable extends StudyMaterialItems
         ),
       );
     }
+    if (data.containsKey('is_pinned')) {
+      context.handle(
+        _isPinnedMeta,
+        isPinned.isAcceptableOrUnknown(data['is_pinned']!, _isPinnedMeta),
+      );
+    }
     return context;
   }
 
@@ -844,6 +972,10 @@ class $StudyMaterialItemsTable extends StudyMaterialItems
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       ),
+      isPinned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_pinned'],
+      )!,
     );
   }
 
@@ -859,11 +991,13 @@ class StudyMaterialItem extends DataClass
   final String folderId;
   final String name;
   final String? description;
+  final bool isPinned;
   const StudyMaterialItem({
     required this.id,
     required this.folderId,
     required this.name,
     this.description,
+    required this.isPinned,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -874,6 +1008,7 @@ class StudyMaterialItem extends DataClass
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
     }
+    map['is_pinned'] = Variable<bool>(isPinned);
     return map;
   }
 
@@ -885,6 +1020,7 @@ class StudyMaterialItem extends DataClass
       description: description == null && nullToAbsent
           ? const Value.absent()
           : Value(description),
+      isPinned: Value(isPinned),
     );
   }
 
@@ -898,6 +1034,7 @@ class StudyMaterialItem extends DataClass
       folderId: serializer.fromJson<String>(json['folderId']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
+      isPinned: serializer.fromJson<bool>(json['isPinned']),
     );
   }
   @override
@@ -908,6 +1045,7 @@ class StudyMaterialItem extends DataClass
       'folderId': serializer.toJson<String>(folderId),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
+      'isPinned': serializer.toJson<bool>(isPinned),
     };
   }
 
@@ -916,11 +1054,13 @@ class StudyMaterialItem extends DataClass
     String? folderId,
     String? name,
     Value<String?> description = const Value.absent(),
+    bool? isPinned,
   }) => StudyMaterialItem(
     id: id ?? this.id,
     folderId: folderId ?? this.folderId,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
+    isPinned: isPinned ?? this.isPinned,
   );
   StudyMaterialItem copyWithCompanion(StudyMaterialItemsCompanion data) {
     return StudyMaterialItem(
@@ -930,6 +1070,7 @@ class StudyMaterialItem extends DataClass
       description: data.description.present
           ? data.description.value
           : this.description,
+      isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
     );
   }
 
@@ -939,13 +1080,14 @@ class StudyMaterialItem extends DataClass
           ..write('id: $id, ')
           ..write('folderId: $folderId, ')
           ..write('name: $name, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('isPinned: $isPinned')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, folderId, name, description);
+  int get hashCode => Object.hash(id, folderId, name, description, isPinned);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -953,7 +1095,8 @@ class StudyMaterialItem extends DataClass
           other.id == this.id &&
           other.folderId == this.folderId &&
           other.name == this.name &&
-          other.description == this.description);
+          other.description == this.description &&
+          other.isPinned == this.isPinned);
 }
 
 class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
@@ -961,12 +1104,14 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
   final Value<String> folderId;
   final Value<String> name;
   final Value<String?> description;
+  final Value<bool> isPinned;
   final Value<int> rowid;
   const StudyMaterialItemsCompanion({
     this.id = const Value.absent(),
     this.folderId = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
+    this.isPinned = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   StudyMaterialItemsCompanion.insert({
@@ -974,6 +1119,7 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
     required String folderId,
     required String name,
     this.description = const Value.absent(),
+    this.isPinned = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        folderId = Value(folderId),
@@ -983,6 +1129,7 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
     Expression<String>? folderId,
     Expression<String>? name,
     Expression<String>? description,
+    Expression<bool>? isPinned,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -990,6 +1137,7 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
       if (folderId != null) 'folder_id': folderId,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
+      if (isPinned != null) 'is_pinned': isPinned,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -999,6 +1147,7 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
     Value<String>? folderId,
     Value<String>? name,
     Value<String?>? description,
+    Value<bool>? isPinned,
     Value<int>? rowid,
   }) {
     return StudyMaterialItemsCompanion(
@@ -1006,6 +1155,7 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
       folderId: folderId ?? this.folderId,
       name: name ?? this.name,
       description: description ?? this.description,
+      isPinned: isPinned ?? this.isPinned,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1025,6 +1175,9 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
+    if (isPinned.present) {
+      map['is_pinned'] = Variable<bool>(isPinned.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1038,6 +1191,7 @@ class StudyMaterialItemsCompanion extends UpdateCompanion<StudyMaterialItem> {
           ..write('folderId: $folderId, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
+          ..write('isPinned: $isPinned, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1937,6 +2091,7 @@ typedef $$StudyFolderItemsTableCreateCompanionBuilder =
       required String name,
       required String createdAt,
       required String updatedAt,
+      Value<bool> isPinned,
       Value<int> rowid,
     });
 typedef $$StudyFolderItemsTableUpdateCompanionBuilder =
@@ -1945,6 +2100,7 @@ typedef $$StudyFolderItemsTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String> createdAt,
       Value<String> updatedAt,
+      Value<bool> isPinned,
       Value<int> rowid,
     });
 
@@ -2032,6 +2188,11 @@ class $$StudyFolderItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> sourceItemsRefs(
     Expression<bool> Function($$SourceItemsTableFilterComposer f) f,
   ) {
@@ -2111,6 +2272,11 @@ class $$StudyFolderItemsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$StudyFolderItemsTableAnnotationComposer
@@ -2133,6 +2299,9 @@ class $$StudyFolderItemsTableAnnotationComposer
 
   GeneratedColumn<String> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPinned =>
+      $composableBuilder(column: $table.isPinned, builder: (column) => column);
 
   Expression<T> sourceItemsRefs<T extends Object>(
     Expression<T> Function($$SourceItemsTableAnnotationComposer a) f,
@@ -2223,12 +2392,14 @@ class $$StudyFolderItemsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
                 Value<String> updatedAt = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StudyFolderItemsCompanion(
                 id: id,
                 name: name,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                isPinned: isPinned,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2237,12 +2408,14 @@ class $$StudyFolderItemsTableTableManager
                 required String name,
                 required String createdAt,
                 required String updatedAt,
+                Value<bool> isPinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StudyFolderItemsCompanion.insert(
                 id: id,
                 name: name,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                isPinned: isPinned,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2339,6 +2512,7 @@ typedef $$SourceItemsTableCreateCompanionBuilder =
       Value<String?> path,
       required String type,
       Value<String?> extractedContent,
+      Value<bool> isPinned,
       Value<int> rowid,
     });
 typedef $$SourceItemsTableUpdateCompanionBuilder =
@@ -2349,6 +2523,7 @@ typedef $$SourceItemsTableUpdateCompanionBuilder =
       Value<String?> path,
       Value<String> type,
       Value<String?> extractedContent,
+      Value<bool> isPinned,
       Value<int> rowid,
     });
 
@@ -2410,6 +2585,11 @@ class $$SourceItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$StudyFolderItemsTableFilterComposer get folderId {
     final $$StudyFolderItemsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -2468,6 +2648,11 @@ class $$SourceItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$StudyFolderItemsTableOrderingComposer get folderId {
     final $$StudyFolderItemsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2517,6 +2702,9 @@ class $$SourceItemsTableAnnotationComposer
     column: $table.extractedContent,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get isPinned =>
+      $composableBuilder(column: $table.isPinned, builder: (column) => column);
 
   $$StudyFolderItemsTableAnnotationComposer get folderId {
     final $$StudyFolderItemsTableAnnotationComposer composer = $composerBuilder(
@@ -2576,6 +2764,7 @@ class $$SourceItemsTableTableManager
                 Value<String?> path = const Value.absent(),
                 Value<String> type = const Value.absent(),
                 Value<String?> extractedContent = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SourceItemsCompanion(
                 id: id,
@@ -2584,6 +2773,7 @@ class $$SourceItemsTableTableManager
                 path: path,
                 type: type,
                 extractedContent: extractedContent,
+                isPinned: isPinned,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2594,6 +2784,7 @@ class $$SourceItemsTableTableManager
                 Value<String?> path = const Value.absent(),
                 required String type,
                 Value<String?> extractedContent = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SourceItemsCompanion.insert(
                 id: id,
@@ -2602,6 +2793,7 @@ class $$SourceItemsTableTableManager
                 path: path,
                 type: type,
                 extractedContent: extractedContent,
+                isPinned: isPinned,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2677,6 +2869,7 @@ typedef $$StudyMaterialItemsTableCreateCompanionBuilder =
       required String folderId,
       required String name,
       Value<String?> description,
+      Value<bool> isPinned,
       Value<int> rowid,
     });
 typedef $$StudyMaterialItemsTableUpdateCompanionBuilder =
@@ -2685,6 +2878,7 @@ typedef $$StudyMaterialItemsTableUpdateCompanionBuilder =
       Value<String> folderId,
       Value<String> name,
       Value<String?> description,
+      Value<bool> isPinned,
       Value<int> rowid,
     });
 
@@ -2769,6 +2963,11 @@ class $$StudyMaterialItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$StudyFolderItemsTableFilterComposer get folderId {
     final $$StudyFolderItemsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -2842,6 +3041,11 @@ class $$StudyMaterialItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$StudyFolderItemsTableOrderingComposer get folderId {
     final $$StudyFolderItemsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2885,6 +3089,9 @@ class $$StudyMaterialItemsTableAnnotationComposer
     column: $table.description,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get isPinned =>
+      $composableBuilder(column: $table.isPinned, builder: (column) => column);
 
   $$StudyFolderItemsTableAnnotationComposer get folderId {
     final $$StudyFolderItemsTableAnnotationComposer composer = $composerBuilder(
@@ -2972,12 +3179,14 @@ class $$StudyMaterialItemsTableTableManager
                 Value<String> folderId = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StudyMaterialItemsCompanion(
                 id: id,
                 folderId: folderId,
                 name: name,
                 description: description,
+                isPinned: isPinned,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2986,12 +3195,14 @@ class $$StudyMaterialItemsTableTableManager
                 required String folderId,
                 required String name,
                 Value<String?> description = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StudyMaterialItemsCompanion.insert(
                 id: id,
                 folderId: folderId,
                 name: name,
                 description: description,
+                isPinned: isPinned,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -12,6 +12,7 @@ class SourceItems extends Table {
   TextColumn get path => text().nullable()();
   TextColumn get type => text()(); // Use SourceType.name to store as string
   TextColumn get extractedContent => text().nullable()();
+  BoolColumn get isPinned => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};

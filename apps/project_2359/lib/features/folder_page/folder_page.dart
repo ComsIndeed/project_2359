@@ -35,11 +35,50 @@ class FolderPage extends StatefulWidget {
 
 class _FolderPageState extends State<FolderPage> {
   late String folderName;
+  final Set<String> _selectedMaterialIds = {};
+
+  bool get _isSelecting => _selectedMaterialIds.isNotEmpty;
+
+  void _toggleMaterialSelection(String id) {
+    setState(() {
+      if (_selectedMaterialIds.contains(id)) {
+        _selectedMaterialIds.remove(id);
+      } else {
+        _selectedMaterialIds.add(id);
+      }
+    });
+  }
+
+  void _clearSelection() {
+    setState(() {
+      _selectedMaterialIds.clear();
+    });
+  }
+
+  Future<void> _handlePinSelected() async {
+    final service = context.read<StudyMaterialService>();
+    for (final id in _selectedMaterialIds) {
+      await service.toggleMaterialPin(id, true);
+    }
+    _clearSelection();
+  }
+
+  Future<void> _handleDeleteSelected() async {
+    final service = context.read<StudyMaterialService>();
+    for (final id in _selectedMaterialIds) {
+      await service.deleteMaterial(id);
+    }
+    _clearSelection();
+  }
+
+  late Stream<List<StudyMaterialItem>> _materialsStream;
 
   @override
   void initState() {
     super.initState();
     folderName = widget.initialFolderName;
+    final service = context.read<StudyMaterialService>();
+    _materialsStream = service.watchMaterialsByFolderId(widget.folderId);
   }
 
   @override
@@ -49,26 +88,39 @@ class _FolderPageState extends State<FolderPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundAlt,
       body: ExpandableFab(
-        // expandedWidth: MediaQuery.of(context).size.width * 0.92,
-        // expandedHeight: MediaQuery.of(context).size.height * 0.8,
-        collapsed: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const FaIcon(FontAwesomeIcons.plus, size: 14),
-              const SizedBox(width: 10),
-              Text(
-                'Create',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.2,
-                ),
+        collapsedBuilder: (context, isOpen, expand, close) {
+          if (_isSelecting) {
+            return _SelectionActionBar(
+              selectedCount: _selectedMaterialIds.length,
+              onClose: _clearSelection,
+              onPin: _handlePinSelected,
+              onDelete: _handleDeleteSelected,
+            );
+          }
+          return InkWell(
+            onTap: expand,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const FaIcon(FontAwesomeIcons.plus, size: 14),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Create',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        expanded: _FolderFabContent(folderId: widget.folderId),
+            ),
+          );
+        },
+        expandedBuilder: (context, isOpen, expand, close) {
+          return _FolderFabContent(folderId: widget.folderId);
+        },
         body: CustomScrollView(
           physics: const ClampingScrollPhysics(),
           slivers: [
@@ -100,7 +152,13 @@ class _FolderPageState extends State<FolderPage> {
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
               sliver: SliverToBoxAdapter(
-                child: _StudyMaterialsList(folderId: widget.folderId),
+                child: _StudyMaterialsList(
+                  stream: _materialsStream,
+                  folderId: widget.folderId,
+                  selectedIds: _selectedMaterialIds,
+                  onToggleSelection: _toggleMaterialSelection,
+                  isSelecting: _isSelecting,
+                ),
               ),
             ),
           ],
@@ -378,18 +436,29 @@ class _ActionButtonChip extends StatelessWidget {
 }
 
 class _StudyMaterialsList extends StatelessWidget {
+  final Stream<List<StudyMaterialItem>> stream;
   final String folderId;
-  const _StudyMaterialsList({required this.folderId});
+  final Set<String> selectedIds;
+  final ValueChanged<String> onToggleSelection;
+  final bool isSelecting;
+
+  const _StudyMaterialsList({
+    required this.stream,
+    required this.folderId,
+    required this.selectedIds,
+    required this.onToggleSelection,
+    required this.isSelecting,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final service = context.read<StudyMaterialService>();
 
     return StreamBuilder<List<StudyMaterialItem>>(
-      stream: service.watchMaterialsByFolderId(folderId),
+      stream: stream,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -427,11 +496,15 @@ class _StudyMaterialsList extends StatelessWidget {
                 label: materials[i].name,
                 subLabel: materials[i].description ?? "Material Pack",
                 icon: FontAwesomeIcons.clone,
-                showDivider: i < materials.length - 1,
-                onTap: () {
-                  // TODO: Navigate to study / view material
-                },
-                showChevron: true,
+                onTap: isSelecting
+                    ? () => onToggleSelection(materials[i].id)
+                    : () {
+                        // TODO: Navigate to study / view material
+                      },
+                onLongPress: () => onToggleSelection(materials[i].id),
+                isSelected: selectedIds.contains(materials[i].id),
+                isSelecting: isSelecting,
+                showChevron: !isSelecting,
               ),
           ],
         );
@@ -1645,4 +1718,100 @@ Future<List<String>> _extractPdfTextInIsolate(Uint8List bytes) async {
   }
   document.dispose();
   return pages;
+}
+
+class _SelectionActionBar extends StatelessWidget {
+  final int selectedCount;
+  final VoidCallback onClose;
+  final VoidCallback onPin;
+  final VoidCallback onDelete;
+
+  const _SelectionActionBar({
+    required this.selectedCount,
+    required this.onClose,
+    required this.onPin,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            onPressed: onClose,
+            icon: const FaIcon(FontAwesomeIcons.xmark, size: 16),
+            visualDensity: VisualDensity.compact,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            "$selectedCount Selected",
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: 16),
+          _BarAction(
+            icon: FontAwesomeIcons.thumbtack,
+            label: "Pin",
+            onTap: onPin,
+          ),
+          const SizedBox(width: 8),
+          _BarAction(
+            icon: FontAwesomeIcons.trashCan,
+            label: "Delete",
+            onTap: onDelete,
+            isDestructive: true,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BarAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  const _BarAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = isDestructive
+        ? theme.colorScheme.error
+        : theme.colorScheme.onSurface;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FaIcon(icon, size: 14, color: color),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

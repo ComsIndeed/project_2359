@@ -6,6 +6,7 @@ class StudyFolderItems extends Table {
 
   TextColumn get createdAt => text()();
   TextColumn get updatedAt => text()();
+  BoolColumn get isPinned => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};

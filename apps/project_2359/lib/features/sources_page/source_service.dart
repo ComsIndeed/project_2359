@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:project_2359/app_database.dart';
 
 class SourceService {
@@ -11,6 +12,12 @@ class SourceService {
 
   Stream<List<SourceItem>> watchAllSources() {
     return _db.select(_db.sourceItems).watch();
+  }
+
+  Stream<List<SourceItem>> watchPinnedSources() {
+    return (_db.select(
+      _db.sourceItems,
+    )..where((t) => t.isPinned.equals(true))).watch();
   }
 
   Future<List<SourceItem>> getSourcesByFolderId(String folderId) async {
@@ -37,6 +44,12 @@ class SourceService {
 
   Future<void> deleteSource(String id) async {
     await (_db.delete(_db.sourceItems)..where((t) => t.id.equals(id))).go();
+  }
+
+  Future<void> toggleSourcePin(String id, bool isPinned) async {
+    await (_db.update(_db.sourceItems)..where((t) => t.id.equals(id))).write(
+      SourceItemsCompanion(isPinned: Value(isPinned)),
+    );
   }
 
   Future<List<SourceItemBlob>> getAllSourceBlobs() async {

@@ -6,6 +6,7 @@ class StudyMaterialItems extends Table {
   TextColumn get folderId => text().references(StudyFolderItems, #id)();
   TextColumn get name => text()();
   TextColumn get description => text().nullable()();
+  BoolColumn get isPinned => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};

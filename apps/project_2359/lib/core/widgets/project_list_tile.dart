@@ -41,6 +41,9 @@ class ProjectListTile extends StatelessWidget {
   final bool isAlert;
   final Widget? targetPage;
   final ProjectTransitionType? transitionType;
+  final bool isSelected;
+  final bool isSelecting;
+  final VoidCallback? onLongPress;
 
   const ProjectListTile({
     super.key,
@@ -60,6 +63,9 @@ class ProjectListTile extends StatelessWidget {
     this.expandedContent,
     this.targetPage,
     this.transitionType,
+    this.isSelected = false,
+    this.isSelecting = false,
+    this.onLongPress,
   });
 
   /// Shorthand constructor for a simple text-based tile
@@ -80,6 +86,9 @@ class ProjectListTile extends StatelessWidget {
     Widget? expandedContent,
     Widget? targetPage,
     ProjectTransitionType? transitionType,
+    bool isSelected = false,
+    bool isSelecting = false,
+    VoidCallback? onLongPress,
   }) {
     return ProjectListTile(
       key: key,
@@ -98,12 +107,19 @@ class ProjectListTile extends StatelessWidget {
       expandedContent: expandedContent,
       targetPage: targetPage,
       transitionType: transitionType,
+      isSelected: isSelected,
+      isSelecting: isSelecting,
+      onLongPress: onLongPress,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     if (targetPage != null && transitionType != null) {
+      if (isSelecting) {
+        return _buildTile(context, onTap);
+      }
+
       void effectiveOnTap() {
         onTap?.call();
       }
@@ -243,7 +259,9 @@ class ProjectListTile extends StatelessWidget {
     final theme = Theme.of(context);
 
     // Decoration logic
-    final effectiveBgColor = backgroundColor ?? Colors.transparent;
+    final effectiveBgColor = isSelected
+        ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+        : (backgroundColor ?? Colors.transparent);
     final borderRadius = isSingle ? BorderRadius.circular(16) : null;
 
     Widget innerContent = Padding(
@@ -295,6 +313,9 @@ class ProjectListTile extends StatelessWidget {
               if (trailing != null) ...[
                 const SizedBox(width: 12),
                 trailing!,
+              ] else if (isSelecting) ...[
+                const SizedBox(width: 12),
+                _AnimatedCheckbox(isSelected: isSelected),
               ] else if (onTap != null && showChevron) ...[
                 const SizedBox(width: 12),
                 Icon(
@@ -346,6 +367,7 @@ class ProjectListTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: borderRadius,
         child: Ink(
           decoration: BoxDecoration(
@@ -464,6 +486,31 @@ class ProjectListGroup extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Column(mainAxisSize: MainAxisSize.min, children: children),
+      ),
+    );
+  }
+}
+
+class _AnimatedCheckbox extends StatelessWidget {
+  final bool isSelected;
+  const _AnimatedCheckbox({required this.isSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return ScaleTransition(scale: animation, child: child);
+      },
+      child: FaIcon(
+        isSelected ? FontAwesomeIcons.circleCheck : FontAwesomeIcons.circle,
+        key: ValueKey(isSelected),
+        size: 20,
+        color: isSelected
+            ? theme.colorScheme.primary
+            : theme.colorScheme.onSurface.withValues(alpha: 0.1),
       ),
     );
   }

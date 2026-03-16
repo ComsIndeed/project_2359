@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:project_2359/app_database.dart';
 
 /// Service for CRUD operations on study folders, materials (packs), and cards.
@@ -13,7 +14,15 @@ class StudyMaterialService {
   }
 
   Stream<List<StudyFolderItem>> watchAllFolders() {
-    return _db.select(_db.studyFolderItems).watch();
+    return (_db.select(
+      _db.studyFolderItems,
+    )..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])).watch();
+  }
+
+  Stream<List<StudyFolderItem>> watchPinnedFolders() {
+    return (_db.select(
+      _db.studyFolderItems,
+    )..where((t) => t.isPinned.equals(true))).watch();
   }
 
   Future<StudyFolderItem?> getFolderById(String id) async {
@@ -24,6 +33,17 @@ class StudyMaterialService {
 
   Future<void> insertFolder(StudyFolderItemsCompanion folder) async {
     await _db.into(_db.studyFolderItems).insert(folder);
+  }
+
+  Future<void> updateFolder(StudyFolderItemsCompanion folder) async {
+    await (_db.update(
+      _db.studyFolderItems,
+    )..where((t) => t.id.equals(folder.id.value))).write(folder);
+  }
+
+  Future<void> toggleFolderPin(String id, bool isPinned) async {
+    await (_db.update(_db.studyFolderItems)..where((t) => t.id.equals(id)))
+        .write(StudyFolderItemsCompanion(isPinned: Value(isPinned)));
   }
 
   Future<void> deleteFolder(String id) async {
@@ -86,6 +106,17 @@ class StudyMaterialService {
     return (_db.select(
       _db.studyMaterialItems,
     )..where((t) => t.folderId.equals(folderId))).watch();
+  }
+
+  Stream<List<StudyMaterialItem>> watchPinnedMaterials() {
+    return (_db.select(
+      _db.studyMaterialItems,
+    )..where((t) => t.isPinned.equals(true))).watch();
+  }
+
+  Future<void> toggleMaterialPin(String id, bool isPinned) async {
+    await (_db.update(_db.studyMaterialItems)..where((t) => t.id.equals(id)))
+        .write(StudyMaterialItemsCompanion(isPinned: Value(isPinned)));
   }
 
   Future<void> insertMaterial(StudyMaterialItemsCompanion material) async {

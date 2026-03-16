@@ -22,7 +22,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -36,6 +36,12 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(studyFolderItems);
           await m.createTable(studyCardItems);
           await m.createTable(sourceItemBlobs);
+        }
+        if (from < 3) {
+          // Add isPinned to existing tables
+          await m.addColumn(studyFolderItems, studyFolderItems.isPinned);
+          await m.addColumn(studyMaterialItems, studyMaterialItems.isPinned);
+          await m.addColumn(sourceItems, sourceItems.isPinned);
         }
       },
       beforeOpen: (details) async {

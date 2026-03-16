@@ -13,8 +13,66 @@ import 'package:project_2359/core/study_material_service.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final Set<String> _selectedFolderIds = {};
+  final Set<String> _selectedMaterialIds = {};
+
+  bool get _isSelecting =>
+      _selectedFolderIds.isNotEmpty || _selectedMaterialIds.isNotEmpty;
+
+  void _toggleFolderSelection(String id) {
+    setState(() {
+      if (_selectedFolderIds.contains(id)) {
+        _selectedFolderIds.remove(id);
+      } else {
+        _selectedFolderIds.add(id);
+      }
+    });
+  }
+
+  void _clearSelection() {
+    setState(() {
+      _selectedFolderIds.clear();
+      _selectedMaterialIds.clear();
+    });
+  }
+
+  Future<void> _handlePinSelected() async {
+    final service = context.read<StudyMaterialService>();
+    for (final id in _selectedFolderIds) {
+      // We need to know current state or just toggle? Usually Pin action means "Pin them all".
+      // For simplicity, let's assume it Pins them.
+      await service.toggleFolderPin(id, true);
+    }
+    // TODO: handle materials too if present
+    _clearSelection();
+  }
+
+  Future<void> _handleDeleteSelected() async {
+    final service = context.read<StudyMaterialService>();
+    for (final id in _selectedFolderIds) {
+      await service.deleteFolder(id);
+    }
+    _clearSelection();
+  }
+
+  late Stream<List<StudyFolderItem>> _foldersStream;
+  late Stream<List<StudyFolderItem>> _pinnedFoldersStream;
+
+  @override
+  void initState() {
+    super.initState();
+    final service = context.read<StudyMaterialService>();
+    _foldersStream = service.watchAllFolders();
+    _pinnedFoldersStream = service.watchPinnedFolders();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,23 +81,39 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: ExpandableFab(
-        collapsed: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FaIcon(FontAwesomeIcons.plus, size: 14),
-              SizedBox(width: 8),
-              Text(
-                "New",
-                style: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+        collapsedBuilder: (context, isOpen, expand, close) {
+          if (_isSelecting) {
+            return _SelectionActionBar(
+              selectedCount:
+                  _selectedFolderIds.length + _selectedMaterialIds.length,
+              onClose: _clearSelection,
+              onPin: _handlePinSelected,
+              onDelete: _handleDeleteSelected,
+            );
+          }
+          return InkWell(
+            onTap: expand,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const FaIcon(FontAwesomeIcons.plus, size: 14),
+                  const SizedBox(width: 8),
+                  Text(
+                    "New",
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        expanded: const _NewButtonExpandedContent(),
+            ),
+          );
+        },
+        expandedBuilder: (context, isOpen, expand, close) {
+          return const _NewButtonExpandedContent();
+        },
         body: LayoutBuilder(
           builder: (context, constraints) {
             final topBgHeight = constraints.maxHeight * 0.10;
@@ -89,36 +163,11 @@ class HomePage extends StatelessWidget {
                       const SizedBox(height: 48),
 
                       // PINNED SECTION
-                      const _SectionHeader(title: "Pinned"),
-                      const SizedBox(height: 8),
-                      ProjectListGroup(
-                        backgroundColor: theme.colorScheme.surfaceContainer,
-                        children: [
-                          ProjectListTile.simple(
-                            label: "University Physics",
-                            date: "2:40 PM",
-                            sources: [
-                              (
-                                label: "Mechanics.pdf",
-                                icon: FontAwesomeIcons.filePdf,
-                              ),
-                              (
-                                label: "Waves.doc",
-                                icon: FontAwesomeIcons.fileWord,
-                              ),
-                              (
-                                label: "Notes",
-                                icon: FontAwesomeIcons.fileLines,
-                              ),
-                            ],
-                            targetPage: FolderPage(
-                              folderId: 'physics_dummy',
-                              initialFolderName: "University Physics",
-                            ),
-                            transitionType: ProjectTransitionType.slideLeft,
-                            showChevron: false,
-                          ),
-                        ],
+                      _PinnedFoldersSection(
+                        stream: _pinnedFoldersStream,
+                        selectedIds: _selectedFolderIds,
+                        onToggleSelection: _toggleFolderSelection,
+                        isSelecting: _isSelecting,
                       ),
 
                       const SizedBox(height: 24),
@@ -127,7 +176,11 @@ class HomePage extends StatelessWidget {
                       const _SectionHeader(title: "Today"),
                       const SizedBox(height: 8),
                       _FolderList(
+                        stream: _foldersStream,
                         backgroundColor: theme.colorScheme.surfaceContainer,
+                        selectedIds: _selectedFolderIds,
+                        onToggleSelection: _toggleFolderSelection,
+                        isSelecting: _isSelecting,
                       ),
                       const SizedBox(height: 48),
                       Center(
@@ -178,18 +231,29 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _FolderList extends StatelessWidget {
+  final Stream<List<StudyFolderItem>> stream;
   final Color? backgroundColor;
-  const _FolderList({this.backgroundColor});
+  final Set<String> selectedIds;
+  final ValueChanged<String> onToggleSelection;
+  final bool isSelecting;
+
+  const _FolderList({
+    required this.stream,
+    this.backgroundColor,
+    required this.selectedIds,
+    required this.onToggleSelection,
+    required this.isSelecting,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final service = context.read<StudyMaterialService>();
 
     return StreamBuilder<List<StudyFolderItem>>(
-      stream: service.watchAllFolders(),
+      stream: stream,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -212,22 +276,22 @@ class _FolderList extends StatelessWidget {
         return ProjectListGroup(
           backgroundColor: backgroundColor,
           children: [
-            for (int i = 0; i < folders.length; i++) ...[
+            for (final folder in folders)
               ProjectListTile.simple(
-                label: folders[i].name,
-                date:
-                    "Recent", // In a real app, you'd format folders[i].updatedAt
-                sources:
-                    const [], // TODO: Link sources to folders and display here
+                label: folder.name,
+                date: folder.updatedAt.substring(11, 16), // Simple HH:mm
+                sources: const [], // TODO: Get sources for folder
                 targetPage: FolderPage(
-                  folderId: folders[i].id,
-                  initialFolderName: folders[i].name,
+                  folderId: folder.id,
+                  initialFolderName: folder.name,
                 ),
                 transitionType: ProjectTransitionType.slideLeft,
-                showDivider: i < folders.length - 1,
-                showChevron: false,
+                showChevron: !isSelecting,
+                isSelected: selectedIds.contains(folder.id),
+                isSelecting: isSelecting,
+                onTap: isSelecting ? () => onToggleSelection(folder.id) : null,
+                onLongPress: () => onToggleSelection(folder.id),
               ),
-            ],
           ],
         );
       },
@@ -578,6 +642,161 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SelectionActionBar extends StatelessWidget {
+  final int selectedCount;
+  final VoidCallback onClose;
+  final VoidCallback onPin;
+  final VoidCallback onDelete;
+
+  const _SelectionActionBar({
+    required this.selectedCount,
+    required this.onClose,
+    required this.onPin,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            onPressed: onClose,
+            icon: const FaIcon(FontAwesomeIcons.xmark, size: 16),
+            visualDensity: VisualDensity.compact,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            "$selectedCount Selected",
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: 16),
+          _BarAction(
+            icon: FontAwesomeIcons.thumbtack,
+            label: "Pin",
+            onTap: onPin,
+          ),
+          const SizedBox(width: 8),
+          _BarAction(
+            icon: FontAwesomeIcons.trashCan,
+            label: "Delete",
+            onTap: onDelete,
+            isDestructive: true,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BarAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  const _BarAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = isDestructive
+        ? theme.colorScheme.error
+        : theme.colorScheme.onSurface;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FaIcon(icon, size: 14, color: color),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PinnedFoldersSection extends StatelessWidget {
+  final Stream<List<StudyFolderItem>> stream;
+  final Set<String> selectedIds;
+  final ValueChanged<String> onToggleSelection;
+  final bool isSelecting;
+
+  const _PinnedFoldersSection({
+    required this.stream,
+    required this.selectedIds,
+    required this.onToggleSelection,
+    required this.isSelecting,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return StreamBuilder<List<StudyFolderItem>>(
+      stream: stream,
+      builder: (context, snapshot) {
+        final pinned = snapshot.data ?? [];
+        if (pinned.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _SectionHeader(title: "Pinned"),
+            const SizedBox(height: 8),
+            ProjectListGroup(
+              backgroundColor: theme.colorScheme.surfaceContainer,
+              children: [
+                for (final folder in pinned)
+                  ProjectListTile.simple(
+                    label: folder.name,
+                    date: folder.updatedAt.substring(11, 16),
+                    sources: const [], // TODO
+                    targetPage: FolderPage(
+                      folderId: folder.id,
+                      initialFolderName: folder.name,
+                    ),
+                    transitionType: ProjectTransitionType.slideLeft,
+                    showChevron: !isSelecting,
+                    isSelected: selectedIds.contains(folder.id),
+                    isSelecting: isSelecting,
+                    onTap: isSelecting
+                        ? () => onToggleSelection(folder.id)
+                        : null,
+                    onLongPress: () => onToggleSelection(folder.id),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
+        );
+      },
     );
   }
 }
