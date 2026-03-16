@@ -56,11 +56,50 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _handleDeleteSelected() async {
+    final count = _selectedFolderIds.length + _selectedMaterialIds.length;
+    if (count == 0) return;
+
+    final confirmed = await _showDeleteConfirmation(context, count: count);
+    if (!confirmed || !mounted) return;
+
     final service = context.read<StudyMaterialService>();
     for (final id in _selectedFolderIds) {
       await service.deleteFolder(id);
     }
+    // TODO: handle materials if we ever allow multiselecting them on home
+    for (final id in _selectedMaterialIds) {
+      await service.deleteMaterial(id);
+    }
     _clearSelection();
+  }
+
+  Future<bool> _showDeleteConfirmation(
+    BuildContext context, {
+    required int count,
+  }) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Delete $count Item${count > 1 ? 's' : ''}?"),
+            content: Text(
+              "Are you sure you want to delete the selected ${count > 1 ? 'items' : 'item'}? This action cannot be undone.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text("Cancel"),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: const Text("Delete"),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   late Stream<List<StudyFolderItem>> _foldersStream;

@@ -64,11 +64,46 @@ class _FolderPageState extends State<FolderPage> {
   }
 
   Future<void> _handleDeleteSelected() async {
+    final count = _selectedMaterialIds.length;
+    if (count == 0) return;
+
+    final confirmed = await _showMultiDeleteConfirmation(context, count: count);
+    if (!confirmed || !mounted) return;
+
     final service = context.read<StudyMaterialService>();
     for (final id in _selectedMaterialIds) {
       await service.deleteMaterial(id);
     }
     _clearSelection();
+  }
+
+  Future<bool> _showMultiDeleteConfirmation(
+    BuildContext context, {
+    required int count,
+  }) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Delete $count Item${count > 1 ? 's' : ''}?"),
+            content: Text(
+              "Are you sure you want to delete the selected ${count > 1 ? 'items' : 'item'}? This action cannot be undone.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text("Cancel"),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: const Text("Delete"),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   late Stream<List<StudyMaterialItem>> _materialsStream;
@@ -79,6 +114,54 @@ class _FolderPageState extends State<FolderPage> {
     folderName = widget.initialFolderName;
     final service = context.read<StudyMaterialService>();
     _materialsStream = service.watchMaterialsByFolderId(widget.folderId);
+  }
+
+  void _showFolderSettings(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _FolderSettingsBottomSheet(
+        folderName: folderName,
+        onDelete: () async {
+          final service = context.read<StudyMaterialService>();
+          final navigator = Navigator.of(context);
+          final confirmed = await _showDeleteConfirmation(context);
+          if (confirmed && mounted) {
+            await service.deleteFolder(widget.folderId);
+            if (mounted) {
+              navigator.pop(); // Close bottom sheet
+              navigator.pop(); // Go back to Home
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  Future<bool> _showDeleteConfirmation(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Delete Collection?"),
+            content: Text(
+              "Are you sure you want to delete '$folderName'? This will also delete all study materials and sources inside.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text("Cancel"),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: const Text("Delete"),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   @override
@@ -136,7 +219,7 @@ class _FolderPageState extends State<FolderPage> {
                   widget.folderId,
                   folderName,
                 ),
-                onSettingsTap: () {},
+                onSettingsTap: () => _showFolderSettings(context),
               ),
             ),
 
@@ -1811,6 +1894,84 @@ class _BarAction extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// FOLDER SETTINGS BOTTOM SHEET
+// ---------------------------------------------------------------------------
+
+class _FolderSettingsBottomSheet extends StatelessWidget {
+  final String folderName;
+  final VoidCallback onDelete;
+
+  const _FolderSettingsBottomSheet({
+    required this.folderName,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundAlt,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: cs.onSurface.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            "Collection Settings",
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 24),
+          ProjectListGroup(
+            children: [
+              ProjectListTile.simple(
+                label: "Rename Collection",
+                icon: FontAwesomeIcons.pen,
+                showDivider: true,
+                onTap: () {
+                  // TODO: Implement rename
+                  Navigator.pop(context);
+                },
+              ),
+              ProjectListTile.simple(
+                label: "Delete Collection",
+                icon: FontAwesomeIcons.trashCan,
+                isAlert: true,
+                onTap: () {
+                  Navigator.pop(context); // Close bottom sheet
+                  onDelete();
+                },
+                backgroundColor: cs.errorContainer.withValues(alpha: 0.2),
+                trailing: FaIcon(
+                  FontAwesomeIcons.chevronRight,
+                  size: 14,
+                  color: cs.error,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
