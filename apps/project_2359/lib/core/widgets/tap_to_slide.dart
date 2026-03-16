@@ -67,12 +67,11 @@ class TapToSlide extends StatelessWidget {
               begin = const Offset(-1.0, -1.0);
               break;
           }
-          const end = Offset.zero;
-          final tween = Tween(
-            begin: begin,
-            end: end,
-          ).chain(CurveTween(curve: Curves.easeInOutCubicEmphasized));
-          final offsetAnimation = animation.drive(tween);
+          final offsetAnimation = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeInOutCubic,
+            reverseCurve: Curves.easeInOutCubic,
+          ).drive(Tween(begin: begin, end: Offset.zero));
           return SlideTransition(position: offsetAnimation, child: child);
         },
       );

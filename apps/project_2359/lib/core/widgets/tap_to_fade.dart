@@ -26,7 +26,8 @@ class TapToFade extends StatelessWidget {
             return FadeTransition(
               opacity: CurvedAnimation(
                 parent: animation,
-                curve: Curves.easeInOutCubicEmphasized,
+                curve: Curves.easeInOutCubic,
+                reverseCurve: Curves.easeInOutCubic,
               ),
               child: child,
             );

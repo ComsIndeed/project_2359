@@ -45,24 +45,31 @@ class TapToDrop extends StatelessWidget {
                 break;
             }
 
-            // Using easeOutBack for a premium "drop and settle" feel
-            const mainCurve = Curves.easeOutBack;
+            const behaviorCurve = Curves.easeInOutCubic;
 
-            final slideAnimation = Tween<Offset>(
-              begin: begin,
-              end: Offset.zero,
-            ).animate(CurvedAnimation(parent: animation, curve: mainCurve));
+            final slideAnimation = Tween<Offset>(begin: begin, end: Offset.zero)
+                .animate(
+                  CurvedAnimation(
+                    parent: animation,
+                    curve: behaviorCurve,
+                    reverseCurve: behaviorCurve,
+                  ),
+                );
 
-            final scaleAnimation = Tween<double>(
-              begin: 1.12,
-              end: 1.0,
-            ).animate(CurvedAnimation(parent: animation, curve: mainCurve));
+            final scaleAnimation = Tween<double>(begin: 1.12, end: 1.0).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: behaviorCurve,
+                reverseCurve: behaviorCurve,
+              ),
+            );
 
             final opacityAnimation = Tween<double>(begin: 0.0, end: 1.0)
                 .animate(
                   CurvedAnimation(
                     parent: animation,
-                    curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+                    curve: behaviorCurve,
+                    reverseCurve: behaviorCurve,
                   ),
                 );
 

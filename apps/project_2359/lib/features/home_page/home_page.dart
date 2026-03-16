@@ -23,18 +23,21 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: ExpandableFab(
-        collapsed: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FaIcon(FontAwesomeIcons.plus, size: 14),
-            SizedBox(width: 8),
-            Text(
-              "New",
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+        collapsed: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FaIcon(FontAwesomeIcons.plus, size: 14),
+              SizedBox(width: 8),
+              Text(
+                "New",
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         expanded: const _NewButtonExpandedContent(),
         body: LayoutBuilder(
@@ -318,6 +321,16 @@ class _NewButtonExpandedContent extends StatefulWidget {
 class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
   final TextEditingController _folderNameController = TextEditingController();
   bool _isCreatingFolder = false;
+  bool _isSuccess = false;
+  String _addedName = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _folderNameController.addListener(() {
+      setState(() {}); // Trigger rebuild to show/hide the button
+    });
+  }
 
   Future<void> _createFolder() async {
     final name = _folderNameController.text.trim();
@@ -335,19 +348,32 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
           updatedAt: DateTime.now().toIso8601String(),
         ),
       );
-      _folderNameController.clear();
+
       if (mounted) {
-        // Close FAB (assuming it's controlled via a scaffold or state)
-        // For now, just show success
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Collection '$name' created!"),
-            behavior: SnackBarBehavior.floating,
-          ),
+        setState(() {
+          _isSuccess = true;
+          _isCreatingFolder = false;
+          _addedName = name;
+        });
+
+        // Feedback: Turn FAB green
+        ExpandableFab.of(context).setOverrideColor(
+          Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF1B5E20) // Deep green
+              : const Color(0xFF4CAF50), // Standard green
         );
+
+        // Wait then close
+        await Future.delayed(const Duration(milliseconds: 1200));
+
+        if (mounted) {
+          _folderNameController.clear();
+          ExpandableFab.of(context).close();
+        }
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _isCreatingFolder = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Error: $e"),
@@ -355,8 +381,6 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
           ),
         );
       }
-    } finally {
-      if (mounted) setState(() => _isCreatingFolder = false);
     }
   }
 
@@ -371,133 +395,169 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
+    if (_isSuccess) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const FaIcon(
+              FontAwesomeIcons.checkCircle,
+              color: Colors.white,
+              size: 40,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Added '$_addedName'",
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.symmetric(vertical: 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // NEW COLLECTION CREATION
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Text(
-              "Quick Access",
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ),
-
-          // PREMIUM FOLDER CREATION BOX
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cs.primary.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: cs.primary.withValues(alpha: 0.1)),
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  "NEW COLLECTION",
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: cs.primary,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Row(
                   children: [
-                    FaIcon(
-                      FontAwesomeIcons.folderPlus,
-                      size: 14,
-                      color: cs.primary,
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      "NEW COLLECTION",
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: cs.primary,
-                        letterSpacing: 1.2,
+                    Expanded(
+                      child: TextField(
+                        controller: _folderNameController,
+                        decoration: InputDecoration(
+                          hintText: "Enter Name...",
+                          hintStyle: TextStyle(
+                            color: cs.onSurface.withValues(alpha: 0.3),
+                            fontSize: 15,
+                          ),
+                          prefixIcon: Container(
+                            padding: const EdgeInsets.all(12),
+                            child: FaIcon(
+                              FontAwesomeIcons.folderPlus,
+                              size: 16,
+                              color: cs.primary.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          filled: true,
+                          fillColor: cs.onSurface.withValues(alpha: 0.04),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide(
+                              color: cs.primary.withValues(alpha: 0.2),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        onSubmitted: (_) => _createFolder(),
                       ),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOutCubic,
+                      child: _folderNameController.text.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: IconButton(
+                                onPressed: _isCreatingFolder
+                                    ? null
+                                    : _createFolder,
+                                icon: _isCreatingFolder
+                                    ? const SizedBox(
+                                        height: 18,
+                                        width: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const FaIcon(
+                                        FontAwesomeIcons.check,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
+                                style: IconButton.styleFrom(
+                                  backgroundColor: cs.primary,
+                                  fixedSize: const Size(54, 54),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _folderNameController,
-                  decoration: InputDecoration(
-                    hintText: "Enter Name...",
-                    hintStyle: TextStyle(
-                      color: cs.onSurface.withValues(alpha: 0.2),
-                    ),
-                    filled: true,
-                    fillColor: theme.scaffoldBackgroundColor,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: cs.onSurface.withValues(alpha: 0.05),
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: cs.onSurface.withValues(alpha: 0.05),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: cs.primary, width: 1.5),
-                    ),
-                  ),
-                  onSubmitted: (_) => _createFolder(),
+              ],
+            ),
+          ),
+
+          // SEPARATOR
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Divider(
+                  color: cs.onSurface.withValues(alpha: 0.08),
+                  indent: 32,
+                  endIndent: 32,
                 ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isCreatingFolder ? null : _createFolder,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: cs.primary,
-                      foregroundColor: cs.onPrimary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
+                Container(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.98,
+                  ), // Match FAB bg
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    "OR",
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: cs.onSurface.withValues(alpha: 0.3),
+                      fontWeight: FontWeight.bold,
                     ),
-                    child: _isCreatingFolder
-                        ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            "Create Collection",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
                   ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              "More Options",
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
+          // LIST TILES FOR MORE OPTIONS
           ProjectListGroup(
-            backgroundColor: theme.colorScheme.surfaceContainer,
+            backgroundColor:
+                Colors.transparent, // Let FAB background show through
             margin: const EdgeInsets.symmetric(horizontal: 8),
             children: [
               ProjectListTile.simple(
@@ -508,36 +568,9 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
                 showChevron: false,
               ),
               ProjectListTile.simple(
-                label: "Upload File",
-                icon: FontAwesomeIcons.fileArrowUp,
+                label: "Upload Media",
+                icon: FontAwesomeIcons.photoFilm,
                 showDivider: false,
-                onTap: () {},
-                showChevron: false,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // A suggested action area
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              "Recent Suggestions",
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          ProjectListGroup(
-            backgroundColor: theme.colorScheme.surfaceContainer.withValues(
-              alpha: 0.5,
-            ),
-            margin: const EdgeInsets.symmetric(horizontal: 8),
-            children: [
-              ProjectListTile.simple(
-                label: "Summarize Physics Notes",
-                icon: FontAwesomeIcons.wandMagicSparkles,
                 onTap: () {},
                 showChevron: false,
               ),

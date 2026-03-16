@@ -28,8 +28,8 @@ class ExpandableFab extends StatefulWidget {
     required this.body,
     super.key,
     this.backgroundColor,
-    this.duration = const Duration(milliseconds: 400),
-    this.curve = Curves.easeOutBack,
+    this.duration = const Duration(milliseconds: 200),
+    this.curve = Curves.easeInOutCubic,
     required this.collapsed,
     required this.expanded,
     this.expandedWidth,
@@ -55,8 +55,16 @@ class ExpandableFabState extends State<ExpandableFab> {
 
   void close() {
     if (_isOpen) {
-      setState(() => _isOpen = false);
+      setState(() {
+        _isOpen = false;
+        _overrideColor = null; // Clear override on close
+      });
     }
+  }
+
+  Color? _overrideColor;
+  void setOverrideColor(Color? color) {
+    if (mounted) setState(() => _overrideColor = color);
   }
 
   Size? _collapsedSize;
@@ -173,6 +181,7 @@ class ExpandableFabState extends State<ExpandableFab> {
                 child: Container(
                   decoration: ShapeDecoration(
                     color:
+                        _overrideColor ??
                         widget.backgroundColor ??
                         theme.colorScheme.surfaceContainerHighest.withValues(
                           alpha: 0.98,
@@ -204,44 +213,39 @@ class ExpandableFabState extends State<ExpandableFab> {
                       onTap: _isOpen
                           ? null
                           : () => setState(() => _isOpen = true),
-                      child: AnimatedPadding(
+                      child: AnimatedSize(
                         duration: widget.duration,
                         curve: widget.curve,
-                        padding: EdgeInsets.all(_isOpen ? 4.0 : 16.0),
-                        child: AnimatedSize(
+                        alignment: Alignment.bottomCenter,
+                        clipBehavior: Clip.antiAlias,
+                        child: AnimatedSwitcher(
                           duration: widget.duration,
-                          curve: widget.curve,
-                          alignment: Alignment.bottomCenter,
-                          clipBehavior: Clip.antiAlias,
-                          child: AnimatedSwitcher(
-                            duration: widget.duration,
-                            switchInCurve: widget.curve,
-                            switchOutCurve: widget.curve,
-                            layoutBuilder: (currentChild, previousChildren) =>
-                                Stack(
-                                  alignment: Alignment.bottomCenter,
-                                  children: [
-                                    for (final child in previousChildren)
-                                      Positioned(child: child),
-                                    ?currentChild,
-                                  ],
-                                ),
-                            child: _isOpen
-                                ? KeyedSubtree(
-                                    key: const ValueKey("expanded"),
-                                    child: _SizeReporter(
-                                      onSizeChanged: _onExpandedSizeChanged,
-                                      child: expandedChild,
-                                    ),
-                                  )
-                                : KeyedSubtree(
-                                    key: const ValueKey("collapsed"),
-                                    child: _SizeReporter(
-                                      onSizeChanged: _onCollapsedSizeChanged,
-                                      child: widget.collapsed,
-                                    ),
+                          switchInCurve: widget.curve,
+                          switchOutCurve: widget.curve,
+                          layoutBuilder: (currentChild, previousChildren) =>
+                              Stack(
+                                alignment: Alignment.bottomCenter,
+                                children: [
+                                  for (final child in previousChildren)
+                                    Positioned(child: child),
+                                  ?currentChild,
+                                ],
+                              ),
+                          child: _isOpen
+                              ? KeyedSubtree(
+                                  key: const ValueKey("expanded"),
+                                  child: _SizeReporter(
+                                    onSizeChanged: _onExpandedSizeChanged,
+                                    child: expandedChild,
                                   ),
-                          ),
+                                )
+                              : KeyedSubtree(
+                                  key: const ValueKey("collapsed"),
+                                  child: _SizeReporter(
+                                    onSizeChanged: _onCollapsedSizeChanged,
+                                    child: widget.collapsed,
+                                  ),
+                                ),
                         ),
                       ),
                     ),

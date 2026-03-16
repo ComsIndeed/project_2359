@@ -22,7 +22,28 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (m) async {
+        await m.createAll();
+      },
+      onUpgrade: (m, from, to) async {
+        if (from < 2) {
+          // Add missing tables that were introduced
+          await m.createTable(studyFolderItems);
+          await m.createTable(studyCardItems);
+          await m.createTable(sourceItemBlobs);
+        }
+      },
+      beforeOpen: (details) async {
+        // Enable foreign keys if needed
+        // await customStatement('PRAGMA foreign_keys = ON');
+      },
+    );
+  }
 
   static QueryExecutor _openConnection() {
     return driftDatabase(
@@ -30,8 +51,6 @@ class AppDatabase extends _$AppDatabase {
       native: const DriftNativeOptions(
         databaseDirectory: path.getApplicationSupportDirectory,
       ),
-      // If you need web support, see https://drift.simonbinder.eu/platforms/web/
-      // TODO: Implement web support
     );
   }
 }

@@ -44,7 +44,8 @@ class TapToGrow extends StatelessWidget {
               alignment: alignment,
               scale: CurvedAnimation(
                 parent: anim,
-                curve: Curves.easeInOutCubicEmphasized,
+                curve: Curves.easeInOutCubic,
+                reverseCurve: Curves.easeInOutCubic,
               ),
               child: child,
             );

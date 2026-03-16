@@ -34,6 +34,8 @@ Future<void> main() async {
   runApp(
     MultiRepositoryProvider(
       providers: [
+        RepositoryProvider<AppDatabase>.value(value: database),
+        RepositoryProvider<SourceService>.value(value: sourceService),
         RepositoryProvider<StudyMaterialService>.value(
           value: studyMaterialService,
         ),

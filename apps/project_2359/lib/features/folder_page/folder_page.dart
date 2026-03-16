@@ -51,19 +51,22 @@ class _FolderPageState extends State<FolderPage> {
       body: ExpandableFab(
         // expandedWidth: MediaQuery.of(context).size.width * 0.92,
         // expandedHeight: MediaQuery.of(context).size.height * 0.8,
-        collapsed: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const FaIcon(FontAwesomeIcons.plus, size: 14),
-            const SizedBox(width: 10),
-            Text(
-              'Create',
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.2,
+        collapsed: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const FaIcon(FontAwesomeIcons.plus, size: 14),
+              const SizedBox(width: 10),
+              Text(
+                'Create',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.2,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         expanded: _FolderFabContent(folderId: widget.folderId),
         body: CustomScrollView(
