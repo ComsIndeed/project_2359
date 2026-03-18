@@ -6,6 +6,7 @@ import 'package:project_2359/core/tables/source_items.dart';
 import 'package:project_2359/core/tables/study_material_items.dart';
 import 'package:project_2359/core/tables/study_folder_items.dart';
 import 'package:project_2359/core/tables/study_card_items.dart';
+import 'package:project_2359/core/tables/study_session_events.dart';
 
 part 'app_database.g.dart';
 
@@ -16,13 +17,14 @@ part 'app_database.g.dart';
     StudyFolderItems,
     SourceItemBlobs,
     StudyCardItems,
+    StudySessionEvents,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -54,6 +56,10 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(studyCardItems, studyCardItems.lapses);
           await m.addColumn(studyCardItems, studyCardItems.fsrsState);
           await m.addColumn(studyCardItems, studyCardItems.lastReview);
+        }
+        if (from < 5) {
+          // Add StudySessionEvents table
+          await m.createTable(studySessionEvents);
         }
       },
       beforeOpen: (details) async {

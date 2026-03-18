@@ -2487,6 +2487,481 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
   }
 }
 
+class $StudySessionEventsTable extends StudySessionEvents
+    with TableInfo<$StudySessionEventsTable, StudySessionEvent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StudySessionEventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cardIdMeta = const VerificationMeta('cardId');
+  @override
+  late final GeneratedColumn<String> cardId = GeneratedColumn<String>(
+    'card_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _materialIdMeta = const VerificationMeta(
+    'materialId',
+  );
+  @override
+  late final GeneratedColumn<String> materialId = GeneratedColumn<String>(
+    'material_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ratingMeta = const VerificationMeta('rating');
+  @override
+  late final GeneratedColumn<int> rating = GeneratedColumn<int>(
+    'rating',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reviewedAtMeta = const VerificationMeta(
+    'reviewedAt',
+  );
+  @override
+  late final GeneratedColumn<String> reviewedAt = GeneratedColumn<String>(
+    'reviewed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scheduledDaysMeta = const VerificationMeta(
+    'scheduledDays',
+  );
+  @override
+  late final GeneratedColumn<int> scheduledDays = GeneratedColumn<int>(
+    'scheduled_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _elapsedDaysMeta = const VerificationMeta(
+    'elapsedDays',
+  );
+  @override
+  late final GeneratedColumn<int> elapsedDays = GeneratedColumn<int>(
+    'elapsed_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    cardId,
+    materialId,
+    rating,
+    reviewedAt,
+    scheduledDays,
+    elapsedDays,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'study_session_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StudySessionEvent> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('card_id')) {
+      context.handle(
+        _cardIdMeta,
+        cardId.isAcceptableOrUnknown(data['card_id']!, _cardIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cardIdMeta);
+    }
+    if (data.containsKey('material_id')) {
+      context.handle(
+        _materialIdMeta,
+        materialId.isAcceptableOrUnknown(data['material_id']!, _materialIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_materialIdMeta);
+    }
+    if (data.containsKey('rating')) {
+      context.handle(
+        _ratingMeta,
+        rating.isAcceptableOrUnknown(data['rating']!, _ratingMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ratingMeta);
+    }
+    if (data.containsKey('reviewed_at')) {
+      context.handle(
+        _reviewedAtMeta,
+        reviewedAt.isAcceptableOrUnknown(data['reviewed_at']!, _reviewedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reviewedAtMeta);
+    }
+    if (data.containsKey('scheduled_days')) {
+      context.handle(
+        _scheduledDaysMeta,
+        scheduledDays.isAcceptableOrUnknown(
+          data['scheduled_days']!,
+          _scheduledDaysMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_scheduledDaysMeta);
+    }
+    if (data.containsKey('elapsed_days')) {
+      context.handle(
+        _elapsedDaysMeta,
+        elapsedDays.isAcceptableOrUnknown(
+          data['elapsed_days']!,
+          _elapsedDaysMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_elapsedDaysMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StudySessionEvent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StudySessionEvent(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      cardId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}card_id'],
+      )!,
+      materialId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}material_id'],
+      )!,
+      rating: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rating'],
+      )!,
+      reviewedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reviewed_at'],
+      )!,
+      scheduledDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}scheduled_days'],
+      )!,
+      elapsedDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}elapsed_days'],
+      )!,
+    );
+  }
+
+  @override
+  $StudySessionEventsTable createAlias(String alias) {
+    return $StudySessionEventsTable(attachedDatabase, alias);
+  }
+}
+
+class StudySessionEvent extends DataClass
+    implements Insertable<StudySessionEvent> {
+  final String id;
+  final String cardId;
+  final String materialId;
+  final int rating;
+  final String reviewedAt;
+  final int scheduledDays;
+  final int elapsedDays;
+  const StudySessionEvent({
+    required this.id,
+    required this.cardId,
+    required this.materialId,
+    required this.rating,
+    required this.reviewedAt,
+    required this.scheduledDays,
+    required this.elapsedDays,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['card_id'] = Variable<String>(cardId);
+    map['material_id'] = Variable<String>(materialId);
+    map['rating'] = Variable<int>(rating);
+    map['reviewed_at'] = Variable<String>(reviewedAt);
+    map['scheduled_days'] = Variable<int>(scheduledDays);
+    map['elapsed_days'] = Variable<int>(elapsedDays);
+    return map;
+  }
+
+  StudySessionEventsCompanion toCompanion(bool nullToAbsent) {
+    return StudySessionEventsCompanion(
+      id: Value(id),
+      cardId: Value(cardId),
+      materialId: Value(materialId),
+      rating: Value(rating),
+      reviewedAt: Value(reviewedAt),
+      scheduledDays: Value(scheduledDays),
+      elapsedDays: Value(elapsedDays),
+    );
+  }
+
+  factory StudySessionEvent.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StudySessionEvent(
+      id: serializer.fromJson<String>(json['id']),
+      cardId: serializer.fromJson<String>(json['cardId']),
+      materialId: serializer.fromJson<String>(json['materialId']),
+      rating: serializer.fromJson<int>(json['rating']),
+      reviewedAt: serializer.fromJson<String>(json['reviewedAt']),
+      scheduledDays: serializer.fromJson<int>(json['scheduledDays']),
+      elapsedDays: serializer.fromJson<int>(json['elapsedDays']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'cardId': serializer.toJson<String>(cardId),
+      'materialId': serializer.toJson<String>(materialId),
+      'rating': serializer.toJson<int>(rating),
+      'reviewedAt': serializer.toJson<String>(reviewedAt),
+      'scheduledDays': serializer.toJson<int>(scheduledDays),
+      'elapsedDays': serializer.toJson<int>(elapsedDays),
+    };
+  }
+
+  StudySessionEvent copyWith({
+    String? id,
+    String? cardId,
+    String? materialId,
+    int? rating,
+    String? reviewedAt,
+    int? scheduledDays,
+    int? elapsedDays,
+  }) => StudySessionEvent(
+    id: id ?? this.id,
+    cardId: cardId ?? this.cardId,
+    materialId: materialId ?? this.materialId,
+    rating: rating ?? this.rating,
+    reviewedAt: reviewedAt ?? this.reviewedAt,
+    scheduledDays: scheduledDays ?? this.scheduledDays,
+    elapsedDays: elapsedDays ?? this.elapsedDays,
+  );
+  StudySessionEvent copyWithCompanion(StudySessionEventsCompanion data) {
+    return StudySessionEvent(
+      id: data.id.present ? data.id.value : this.id,
+      cardId: data.cardId.present ? data.cardId.value : this.cardId,
+      materialId: data.materialId.present
+          ? data.materialId.value
+          : this.materialId,
+      rating: data.rating.present ? data.rating.value : this.rating,
+      reviewedAt: data.reviewedAt.present
+          ? data.reviewedAt.value
+          : this.reviewedAt,
+      scheduledDays: data.scheduledDays.present
+          ? data.scheduledDays.value
+          : this.scheduledDays,
+      elapsedDays: data.elapsedDays.present
+          ? data.elapsedDays.value
+          : this.elapsedDays,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StudySessionEvent(')
+          ..write('id: $id, ')
+          ..write('cardId: $cardId, ')
+          ..write('materialId: $materialId, ')
+          ..write('rating: $rating, ')
+          ..write('reviewedAt: $reviewedAt, ')
+          ..write('scheduledDays: $scheduledDays, ')
+          ..write('elapsedDays: $elapsedDays')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    cardId,
+    materialId,
+    rating,
+    reviewedAt,
+    scheduledDays,
+    elapsedDays,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StudySessionEvent &&
+          other.id == this.id &&
+          other.cardId == this.cardId &&
+          other.materialId == this.materialId &&
+          other.rating == this.rating &&
+          other.reviewedAt == this.reviewedAt &&
+          other.scheduledDays == this.scheduledDays &&
+          other.elapsedDays == this.elapsedDays);
+}
+
+class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
+  final Value<String> id;
+  final Value<String> cardId;
+  final Value<String> materialId;
+  final Value<int> rating;
+  final Value<String> reviewedAt;
+  final Value<int> scheduledDays;
+  final Value<int> elapsedDays;
+  final Value<int> rowid;
+  const StudySessionEventsCompanion({
+    this.id = const Value.absent(),
+    this.cardId = const Value.absent(),
+    this.materialId = const Value.absent(),
+    this.rating = const Value.absent(),
+    this.reviewedAt = const Value.absent(),
+    this.scheduledDays = const Value.absent(),
+    this.elapsedDays = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StudySessionEventsCompanion.insert({
+    required String id,
+    required String cardId,
+    required String materialId,
+    required int rating,
+    required String reviewedAt,
+    required int scheduledDays,
+    required int elapsedDays,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       cardId = Value(cardId),
+       materialId = Value(materialId),
+       rating = Value(rating),
+       reviewedAt = Value(reviewedAt),
+       scheduledDays = Value(scheduledDays),
+       elapsedDays = Value(elapsedDays);
+  static Insertable<StudySessionEvent> custom({
+    Expression<String>? id,
+    Expression<String>? cardId,
+    Expression<String>? materialId,
+    Expression<int>? rating,
+    Expression<String>? reviewedAt,
+    Expression<int>? scheduledDays,
+    Expression<int>? elapsedDays,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (cardId != null) 'card_id': cardId,
+      if (materialId != null) 'material_id': materialId,
+      if (rating != null) 'rating': rating,
+      if (reviewedAt != null) 'reviewed_at': reviewedAt,
+      if (scheduledDays != null) 'scheduled_days': scheduledDays,
+      if (elapsedDays != null) 'elapsed_days': elapsedDays,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StudySessionEventsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? cardId,
+    Value<String>? materialId,
+    Value<int>? rating,
+    Value<String>? reviewedAt,
+    Value<int>? scheduledDays,
+    Value<int>? elapsedDays,
+    Value<int>? rowid,
+  }) {
+    return StudySessionEventsCompanion(
+      id: id ?? this.id,
+      cardId: cardId ?? this.cardId,
+      materialId: materialId ?? this.materialId,
+      rating: rating ?? this.rating,
+      reviewedAt: reviewedAt ?? this.reviewedAt,
+      scheduledDays: scheduledDays ?? this.scheduledDays,
+      elapsedDays: elapsedDays ?? this.elapsedDays,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (cardId.present) {
+      map['card_id'] = Variable<String>(cardId.value);
+    }
+    if (materialId.present) {
+      map['material_id'] = Variable<String>(materialId.value);
+    }
+    if (rating.present) {
+      map['rating'] = Variable<int>(rating.value);
+    }
+    if (reviewedAt.present) {
+      map['reviewed_at'] = Variable<String>(reviewedAt.value);
+    }
+    if (scheduledDays.present) {
+      map['scheduled_days'] = Variable<int>(scheduledDays.value);
+    }
+    if (elapsedDays.present) {
+      map['elapsed_days'] = Variable<int>(elapsedDays.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StudySessionEventsCompanion(')
+          ..write('id: $id, ')
+          ..write('cardId: $cardId, ')
+          ..write('materialId: $materialId, ')
+          ..write('rating: $rating, ')
+          ..write('reviewedAt: $reviewedAt, ')
+          ..write('scheduledDays: $scheduledDays, ')
+          ..write('elapsedDays: $elapsedDays, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2500,6 +2975,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $StudyCardItemsTable studyCardItems = $StudyCardItemsTable(this);
+  late final $StudySessionEventsTable studySessionEvents =
+      $StudySessionEventsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2510,6 +2987,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     studyMaterialItems,
     sourceItemBlobs,
     studyCardItems,
+    studySessionEvents,
   ];
 }
 
@@ -4488,6 +4966,265 @@ typedef $$StudyCardItemsTableProcessedTableManager =
       StudyCardItem,
       PrefetchHooks Function({bool materialId})
     >;
+typedef $$StudySessionEventsTableCreateCompanionBuilder =
+    StudySessionEventsCompanion Function({
+      required String id,
+      required String cardId,
+      required String materialId,
+      required int rating,
+      required String reviewedAt,
+      required int scheduledDays,
+      required int elapsedDays,
+      Value<int> rowid,
+    });
+typedef $$StudySessionEventsTableUpdateCompanionBuilder =
+    StudySessionEventsCompanion Function({
+      Value<String> id,
+      Value<String> cardId,
+      Value<String> materialId,
+      Value<int> rating,
+      Value<String> reviewedAt,
+      Value<int> scheduledDays,
+      Value<int> elapsedDays,
+      Value<int> rowid,
+    });
+
+class $$StudySessionEventsTableFilterComposer
+    extends Composer<_$AppDatabase, $StudySessionEventsTable> {
+  $$StudySessionEventsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cardId => $composableBuilder(
+    column: $table.cardId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get materialId => $composableBuilder(
+    column: $table.materialId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rating => $composableBuilder(
+    column: $table.rating,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get scheduledDays => $composableBuilder(
+    column: $table.scheduledDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get elapsedDays => $composableBuilder(
+    column: $table.elapsedDays,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StudySessionEventsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StudySessionEventsTable> {
+  $$StudySessionEventsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cardId => $composableBuilder(
+    column: $table.cardId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get materialId => $composableBuilder(
+    column: $table.materialId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rating => $composableBuilder(
+    column: $table.rating,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get scheduledDays => $composableBuilder(
+    column: $table.scheduledDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get elapsedDays => $composableBuilder(
+    column: $table.elapsedDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StudySessionEventsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StudySessionEventsTable> {
+  $$StudySessionEventsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get cardId =>
+      $composableBuilder(column: $table.cardId, builder: (column) => column);
+
+  GeneratedColumn<String> get materialId => $composableBuilder(
+    column: $table.materialId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get rating =>
+      $composableBuilder(column: $table.rating, builder: (column) => column);
+
+  GeneratedColumn<String> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get scheduledDays => $composableBuilder(
+    column: $table.scheduledDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get elapsedDays => $composableBuilder(
+    column: $table.elapsedDays,
+    builder: (column) => column,
+  );
+}
+
+class $$StudySessionEventsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StudySessionEventsTable,
+          StudySessionEvent,
+          $$StudySessionEventsTableFilterComposer,
+          $$StudySessionEventsTableOrderingComposer,
+          $$StudySessionEventsTableAnnotationComposer,
+          $$StudySessionEventsTableCreateCompanionBuilder,
+          $$StudySessionEventsTableUpdateCompanionBuilder,
+          (
+            StudySessionEvent,
+            BaseReferences<
+              _$AppDatabase,
+              $StudySessionEventsTable,
+              StudySessionEvent
+            >,
+          ),
+          StudySessionEvent,
+          PrefetchHooks Function()
+        > {
+  $$StudySessionEventsTableTableManager(
+    _$AppDatabase db,
+    $StudySessionEventsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StudySessionEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StudySessionEventsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StudySessionEventsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> cardId = const Value.absent(),
+                Value<String> materialId = const Value.absent(),
+                Value<int> rating = const Value.absent(),
+                Value<String> reviewedAt = const Value.absent(),
+                Value<int> scheduledDays = const Value.absent(),
+                Value<int> elapsedDays = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StudySessionEventsCompanion(
+                id: id,
+                cardId: cardId,
+                materialId: materialId,
+                rating: rating,
+                reviewedAt: reviewedAt,
+                scheduledDays: scheduledDays,
+                elapsedDays: elapsedDays,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String cardId,
+                required String materialId,
+                required int rating,
+                required String reviewedAt,
+                required int scheduledDays,
+                required int elapsedDays,
+                Value<int> rowid = const Value.absent(),
+              }) => StudySessionEventsCompanion.insert(
+                id: id,
+                cardId: cardId,
+                materialId: materialId,
+                rating: rating,
+                reviewedAt: reviewedAt,
+                scheduledDays: scheduledDays,
+                elapsedDays: elapsedDays,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StudySessionEventsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StudySessionEventsTable,
+      StudySessionEvent,
+      $$StudySessionEventsTableFilterComposer,
+      $$StudySessionEventsTableOrderingComposer,
+      $$StudySessionEventsTableAnnotationComposer,
+      $$StudySessionEventsTableCreateCompanionBuilder,
+      $$StudySessionEventsTableUpdateCompanionBuilder,
+      (
+        StudySessionEvent,
+        BaseReferences<
+          _$AppDatabase,
+          $StudySessionEventsTable,
+          StudySessionEvent
+        >,
+      ),
+      StudySessionEvent,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4502,4 +5239,6 @@ class $AppDatabaseManager {
       $$SourceItemBlobsTableTableManager(_db, _db.sourceItemBlobs);
   $$StudyCardItemsTableTableManager get studyCardItems =>
       $$StudyCardItemsTableTableManager(_db, _db.studyCardItems);
+  $$StudySessionEventsTableTableManager get studySessionEvents =>
+      $$StudySessionEventsTableTableManager(_db, _db.studySessionEvents);
 }
