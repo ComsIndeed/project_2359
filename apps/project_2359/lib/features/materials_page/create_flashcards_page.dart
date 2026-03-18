@@ -1,14 +1,15 @@
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:uuid/uuid.dart';
+
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/study_material_service.dart';
-import 'package:project_2359/core/tables/study_card.dart';
+import 'package:project_2359/core/tables/study_card_items.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
-import 'package:drift/drift.dart' hide Column;
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:uuid/uuid.dart';
 
 /// A card in the flashcard editor — front (question) and back (answer).
 class _FlashcardEntry {
