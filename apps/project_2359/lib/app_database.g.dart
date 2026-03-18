@@ -1652,6 +1652,106 @@ class $StudyCardItemsTable extends StudyCardItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _dueMeta = const VerificationMeta('due');
+  @override
+  late final GeneratedColumn<String> due = GeneratedColumn<String>(
+    'due',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stabilityMeta = const VerificationMeta(
+    'stability',
+  );
+  @override
+  late final GeneratedColumn<double> stability = GeneratedColumn<double>(
+    'stability',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _difficultyMeta = const VerificationMeta(
+    'difficulty',
+  );
+  @override
+  late final GeneratedColumn<double> difficulty = GeneratedColumn<double>(
+    'difficulty',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _elapsedDaysMeta = const VerificationMeta(
+    'elapsedDays',
+  );
+  @override
+  late final GeneratedColumn<int> elapsedDays = GeneratedColumn<int>(
+    'elapsed_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _scheduledDaysMeta = const VerificationMeta(
+    'scheduledDays',
+  );
+  @override
+  late final GeneratedColumn<int> scheduledDays = GeneratedColumn<int>(
+    'scheduled_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _repsMeta = const VerificationMeta('reps');
+  @override
+  late final GeneratedColumn<int> reps = GeneratedColumn<int>(
+    'reps',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lapsesMeta = const VerificationMeta('lapses');
+  @override
+  late final GeneratedColumn<int> lapses = GeneratedColumn<int>(
+    'lapses',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _fsrsStateMeta = const VerificationMeta(
+    'fsrsState',
+  );
+  @override
+  late final GeneratedColumn<int> fsrsState = GeneratedColumn<int>(
+    'fsrs_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastReviewMeta = const VerificationMeta(
+    'lastReview',
+  );
+  @override
+  late final GeneratedColumn<String> lastReview = GeneratedColumn<String>(
+    'last_review',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1661,6 +1761,15 @@ class $StudyCardItemsTable extends StudyCardItems
     question,
     optionsListJson,
     answer,
+    due,
+    stability,
+    difficulty,
+    elapsedDays,
+    scheduledDays,
+    reps,
+    lapses,
+    fsrsState,
+    lastReview,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1725,6 +1834,66 @@ class $StudyCardItemsTable extends StudyCardItems
         answer.isAcceptableOrUnknown(data['answer']!, _answerMeta),
       );
     }
+    if (data.containsKey('due')) {
+      context.handle(
+        _dueMeta,
+        due.isAcceptableOrUnknown(data['due']!, _dueMeta),
+      );
+    }
+    if (data.containsKey('stability')) {
+      context.handle(
+        _stabilityMeta,
+        stability.isAcceptableOrUnknown(data['stability']!, _stabilityMeta),
+      );
+    }
+    if (data.containsKey('difficulty')) {
+      context.handle(
+        _difficultyMeta,
+        difficulty.isAcceptableOrUnknown(data['difficulty']!, _difficultyMeta),
+      );
+    }
+    if (data.containsKey('elapsed_days')) {
+      context.handle(
+        _elapsedDaysMeta,
+        elapsedDays.isAcceptableOrUnknown(
+          data['elapsed_days']!,
+          _elapsedDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('scheduled_days')) {
+      context.handle(
+        _scheduledDaysMeta,
+        scheduledDays.isAcceptableOrUnknown(
+          data['scheduled_days']!,
+          _scheduledDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reps')) {
+      context.handle(
+        _repsMeta,
+        reps.isAcceptableOrUnknown(data['reps']!, _repsMeta),
+      );
+    }
+    if (data.containsKey('lapses')) {
+      context.handle(
+        _lapsesMeta,
+        lapses.isAcceptableOrUnknown(data['lapses']!, _lapsesMeta),
+      );
+    }
+    if (data.containsKey('fsrs_state')) {
+      context.handle(
+        _fsrsStateMeta,
+        fsrsState.isAcceptableOrUnknown(data['fsrs_state']!, _fsrsStateMeta),
+      );
+    }
+    if (data.containsKey('last_review')) {
+      context.handle(
+        _lastReviewMeta,
+        lastReview.isAcceptableOrUnknown(data['last_review']!, _lastReviewMeta),
+      );
+    }
     return context;
   }
 
@@ -1762,6 +1931,42 @@ class $StudyCardItemsTable extends StudyCardItems
         DriftSqlType.string,
         data['${effectivePrefix}answer'],
       ),
+      due: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}due'],
+      ),
+      stability: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}stability'],
+      )!,
+      difficulty: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}difficulty'],
+      )!,
+      elapsedDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}elapsed_days'],
+      )!,
+      scheduledDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}scheduled_days'],
+      )!,
+      reps: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reps'],
+      )!,
+      lapses: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}lapses'],
+      )!,
+      fsrsState: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}fsrs_state'],
+      )!,
+      lastReview: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_review'],
+      ),
     );
   }
 
@@ -1785,6 +1990,17 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
   final String? question;
   final String? optionsListJson;
   final String? answer;
+
+  /// FSRS fields
+  final String? due;
+  final double stability;
+  final double difficulty;
+  final int elapsedDays;
+  final int scheduledDays;
+  final int reps;
+  final int lapses;
+  final int fsrsState;
+  final String? lastReview;
   const StudyCardItem({
     required this.id,
     required this.materialId,
@@ -1793,6 +2009,15 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
     this.question,
     this.optionsListJson,
     this.answer,
+    this.due,
+    required this.stability,
+    required this.difficulty,
+    required this.elapsedDays,
+    required this.scheduledDays,
+    required this.reps,
+    required this.lapses,
+    required this.fsrsState,
+    this.lastReview,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1811,6 +2036,19 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
     }
     if (!nullToAbsent || answer != null) {
       map['answer'] = Variable<String>(answer);
+    }
+    if (!nullToAbsent || due != null) {
+      map['due'] = Variable<String>(due);
+    }
+    map['stability'] = Variable<double>(stability);
+    map['difficulty'] = Variable<double>(difficulty);
+    map['elapsed_days'] = Variable<int>(elapsedDays);
+    map['scheduled_days'] = Variable<int>(scheduledDays);
+    map['reps'] = Variable<int>(reps);
+    map['lapses'] = Variable<int>(lapses);
+    map['fsrs_state'] = Variable<int>(fsrsState);
+    if (!nullToAbsent || lastReview != null) {
+      map['last_review'] = Variable<String>(lastReview);
     }
     return map;
   }
@@ -1832,6 +2070,17 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
       answer: answer == null && nullToAbsent
           ? const Value.absent()
           : Value(answer),
+      due: due == null && nullToAbsent ? const Value.absent() : Value(due),
+      stability: Value(stability),
+      difficulty: Value(difficulty),
+      elapsedDays: Value(elapsedDays),
+      scheduledDays: Value(scheduledDays),
+      reps: Value(reps),
+      lapses: Value(lapses),
+      fsrsState: Value(fsrsState),
+      lastReview: lastReview == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastReview),
     );
   }
 
@@ -1848,6 +2097,15 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
       question: serializer.fromJson<String?>(json['question']),
       optionsListJson: serializer.fromJson<String?>(json['optionsListJson']),
       answer: serializer.fromJson<String?>(json['answer']),
+      due: serializer.fromJson<String?>(json['due']),
+      stability: serializer.fromJson<double>(json['stability']),
+      difficulty: serializer.fromJson<double>(json['difficulty']),
+      elapsedDays: serializer.fromJson<int>(json['elapsedDays']),
+      scheduledDays: serializer.fromJson<int>(json['scheduledDays']),
+      reps: serializer.fromJson<int>(json['reps']),
+      lapses: serializer.fromJson<int>(json['lapses']),
+      fsrsState: serializer.fromJson<int>(json['fsrsState']),
+      lastReview: serializer.fromJson<String?>(json['lastReview']),
     );
   }
   @override
@@ -1861,6 +2119,15 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
       'question': serializer.toJson<String?>(question),
       'optionsListJson': serializer.toJson<String?>(optionsListJson),
       'answer': serializer.toJson<String?>(answer),
+      'due': serializer.toJson<String?>(due),
+      'stability': serializer.toJson<double>(stability),
+      'difficulty': serializer.toJson<double>(difficulty),
+      'elapsedDays': serializer.toJson<int>(elapsedDays),
+      'scheduledDays': serializer.toJson<int>(scheduledDays),
+      'reps': serializer.toJson<int>(reps),
+      'lapses': serializer.toJson<int>(lapses),
+      'fsrsState': serializer.toJson<int>(fsrsState),
+      'lastReview': serializer.toJson<String?>(lastReview),
     };
   }
 
@@ -1872,6 +2139,15 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
     Value<String?> question = const Value.absent(),
     Value<String?> optionsListJson = const Value.absent(),
     Value<String?> answer = const Value.absent(),
+    Value<String?> due = const Value.absent(),
+    double? stability,
+    double? difficulty,
+    int? elapsedDays,
+    int? scheduledDays,
+    int? reps,
+    int? lapses,
+    int? fsrsState,
+    Value<String?> lastReview = const Value.absent(),
   }) => StudyCardItem(
     id: id ?? this.id,
     materialId: materialId ?? this.materialId,
@@ -1882,6 +2158,15 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
         ? optionsListJson.value
         : this.optionsListJson,
     answer: answer.present ? answer.value : this.answer,
+    due: due.present ? due.value : this.due,
+    stability: stability ?? this.stability,
+    difficulty: difficulty ?? this.difficulty,
+    elapsedDays: elapsedDays ?? this.elapsedDays,
+    scheduledDays: scheduledDays ?? this.scheduledDays,
+    reps: reps ?? this.reps,
+    lapses: lapses ?? this.lapses,
+    fsrsState: fsrsState ?? this.fsrsState,
+    lastReview: lastReview.present ? lastReview.value : this.lastReview,
   );
   StudyCardItem copyWithCompanion(StudyCardItemsCompanion data) {
     return StudyCardItem(
@@ -1898,6 +2183,23 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
           ? data.optionsListJson.value
           : this.optionsListJson,
       answer: data.answer.present ? data.answer.value : this.answer,
+      due: data.due.present ? data.due.value : this.due,
+      stability: data.stability.present ? data.stability.value : this.stability,
+      difficulty: data.difficulty.present
+          ? data.difficulty.value
+          : this.difficulty,
+      elapsedDays: data.elapsedDays.present
+          ? data.elapsedDays.value
+          : this.elapsedDays,
+      scheduledDays: data.scheduledDays.present
+          ? data.scheduledDays.value
+          : this.scheduledDays,
+      reps: data.reps.present ? data.reps.value : this.reps,
+      lapses: data.lapses.present ? data.lapses.value : this.lapses,
+      fsrsState: data.fsrsState.present ? data.fsrsState.value : this.fsrsState,
+      lastReview: data.lastReview.present
+          ? data.lastReview.value
+          : this.lastReview,
     );
   }
 
@@ -1910,7 +2212,16 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
           ..write('citationJson: $citationJson, ')
           ..write('question: $question, ')
           ..write('optionsListJson: $optionsListJson, ')
-          ..write('answer: $answer')
+          ..write('answer: $answer, ')
+          ..write('due: $due, ')
+          ..write('stability: $stability, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('elapsedDays: $elapsedDays, ')
+          ..write('scheduledDays: $scheduledDays, ')
+          ..write('reps: $reps, ')
+          ..write('lapses: $lapses, ')
+          ..write('fsrsState: $fsrsState, ')
+          ..write('lastReview: $lastReview')
           ..write(')'))
         .toString();
   }
@@ -1924,6 +2235,15 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
     question,
     optionsListJson,
     answer,
+    due,
+    stability,
+    difficulty,
+    elapsedDays,
+    scheduledDays,
+    reps,
+    lapses,
+    fsrsState,
+    lastReview,
   );
   @override
   bool operator ==(Object other) =>
@@ -1935,7 +2255,16 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
           other.citationJson == this.citationJson &&
           other.question == this.question &&
           other.optionsListJson == this.optionsListJson &&
-          other.answer == this.answer);
+          other.answer == this.answer &&
+          other.due == this.due &&
+          other.stability == this.stability &&
+          other.difficulty == this.difficulty &&
+          other.elapsedDays == this.elapsedDays &&
+          other.scheduledDays == this.scheduledDays &&
+          other.reps == this.reps &&
+          other.lapses == this.lapses &&
+          other.fsrsState == this.fsrsState &&
+          other.lastReview == this.lastReview);
 }
 
 class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
@@ -1946,6 +2275,15 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
   final Value<String?> question;
   final Value<String?> optionsListJson;
   final Value<String?> answer;
+  final Value<String?> due;
+  final Value<double> stability;
+  final Value<double> difficulty;
+  final Value<int> elapsedDays;
+  final Value<int> scheduledDays;
+  final Value<int> reps;
+  final Value<int> lapses;
+  final Value<int> fsrsState;
+  final Value<String?> lastReview;
   final Value<int> rowid;
   const StudyCardItemsCompanion({
     this.id = const Value.absent(),
@@ -1955,6 +2293,15 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
     this.question = const Value.absent(),
     this.optionsListJson = const Value.absent(),
     this.answer = const Value.absent(),
+    this.due = const Value.absent(),
+    this.stability = const Value.absent(),
+    this.difficulty = const Value.absent(),
+    this.elapsedDays = const Value.absent(),
+    this.scheduledDays = const Value.absent(),
+    this.reps = const Value.absent(),
+    this.lapses = const Value.absent(),
+    this.fsrsState = const Value.absent(),
+    this.lastReview = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   StudyCardItemsCompanion.insert({
@@ -1965,6 +2312,15 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
     this.question = const Value.absent(),
     this.optionsListJson = const Value.absent(),
     this.answer = const Value.absent(),
+    this.due = const Value.absent(),
+    this.stability = const Value.absent(),
+    this.difficulty = const Value.absent(),
+    this.elapsedDays = const Value.absent(),
+    this.scheduledDays = const Value.absent(),
+    this.reps = const Value.absent(),
+    this.lapses = const Value.absent(),
+    this.fsrsState = const Value.absent(),
+    this.lastReview = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        materialId = Value(materialId),
@@ -1977,6 +2333,15 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
     Expression<String>? question,
     Expression<String>? optionsListJson,
     Expression<String>? answer,
+    Expression<String>? due,
+    Expression<double>? stability,
+    Expression<double>? difficulty,
+    Expression<int>? elapsedDays,
+    Expression<int>? scheduledDays,
+    Expression<int>? reps,
+    Expression<int>? lapses,
+    Expression<int>? fsrsState,
+    Expression<String>? lastReview,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1987,6 +2352,15 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
       if (question != null) 'question': question,
       if (optionsListJson != null) 'options_list_json': optionsListJson,
       if (answer != null) 'answer': answer,
+      if (due != null) 'due': due,
+      if (stability != null) 'stability': stability,
+      if (difficulty != null) 'difficulty': difficulty,
+      if (elapsedDays != null) 'elapsed_days': elapsedDays,
+      if (scheduledDays != null) 'scheduled_days': scheduledDays,
+      if (reps != null) 'reps': reps,
+      if (lapses != null) 'lapses': lapses,
+      if (fsrsState != null) 'fsrs_state': fsrsState,
+      if (lastReview != null) 'last_review': lastReview,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1999,6 +2373,15 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
     Value<String?>? question,
     Value<String?>? optionsListJson,
     Value<String?>? answer,
+    Value<String?>? due,
+    Value<double>? stability,
+    Value<double>? difficulty,
+    Value<int>? elapsedDays,
+    Value<int>? scheduledDays,
+    Value<int>? reps,
+    Value<int>? lapses,
+    Value<int>? fsrsState,
+    Value<String?>? lastReview,
     Value<int>? rowid,
   }) {
     return StudyCardItemsCompanion(
@@ -2009,6 +2392,15 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
       question: question ?? this.question,
       optionsListJson: optionsListJson ?? this.optionsListJson,
       answer: answer ?? this.answer,
+      due: due ?? this.due,
+      stability: stability ?? this.stability,
+      difficulty: difficulty ?? this.difficulty,
+      elapsedDays: elapsedDays ?? this.elapsedDays,
+      scheduledDays: scheduledDays ?? this.scheduledDays,
+      reps: reps ?? this.reps,
+      lapses: lapses ?? this.lapses,
+      fsrsState: fsrsState ?? this.fsrsState,
+      lastReview: lastReview ?? this.lastReview,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2037,6 +2429,33 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
     if (answer.present) {
       map['answer'] = Variable<String>(answer.value);
     }
+    if (due.present) {
+      map['due'] = Variable<String>(due.value);
+    }
+    if (stability.present) {
+      map['stability'] = Variable<double>(stability.value);
+    }
+    if (difficulty.present) {
+      map['difficulty'] = Variable<double>(difficulty.value);
+    }
+    if (elapsedDays.present) {
+      map['elapsed_days'] = Variable<int>(elapsedDays.value);
+    }
+    if (scheduledDays.present) {
+      map['scheduled_days'] = Variable<int>(scheduledDays.value);
+    }
+    if (reps.present) {
+      map['reps'] = Variable<int>(reps.value);
+    }
+    if (lapses.present) {
+      map['lapses'] = Variable<int>(lapses.value);
+    }
+    if (fsrsState.present) {
+      map['fsrs_state'] = Variable<int>(fsrsState.value);
+    }
+    if (lastReview.present) {
+      map['last_review'] = Variable<String>(lastReview.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2053,6 +2472,15 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
           ..write('question: $question, ')
           ..write('optionsListJson: $optionsListJson, ')
           ..write('answer: $answer, ')
+          ..write('due: $due, ')
+          ..write('stability: $stability, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('elapsedDays: $elapsedDays, ')
+          ..write('scheduledDays: $scheduledDays, ')
+          ..write('reps: $reps, ')
+          ..write('lapses: $lapses, ')
+          ..write('fsrsState: $fsrsState, ')
+          ..write('lastReview: $lastReview, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3518,6 +3946,15 @@ typedef $$StudyCardItemsTableCreateCompanionBuilder =
       Value<String?> question,
       Value<String?> optionsListJson,
       Value<String?> answer,
+      Value<String?> due,
+      Value<double> stability,
+      Value<double> difficulty,
+      Value<int> elapsedDays,
+      Value<int> scheduledDays,
+      Value<int> reps,
+      Value<int> lapses,
+      Value<int> fsrsState,
+      Value<String?> lastReview,
       Value<int> rowid,
     });
 typedef $$StudyCardItemsTableUpdateCompanionBuilder =
@@ -3529,6 +3966,15 @@ typedef $$StudyCardItemsTableUpdateCompanionBuilder =
       Value<String?> question,
       Value<String?> optionsListJson,
       Value<String?> answer,
+      Value<String?> due,
+      Value<double> stability,
+      Value<double> difficulty,
+      Value<int> elapsedDays,
+      Value<int> scheduledDays,
+      Value<int> reps,
+      Value<int> lapses,
+      Value<int> fsrsState,
+      Value<String?> lastReview,
       Value<int> rowid,
     });
 
@@ -3602,6 +4048,51 @@ class $$StudyCardItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get due => $composableBuilder(
+    column: $table.due,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get stability => $composableBuilder(
+    column: $table.stability,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get elapsedDays => $composableBuilder(
+    column: $table.elapsedDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get scheduledDays => $composableBuilder(
+    column: $table.scheduledDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reps => $composableBuilder(
+    column: $table.reps,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lapses => $composableBuilder(
+    column: $table.lapses,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fsrsState => $composableBuilder(
+    column: $table.fsrsState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastReview => $composableBuilder(
+    column: $table.lastReview,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$StudyMaterialItemsTableFilterComposer get materialId {
     final $$StudyMaterialItemsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -3665,6 +4156,51 @@ class $$StudyCardItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get due => $composableBuilder(
+    column: $table.due,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get stability => $composableBuilder(
+    column: $table.stability,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get elapsedDays => $composableBuilder(
+    column: $table.elapsedDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get scheduledDays => $composableBuilder(
+    column: $table.scheduledDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get reps => $composableBuilder(
+    column: $table.reps,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lapses => $composableBuilder(
+    column: $table.lapses,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fsrsState => $composableBuilder(
+    column: $table.fsrsState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastReview => $composableBuilder(
+    column: $table.lastReview,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$StudyMaterialItemsTableOrderingComposer get materialId {
     final $$StudyMaterialItemsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3719,6 +4255,41 @@ class $$StudyCardItemsTableAnnotationComposer
 
   GeneratedColumn<String> get answer =>
       $composableBuilder(column: $table.answer, builder: (column) => column);
+
+  GeneratedColumn<String> get due =>
+      $composableBuilder(column: $table.due, builder: (column) => column);
+
+  GeneratedColumn<double> get stability =>
+      $composableBuilder(column: $table.stability, builder: (column) => column);
+
+  GeneratedColumn<double> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get elapsedDays => $composableBuilder(
+    column: $table.elapsedDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get scheduledDays => $composableBuilder(
+    column: $table.scheduledDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get reps =>
+      $composableBuilder(column: $table.reps, builder: (column) => column);
+
+  GeneratedColumn<int> get lapses =>
+      $composableBuilder(column: $table.lapses, builder: (column) => column);
+
+  GeneratedColumn<int> get fsrsState =>
+      $composableBuilder(column: $table.fsrsState, builder: (column) => column);
+
+  GeneratedColumn<String> get lastReview => $composableBuilder(
+    column: $table.lastReview,
+    builder: (column) => column,
+  );
 
   $$StudyMaterialItemsTableAnnotationComposer get materialId {
     final $$StudyMaterialItemsTableAnnotationComposer composer =
@@ -3782,6 +4353,15 @@ class $$StudyCardItemsTableTableManager
                 Value<String?> question = const Value.absent(),
                 Value<String?> optionsListJson = const Value.absent(),
                 Value<String?> answer = const Value.absent(),
+                Value<String?> due = const Value.absent(),
+                Value<double> stability = const Value.absent(),
+                Value<double> difficulty = const Value.absent(),
+                Value<int> elapsedDays = const Value.absent(),
+                Value<int> scheduledDays = const Value.absent(),
+                Value<int> reps = const Value.absent(),
+                Value<int> lapses = const Value.absent(),
+                Value<int> fsrsState = const Value.absent(),
+                Value<String?> lastReview = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StudyCardItemsCompanion(
                 id: id,
@@ -3791,6 +4371,15 @@ class $$StudyCardItemsTableTableManager
                 question: question,
                 optionsListJson: optionsListJson,
                 answer: answer,
+                due: due,
+                stability: stability,
+                difficulty: difficulty,
+                elapsedDays: elapsedDays,
+                scheduledDays: scheduledDays,
+                reps: reps,
+                lapses: lapses,
+                fsrsState: fsrsState,
+                lastReview: lastReview,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3802,6 +4391,15 @@ class $$StudyCardItemsTableTableManager
                 Value<String?> question = const Value.absent(),
                 Value<String?> optionsListJson = const Value.absent(),
                 Value<String?> answer = const Value.absent(),
+                Value<String?> due = const Value.absent(),
+                Value<double> stability = const Value.absent(),
+                Value<double> difficulty = const Value.absent(),
+                Value<int> elapsedDays = const Value.absent(),
+                Value<int> scheduledDays = const Value.absent(),
+                Value<int> reps = const Value.absent(),
+                Value<int> lapses = const Value.absent(),
+                Value<int> fsrsState = const Value.absent(),
+                Value<String?> lastReview = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StudyCardItemsCompanion.insert(
                 id: id,
@@ -3811,6 +4409,15 @@ class $$StudyCardItemsTableTableManager
                 question: question,
                 optionsListJson: optionsListJson,
                 answer: answer,
+                due: due,
+                stability: stability,
+                difficulty: difficulty,
+                elapsedDays: elapsedDays,
+                scheduledDays: scheduledDays,
+                reps: reps,
+                lapses: lapses,
+                fsrsState: fsrsState,
+                lastReview: lastReview,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

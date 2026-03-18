@@ -24,6 +24,19 @@ class StudyCardItems extends Table {
   TextColumn get optionsListJson => text().nullable()(); // List<String>
   TextColumn get answer => text().nullable()();
 
+  /// FSRS fields
+  TextColumn get due =>
+      text().nullable()(); // ISO8601 string, null = never reviewed
+  RealColumn get stability => real().withDefault(const Constant(0.0))();
+  RealColumn get difficulty => real().withDefault(const Constant(0.0))();
+  IntColumn get elapsedDays => integer().withDefault(const Constant(0))();
+  IntColumn get scheduledDays => integer().withDefault(const Constant(0))();
+  IntColumn get reps => integer().withDefault(const Constant(0))();
+  IntColumn get lapses => integer().withDefault(const Constant(0))();
+  IntColumn get fsrsState => integer().withDefault(const Constant(0))();
+  // 0=New, 1=Learning, 2=Review, 3=Relearning — mirrors fsrs package State enum
+  TextColumn get lastReview => text().nullable()(); // ISO8601 string
+
   @override
   Set<Column> get primaryKey => {id};
 }
