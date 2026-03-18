@@ -13,11 +13,19 @@ import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:provider/provider.dart';
-import 'package:project_2359/features/folder_page/folder_sources_page.dart';
+// removed FolderSourcesPage import as it is now integrated
+import 'package:project_2359/features/source_page/source_page.dart';
+import 'package:project_2359/features/sources_page/source_list_item.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:uuid/uuid.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
+import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
+
+enum FabMode { generation, sources, settings }
 
 class FolderPage extends StatefulWidget {
   final String folderId;
@@ -36,6 +44,7 @@ class FolderPage extends StatefulWidget {
 class _FolderPageState extends State<FolderPage> {
   late String folderName;
   final Set<String> _selectedMaterialIds = {};
+  FabMode _fabMode = FabMode.generation;
 
   bool get _isSelecting => _selectedMaterialIds.isNotEmpty;
 
@@ -116,53 +125,9 @@ class _FolderPageState extends State<FolderPage> {
     _materialsStream = service.watchMaterialsByFolderId(widget.folderId);
   }
 
-  void _showFolderSettings(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _FolderSettingsBottomSheet(
-        folderName: folderName,
-        onDelete: () async {
-          final service = context.read<StudyMaterialService>();
-          final navigator = Navigator.of(context);
-          final confirmed = await _showDeleteConfirmation(context);
-          if (confirmed && mounted) {
-            await service.deleteFolder(widget.folderId);
-            if (mounted) {
-              navigator.pop(); // Close bottom sheet
-              navigator.pop(); // Go back to Home
-            }
-          }
-        },
-      ),
-    );
-  }
+  // Removed _showFolderSettings
 
-  Future<bool> _showDeleteConfirmation(BuildContext context) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text("Delete Collection?"),
-            content: Text(
-              "Are you sure you want to delete '$folderName'? This will also delete all study materials and sources inside.",
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text("Cancel"),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.error,
-                ),
-                child: const Text("Delete"),
-              ),
-            ],
-          ),
-        ) ??
-        false;
-  }
+  // Removed _showDeleteConfirmation
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +146,10 @@ class _FolderPageState extends State<FolderPage> {
             );
           }
           return InkWell(
-            onTap: expand,
+            onTap: () {
+              setState(() => _fabMode = FabMode.generation);
+              expand();
+            },
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -202,7 +170,7 @@ class _FolderPageState extends State<FolderPage> {
           );
         },
         expandedBuilder: (context, isOpen, expand, close) {
-          return _FolderFabContent(folderId: widget.folderId);
+          return _FolderFabContent(folderId: widget.folderId, mode: _fabMode);
         },
         body: CustomScrollView(
           physics: const ClampingScrollPhysics(),
@@ -214,12 +182,14 @@ class _FolderPageState extends State<FolderPage> {
                 folderName: folderName,
                 topPadding: MediaQuery.of(context).padding.top,
                 onBack: () => Navigator.pop(context),
-                onSourcesTap: () => FolderSourcesPage.show(
-                  context,
-                  widget.folderId,
-                  folderName,
-                ),
-                onSettingsTap: () => _showFolderSettings(context),
+                onSourcesTap: () {
+                  setState(() => _fabMode = FabMode.sources);
+                  ExpandableFab.of(context).expand();
+                },
+                onSettingsTap: () {
+                  setState(() => _fabMode = FabMode.settings);
+                  ExpandableFab.of(context).expand();
+                },
               ),
             ),
 
@@ -622,7 +592,8 @@ class _SectionLabel extends StatelessWidget {
 
 class _FolderFabContent extends StatefulWidget {
   final String folderId;
-  const _FolderFabContent({required this.folderId});
+  final FabMode mode;
+  const _FolderFabContent({required this.folderId, required this.mode});
 
   @override
   State<_FolderFabContent> createState() => _FolderFabContentState();
@@ -646,6 +617,30 @@ class _FolderFabContentState extends State<_FolderFabContent> {
   // Tracking for animation direction
   int _prevStep = 1;
   bool _prevManual = false;
+  late FabMode _currentMode;
+  FabMode? _prevMode;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentMode = widget.mode;
+  }
+
+  @override
+  void didUpdateWidget(_FolderFabContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.mode != widget.mode) {
+      setState(() {
+        _prevMode = _currentMode;
+        _currentMode = widget.mode;
+        // If switching TO generation, reset steps
+        if (_currentMode == FabMode.generation) {
+          _currentStep = 1;
+          _showManualBranch = false;
+        }
+      });
+    }
+  }
 
   void _updateStep(int nextStep, {bool? manual}) {
     setState(() {
@@ -885,36 +880,76 @@ class _FolderFabContentState extends State<_FolderFabContent> {
     super.dispose();
   }
 
+  void _importDocument(BuildContext context) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: true,
+      withData: true,
+      allowedExtensions: ["pdf", "docx", "pptx"],
+    );
+
+    if (result == null) return;
+
+    if (context.mounted) {
+      context.read<SourcesPageBloc>().add(
+        ImportDocumentsEvent(result.files, folderId: widget.folderId),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Determine the active widget and its key for AnimatedSwitcher
     final Widget currentWidget;
     final ValueKey key;
 
-    if (_showManualBranch) {
-      currentWidget = _buildManualBranch(context);
-      key = const ValueKey('manual');
-    } else {
-      key = ValueKey(_currentStep);
-      switch (_currentStep) {
-        case 1:
-          currentWidget = _buildStep1(context);
-          break;
-        case 2:
-          currentWidget = _buildStep2(context);
-          break;
-        case 3:
-          currentWidget = _buildStep3(context);
-          break;
-        default:
-          currentWidget = _buildStep1(context);
-      }
+    // Use mode-based switching first, then step-based within generation
+    switch (_currentMode) {
+      case FabMode.generation:
+        if (_showManualBranch) {
+          currentWidget = _buildManualBranch(context);
+          key = const ValueKey('manual');
+        } else {
+          key = ValueKey(_currentStep);
+          switch (_currentStep) {
+            case 1:
+              currentWidget = _buildStep1(context);
+              break;
+            case 2:
+              currentWidget = _buildStep2(context);
+              break;
+            case 3:
+              currentWidget = _buildStep3(context);
+              break;
+            default:
+              currentWidget = _buildStep1(context);
+          }
+        }
+        break;
+      case FabMode.sources:
+        currentWidget = _buildSourcesView(context);
+        key = const ValueKey('sources');
+        break;
+      case FabMode.settings:
+        currentWidget = _buildSettingsView(context);
+        key = const ValueKey('settings');
+        break;
     }
 
-    // Progression logic: forward if step increased OR if we entered manual branch
-    final bool isForward =
-        (_showManualBranch && !_prevManual) ||
-        (!_showManualBranch && !_prevManual && _currentStep > _prevStep);
+    // Progression logic
+    final bool isForward;
+    if (_prevMode != null && _prevMode != _currentMode) {
+      final modeOrder = {
+        FabMode.generation: 0,
+        FabMode.sources: 1,
+        FabMode.settings: 2,
+      };
+      isForward = modeOrder[_currentMode]! > modeOrder[_prevMode]!;
+    } else {
+      isForward =
+          (_showManualBranch && !_prevManual) ||
+          (!_showManualBranch && !_prevManual && _currentStep > _prevStep);
+    }
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 400),
@@ -922,13 +957,9 @@ class _FolderFabContentState extends State<_FolderFabContent> {
       switchOutCurve: Curves.easeInCubic,
       transitionBuilder: (Widget child, Animation<double> animation) {
         final bool isEntering = child.key == key;
-
-        // Offset for the child being entered
         var beginOffset = isForward
             ? const Offset(0.0, 1.0)
             : const Offset(0.0, -1.0);
-
-        // If it's the child LEAVING, it should go the opposite way
         if (!isEntering) {
           beginOffset = isForward
               ? const Offset(0.0, -1.0)
@@ -969,7 +1000,6 @@ class _FolderFabContentState extends State<_FolderFabContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // MANUAL NOTICE
               GestureDetector(
                 onTap: () => _updateStep(_currentStep, manual: true),
                 child: Container(
@@ -1008,7 +1038,7 @@ class _FolderFabContentState extends State<_FolderFabContent> {
                 ),
               ),
               const SizedBox(height: 16),
-              _SectionLabel(title: "Select Sources"),
+              const _SectionLabel(title: "Select Sources"),
               const SizedBox(height: 8),
 
               if (sources.isEmpty)
@@ -1073,43 +1103,11 @@ class _FolderFabContentState extends State<_FolderFabContent> {
                 ),
 
               const SizedBox(height: 24),
-              _SectionLabel(title: "Import New Sources"),
-              const SizedBox(height: 8),
-
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                childAspectRatio: 2.5,
-                children: [
-                  CardButton(
-                    icon: FontAwesomeIcons.filePdf,
-                    label: "PDF File",
-                    subLabel: "Upload doc",
-                    layoutDirection: CardLayoutDirection.horizontal,
-                    isCompact: true,
-                    onTap: () => FolderSourcesPage.show(
-                      context,
-                      widget.folderId,
-                      "Folder",
-                    ),
-                  ),
-                  CardButton(
-                    icon: FontAwesomeIcons.youtube,
-                    label: "YouTube",
-                    subLabel: "Paste link",
-                    layoutDirection: CardLayoutDirection.horizontal,
-                    isCompact: true,
-                    onTap: () {},
-                  ),
-                ],
-              ),
+              _buildImportGrid(context),
 
               const SizedBox(height: 16),
               _WizardButton(
-                label: "Continue",
+                label: "Continue to Configuration",
                 onPressed: _selectedSources.isEmpty
                     ? null
                     : () => _updateStep(2),
@@ -1147,12 +1145,11 @@ class _FolderFabContentState extends State<_FolderFabContent> {
                 ),
               ),
               const SizedBox(width: 8),
-              _SectionLabel(title: "Configure Materials"),
+              const _SectionLabel(title: "Configure Materials"),
             ],
           ),
           const SizedBox(height: 8),
 
-          // TYPES CONFIG
           Column(
             children: [
               for (var type in _types) ...[
@@ -1175,7 +1172,7 @@ class _FolderFabContentState extends State<_FolderFabContent> {
           ),
 
           const SizedBox(height: 12),
-          _SectionLabel(title: "Studying Strategy"),
+          const _SectionLabel(title: "Studying Strategy"),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(4),
@@ -1260,7 +1257,7 @@ class _FolderFabContentState extends State<_FolderFabContent> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               else
-                FaIcon(
+                const FaIcon(
                   FontAwesomeIcons.circleCheck,
                   color: Colors.green,
                   size: 20,
@@ -1380,10 +1377,10 @@ class _FolderFabContentState extends State<_FolderFabContent> {
             children: [
               IconButton(
                 onPressed: () => _updateStep(_currentStep, manual: false),
-                icon: FaIcon(
+                icon: const FaIcon(
                   FontAwesomeIcons.chevronUp,
                   size: 16,
-                  color: cs.secondary,
+                  color: Colors.grey,
                 ),
                 style: IconButton.styleFrom(
                   padding: EdgeInsets.zero,
@@ -1392,12 +1389,10 @@ class _FolderFabContentState extends State<_FolderFabContent> {
                 ),
               ),
               const SizedBox(width: 8),
-              _SectionLabel(title: "Manual Creation"),
+              const _SectionLabel(title: "Manual Creation"),
             ],
           ),
           const SizedBox(height: 16),
-
-          // MOCK MANUAL CREATION FORM
           TextField(
             decoration: InputDecoration(
               labelText: "Title",
@@ -1410,7 +1405,6 @@ class _FolderFabContentState extends State<_FolderFabContent> {
             ),
           ),
           const SizedBox(height: 12),
-
           DropdownButtonFormField<String>(
             decoration: InputDecoration(
               labelText: "Type",
@@ -1427,7 +1421,6 @@ class _FolderFabContentState extends State<_FolderFabContent> {
             onChanged: (v) {},
           ),
           const SizedBox(height: 12),
-
           TextField(
             maxLines: 5,
             decoration: InputDecoration(
@@ -1441,12 +1434,239 @@ class _FolderFabContentState extends State<_FolderFabContent> {
             ),
           ),
           const SizedBox(height: 20),
-
           _WizardButton(
             label: "Create Material",
             onPressed: () {},
             icon: FontAwesomeIcons.plus,
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImportGrid(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionLabel(title: "Import New Sources"),
+        const SizedBox(height: 8),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: 2.6,
+          children: [
+            CardButton(
+              icon: FontAwesomeIcons.fileLines,
+              label: "Documents",
+              subLabel: "PDF only for now",
+              layoutDirection: CardLayoutDirection.horizontal,
+              isCompact: true,
+              accentColor: cs.primary,
+              onTap: () => _importDocument(context),
+            ),
+            CardButton(
+              icon: FontAwesomeIcons.image,
+              label: "Images",
+              subLabel: "TODO: Support",
+              layoutDirection: CardLayoutDirection.horizontal,
+              isCompact: true,
+              accentColor: const Color(0xFF00D2D3),
+              onTap: null,
+            ),
+            CardButton(
+              icon: FontAwesomeIcons.video,
+              label: "Videos",
+              subLabel: "TODO: Support",
+              layoutDirection: CardLayoutDirection.horizontal,
+              isCompact: true,
+              accentColor: const Color(0xFFFF9F43),
+              onTap: null,
+            ),
+            CardButton(
+              icon: FontAwesomeIcons.music,
+              label: "Audios",
+              subLabel: "TODO: Support",
+              layoutDirection: CardLayoutDirection.horizontal,
+              isCompact: true,
+              accentColor: const Color(0xFF54A0FF),
+              onTap: null,
+            ),
+            CardButton(
+              icon: FontAwesomeIcons.paragraph,
+              label: "Text",
+              subLabel: "TODO: Support",
+              layoutDirection: CardLayoutDirection.horizontal,
+              isCompact: true,
+              accentColor: const Color(0xFF5F27CD),
+              onTap: null,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSourcesView(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return StreamBuilder<List<SourceItem>>(
+      stream: context.read<SourceService>().watchSourcesByFolderId(
+        widget.folderId,
+      ),
+      builder: (context, snapshot) {
+        final sources = snapshot.data ?? [];
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  const FaIcon(FontAwesomeIcons.layerGroup, size: 18),
+                  const SizedBox(width: 12),
+                  Text(
+                    "Collection Sources",
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (sources.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    child: Text(
+                      "No sources in this collection yet.",
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurface.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ),
+                )
+              else
+                ProjectListGroup(
+                  backgroundColor: cs.onSurface.withValues(alpha: 0.04),
+                  children: [
+                    for (var source in sources)
+                      SourceListItem(
+                        title: source.label,
+                        subtitle: source.path ?? "Source Document",
+                        icon: FontAwesomeIcons.fileLines,
+                        initialStatus: SourceIndexingStatus.indexed,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => _SourcePageLoader(
+                                sourceId: source.id,
+                                sourceLabel: source.label,
+                              ),
+                            ),
+                          );
+                        },
+                        onDelete: () {
+                          context.read<SourcesPageBloc>().add(
+                            DeleteSourceEvent(source.id),
+                          );
+                        },
+                      ),
+                  ],
+                ),
+              const SizedBox(height: 24),
+              _buildImportGrid(context),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSettingsView(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const FaIcon(FontAwesomeIcons.gear, size: 18),
+              const SizedBox(width: 12),
+              Text(
+                "Collection Settings",
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          ProjectListGroup(
+            backgroundColor: cs.onSurface.withValues(alpha: 0.04),
+            children: [
+              ProjectListTile.simple(
+                label: "Rename Collection",
+                icon: FontAwesomeIcons.pen,
+                showDivider: true,
+                onTap: () {
+                  // TODO: Implement rename
+                },
+              ),
+              ProjectListTile.simple(
+                label: "Delete Collection",
+                icon: FontAwesomeIcons.trashCan,
+                isAlert: true,
+                onTap: () async {
+                  final service = context.read<StudyMaterialService>();
+                  final confirmed =
+                      await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("Delete Collection?"),
+                          content: const Text(
+                            "Are you sure you want to delete this collection? This action cannot be undone.",
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              style: TextButton.styleFrom(
+                                foregroundColor: theme.colorScheme.error,
+                              ),
+                              child: const Text("Delete"),
+                            ),
+                          ],
+                        ),
+                      ) ??
+                      false;
+
+                  if (confirmed) {
+                    await service.deleteFolder(widget.folderId);
+                    if (context.mounted) {
+                      Navigator.pop(context); // Close FolderPage
+                    }
+                  }
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -1900,79 +2120,55 @@ class _BarAction extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// FOLDER SETTINGS BOTTOM SHEET
+// SOURCE PAGE LOADER
 // ---------------------------------------------------------------------------
 
-class _FolderSettingsBottomSheet extends StatelessWidget {
-  final String folderName;
-  final VoidCallback onDelete;
+class _SourcePageLoader extends StatefulWidget {
+  final String sourceId;
+  final String sourceLabel;
 
-  const _FolderSettingsBottomSheet({
-    required this.folderName,
-    required this.onDelete,
-  });
+  const _SourcePageLoader({required this.sourceId, required this.sourceLabel});
+
+  @override
+  State<_SourcePageLoader> createState() => _SourcePageLoaderState();
+}
+
+class _SourcePageLoaderState extends State<_SourcePageLoader> {
+  SourceItemBlob? _blob;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBlob();
+  }
+
+  Future<void> _loadBlob() async {
+    final sourceService = SourceService(context.read<AppDatabase>());
+    final blob = await sourceService.getSourceBlobBySourceId(widget.sourceId);
+    if (mounted) {
+      setState(() {
+        _blob = blob;
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundAlt,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Handle
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: cs.onSurface.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            "Collection Settings",
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ProjectListGroup(
-            children: [
-              ProjectListTile.simple(
-                label: "Rename Collection",
-                icon: FontAwesomeIcons.pen,
-                showDivider: true,
-                onTap: () {
-                  // TODO: Implement rename
-                  Navigator.pop(context);
-                },
-              ),
-              ProjectListTile.simple(
-                label: "Delete Collection",
-                icon: FontAwesomeIcons.trashCan,
-                isAlert: true,
-                onTap: () {
-                  Navigator.pop(context); // Close bottom sheet
-                  onDelete();
-                },
-                backgroundColor: cs.errorContainer.withValues(alpha: 0.2),
-                trailing: FaIcon(
-                  FontAwesomeIcons.chevronRight,
-                  size: 14,
-                  color: cs.error,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+    if (_blob == null) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: Text("File data not found")),
+      );
+    }
+
+    return SourcePage(fileBytes: _blob!.bytes, title: widget.sourceLabel);
   }
 }
+
+// End of file

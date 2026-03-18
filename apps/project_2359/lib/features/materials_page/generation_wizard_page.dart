@@ -1,23 +1,26 @@
 import 'dart:async';
 import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show compute;
-import 'package:llm_json_stream/llm_json_stream.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:llm_json_stream/llm_json_stream.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+
 import 'package:project_2359/app_database.dart';
+import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/ai_helpers.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/features/home_page/home_page.dart';
 import 'package:project_2359/features/materials_page/create_flashcards_page.dart';
+import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
-import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_state.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
-import 'package:project_2359/app_theme.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_state.dart';
 
 /// Parses PDF bytes in an isolate. Returns list of text strings per page.
 List<String> _extractPdfText(Uint8List bytes) {
@@ -123,15 +126,10 @@ class _GenerateMaterialsWizardPageState
   }
 
   void _exitWizard() {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const HomePage()),
-      (route) => false,
-    );
+    Navigator.of(context).pop();
   }
 
-  Future<void> _startGeneration() async {
-    final sourceService = context.read<SourcesPageBloc>().sourceService;
-
+  Future<void> _startGeneration(SourceService sourceService) async {
     // Clean up previous run
     _generationSub?.cancel();
     _parser?.dispose();
@@ -1023,6 +1021,8 @@ class _GenerateMaterialsWizardPageState
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    final sourceService = context.read<SourcesPageBloc>().sourceService;
+
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOutCubic,
@@ -1162,7 +1162,7 @@ class _GenerateMaterialsWizardPageState
                                         ),
                                       );
                                       // Start generation after expansion animation
-                                      _startGeneration();
+                                      _startGeneration(sourceService);
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -1219,6 +1219,8 @@ class _GenerateMaterialsWizardPageState
         : (_isGenerating
               ? "Generating ${_streamedCards.length} cards..."
               : "${_streamedCards.length} cards generated!");
+
+    final sourceService = context.read<SourcesPageBloc>().sourceService;
 
     return SizedBox(
       key: const ValueKey('expanded'),
@@ -1343,7 +1345,7 @@ class _GenerateMaterialsWizardPageState
                           ),
                           const SizedBox(height: 20),
                           ElevatedButton.icon(
-                            onPressed: _startGeneration,
+                            onPressed: () => _startGeneration(sourceService),
                             icon: const FaIcon(
                               FontAwesomeIcons.arrowRotateRight,
                               size: 14,
