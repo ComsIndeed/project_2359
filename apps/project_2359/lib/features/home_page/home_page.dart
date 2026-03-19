@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'dart:async';
 
-import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
+import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
-import 'package:project_2359/core/widgets/special_background_generator.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
 import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/folder_page/folder_page.dart';
@@ -24,6 +24,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final Set<String> _selectedFolderIds = {};
   final Set<String> _selectedMaterialIds = {};
+
+  List<StudyFolderItem> _allFolders = [];
+  List<StudyMaterialItem> _allMaterials = [];
+  StreamSubscription? _folderSub;
+  StreamSubscription? _materialSub;
 
   bool get _isSelecting =>
       _selectedFolderIds.isNotEmpty || _selectedMaterialIds.isNotEmpty;
@@ -45,14 +50,14 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<void> _handlePinSelected() async {
+  Future<void> _handlePinSelected({required bool pin}) async {
     final service = context.read<StudyMaterialService>();
     for (final id in _selectedFolderIds) {
-      // We need to know current state or just toggle? Usually Pin action means "Pin them all".
-      // For simplicity, let's assume it Pins them.
-      await service.toggleFolderPin(id, true);
+      await service.toggleFolderPin(id, pin);
     }
-    // TODO: handle materials too if present
+    for (final id in _selectedMaterialIds) {
+      await service.toggleMaterialPin(id, pin);
+    }
     _clearSelection();
   }
 
@@ -103,16 +108,30 @@ class _HomePageState extends State<HomePage> {
         false;
   }
 
-  late Stream<List<StudyFolderItem>> _foldersStream;
-  late Stream<List<StudyFolderItem>> _pinnedFoldersStream;
+  late Stream<List<(StudyFolderItem, int)>> _foldersStream;
+  late Stream<List<(StudyFolderItem, int)>> _pinnedFoldersStream;
 
   @override
   void initState() {
     super.initState();
     AppLogger.info('Initializing HomePage...', tag: 'HomePage');
     final service = context.read<StudyMaterialService>();
-    _foldersStream = service.watchUnpinnedFolders();
-    _pinnedFoldersStream = service.watchPinnedFolders();
+    _foldersStream = service.watchUnpinnedFoldersWithStats();
+    _pinnedFoldersStream = service.watchPinnedFoldersWithStats();
+
+    _folderSub = service.watchAllFolders().listen((folders) {
+      if (mounted) setState(() => _allFolders = folders);
+    });
+    _materialSub = service.watchAllMaterials().listen((materials) {
+      if (mounted) setState(() => _allMaterials = materials);
+    });
+  }
+
+  @override
+  void dispose() {
+    _folderSub?.cancel();
+    _materialSub?.cancel();
+    super.dispose();
   }
 
   @override
@@ -124,11 +143,38 @@ class _HomePageState extends State<HomePage> {
       body: ExpandableFab(
         collapsedBuilder: (context, isOpen, expand, close) {
           if (_isSelecting) {
+            final selectedFolders = _allFolders
+                .where((f) => _selectedFolderIds.contains(f.id))
+                .toList();
+            final selectedMaterials = _allMaterials
+                .where((m) => _selectedMaterialIds.contains(m.id))
+                .toList();
+
+            final allSelected = [...selectedFolders, ...selectedMaterials];
+            final allPinned =
+                allSelected.isNotEmpty &&
+                allSelected.every((i) {
+                  if (i is StudyFolderItem) return i.isPinned;
+                  if (i is StudyMaterialItem) return i.isPinned;
+                  return false;
+                });
+            final allUnpinned =
+                allSelected.isNotEmpty &&
+                allSelected.every((i) {
+                  if (i is StudyFolderItem) return !i.isPinned;
+                  if (i is StudyMaterialItem) return !i.isPinned;
+                  return false;
+                });
+            final isMixed = !allPinned && !allUnpinned;
+
             return _SelectionActionBar(
               selectedCount:
                   _selectedFolderIds.length + _selectedMaterialIds.length,
               onClose: _clearSelection,
-              onPin: _handlePinSelected,
+              onPin: () => _handlePinSelected(pin: true),
+              onUnpin: () => _handlePinSelected(pin: false),
+              isUnpin: allPinned,
+              isPinDisabled: isMixed,
               onDelete: _handleDeleteSelected,
             );
           }
@@ -161,34 +207,6 @@ class _HomePageState extends State<HomePage> {
 
             return Stack(
               children: [
-                // TOP GENERATED BACKGROUND (FULL SCREEN)
-                Positioned.fill(
-                  child: ShaderMask(
-                    shaderCallback: (Rect bounds) {
-                      return LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white.withValues(alpha: 0.5),
-                          Colors.white.withValues(alpha: 0.12),
-                          Colors.white.withValues(alpha: 0.05),
-                        ],
-                        stops: const [0.0, 0.3, 1.0],
-                      ).createShader(bounds);
-                    },
-                    blendMode: BlendMode.dstIn,
-                    child: SpecialBackgroundGenerator(
-                      seed: GenerationSeed.fromString("home_v2"),
-                      label: "Project 2359",
-                      icon: FontAwesomeIcons.bolt,
-                      type: SpecialBackgroundType.vibrantGradients,
-                      showBorder: false,
-                      borderRadius: 0,
-                      child: const SizedBox.expand(),
-                    ),
-                  ),
-                ),
-
                 // MAIN CONTENT
                 SafeArea(
                   bottom: false,
@@ -225,7 +243,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 48),
                       Center(
-                        child: StreamBuilder<List<StudyFolderItem>>(
+                        child: StreamBuilder<List<(StudyFolderItem, int)>>(
                           stream: _foldersStream,
                           builder: (context, snapshot) {
                             final count = (snapshot.data?.length ?? 0);
@@ -278,7 +296,7 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _FolderList extends StatelessWidget {
-  final Stream<List<StudyFolderItem>> stream;
+  final Stream<List<(StudyFolderItem, int)>> stream;
   final Color? backgroundColor;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
@@ -296,17 +314,12 @@ class _FolderList extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return StreamBuilder<List<StudyFolderItem>>(
+    return StreamBuilder<List<(StudyFolderItem, int)>>(
       stream: stream,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting &&
-            !snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
+        final folderPairs = snapshot.data ?? [];
 
-        final folders = snapshot.data ?? [];
-
-        if (folders.isEmpty) {
+        if (folderPairs.isEmpty) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Center(
@@ -320,24 +333,59 @@ class _FolderList extends StatelessWidget {
           );
         }
 
-        return ProjectListGroup(
-          backgroundColor: backgroundColor,
+        return Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            for (final folder in folders)
-              ProjectListTile.simple(
-                label: folder.name,
-                date: folder.updatedAt.substring(11, 16), // Simple HH:mm
-                sources: const [], // TODO: Get sources for folder
-                targetPage: FolderPage(
-                  folderId: folder.id,
-                  initialFolderName: folder.name,
+            for (final pair in folderPairs)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: ProjectCardTile(
+                  title: Row(
+                    children: [
+                      if (pair.$1.isPinned) ...[
+                        FaIcon(
+                          FontAwesomeIcons.thumbtack,
+                          size: 14,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Expanded(
+                        child: Text(
+                          pair.$1.name,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  subtitle: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FaIcon(
+                        FontAwesomeIcons.layerGroup,
+                        size: 10,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.4,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text("${pair.$2} Card${pair.$2 == 1 ? '' : 's'}"),
+                    ],
+                  ),
+                  isSelected: selectedIds.contains(pair.$1.id),
+                  onTap: isSelecting
+                      ? () => onToggleSelection(pair.$1.id)
+                      : () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FolderPage(
+                              folderId: pair.$1.id,
+                              initialFolderName: pair.$1.name,
+                            ),
+                          ),
+                        ),
+                  onLongTap: () => onToggleSelection(pair.$1.id),
                 ),
-                transitionType: ProjectTransitionType.slideLeft,
-                showChevron: !isSelecting,
-                isSelected: selectedIds.contains(folder.id),
-                isSelecting: isSelecting,
-                onTap: isSelecting ? () => onToggleSelection(folder.id) : null,
-                onLongPress: () => onToggleSelection(folder.id),
               ),
           ],
         );
@@ -432,8 +480,6 @@ class _NewButtonExpandedContent extends StatefulWidget {
 class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
   final TextEditingController _folderNameController = TextEditingController();
   bool _isCreatingFolder = false;
-  bool _isSuccess = false;
-  String _addedName = "";
 
   @override
   void initState() {
@@ -461,26 +507,8 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
       );
 
       if (mounted) {
-        setState(() {
-          _isSuccess = true;
-          _isCreatingFolder = false;
-          _addedName = name;
-        });
-
-        // Feedback: Turn FAB green
-        ExpandableFab.of(context).setOverrideColor(
-          Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF1B5E20) // Deep green
-              : const Color(0xFF4CAF50), // Standard green
-        );
-
-        // Wait then close
-        await Future.delayed(const Duration(milliseconds: 1200));
-
-        if (mounted) {
-          _folderNameController.clear();
-          ExpandableFab.of(context).close();
-        }
+        _folderNameController.clear();
+        ExpandableFab.of(context).close();
       }
     } catch (e) {
       if (mounted) {
@@ -505,31 +533,6 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-
-    if (_isSuccess) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const FaIcon(
-              FontAwesomeIcons.checkCircle,
-              color: Colors.white,
-              size: 40,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "Added '$_addedName'",
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      );
-    }
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -697,13 +700,19 @@ class _SelectionActionBar extends StatelessWidget {
   final int selectedCount;
   final VoidCallback onClose;
   final VoidCallback onPin;
+  final VoidCallback onUnpin;
   final VoidCallback onDelete;
+  final bool isUnpin;
+  final bool isPinDisabled;
 
   const _SelectionActionBar({
     required this.selectedCount,
     required this.onClose,
     required this.onPin,
+    required this.onUnpin,
     required this.onDelete,
+    this.isUnpin = false,
+    this.isPinDisabled = false,
   });
 
   @override
@@ -728,9 +737,12 @@ class _SelectionActionBar extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           _BarAction(
-            icon: FontAwesomeIcons.thumbtack,
-            label: "Pin",
-            onTap: onPin,
+            icon: isUnpin
+                ? FontAwesomeIcons.thumbtack
+                : FontAwesomeIcons.thumbtack,
+            label: isUnpin ? "Unpin" : "Pin",
+            onTap: isUnpin ? onUnpin : onPin,
+            isDisabled: isPinDisabled,
           ),
           const SizedBox(width: 8),
           _BarAction(
@@ -750,23 +762,27 @@ class _BarAction extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final bool isDestructive;
+  final bool isDisabled;
 
   const _BarAction({
     required this.icon,
     required this.label,
     required this.onTap,
     this.isDestructive = false,
+    this.isDisabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = isDestructive
+    final color = isDisabled
+        ? theme.colorScheme.onSurface.withValues(alpha: 0.2)
+        : isDestructive
         ? theme.colorScheme.error
         : theme.colorScheme.onSurface;
 
     return InkWell(
-      onTap: onTap,
+      onTap: isDisabled ? null : onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -790,7 +806,7 @@ class _BarAction extends StatelessWidget {
 }
 
 class _PinnedFoldersSection extends StatelessWidget {
-  final Stream<List<StudyFolderItem>> stream;
+  final Stream<List<(StudyFolderItem, int)>> stream;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
   final bool isSelecting;
@@ -806,7 +822,7 @@ class _PinnedFoldersSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return StreamBuilder<List<StudyFolderItem>>(
+    return StreamBuilder<List<(StudyFolderItem, int)>>(
       stream: stream,
       builder: (context, snapshot) {
         final pinned = snapshot.data ?? [];
@@ -817,26 +833,57 @@ class _PinnedFoldersSection extends StatelessWidget {
           children: [
             const _SectionHeader(title: "Pinned"),
             const SizedBox(height: 8),
-            ProjectListGroup(
-              backgroundColor: theme.colorScheme.surfaceContainer,
+            Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                for (final folder in pinned)
-                  ProjectListTile.simple(
-                    label: folder.name,
-                    date: folder.updatedAt.substring(11, 16),
-                    sources: const [], // TODO
-                    targetPage: FolderPage(
-                      folderId: folder.id,
-                      initialFolderName: folder.name,
+                for (final pair in pinned)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: ProjectCardTile(
+                      title: Row(
+                        children: [
+                          FaIcon(
+                            FontAwesomeIcons.thumbtack,
+                            size: 14,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              pair.$1.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      subtitle: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          FaIcon(
+                            FontAwesomeIcons.layerGroup,
+                            size: 10,
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.4,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text("${pair.$2} Card${pair.$2 == 1 ? '' : 's'}"),
+                        ],
+                      ),
+                      isSelected: selectedIds.contains(pair.$1.id),
+                      onTap: isSelecting
+                          ? () => onToggleSelection(pair.$1.id)
+                          : () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FolderPage(
+                                  folderId: pair.$1.id,
+                                  initialFolderName: pair.$1.name,
+                                ),
+                              ),
+                            ),
+                      onLongTap: () => onToggleSelection(pair.$1.id),
                     ),
-                    transitionType: ProjectTransitionType.slideLeft,
-                    showChevron: !isSelecting,
-                    isSelected: selectedIds.contains(folder.id),
-                    isSelecting: isSelecting,
-                    onTap: isSelecting
-                        ? () => onToggleSelection(folder.id)
-                        : null,
-                    onLongPress: () => onToggleSelection(folder.id),
                   ),
               ],
             ),

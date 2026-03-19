@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/app_theme.dart';
 import 'tap_to_fade.dart';
 import 'tap_to_grow.dart';
 import 'tap_to_slide.dart';
@@ -262,7 +263,7 @@ class ProjectListTile extends StatelessWidget {
     final effectiveBgColor = isSelected
         ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
         : (backgroundColor ?? Colors.transparent);
-    final borderRadius = isSingle ? BorderRadius.circular(16) : null;
+    final borderRadius = isSingle ? BorderRadius.circular(24) : null;
 
     Widget innerContent = Padding(
       padding:
@@ -276,27 +277,41 @@ class ProjectListTile extends StatelessWidget {
             children: [
               if (leading != null)
                 Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: leading!,
+                  padding: const EdgeInsets.only(right: 14),
+                  child: IconTheme.merge(
+                    data: IconThemeData(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      size: 18,
+                    ),
+                    child: leading!,
+                  ),
                 ),
               Expanded(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Flexible(
-                      child: DefaultTextStyle(
-                        style: theme.textTheme.bodyLarge!.copyWith(
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.2,
+                    DefaultTextStyle(
+                      style: theme.textTheme.bodyLarge!.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.9,
+                        ),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      child: title,
+                    ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      DefaultTextStyle(
+                        style: theme.textTheme.bodyMedium!.copyWith(
                           color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.9,
+                            alpha: 0.4,
                           ),
                         ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        child: title,
+                        child: subtitle!,
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -318,10 +333,10 @@ class ProjectListTile extends StatelessWidget {
                 _AnimatedCheckbox(isSelected: isSelected),
               ] else if (onTap != null && showChevron) ...[
                 const SizedBox(width: 12),
-                Icon(
-                  Icons.chevron_right,
-                  size: 18,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
+                FaIcon(
+                  FontAwesomeIcons.chevronRight,
+                  size: 14,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
               ],
             ],
@@ -345,14 +360,6 @@ class ProjectListTile extends StatelessWidget {
                   else
                     _SourceChip(label: "+${sources!.length - 2} more"),
               ],
-            ),
-          ] else if (subtitle != null) ...[
-            const SizedBox(height: 4),
-            DefaultTextStyle(
-              style: theme.textTheme.bodySmall!.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-              ),
-              child: subtitle!,
             ),
           ],
           if (isAlert && expandedContent != null) ...[
@@ -396,17 +403,11 @@ class ProjectListTile extends StatelessWidget {
     }
 
     if (isSingle) {
-      return Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: content,
-        ),
+      return Material(
+        color: theme.colorScheme.surface,
+        shape: AppTheme.cardShape,
+        clipBehavior: Clip.antiAlias,
+        child: content,
       );
     }
 
@@ -474,17 +475,12 @@ class ProjectListGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      margin: margin,
-      decoration: BoxDecoration(
+    return Padding(
+      padding: margin ?? EdgeInsets.zero,
+      child: Material(
         color: backgroundColor ?? theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        shape: AppTheme.cardShape,
+        clipBehavior: Clip.antiAlias,
         child: Column(mainAxisSize: MainAxisSize.min, children: children),
       ),
     );

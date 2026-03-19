@@ -254,10 +254,8 @@ extension AppThemeExtension on ThemeData {
     final base = scaffoldBackgroundColor;
 
     if (isDark) {
-      // Derive a "Solid Dark Grey" for dark mode.
-      // We lerp with a neutral deep grey (0xFF1A1A1A) to pull the themed background (like Ocean or Warm)
-      // towards a more neutral, solid grey state without completely losing the original tint.
-      return Color.lerp(base, const Color(0xFF1A1A1A), 0.6)!;
+      // For "Global Black Mode", we ensure the alternate background is even closer to pure black.
+      return Color.lerp(base, Colors.black, 0.8)!;
     } else {
       // For light mode, we create a slightly deeper, "paper-like" grey alternative.
       // This helps content pop more on pages with lots of tiles.

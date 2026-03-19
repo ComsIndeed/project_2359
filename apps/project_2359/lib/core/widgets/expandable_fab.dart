@@ -45,8 +45,8 @@ class ExpandableFab extends StatefulWidget {
     required this.body,
     super.key,
     this.backgroundColor,
-    this.duration = const Duration(milliseconds: 200),
-    this.curve = Curves.easeInOutCubic,
+    this.duration = const Duration(milliseconds: 300),
+    this.curve = Curves.easeInOutCubicEmphasized,
     required this.collapsedBuilder,
     required this.expandedBuilder,
     this.expandedWidth,
@@ -164,8 +164,8 @@ class ExpandableFabState extends State<ExpandableFab> {
     } else {
       expandedChild = ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: screenSize.width * .9,
-          maxHeight: screenSize.height * .7,
+          maxWidth: screenSize.width * .95,
+          maxHeight: screenSize.height * .9, // More generous dynamic height
         ),
         child: expandedChildRaw,
       );

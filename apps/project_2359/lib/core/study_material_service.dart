@@ -23,18 +23,64 @@ class StudyMaterialService {
     )..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])).watch();
   }
 
-  Stream<List<StudyFolderItem>> watchPinnedFolders() {
-    AppLogger.debug('Watching pinned folders', tag: _tag);
-    return (_db.select(
-      _db.studyFolderItems,
-    )..where((t) => t.isPinned.equals(true))).watch();
+  Stream<List<(StudyFolderItem, int)>> watchPinnedFoldersWithStats() {
+    AppLogger.debug('Watching pinned folders with stats', tag: _tag);
+    final count = _db.studyCardItems.id.count();
+    final query =
+        _db.select(_db.studyFolderItems).join([
+            leftOuterJoin(
+              _db.studyMaterialItems,
+              _db.studyMaterialItems.folderId.equalsExp(
+                _db.studyFolderItems.id,
+              ),
+            ),
+            leftOuterJoin(
+              _db.studyCardItems,
+              _db.studyCardItems.materialId.equalsExp(
+                _db.studyMaterialItems.id,
+              ),
+            ),
+          ])
+          ..where(_db.studyFolderItems.isPinned.equals(true))
+          ..addColumns([count])
+          ..groupBy([_db.studyFolderItems.id])
+          ..orderBy([OrderingTerm.desc(_db.studyFolderItems.updatedAt)]);
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        return (row.readTable(_db.studyFolderItems), row.read(count) ?? 0);
+      }).toList();
+    });
   }
 
-  Stream<List<StudyFolderItem>> watchUnpinnedFolders() {
-    AppLogger.debug('Watching unpinned folders', tag: _tag);
-    return (_db.select(
-      _db.studyFolderItems,
-    )..where((t) => t.isPinned.equals(false))).watch();
+  Stream<List<(StudyFolderItem, int)>> watchUnpinnedFoldersWithStats() {
+    AppLogger.debug('Watching unpinned folders with stats', tag: _tag);
+    final count = _db.studyCardItems.id.count();
+    final query =
+        _db.select(_db.studyFolderItems).join([
+            leftOuterJoin(
+              _db.studyMaterialItems,
+              _db.studyMaterialItems.folderId.equalsExp(
+                _db.studyFolderItems.id,
+              ),
+            ),
+            leftOuterJoin(
+              _db.studyCardItems,
+              _db.studyCardItems.materialId.equalsExp(
+                _db.studyMaterialItems.id,
+              ),
+            ),
+          ])
+          ..where(_db.studyFolderItems.isPinned.equals(false))
+          ..addColumns([count])
+          ..groupBy([_db.studyFolderItems.id])
+          ..orderBy([OrderingTerm.desc(_db.studyFolderItems.updatedAt)]);
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        return (row.readTable(_db.studyFolderItems), row.read(count) ?? 0);
+      }).toList();
+    });
   }
 
   Future<StudyFolderItem?> getFolderById(String id) async {
@@ -136,6 +182,11 @@ class StudyMaterialService {
     return (_db.select(
       _db.studyMaterialItems,
     )..where((t) => t.isPinned.equals(true))).watch();
+  }
+
+  Stream<List<StudyMaterialItem>> watchAllMaterials() {
+    AppLogger.debug('Watching all materials', tag: _tag);
+    return _db.select(_db.studyMaterialItems).watch();
   }
 
   Future<void> toggleMaterialPin(String id, bool isPinned) async {

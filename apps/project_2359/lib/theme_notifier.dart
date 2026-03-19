@@ -57,7 +57,7 @@ enum BackgroundTone {
 class ThemeNotifier extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.dark;
   Color _accentColor = const Color(0xFF448AFF);
-  BackgroundTone _backgroundTone = BackgroundTone.ocean;
+  BackgroundTone _backgroundTone = BackgroundTone.stark;
 
   ThemeMode get themeMode => _themeMode;
   Color get accentColor => _accentColor;
@@ -77,7 +77,7 @@ class ThemeNotifier extends ChangeNotifier {
     if (toneIndex != null && toneIndex < BackgroundTone.values.length) {
       _backgroundTone = BackgroundTone.values[toneIndex];
     } else {
-      _backgroundTone = BackgroundTone.ocean;
+      _backgroundTone = BackgroundTone.stark;
     }
     notifyListeners();
   }
