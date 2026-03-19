@@ -15,6 +15,9 @@ enum SpecialBackgroundType {
 
   /// A modern mesh-style background with vibrant overlapping gradients.
   vibrantGradients,
+
+  /// A geometric background with deterministic layered squares.
+  geometricSquares,
 }
 
 /// Static helpers that turn a [GenerationSeed] into deterministic colours.
@@ -566,6 +569,11 @@ class AbstractArtPainter extends CustomPainter {
       return;
     }
 
+    if (type == SpecialBackgroundType.geometricSquares) {
+      _drawGeometricSquares(canvas, size, r, paint, baseHue);
+      return;
+    }
+
     // Layer count: 3 to 6 layers for richness
     final int layerCount = 3 + (seed.abs() % 4);
 
@@ -761,6 +769,84 @@ class AbstractArtPainter extends CustomPainter {
       );
       canvas.drawCircle(center, radius, paint);
       paint.shader = null;
+    }
+  }
+
+  void _drawGeometricSquares(
+    Canvas canvas,
+    Size size,
+    Random r,
+    Paint paint,
+    double baseHue,
+  ) {
+    // Final draw to smooth - NO TRANSPARENT BLACK
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+    paint.shader = null;
+
+    // Very faint strokes
+    final strokePaint = Paint()
+      ..color = HSLColor.fromAHSL(0.1, baseHue, 1.0, 0.5).toColor()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    final fillPaint = Paint()..style = PaintingStyle.fill;
+
+    // Use a vertical sectioning approach to avoid clustering
+    final int sections = 4;
+    final double sectionHeight = size.height / sections;
+
+    // ── LARGE SQUARES (RIGHT) ──
+    final int largeCount = 3 + r.nextInt(2);
+    const double largeSize = 90;
+    fillPaint.color = HSLColor.fromAHSL(0.12, baseHue, 1.0, 0.5).toColor();
+
+    for (int i = 0; i < largeCount; i++) {
+      // Each square gets a primary section, then jitters
+      final section = i % sections;
+      final rect = Rect.fromLTWH(
+        size.width - largeSize - (r.nextDouble() * 50),
+        (section * sectionHeight) + (r.nextDouble() * sectionHeight * 0.5) - 20,
+        largeSize,
+        largeSize,
+      );
+      canvas.drawRect(rect, fillPaint);
+      canvas.drawRect(rect, strokePaint);
+    }
+
+    // ── MEDIUM SQUARES (MIDDLE-RIGHT) ──
+    final int medCount = 7 + r.nextInt(4);
+    const double medSize = 45;
+    fillPaint.color = HSLColor.fromAHSL(0.08, baseHue, 1.0, 0.5).toColor();
+
+    for (int i = 0; i < medCount; i++) {
+      final section = i % (sections * 2); // Split into 8 sub-sections
+      final subSectionHeight = size.height / (sections * 2);
+      final rect = Rect.fromLTWH(
+        size.width - 180 - (r.nextDouble() * 90),
+        (section * subSectionHeight) +
+            (r.nextDouble() * subSectionHeight * 0.5) -
+            10,
+        medSize,
+        medSize,
+      );
+      canvas.drawRect(rect, fillPaint);
+      canvas.drawRect(rect, strokePaint);
+    }
+
+    // ── SMALL SQUARES (LEFT-ISH BREAKDOWN) ──
+    final int smallCount = 15 + r.nextInt(10);
+    const double smallSize = 22;
+    fillPaint.color = HSLColor.fromAHSL(0.05, baseHue, 1.0, 0.5).toColor();
+
+    for (int i = 0; i < smallCount; i++) {
+      final rect = Rect.fromLTWH(
+        size.width - 270 - (r.nextDouble() * 160),
+        r.nextDouble() * size.height - 10,
+        smallSize,
+        smallSize,
+      );
+      canvas.drawRect(rect, fillPaint);
+      canvas.drawRect(rect, strokePaint);
     }
   }
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/core/widgets/card_button.dart';
+import 'package:project_2359/core/widgets/special_background_generator.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -12,7 +14,6 @@ import 'package:project_2359/core/study_material_service.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
-import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:provider/provider.dart';
 // removed FolderSourcesPage import as it is now integrated
 import 'package:project_2359/features/source_page/source_page.dart';
@@ -327,9 +328,15 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
             bottom: -20,
             width: 300,
             child: Opacity(
-              opacity: (1.0 - t).clamp(0.0, 1.0) * 0.5,
-              child: CustomPaint(
-                painter: _SquaresPainter(color: theme.colorScheme.primary),
+              opacity: (1.0 - t).clamp(0.0, 1.0) * 0.6,
+              child: SpecialBackgroundGenerator(
+                type: SpecialBackgroundType.geometricSquares,
+                seed: GenerationSeed.fromString(folderName),
+                label: folderName,
+                icon: FontAwesomeIcons.folder,
+                showBorder: false,
+                borderRadius: 0,
+                child: const SizedBox.expand(),
               ),
             ),
           ),
@@ -2255,66 +2262,4 @@ class _SourcePageLoaderState extends State<_SourcePageLoader> {
 
     return SourcePage(fileBytes: _blob!.bytes, title: widget.sourceLabel);
   }
-}
-
-class _SquaresPainter extends CustomPainter {
-  final Color color;
-  _SquaresPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Very faint strokes
-    final strokePaint = Paint()
-      ..color = color.withValues(alpha: 0.05)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-
-    // More prominent translucent fills for "stacking" effect
-    final fillPaint = Paint()..style = PaintingStyle.fill;
-
-    // Right side: Large squares
-    const double largeSize = 92;
-    fillPaint.color = color.withValues(alpha: 0.12);
-    for (int i = 0; i < 4; i++) {
-      final rect = Rect.fromLTWH(
-        size.width - largeSize - (i * 30),
-        -20 + (i * 40),
-        largeSize,
-        largeSize,
-      );
-      canvas.drawRect(rect, fillPaint);
-      canvas.drawRect(rect, strokePaint);
-    }
-
-    // Middle: Medium squares (overlapping more for stacking effect)
-    const double medSize = 48;
-    fillPaint.color = color.withValues(alpha: 0.08);
-    for (int i = 0; i < 9; i++) {
-      final rect = Rect.fromLTWH(
-        size.width - 170 - (i * 22),
-        (i * 45 % (size.height + 40)) - 30,
-        medSize,
-        medSize,
-      );
-      canvas.drawRect(rect, fillPaint);
-      canvas.drawRect(rect, strokePaint);
-    }
-
-    // Left: Small squares (clusters)
-    const double smallSize = 24;
-    fillPaint.color = color.withValues(alpha: 0.05);
-    for (int i = 0; i < 18; i++) {
-      final rect = Rect.fromLTWH(
-        size.width - 250 - (i * 12),
-        (i * 35 % size.height),
-        smallSize,
-        smallSize,
-      );
-      canvas.drawRect(rect, fillPaint);
-      canvas.drawRect(rect, strokePaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
