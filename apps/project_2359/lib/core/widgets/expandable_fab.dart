@@ -39,6 +39,7 @@ class ExpandableFab extends StatefulWidget {
   final ExpandableFabBuilder expandedBuilder;
   final double? expandedWidth;
   final double? expandedHeight;
+  final Alignment alignment;
 
   const ExpandableFab({
     required this.body,
@@ -50,6 +51,7 @@ class ExpandableFab extends StatefulWidget {
     required this.expandedBuilder,
     this.expandedWidth,
     this.expandedHeight,
+    this.alignment = Alignment.bottomCenter,
   });
 
   @override
@@ -195,12 +197,12 @@ class ExpandableFabState extends State<ExpandableFab> {
           ),
           AnimatedPositioned(
             bottom: _isOpen ? 8 : 24,
-            left: 0,
-            right: 0,
+            left: 20,
+            right: 20,
             duration: widget.duration,
             curve: widget.curve,
             child: Align(
-              alignment: Alignment.bottomCenter,
+              alignment: widget.alignment,
               child: Container(
                 decoration: ShapeDecoration(
                   color:
