@@ -2263,21 +2263,22 @@ class _SquaresPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Very faint strokes
     final strokePaint = Paint()
-      ..color = color.withValues(alpha: 0.25)
+      ..color = color.withValues(alpha: 0.05)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
+      ..strokeWidth = 1.0;
 
-    final fillPaint = Paint()
-      ..color = color.withValues(alpha: 0.03)
-      ..style = PaintingStyle.fill;
+    // More prominent translucent fills for "stacking" effect
+    final fillPaint = Paint()..style = PaintingStyle.fill;
 
     // Right side: Large squares
-    const double largeSize = 90;
+    const double largeSize = 92;
+    fillPaint.color = color.withValues(alpha: 0.12);
     for (int i = 0; i < 4; i++) {
       final rect = Rect.fromLTWH(
-        size.width - largeSize - (i * 25),
-        -10 + (i * 45),
+        size.width - largeSize - (i * 30),
+        -20 + (i * 40),
         largeSize,
         largeSize,
       );
@@ -2285,14 +2286,13 @@ class _SquaresPainter extends CustomPainter {
       canvas.drawRect(rect, strokePaint);
     }
 
-    // Middle: Medium squares (more of them)
-    const double medSize = 45;
-    strokePaint.color = color.withValues(alpha: 0.15);
-    fillPaint.color = color.withValues(alpha: 0.02);
-    for (int i = 0; i < 8; i++) {
+    // Middle: Medium squares (overlapping more for stacking effect)
+    const double medSize = 48;
+    fillPaint.color = color.withValues(alpha: 0.08);
+    for (int i = 0; i < 9; i++) {
       final rect = Rect.fromLTWH(
-        size.width - 160 - (i * 20),
-        (i * 50 % (size.height + 40)) - 20,
+        size.width - 170 - (i * 22),
+        (i * 45 % (size.height + 40)) - 30,
         medSize,
         medSize,
       );
@@ -2300,14 +2300,13 @@ class _SquaresPainter extends CustomPainter {
       canvas.drawRect(rect, strokePaint);
     }
 
-    // Left: Small squares (breaking down even more)
-    const double smallSize = 22;
-    strokePaint.color = color.withValues(alpha: 0.08);
-    fillPaint.color = color.withValues(alpha: 0.01);
-    for (int i = 0; i < 15; i++) {
+    // Left: Small squares (clusters)
+    const double smallSize = 24;
+    fillPaint.color = color.withValues(alpha: 0.05);
+    for (int i = 0; i < 18; i++) {
       final rect = Rect.fromLTWH(
-        size.width - 240 - (i * 12),
-        (i * 30 % size.height),
+        size.width - 250 - (i * 12),
+        (i * 35 % size.height),
         smallSize,
         smallSize,
       );
