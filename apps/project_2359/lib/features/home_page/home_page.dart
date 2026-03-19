@@ -11,6 +11,7 @@ import 'package:project_2359/features/folder_page/folder_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
 import 'package:project_2359/core/study_material_service.dart';
 import 'package:project_2359/app_database.dart';
+import 'package:project_2359/core/utils/logger.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -108,8 +109,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    AppLogger.info('Initializing HomePage...', tag: 'HomePage');
     final service = context.read<StudyMaterialService>();
-    _foldersStream = service.watchAllFolders();
+    _foldersStream = service.watchUnpinnedFolders();
     _pinnedFoldersStream = service.watchPinnedFolders();
   }
 
@@ -223,14 +225,20 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 48),
                       Center(
-                        child: Text(
-                          "4 Collections",
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.4,
-                            ),
-                            letterSpacing: 0.2,
-                          ),
+                        child: StreamBuilder<List<StudyFolderItem>>(
+                          stream: _foldersStream,
+                          builder: (context, snapshot) {
+                            final count = (snapshot.data?.length ?? 0);
+                            return Text(
+                              "$count Collection${count == 1 ? '' : 's'}",
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.4,
+                                ),
+                                letterSpacing: 0.2,
+                              ),
+                            );
+                          },
                         ),
                       ),
                       const SizedBox(height: 40),

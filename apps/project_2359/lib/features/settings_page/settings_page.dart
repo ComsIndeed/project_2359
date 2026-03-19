@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/auth/auth_page.dart';
 import 'package:project_2359/features/credits/credits_page.dart';
 import 'package:project_2359/features/profile_page/profile_page.dart';
 import 'package:project_2359/features/settings_page/storage_page.dart';
+import 'package:project_2359/features/settings_page/log_page.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/theme_notifier.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -334,6 +336,30 @@ class SettingsPage extends StatelessWidget {
                             _showSnackBar(context, 'Cache cleared');
                           },
                         ),
+                        _divider(theme),
+                        _SettingsTile(
+                          icon: FontAwesomeIcons.trashCan,
+                          title: 'Reset App Data',
+                          subtitle: 'Wipe all folders, packs, and cards',
+                          onTap: () => _showResetConfirmation(context),
+                        ),
+                      ],
+                    ),
+
+                    // ── Developer Options ──
+                    _SectionTitle(title: 'Developer'),
+                    _SettingsCard(
+                      children: [
+                        TapToSlide(
+                          page: const LogPage(),
+                          direction: SlideDirection.left,
+                          builder: (trigger) => _SettingsTile(
+                            icon: FontAwesomeIcons.terminal,
+                            title: 'View App Logs',
+                            subtitle: 'Inspect system events and errors',
+                            onTap: trigger,
+                          ),
+                        ),
                       ],
                     ),
 
@@ -405,6 +431,38 @@ class SettingsPage extends StatelessWidget {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  static void _showResetConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset All Data?'),
+        content: const Text(
+          'This will permanently delete all your folders, study materials, and cards. This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final db = context.read<AppDatabase>();
+              await db.resetDatabase();
+              if (context.mounted) {
+                Navigator.pop(context);
+                _showSnackBar(context, 'All app data has been reset');
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Reset Everything'),
+          ),
+        ],
+      ),
+    );
   }
 
   static void _showLegalSheet(

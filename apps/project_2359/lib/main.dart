@@ -3,17 +3,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/study_material_service.dart';
+import 'package:project_2359/core/study_scheduler_service.dart';
 import 'package:project_2359/features/home_page/home_page.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/theme_notifier.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
+import 'package:project_2359/core/utils/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  AppLogger.info('--- Application starting ---', tag: 'Main');
+
+  AppLogger.info('Initializing Supabase...', tag: 'Main');
   await Supabase.initialize(
     url: 'https://digzsxnfivcmrsyzdnrb.supabase.co',
     anonKey: 'sb_publishable_moMCFpqrLfTXqWaJATrahQ_SUfKdwbm',
@@ -27,9 +32,11 @@ Future<void> main() async {
 
   await themeNotifier.init();
 
+  AppLogger.info('Initializing services...', tag: 'Main');
   final database = AppDatabase();
   final sourceService = SourceService(database);
   final studyMaterialService = StudyMaterialService(database);
+  final studySchedulerService = StudySchedulerService(database);
 
   runApp(
     MultiRepositoryProvider(
@@ -39,6 +46,7 @@ Future<void> main() async {
         RepositoryProvider<StudyMaterialService>.value(
           value: studyMaterialService,
         ),
+        RepositoryProvider.value(value: studySchedulerService),
       ],
       child: MultiBlocProvider(
         providers: [

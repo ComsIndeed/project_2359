@@ -7,6 +7,7 @@ import 'package:project_2359/core/tables/study_material_items.dart';
 import 'package:project_2359/core/tables/study_folder_items.dart';
 import 'package:project_2359/core/tables/study_card_items.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
+import 'package:project_2359/core/utils/logger.dart';
 
 part 'app_database.g.dart';
 
@@ -24,54 +25,37 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (m) async {
+        AppLogger.info('Creating database tables...', tag: 'Database');
         await m.createAll();
       },
       onUpgrade: (m, from, to) async {
-        if (from < 2) {
-          // Add missing tables that were introduced
-          await m.createTable(studyFolderItems);
-          await m.createTable(studyCardItems);
-          await m.createTable(sourceItemBlobs);
-        }
-        if (from < 3) {
-          // Add isPinned to existing tables
-          await m.addColumn(studyFolderItems, studyFolderItems.isPinned);
-          await m.addColumn(studyMaterialItems, studyMaterialItems.isPinned);
-          await m.addColumn(sourceItems, sourceItems.isPinned);
-        }
-        if (from < 4) {
-          // Add FSRS fields to StudyCardItems
-          await m.addColumn(studyCardItems, studyCardItems.due);
-          await m.addColumn(studyCardItems, studyCardItems.stability);
-          await m.addColumn(studyCardItems, studyCardItems.difficulty);
-          await m.addColumn(studyCardItems, studyCardItems.elapsedDays);
-          await m.addColumn(studyCardItems, studyCardItems.scheduledDays);
-          await m.addColumn(studyCardItems, studyCardItems.reps);
-          await m.addColumn(studyCardItems, studyCardItems.lapses);
-          await m.addColumn(studyCardItems, studyCardItems.fsrsState);
-          await m.addColumn(studyCardItems, studyCardItems.lastReview);
-        }
-        if (from < 5) {
-          // Add StudySessionEvents table
-          await m.createTable(studySessionEvents);
-        }
+        AppLogger.info('Upgrading database from $from to $to', tag: 'Database');
       },
       beforeOpen: (details) async {
-        // Enable foreign keys if needed
-        // await customStatement('PRAGMA foreign_keys = ON');
+        AppLogger.info('Database opened successfully', tag: 'Database');
       },
     );
   }
 
+  /// Clears all data from the database.
+  Future<void> resetDatabase() async {
+    AppLogger.warning('Wiping entire database...', tag: 'Database');
+    await transaction(() async {
+      for (final table in allTables) {
+        await delete(table).go();
+      }
+    });
+  }
+
   static QueryExecutor _openConnection() {
     return driftDatabase(
-      name: 'project_2359_database',
+      name: 'project_2359_database_v2',
       native: const DriftNativeOptions(
         databaseDirectory: path.getApplicationSupportDirectory,
       ),

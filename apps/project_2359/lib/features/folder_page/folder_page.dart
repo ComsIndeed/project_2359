@@ -821,6 +821,7 @@ class _FolderFabContentState extends State<_FolderFabContent> {
   }
 
   Future<void> _saveMaterial() async {
+    print(_streamedCards);
     if (_streamedCards.isEmpty) return;
 
     final materialService = context.read<StudyMaterialService>();
