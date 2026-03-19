@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'dart:ui' as ui;
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 
@@ -248,14 +250,48 @@ class SpecialBackgroundGenerator extends StatefulWidget {
       _SpecialBackgroundGeneratorState();
 }
 
-class _SpecialBackgroundGeneratorState
-    extends State<SpecialBackgroundGenerator> {
+class _SpecialBackgroundGeneratorState extends State<SpecialBackgroundGenerator>
+    with SingleTickerProviderStateMixin {
   /// Global cache of pre-rendered art images, keyed by a composite hash.
-  /// Shared across all instances so duplicate seeds/sizes reuse the same image.
   static final Map<int, ui.Image> _imageCache = {};
 
   ui.Image? _cachedImage;
   int? _cacheKey;
+
+  // Animation & Sensors
+  late AnimationController _controller;
+  StreamSubscription<AccelerometerEvent>? _sensorSubscription;
+  Offset _sensorOffset = Offset.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 30),
+    )..repeat();
+
+    _sensorSubscription = accelerometerEvents.listen((event) {
+      if (mounted) {
+        setState(() {
+          // Low-pass filter for smoothness
+          _sensorOffset = Offset(
+            (_sensorOffset.dx * 0.9) + (event.x * 0.1),
+            (_sensorOffset.dy * 0.9) + (event.y * 0.1),
+          );
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _sensorSubscription?.cancel();
+    _cachedImage = null;
+    _cacheKey = null;
+    super.dispose();
+  }
 
   /// Builds a composite cache key from all inputs that affect the painted output.
   int _buildCacheKey(
@@ -316,15 +352,6 @@ class _SpecialBackgroundGeneratorState
       _cacheKey = key;
       _cachedImage = image;
     });
-  }
-
-  @override
-  void dispose() {
-    // We do NOT dispose images from the static cache here — they may be shared.
-    // Flutter's image cache will handle memory pressure.
-    _cachedImage = null;
-    _cacheKey = null;
-    super.dispose();
   }
 
   @override
@@ -413,7 +440,30 @@ class _SpecialBackgroundGeneratorState
 
                     // Only render when we have a real size.
                     if (size.width > 0 && size.height > 0) {
-                      // Synchronously build/fetch the cached image.
+                      // Geometric squares are animated, so we don't cache them as images
+                      // to avoid lag. Instead, we paint them directly every frame.
+                      if (widget.type ==
+                          SpecialBackgroundType.geometricSquares) {
+                        return AnimatedBuilder(
+                          animation: _controller,
+                          builder: (context, _) {
+                            return CustomPaint(
+                              painter: AbstractArtPainter(
+                                hash,
+                                colors.primary,
+                                widget.type,
+                                brightness,
+                                sensorOffset: _sensorOffset,
+                                flowValue: _controller.value,
+                              ),
+                              isComplex: true,
+                              willChange: true,
+                            );
+                          },
+                        );
+                      }
+
+                      // Synchronously build/fetch the cached image for static patterns.
                       final key = _buildCacheKey(
                         hash,
                         size.width,
@@ -554,8 +604,17 @@ class AbstractArtPainter extends CustomPainter {
   final Color baseColor;
   final SpecialBackgroundType type;
   final Brightness brightness;
+  final Offset sensorOffset;
+  final double flowValue;
 
-  AbstractArtPainter(this.seed, this.baseColor, this.type, this.brightness);
+  AbstractArtPainter(
+    this.seed,
+    this.baseColor,
+    this.type,
+    this.brightness, {
+    this.sensorOffset = Offset.zero,
+    this.flowValue = 0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -795,22 +854,41 @@ class AbstractArtPainter extends CustomPainter {
     final int sections = 4;
     final double sectionHeight = size.height / sections;
 
+    // ── FLOW & PARALLAX CALCULATIONS ──
+    // Deterministic flow source (center, top, bottom, etc. based on seed)
+    final flowSourceX = (seed % 3 == 0)
+        ? size.width
+        : (seed % 3 == 1 ? 0.0 : size.width / 2);
+    final flowSourceY = (seed % 4 == 0)
+        ? 0.0
+        : (seed % 4 == 1 ? size.height : size.height / 2);
+    final sourcePoint = Offset(flowSourceX, flowSourceY);
+
     // ── LARGE SQUARES (RIGHT) ──
     final int largeCount = 3 + r.nextInt(2);
     const double largeSize = 90;
     fillPaint.color = HSLColor.fromAHSL(0.12, baseHue, 1.0, 0.5).toColor();
 
     for (int i = 0; i < largeCount; i++) {
-      // Each square gets a primary section, then jitters
       final section = i % sections;
-      final rect = Rect.fromLTWH(
-        size.width - largeSize - (r.nextDouble() * 50),
-        (section * sectionHeight) + (r.nextDouble() * sectionHeight * 0.5) - 20,
-        largeSize,
-        largeSize,
+
+      // Target position
+      final targetX = size.width - largeSize - (r.nextDouble() * 50);
+      final targetY =
+          (section * sectionHeight) +
+          (r.nextDouble() * sectionHeight * 0.5) -
+          20;
+
+      _drawAnimatedSquare(
+        canvas: canvas,
+        source: sourcePoint,
+        target: Offset(targetX, targetY),
+        baseSize: largeSize,
+        parallaxFactor: 3.5, // Move more (closest)
+        fillPaint: fillPaint,
+        strokePaint: strokePaint,
+        r: r,
       );
-      canvas.drawRect(rect, fillPaint);
-      canvas.drawRect(rect, strokePaint);
     }
 
     // ── MEDIUM SQUARES (MIDDLE-RIGHT) ──
@@ -819,18 +897,25 @@ class AbstractArtPainter extends CustomPainter {
     fillPaint.color = HSLColor.fromAHSL(0.08, baseHue, 1.0, 0.5).toColor();
 
     for (int i = 0; i < medCount; i++) {
-      final section = i % (sections * 2); // Split into 8 sub-sections
+      final section = i % (sections * 2);
       final subSectionHeight = size.height / (sections * 2);
-      final rect = Rect.fromLTWH(
-        size.width - 180 - (r.nextDouble() * 90),
-        (section * subSectionHeight) +
-            (r.nextDouble() * subSectionHeight * 0.5) -
-            10,
-        medSize,
-        medSize,
+
+      final targetX = size.width - 180 - (r.nextDouble() * 90);
+      final targetY =
+          (section * subSectionHeight) +
+          (r.nextDouble() * subSectionHeight * 0.5) -
+          10;
+
+      _drawAnimatedSquare(
+        canvas: canvas,
+        source: sourcePoint,
+        target: Offset(targetX, targetY),
+        baseSize: medSize,
+        parallaxFactor: 1.5,
+        fillPaint: fillPaint,
+        strokePaint: strokePaint,
+        r: r,
       );
-      canvas.drawRect(rect, fillPaint);
-      canvas.drawRect(rect, strokePaint);
     }
 
     // ── SMALL SQUARES (LEFT-ISH BREAKDOWN) ──
@@ -839,15 +924,74 @@ class AbstractArtPainter extends CustomPainter {
     fillPaint.color = HSLColor.fromAHSL(0.05, baseHue, 1.0, 0.5).toColor();
 
     for (int i = 0; i < smallCount; i++) {
-      final rect = Rect.fromLTWH(
-        size.width - 270 - (r.nextDouble() * 160),
-        r.nextDouble() * size.height - 10,
-        smallSize,
-        smallSize,
+      final targetX = size.width - 270 - (r.nextDouble() * 160);
+      final targetY = r.nextDouble() * size.height - 10;
+
+      _drawAnimatedSquare(
+        canvas: canvas,
+        source: sourcePoint,
+        target: Offset(targetX, targetY),
+        baseSize: smallSize,
+        parallaxFactor: 0.5, // Move less (farthest)
+        fillPaint: fillPaint,
+        strokePaint: strokePaint,
+        r: r,
       );
-      canvas.drawRect(rect, fillPaint);
-      canvas.drawRect(rect, strokePaint);
     }
+  }
+
+  void _drawAnimatedSquare({
+    required Canvas canvas,
+    required Offset source,
+    required Offset target,
+    required double baseSize,
+    required double parallaxFactor,
+    required Paint fillPaint,
+    required Paint strokePaint,
+    required Random r,
+  }) {
+    // 1. Calculate Flow (Shrink to/from source)
+    // We use a phase shift for each square so they don't move in a block
+    final phase = r.nextDouble();
+    final t = (flowValue + phase) % 1.0;
+
+    // Lerp position from source to target (or beyond)
+    final currentPos = Offset.lerp(
+      source,
+      target + (target - source) * 0.5,
+      t,
+    )!;
+
+    // Scale size based on flow (shrink as they get further from target, or grow from source)
+    final scale = t < 0.2 ? (t / 0.2) : (t > 0.8 ? (1.0 - t) / 0.2 : 1.0);
+    final currentSize = baseSize * scale;
+
+    // 2. Apply Parallax (Sensor Offset)
+    final finalPos =
+        currentPos +
+        Offset(
+          sensorOffset.dx * parallaxFactor,
+          -sensorOffset.dy * parallaxFactor,
+        );
+
+    // 3. Draw
+
+    // Rotation (also seed-based + slow rotation over time)
+    canvas.save();
+    canvas.translate(
+      finalPos.dx + currentSize / 2,
+      finalPos.dy + currentSize / 2,
+    );
+    canvas.rotate((seed % 10) * 0.1 + (flowValue * pi * 0.2));
+
+    final centeredRect = Rect.fromCenter(
+      center: Offset.zero,
+      width: currentSize,
+      height: currentSize,
+    );
+    canvas.drawRect(centeredRect, fillPaint);
+    canvas.drawRect(centeredRect, strokePaint);
+    canvas.restore();
   }
 
   void _drawVibrantGradients(
@@ -936,5 +1080,7 @@ class AbstractArtPainter extends CustomPainter {
   bool shouldRepaint(covariant AbstractArtPainter oldDelegate) =>
       oldDelegate.seed != seed ||
       oldDelegate.type != type ||
-      oldDelegate.brightness != brightness;
+      oldDelegate.brightness != brightness ||
+      oldDelegate.sensorOffset != sensorOffset ||
+      oldDelegate.flowValue != flowValue;
 }
