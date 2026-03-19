@@ -1458,7 +1458,7 @@ class _FolderFabContentState extends State<_FolderFabContent> {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
-          childAspectRatio: 2.6,
+          childAspectRatio: 2.3,
           children: [
             CardButton(
               icon: FontAwesomeIcons.fileLines,

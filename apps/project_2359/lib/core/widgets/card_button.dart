@@ -101,7 +101,7 @@ class CardButton extends StatelessWidget {
     final contentWidget = Padding(
       padding:
           padding ??
-          (isCompact ? const EdgeInsets.all(12.0) : const EdgeInsets.all(16.0)),
+          (isCompact ? const EdgeInsets.all(10.0) : const EdgeInsets.all(16.0)),
       child: layoutDirection == CardLayoutDirection.horizontal
           ? _buildHorizontalContent(context)
           : _buildVerticalContent(context),

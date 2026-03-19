@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 
 class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
   final SourceService sourceService;
+  String? _currentFolderId;
 
   SourcesPageBloc(this.sourceService) : super(const SourcesPageStateInitial()) {
     on<LoadSourcesEvent>(_onLoad);
@@ -29,10 +30,23 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
     ImportDocumentsEvent event,
     Emitter<SourcesPageState> emit,
   ) async {
+    final effectiveFolderId = event.folderId ?? _currentFolderId;
     const uuid = Uuid();
 
     for (final file in event.files) {
-      if (file.bytes == null) continue;
+      print('--- Importing Document ---');
+      print('Name: ${file.name}');
+      print('Extension: ${file.extension}');
+      print('Path: ${file.path}');
+      print('Bytes is null: ${file.bytes == null}');
+      if (file.bytes != null) {
+        print('Bytes length: ${file.bytes!.length}');
+      }
+
+      if (file.bytes == null) {
+        print('Skipping file ${file.name} because bytes are null.');
+        continue;
+      }
 
       final sourceId = uuid.v4();
       final blobId = uuid.v4();
@@ -42,7 +56,7 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
       await sourceService.insertSource(
         SourceItemsCompanion.insert(
           id: sourceId,
-          folderId: Value(event.folderId),
+          folderId: Value(effectiveFolderId),
           label: file.name,
           path: Value(file.path),
           type: 'document',
@@ -60,8 +74,8 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
       );
     }
 
-    final sources = event.folderId != null
-        ? await sourceService.getSourcesByFolderId(event.folderId!)
+    final sources = effectiveFolderId != null
+        ? await sourceService.getSourcesByFolderId(effectiveFolderId)
         : await sourceService.getAllSources();
     emit(SourcesPageStateLoaded(sources: sources));
   }
@@ -73,7 +87,9 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
     await sourceService.deleteSource(event.sourceId);
     await sourceService.deleteSourceBlobBySourceId(event.sourceId);
 
-    final sources = await sourceService.getAllSources();
+    final sources = _currentFolderId != null
+        ? await sourceService.getSourcesByFolderId(_currentFolderId!)
+        : await sourceService.getAllSources();
     emit(SourcesPageStateLoaded(sources: sources));
   }
 }
