@@ -16,7 +16,7 @@ import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/ai_helpers.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/features/home_page/home_page.dart';
-import 'package:project_2359/features/materials_page/create_flashcards_page.dart';
+import 'package:project_2359/features/study/create_flashcards_page.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
