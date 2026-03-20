@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -5,8 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/study_material_service.dart';
-import 'package:project_2359/core/widgets/special_background_generator.dart';
+import 'package:project_2359/core/tables/study_card_items.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
+import 'package:project_2359/core/widgets/special_background_generator.dart';
 
 class StudyPage extends StatefulWidget {
   final String materialId;
@@ -25,6 +27,7 @@ class StudyPage extends StatefulWidget {
 class _StudyPageState extends State<StudyPage> {
   int _currentIndex = 0;
   bool _isFlipped = false;
+  String? _selectedMcqChoice;
   late Stream<List<StudyCardItem>> _cardsStream;
 
   @override
@@ -40,9 +43,9 @@ class _StudyPageState extends State<StudyPage> {
       setState(() {
         _currentIndex++;
         _isFlipped = false;
+        _selectedMcqChoice = null;
       });
     } else {
-      // Finished session
       _showFinishedDialog();
     }
   }
@@ -52,8 +55,14 @@ class _StudyPageState extends State<StudyPage> {
       setState(() {
         _currentIndex--;
         _isFlipped = false;
+        _selectedMcqChoice = null;
       });
     }
+  }
+
+  Future<void> _handleReview(int rating, int total) async {
+    // rating: 1-Again, 2-Hard, 3-Good, 4-Easy
+    _nextCard(total);
   }
 
   void _showFinishedDialog() {
@@ -91,7 +100,6 @@ class _StudyPageState extends State<StudyPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Scaffold(
@@ -136,50 +144,25 @@ class _StudyPageState extends State<StudyPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(
-                            child: GestureDetector(
-                              onTap: () =>
-                                  setState(() => _isFlipped = !_isFlipped),
-                              child: _FlashcardView(
-                                question: currentCard.question ?? "",
-                                answer: currentCard.answer ?? "",
+                            child: _CardEntryAnimation(
+                              index: _currentIndex,
+                              child: _StudyCardContainer(
+                                card: currentCard,
                                 isFlipped: _isFlipped,
-                                seed: currentCard.id,
+                                onFlip: () =>
+                                    setState(() => _isFlipped = !_isFlipped),
+                                selectedChoice: _selectedMcqChoice,
+                                onChoiceSelected: (choice) {
+                                  setState(() {
+                                    _selectedMcqChoice = choice;
+                                    _isFlipped = true;
+                                  });
+                                },
                               ),
                             ),
                           ),
                           const SizedBox(height: 48),
-                          // Control Row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _ControlButton(
-                                icon: FontAwesomeIcons.arrowLeft,
-                                label: "Back",
-                                onTap: _currentIndex > 0 ? _previousCard : null,
-                              ),
-                              _ControlButton(
-                                icon: _isFlipped
-                                    ? FontAwesomeIcons.check
-                                    : FontAwesomeIcons.eye,
-                                label: _isFlipped ? "Next" : "Reveal",
-                                isPrimary: true,
-                                onTap: () {
-                                  if (!_isFlipped) {
-                                    setState(() => _isFlipped = true);
-                                  } else {
-                                    _nextCard(total);
-                                  }
-                                },
-                              ),
-                              _ControlButton(
-                                icon: FontAwesomeIcons.arrowRight,
-                                label: "Skip",
-                                onTap: _currentIndex < total - 1
-                                    ? () => _nextCard(total)
-                                    : null,
-                              ),
-                            ],
-                          ),
+                          _buildControlPanel(context, total),
                         ],
                       ),
                     ),
@@ -190,6 +173,72 @@ class _StudyPageState extends State<StudyPage> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildControlPanel(BuildContext context, int total) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: !_isFlipped
+          ? _buildRevealPanel(context, total)
+          : _buildFsrsPanel(context, total),
+    );
+  }
+
+  Widget _buildRevealPanel(BuildContext context, int total) {
+    return Row(
+      key: const ValueKey('reveal_panel'),
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _ControlButton(
+          icon: FontAwesomeIcons.arrowLeft,
+          label: "Back",
+          btnSize: 64,
+          onTap: _currentIndex > 0 ? _previousCard : null,
+        ),
+        _ControlButton(
+          icon: FontAwesomeIcons.eye,
+          label: "Reveal",
+          isPrimary: true,
+          btnSize: 84,
+          onTap: () => setState(() => _isFlipped = true),
+        ),
+        _ControlButton(
+          icon: FontAwesomeIcons.arrowRight,
+          label: "Skip",
+          btnSize: 64,
+          onTap: _currentIndex < total - 1 ? () => _nextCard(total) : null,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFsrsPanel(BuildContext context, int total) {
+    return Row(
+      key: const ValueKey('fsrs_panel'),
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _FSRSButton(
+          label: "Again",
+          color: Colors.red,
+          onTap: () => _handleReview(1, total),
+        ),
+        _FSRSButton(
+          label: "Hard",
+          color: Colors.orange,
+          onTap: () => _handleReview(2, total),
+        ),
+        _FSRSButton(
+          label: "Good",
+          color: Colors.lightBlue,
+          onTap: () => _handleReview(3, total),
+        ),
+        _FSRSButton(
+          label: "Easy",
+          color: Colors.green,
+          onTap: () => _handleReview(4, total),
+        ),
+      ],
     );
   }
 
@@ -243,143 +292,416 @@ class _StudyPageState extends State<StudyPage> {
   }
 }
 
-class _FlashcardView extends StatelessWidget {
-  final String question;
-  final String answer;
-  final bool isFlipped;
-  final String seed;
+class _FSRSButton extends StatelessWidget {
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
 
-  const _FlashcardView({
-    required this.question,
-    required this.answer,
-    required this.isFlipped,
-    required this.seed,
+  const _FSRSButton({
+    required this.label,
+    required this.color,
+    required this.onTap,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(24),
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: color.withValues(alpha: 0.4),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  label[0].toUpperCase(),
+                  style: GoogleFonts.outfit(
+                    color: color,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          label.toUpperCase(),
+          style: GoogleFonts.outfit(
+            color: color.withValues(alpha: 0.7),
+            fontWeight: FontWeight.w900,
+            fontSize: 10,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CardEntryAnimation extends StatelessWidget {
+  final int index;
+  final Widget child;
+
+  const _CardEntryAnimation({required this.index, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 600),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
       transitionBuilder: (Widget child, Animation<double> animation) {
-        final rotate = Tween(begin: pi, end: 0.0).animate(animation);
-        return AnimatedBuilder(
-          animation: rotate,
-          child: child,
-          builder: (context, child) {
-            final isUnder = (ValueKey(isFlipped) != child!.key);
-            var tilt = ((animation.value - 0.5).abs() - 0.5) * 0.003;
-            tilt *= isUnder ? -1.0 : 1.0;
-            final value = isUnder ? min(rotate.value, pi / 2) : rotate.value;
-            return Transform(
-              transform: Matrix4.rotationY(value)..setEntry(3, 0, tilt),
-              alignment: Alignment.center,
-              child: child,
+        final offsetAnimation =
+            Tween<Offset>(
+              begin: const Offset(1.0, 0.2),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
             );
-          },
+
+        final rotationAnimation = Tween<double>(begin: 0.05, end: 0.0).animate(
+          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+        );
+
+        final exitOffsetAnimation =
+            Tween<Offset>(
+              begin: const Offset(-1.0, 0.0),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeInCubic),
+            );
+
+        if (child.key == ValueKey(index)) {
+          return SlideTransition(
+            position: offsetAnimation,
+            child: RotationTransition(
+              turns: rotationAnimation,
+              child: FadeTransition(opacity: animation, child: child),
+            ),
+          );
+        } else {
+          return SlideTransition(
+            position: exitOffsetAnimation,
+            child: FadeTransition(opacity: animation, child: child),
+          );
+        }
+      },
+      child: Container(key: ValueKey(index), child: child),
+    );
+  }
+}
+
+class _StudyCardContainer extends StatelessWidget {
+  final StudyCardItem card;
+  final bool isFlipped;
+  final VoidCallback onFlip;
+  final String? selectedChoice;
+  final Function(String) onChoiceSelected;
+
+  const _StudyCardContainer({
+    required this.card,
+    required this.isFlipped,
+    required this.onFlip,
+    this.selectedChoice,
+    required this.onChoiceSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isMcq = card.type == StudyCardType.multipleChoiceQuestion.name;
+
+    return _FlipTransition(
+      isFlipped: isFlipped,
+      front: _CardContent(
+        card: card,
+        isBack: false,
+        onFlip: onFlip,
+        isMcq: isMcq,
+        selectedChoice: selectedChoice,
+        onChoiceSelected: onChoiceSelected,
+      ),
+      back: _CardContent(
+        card: card,
+        isBack: true,
+        onFlip: onFlip,
+        isMcq: isMcq,
+        selectedChoice: selectedChoice,
+        onChoiceSelected: onChoiceSelected,
+      ),
+    );
+  }
+}
+
+class _FlipTransition extends StatelessWidget {
+  final bool isFlipped;
+  final Widget front;
+  final Widget back;
+
+  const _FlipTransition({
+    required this.isFlipped,
+    required this.front,
+    required this.back,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOutCubic,
+      tween: Tween(begin: 0.0, end: isFlipped ? pi : 0.0),
+      builder: (context, value, child) {
+        final bool isBack = value >= pi / 2;
+        final Widget visibleChild = isBack ? back : front;
+
+        return Transform(
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.0012)
+            ..rotateY(value),
+          alignment: Alignment.center,
+          child: isBack
+              ? Transform(
+                  transform: Matrix4.identity()..rotateY(pi),
+                  alignment: Alignment.center,
+                  child: visibleChild,
+                )
+              : visibleChild,
         );
       },
-      child: isFlipped
-          ? _CardContent(
-              key: const ValueKey(true),
-              text: answer,
-              isBack: true,
-              seed: seed,
-            )
-          : _CardContent(
-              key: const ValueKey(false),
-              text: question,
-              isBack: false,
-              seed: seed,
-            ),
     );
   }
 }
 
 class _CardContent extends StatelessWidget {
-  final String text;
+  final StudyCardItem card;
   final bool isBack;
-  final String seed;
+  final VoidCallback onFlip;
+  final bool isMcq;
+  final String? selectedChoice;
+  final Function(String)? onChoiceSelected;
 
   const _CardContent({
-    super.key,
-    required this.text,
+    required this.card,
     required this.isBack,
-    required this.seed,
+    required this.onFlip,
+    required this.isMcq,
+    this.selectedChoice,
+    this.onChoiceSelected,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final String text = isBack ? (card.answer ?? "") : (card.question ?? "");
+    final String labelStr = isBack
+        ? "ANSWER"
+        : (isMcq ? "QUESTION (MCQ)" : "QUESTION");
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: (isBack ? Colors.purple : theme.colorScheme.primary)
-                .withValues(alpha: 0.3),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
+    return GestureDetector(
+      onTap: isMcq && !isBack ? null : onFlip,
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(36),
+          boxShadow: [
+            BoxShadow(
+              color: (isBack ? Colors.purple : theme.colorScheme.primary)
+                  .withValues(alpha: 0.3),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: SpecialBackgroundGenerator(
+          type: SpecialBackgroundType.vibrantGradients,
+          seed: GenerationSeed.fromString(
+            card.id + (isBack ? 'back' : 'front'),
           ),
-        ],
-      ),
-      child: SpecialBackgroundGenerator(
-        type: SpecialBackgroundType.vibrantGradients,
-        seed: GenerationSeed.fromString(seed + (isBack ? 'back' : 'front')),
-        label: text,
-        icon: isBack
-            ? FontAwesomeIcons.lightbulb
-            : FontAwesomeIcons.solidQuestionCircle,
-        borderRadius: 32,
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Align(
-                alignment: Alignment.topLeft,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    isBack ? "ANSWER" : "QUESTION",
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.5,
+          label: text,
+          icon: isBack
+              ? FontAwesomeIcons.lightbulb
+              : FontAwesomeIcons.solidQuestionCircle,
+          borderRadius: 36,
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Text(
+                      labelStr,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.5,
+                        fontSize: 10,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const Spacer(),
-              Text(
-                text,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.displaySmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: text.length > 100 ? 18 : 24,
+                const Spacer(),
+                if (isMcq && !isBack) ...[
+                  _buildMcqFront(context, text, theme),
+                ] else ...[
+                  Text(
+                    text,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: text.length > 100 ? 18 : 24,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+                const Spacer(),
+                FaIcon(
+                  isBack
+                      ? FontAwesomeIcons.checkDouble
+                      : FontAwesomeIcons.fingerprint,
+                  color: Colors.white.withValues(alpha: 0.1),
+                  size: 44,
                 ),
-              ),
-              const Spacer(),
-              FaIcon(
-                isBack
-                    ? FontAwesomeIcons.checkDouble
-                    : FontAwesomeIcons.fingerprint,
-                color: Colors.white.withValues(alpha: 0.2),
-                size: 40,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMcqFront(
+    BuildContext context,
+    String question,
+    ThemeData theme,
+  ) {
+    List<String> options = [];
+    try {
+      if (card.optionsListJson != null) {
+        options = List<String>.from(jsonDecode(card.optionsListJson!));
+      }
+    } catch (_) {}
+
+    return Column(
+      children: [
+        Text(
+          question,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w900,
+            fontSize: 22,
+          ),
+        ),
+        const SizedBox(height: 32),
+        ...options.map((option) {
+          final isSelected = selectedChoice == option;
+          final isCorrect = option == card.answer;
+
+          Color bgColor = Colors.white.withValues(alpha: 0.08);
+          if (selectedChoice != null) {
+            if (isCorrect)
+              bgColor = Colors.green.withValues(alpha: 0.25);
+            else if (isSelected)
+              bgColor = Colors.red.withValues(alpha: 0.25);
+          }
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: selectedChoice == null
+                    ? () => onChoiceSelected!(option)
+                    : null,
+                borderRadius: BorderRadius.circular(16),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
+                  ),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.white.withValues(alpha: 0.4)
+                          : Colors.white.withValues(alpha: 0.05),
+                      width: 2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Center(
+                          child: selectedChoice != null && isCorrect
+                              ? const FaIcon(
+                                  FontAwesomeIcons.check,
+                                  size: 10,
+                                  color: Colors.green,
+                                )
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          option,
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ],
     );
   }
 }
@@ -389,12 +711,14 @@ class _ControlButton extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
   final bool isPrimary;
+  final double btnSize;
 
   const _ControlButton({
     required this.icon,
     required this.label,
     this.onTap,
     this.isPrimary = false,
+    required this.btnSize,
   });
 
   @override
@@ -409,11 +733,11 @@ class _ControlButton extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(32),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: isPrimary ? 72 : 56,
-              height: isPrimary ? 72 : 56,
+              width: btnSize,
+              height: btnSize,
               decoration: BoxDecoration(
                 color: isPrimary
                     ? theme.colorScheme.primary
@@ -423,7 +747,7 @@ class _ControlButton extends StatelessWidget {
                   color: isPrimary
                       ? Colors.white.withValues(alpha: 0.2)
                       : Colors.white.withValues(alpha: 0.1),
-                  width: 1,
+                  width: 1.5,
                 ),
                 boxShadow: isPrimary
                     ? [
@@ -431,8 +755,8 @@ class _ControlButton extends StatelessWidget {
                           color: theme.colorScheme.primary.withValues(
                             alpha: 0.4,
                           ),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
                         ),
                       ]
                     : [],
@@ -440,7 +764,7 @@ class _ControlButton extends StatelessWidget {
               child: Center(
                 child: FaIcon(
                   icon,
-                  size: isPrimary ? 24 : 18,
+                  size: isPrimary ? 28 : 22,
                   color: isEnabled
                       ? Colors.white
                       : Colors.white.withValues(alpha: 0.2),
@@ -449,15 +773,16 @@ class _ControlButton extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(
             color: isEnabled
                 ? Colors.white.withValues(alpha: 0.6)
                 : Colors.white.withValues(alpha: 0.2),
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.8,
+            fontSize: 10,
           ),
         ),
       ],
@@ -525,7 +850,6 @@ class _StudyHeaderDelegate extends SliverPersistentHeaderDelegate {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Background pattern
           Positioned.fill(
             child: Opacity(
               opacity: (1.0 - t).clamp(0.0, 1.0),
@@ -540,8 +864,6 @@ class _StudyHeaderDelegate extends SliverPersistentHeaderDelegate {
               ),
             ),
           ),
-
-          // Header Content
           SafeArea(
             bottom: false,
             child: Column(
@@ -572,7 +894,6 @@ class _StudyHeaderDelegate extends SliverPersistentHeaderDelegate {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      // Progress Text
                       Padding(
                         padding: const EdgeInsets.only(right: 16),
                         child: Text(
@@ -608,7 +929,6 @@ class _StudyHeaderDelegate extends SliverPersistentHeaderDelegate {
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 12),
-                            // Progress Bar
                             Stack(
                               children: [
                                 Container(

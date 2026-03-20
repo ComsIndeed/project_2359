@@ -245,6 +245,12 @@ class StudyMaterialService {
     });
   }
 
+  Future<void> reviewCard(String id, int rating) async {
+    AppLogger.info('Reviewing card $id with rating $rating', tag: _tag);
+    // TODO: Implement FSRS scheduling logic here
+    // This will update the 'due' and 'fsrsCardJson' fields in study_card_items
+  }
+
   Future<void> deleteCard(String id) async {
     AppLogger.warning('Deleting card: $id', tag: _tag);
     await (_db.delete(_db.studyCardItems)..where((t) => t.id.equals(id))).go();
