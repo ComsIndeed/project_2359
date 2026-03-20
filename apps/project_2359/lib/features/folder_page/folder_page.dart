@@ -48,6 +48,8 @@ class _FolderPageState extends State<FolderPage> {
   final Set<String> _selectedMaterialIds = {};
   List<StudyMaterialItem> _allMaterials = [];
   StreamSubscription? _materialSub;
+  List<SourceItem>? _currentSources;
+  StreamSubscription? _sourcesSub;
   FabMode _fabMode = FabMode.generation;
 
   bool get _isSelecting => _selectedMaterialIds.isNotEmpty;
@@ -130,11 +132,42 @@ class _FolderPageState extends State<FolderPage> {
     _materialSub = _materialsStream.listen((materials) {
       if (mounted) setState(() => _allMaterials = materials);
     });
+
+    // Also watch sources to provide initialData to FAB for smooth animation
+    final sourceService = context.read<SourceService>();
+    _sourcesSub = sourceService.watchSourcesByFolderId(widget.folderId).listen((
+      sources,
+    ) {
+      if (mounted) setState(() => _currentSources = sources);
+    });
+  }
+
+  @override
+  void didUpdateWidget(FolderPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.folderId != widget.folderId) {
+      _materialSub?.cancel();
+      _sourcesSub?.cancel();
+
+      final service = context.read<StudyMaterialService>();
+      _materialsStream = service.watchMaterialsByFolderId(widget.folderId);
+      _materialSub = _materialsStream.listen((materials) {
+        if (mounted) setState(() => _allMaterials = materials);
+      });
+
+      final sourceService = context.read<SourceService>();
+      _sourcesSub = sourceService
+          .watchSourcesByFolderId(widget.folderId)
+          .listen((sources) {
+            if (mounted) setState(() => _currentSources = sources);
+          });
+    }
   }
 
   @override
   void dispose() {
     _materialSub?.cancel();
+    _sourcesSub?.cancel();
     super.dispose();
   }
 
@@ -198,7 +231,11 @@ class _FolderPageState extends State<FolderPage> {
           );
         },
         expandedBuilder: (context, isOpen, expand, close) {
-          return _FolderFabContent(folderId: widget.folderId, mode: _fabMode);
+          return _FolderFabContent(
+            folderId: widget.folderId,
+            mode: _fabMode,
+            initialSources: _currentSources,
+          );
         },
         body: StreamBuilder<List<StudyMaterialItem>>(
           stream: _materialsStream,
@@ -328,7 +365,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
             bottom: -20,
             width: 300,
             child: Opacity(
-              opacity: (1.0 - t).clamp(0.0, 1.0) * 0.6,
+              opacity: (1.0 - t).clamp(0.0, 1.0),
               child: SpecialBackgroundGenerator(
                 type: SpecialBackgroundType.geometricSquares,
                 seed: GenerationSeed.fromString(folderName),
@@ -672,7 +709,13 @@ class _SectionLabel extends StatelessWidget {
 class _FolderFabContent extends StatefulWidget {
   final String folderId;
   final FabMode mode;
-  const _FolderFabContent({required this.folderId, required this.mode});
+  final List<SourceItem>? initialSources;
+
+  const _FolderFabContent({
+    required this.folderId,
+    required this.mode,
+    this.initialSources,
+  });
 
   @override
   State<_FolderFabContent> createState() => _FolderFabContentState();
@@ -699,15 +742,25 @@ class _FolderFabContentState extends State<_FolderFabContent> {
   late FabMode _currentMode;
   FabMode? _prevMode;
 
+  late Stream<List<SourceItem>> _sourcesStream;
+
   @override
   void initState() {
     super.initState();
     _currentMode = widget.mode;
+    _sourcesStream = context.read<SourceService>().watchSourcesByFolderId(
+      widget.folderId,
+    );
   }
 
   @override
   void didUpdateWidget(_FolderFabContent oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.folderId != widget.folderId) {
+      _sourcesStream = context.read<SourceService>().watchSourcesByFolderId(
+        widget.folderId,
+      );
+    }
     if (oldWidget.mode != widget.mode) {
       setState(() {
         _prevMode = _currentMode;
@@ -1069,9 +1122,8 @@ class _FolderFabContentState extends State<_FolderFabContent> {
     final cs = theme.colorScheme;
 
     return StreamBuilder<List<SourceItem>>(
-      stream: context.read<SourceService>().watchSourcesByFolderId(
-        widget.folderId,
-      ),
+      stream: _sourcesStream,
+      initialData: widget.initialSources,
       builder: (context, snapshot) {
         final sources = snapshot.data ?? [];
 
@@ -1596,9 +1648,8 @@ class _FolderFabContentState extends State<_FolderFabContent> {
     final cs = theme.colorScheme;
 
     return StreamBuilder<List<SourceItem>>(
-      stream: context.read<SourceService>().watchSourcesByFolderId(
-        widget.folderId,
-      ),
+      stream: _sourcesStream,
+      initialData: widget.initialSources,
       builder: (context, snapshot) {
         final sources = snapshot.data ?? [];
 

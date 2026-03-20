@@ -45,7 +45,7 @@ class ExpandableFab extends StatefulWidget {
     required this.body,
     super.key,
     this.backgroundColor,
-    this.duration = const Duration(milliseconds: 300),
+    this.duration = const Duration(milliseconds: 400),
     this.curve = Curves.easeInOutCubicEmphasized,
     required this.collapsedBuilder,
     required this.expandedBuilder,

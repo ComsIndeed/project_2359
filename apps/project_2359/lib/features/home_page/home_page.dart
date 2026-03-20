@@ -6,7 +6,6 @@ import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
-import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/folder_page/folder_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
 import 'package:project_2359/core/study_material_service.dart';
@@ -29,6 +28,9 @@ class _HomePageState extends State<HomePage> {
   List<StudyMaterialItem> _allMaterials = [];
   StreamSubscription? _folderSub;
   StreamSubscription? _materialSub;
+
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = "";
 
   bool get _isSelecting =>
       _selectedFolderIds.isNotEmpty || _selectedMaterialIds.isNotEmpty;
@@ -131,6 +133,7 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _folderSub?.cancel();
     _materialSub?.cancel();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -218,12 +221,20 @@ class _HomePageState extends State<HomePage> {
                       const _HomeHeader(),
                       const SizedBox(height: 24),
                       // REFINED SEARCH BAR
-                      const SpecialSearchBar(),
+                      SpecialSearchBar(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value.toLowerCase();
+                          });
+                        },
+                      ),
                       const SizedBox(height: 48),
 
                       // PINNED SECTION
                       _PinnedFoldersSection(
                         stream: _pinnedFoldersStream,
+                        searchQuery: _searchQuery,
                         selectedIds: _selectedFolderIds,
                         onToggleSelection: _toggleFolderSelection,
                         isSelecting: _isSelecting,
@@ -236,6 +247,7 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(height: 8),
                       _FolderList(
                         stream: _foldersStream,
+                        searchQuery: _searchQuery,
                         backgroundColor: theme.colorScheme.surfaceContainer,
                         selectedIds: _selectedFolderIds,
                         onToggleSelection: _toggleFolderSelection,
@@ -297,6 +309,7 @@ class _SectionHeader extends StatelessWidget {
 
 class _FolderList extends StatelessWidget {
   final Stream<List<(StudyFolderItem, int)>> stream;
+  final String searchQuery;
   final Color? backgroundColor;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
@@ -304,6 +317,7 @@ class _FolderList extends StatelessWidget {
 
   const _FolderList({
     required this.stream,
+    required this.searchQuery,
     this.backgroundColor,
     required this.selectedIds,
     required this.onToggleSelection,
@@ -317,14 +331,20 @@ class _FolderList extends StatelessWidget {
     return StreamBuilder<List<(StudyFolderItem, int)>>(
       stream: stream,
       builder: (context, snapshot) {
-        final folderPairs = snapshot.data ?? [];
+        final folderPairs = (snapshot.data ?? []).where((p) {
+          if (searchQuery.isEmpty) return true;
+          return p.$1.name.toLowerCase().contains(searchQuery.toLowerCase());
+        }).toList();
 
         if (folderPairs.isEmpty) {
+          final isSearching = searchQuery.isNotEmpty;
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Center(
               child: Text(
-                "No collections yet. Create one below!",
+                isSearching
+                    ? "No matching collections found."
+                    : "No collections yet. Create one below!",
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                 ),
@@ -441,27 +461,28 @@ class _HeaderActions extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        TapToSlide(
-          page: const SettingsPage(),
-          direction: SlideDirection.up,
-          builder: (pushPage) => Container(
-            decoration: BoxDecoration(
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
+              );
+            },
+            icon: FaIcon(
+              FontAwesomeIcons.gear,
+              size: 15,
               color: Theme.of(
                 context,
-              ).colorScheme.onSurface.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(12),
+              ).colorScheme.onSurface.withValues(alpha: 0.4),
             ),
-            child: IconButton(
-              onPressed: pushPage,
-              icon: FaIcon(
-                FontAwesomeIcons.gear,
-                size: 15,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.4),
-              ),
-              visualDensity: VisualDensity.compact,
-            ),
+            visualDensity: VisualDensity.compact,
           ),
         ),
       ],
@@ -807,12 +828,14 @@ class _BarAction extends StatelessWidget {
 
 class _PinnedFoldersSection extends StatelessWidget {
   final Stream<List<(StudyFolderItem, int)>> stream;
+  final String searchQuery;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
   final bool isSelecting;
 
   const _PinnedFoldersSection({
     required this.stream,
+    required this.searchQuery,
     required this.selectedIds,
     required this.onToggleSelection,
     required this.isSelecting,
@@ -825,7 +848,11 @@ class _PinnedFoldersSection extends StatelessWidget {
     return StreamBuilder<List<(StudyFolderItem, int)>>(
       stream: stream,
       builder: (context, snapshot) {
-        final pinned = snapshot.data ?? [];
+        final pinned = (snapshot.data ?? []).where((p) {
+          if (searchQuery.isEmpty) return true;
+          return p.$1.name.toLowerCase().contains(searchQuery.toLowerCase());
+        }).toList();
+
         if (pinned.isEmpty) return const SizedBox.shrink();
 
         return Column(

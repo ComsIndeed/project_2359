@@ -15,10 +15,24 @@ import 'package:project_2359/features/sources_page/sources_page_bloc/sources_pag
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_state.dart';
 
-class SourcesPage extends StatelessWidget {
+class SourcesPage extends StatefulWidget {
   final SourceService sourceService;
 
   const SourcesPage({super.key, required this.sourceService});
+
+  @override
+  State<SourcesPage> createState() => _SourcesPageState();
+}
+
+class _SourcesPageState extends State<SourcesPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = "";
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +41,14 @@ class SourcesPage extends StatelessWidget {
     return Scaffold(
       body: BlocBuilder<SourcesPageBloc, SourcesPageState>(
         builder: (context, state) {
-          final sources = state is SourcesPageStateLoaded
+          final allSources = state is SourcesPageStateLoaded
               ? state.sources
               : <SourceItem>[];
+
+          final sources = allSources.where((s) {
+            if (_searchQuery.isEmpty) return true;
+            return s.label.toLowerCase().contains(_searchQuery.toLowerCase());
+          }).toList();
 
           return SafeArea(
             child: CustomScrollView(
@@ -59,7 +78,14 @@ class SourcesPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SpecialSearchBar(),
+                      SpecialSearchBar(
+                        controller: _searchController,
+                        onChanged: (val) {
+                          setState(() {
+                            _searchQuery = val;
+                          });
+                        },
+                      ),
                       const SizedBox(height: 24),
                       SectionHeader(
                         title: "Import Sources",
@@ -152,7 +178,7 @@ class SourcesPage extends StatelessWidget {
 
                             return TapToSlide(
                               page: _SourcePageLoader(
-                                sourceService: sourceService,
+                                sourceService: widget.sourceService,
                                 source: source,
                               ),
                               direction: SlideDirection.left,
@@ -181,7 +207,9 @@ class SourcesPage extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  "No sources added yet.",
+                                  _searchQuery.isNotEmpty
+                                      ? "No matching sources found."
+                                      : "No sources added yet.",
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
                                         color: cs.onSurface.withValues(

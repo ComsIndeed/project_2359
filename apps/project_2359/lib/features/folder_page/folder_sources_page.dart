@@ -44,6 +44,9 @@ class FolderSourcesPage extends StatefulWidget {
 }
 
 class _FolderSourcesPageState extends State<FolderSourcesPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = "";
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +57,12 @@ class _FolderSourcesPageState extends State<FolderSourcesPage> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
@@ -61,9 +70,14 @@ class _FolderSourcesPageState extends State<FolderSourcesPage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundAlt,
       body: BlocBuilder<SourcesPageBloc, SourcesPageState>(
         builder: (context, state) {
-          final sources = state is SourcesPageStateLoaded
+          final allSources = state is SourcesPageStateLoaded
               ? state.sources
               : <SourceItem>[];
+
+          final sources = allSources.where((s) {
+            if (_searchQuery.isEmpty) return true;
+            return s.label.toLowerCase().contains(_searchQuery.toLowerCase());
+          }).toList();
 
           return SafeArea(
             child: CustomScrollView(
@@ -120,7 +134,14 @@ class _FolderSourcesPageState extends State<FolderSourcesPage> {
                           ],
                         ),
                       ),
-                      const SpecialSearchBar(),
+                      SpecialSearchBar(
+                        controller: _searchController,
+                        onChanged: (val) {
+                          setState(() {
+                            _searchQuery = val;
+                          });
+                        },
+                      ),
                       const SizedBox(height: 24),
                       SectionHeader(
                         title: "Import to Folder",
@@ -209,7 +230,9 @@ class _FolderSourcesPageState extends State<FolderSourcesPage> {
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  "No sources in this collection.",
+                                  _searchQuery.isNotEmpty
+                                      ? "No matching sources in folder."
+                                      : "No sources in this collection.",
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
                                         color: cs.onSurface.withValues(
