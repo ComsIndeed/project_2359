@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/core/widgets/special_background_generator.dart';
 import 'dart:async';
@@ -724,17 +725,19 @@ class _FolderFabContent extends StatefulWidget {
 class _FolderFabContentState extends State<_FolderFabContent> {
   int _currentStep = 1; // 1: Source, 2: Config, 3: Generation
   bool _showManualBranch = false;
+  bool _showImportGrid = false;
 
   // Generation State
   bool _isExtracting = false;
   bool _isGenerating = false;
   final List<StreamedStudyCard> _streamedCards = [];
   String? _generationError;
-  GenerateMaterialMetadata? _metadata;
 
   StreamSubscription? _generationSub;
   JsonStreamParser? _parser;
   StreamController<String>? _llmStreamController;
+  int _presentingIndex = 0;
+  bool _isFinishingCard = false;
 
   // Tracking for animation direction
   int _prevStep = 1;
@@ -820,8 +823,9 @@ class _FolderFabContentState extends State<_FolderFabContent> {
       _isExtracting = true;
       _isGenerating = true;
       _streamedCards.clear();
+      _presentingIndex = 0;
+      _isFinishingCard = false;
       _generationError = null;
-      _metadata = null;
       _currentStep = 3; // Move to generation step
     });
 
@@ -912,6 +916,20 @@ class _FolderFabContentState extends State<_FolderFabContent> {
             .then(
               (val) => setState(() => card.correctAnswerIndex = val.toInt()),
             );
+
+        // When the card is fully generated, wait a bit then animate it to the pile
+        map.future.then((_) async {
+          if (!mounted) return;
+          await Future.delayed(const Duration(milliseconds: 1500));
+          if (!mounted) return;
+          setState(() => _isFinishingCard = true);
+          await Future.delayed(const Duration(milliseconds: 600));
+          if (!mounted) return;
+          setState(() {
+            _isFinishingCard = false;
+            _presentingIndex++;
+          });
+        });
       });
 
       // 4. Stream from AI
@@ -926,8 +944,8 @@ class _FolderFabContentState extends State<_FolderFabContent> {
           switch (event) {
             case GenerateMaterialChunk(:final text):
               _llmStreamController?.add(text);
-            case GenerateMaterialMeta(:final metadata):
-              setState(() => _metadata = metadata);
+            case GenerateMaterialMeta():
+              break;
           }
         },
         onError: (e) {
@@ -1030,6 +1048,24 @@ class _FolderFabContentState extends State<_FolderFabContent> {
     }
   }
 
+  IconData _getSourceIcon(String type) {
+    switch (type.toLowerCase()) {
+      case 'document':
+      case 'pdf':
+        return FontAwesomeIcons.filePdf;
+      case 'text':
+        return FontAwesomeIcons.fileLines;
+      case 'video':
+        return FontAwesomeIcons.fileVideo;
+      case 'audio':
+        return FontAwesomeIcons.fileAudio;
+      case 'image':
+        return FontAwesomeIcons.fileImage;
+      default:
+        return FontAwesomeIcons.fileLines;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Determine the active widget and its key for AnimatedSwitcher
@@ -1077,7 +1113,7 @@ class _FolderFabContentState extends State<_FolderFabContent> {
         FabMode.sources: 1,
         FabMode.settings: 2,
       };
-      isForward = modeOrder[_currentMode]! > modeOrder[_prevMode]!;
+      isForward = modeOrder[_currentMode]! > (modeOrder[_prevMode] ?? 0);
     } else {
       isForward =
           (_showManualBranch && !_prevManual) ||
@@ -1128,55 +1164,14 @@ class _FolderFabContentState extends State<_FolderFabContent> {
         final sources = snapshot.data ?? [];
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              GestureDetector(
-                onTap: () => _updateStep(_currentStep, manual: true),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: cs.primary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: cs.primary.withValues(alpha: 0.1),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      FaIcon(
-                        FontAwesomeIcons.lightbulb,
-                        size: 14,
-                        color: cs.primary,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'You can manually create your own materials too',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: cs.primary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      FaIcon(
-                        FontAwesomeIcons.chevronRight,
-                        size: 10,
-                        color: cs.primary.withValues(alpha: 0.5),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const _SectionLabel(title: "Select Sources"),
-              const SizedBox(height: 8),
-
               if (sources.isEmpty)
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    padding: const EdgeInsets.symmetric(vertical: 48),
                     child: Text(
                       "No sources in this folder yet.\nImport some below!",
                       textAlign: TextAlign.center,
@@ -1187,63 +1182,94 @@ class _FolderFabContentState extends State<_FolderFabContent> {
                   ),
                 )
               else
-                ProjectListGroup(
-                  backgroundColor: cs.onSurface.withValues(alpha: 0.04),
+                Column(
                   children: [
                     for (var i = 0; i < sources.length; i++)
-                      ProjectListTile(
-                        title: Text(
-                          sources[i].label,
-                          style: TextStyle(
-                            color: _selectedSources.contains(sources[i].id)
-                                ? cs.onSurface
-                                : cs.onSurface.withValues(alpha: 0.4),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: ProjectCardTile(
+                          minHeight: 100,
+                          title: Text(sources[i].label),
+                          subtitle: Row(
+                            children: [
+                              FaIcon(
+                                _getSourceIcon(sources[i].type),
+                                size: 10,
+                                color: cs.onSurface.withValues(alpha: 0.3),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "${sources[i].type.toUpperCase()} | ${(sources[i].extractedContent?.length ?? 0)} characters",
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: cs.onSurface.withValues(alpha: 0.4),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        leading: FaIcon(
-                          FontAwesomeIcons.filePdf,
-                          size: 18,
-                          color: _selectedSources.contains(sources[i].id)
-                              ? cs.primary
-                              : cs.onSurface.withValues(alpha: 0.25),
-                        ),
-                        showDivider: i < sources.length - 1,
-                        backgroundColor:
-                            _selectedSources.contains(sources[i].id)
-                            ? cs.primary.withValues(alpha: 0.08)
-                            : Colors.transparent,
-                        onTap: () {
-                          setState(() {
-                            if (_selectedSources.contains(sources[i].id)) {
-                              _selectedSources.remove(sources[i].id);
-                            } else {
-                              _selectedSources.add(sources[i].id);
-                            }
-                          });
-                        },
-                        trailing: FaIcon(
-                          _selectedSources.contains(sources[i].id)
-                              ? FontAwesomeIcons.circleCheck
-                              : FontAwesomeIcons.circle,
-                          size: 16,
-                          color: _selectedSources.contains(sources[i].id)
-                              ? cs.primary
-                              : cs.onSurface.withValues(alpha: 0.1),
+                          leading: _SourcePagePreview(),
+                          isSelected: _selectedSources.contains(sources[i].id),
+                          onTap: () {
+                            setState(() {
+                              if (_selectedSources.contains(sources[i].id)) {
+                                _selectedSources.remove(sources[i].id);
+                              } else {
+                                _selectedSources.add(sources[i].id);
+                              }
+                            });
+                          },
+                          trailing: _selectedSources.contains(sources[i].id)
+                              ? const FaIcon(
+                                  FontAwesomeIcons.circleCheck,
+                                  size: 20,
+                                  color: Colors.blue,
+                                )
+                              : null,
                         ),
                       ),
                   ],
                 ),
 
-              const SizedBox(height: 24),
-              _buildImportGrid(context),
+              // Give bit of space for sources
+              const SizedBox(height: 8),
+
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                child: _showImportGrid
+                    ? Column(
+                        children: [
+                          const SizedBox(height: 24),
+                          _buildImportGrid(context),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
+              ),
 
               const SizedBox(height: 16),
-              _WizardButton(
-                label: "Continue to Configuration",
-                onPressed: _selectedSources.isEmpty
-                    ? null
-                    : () => _updateStep(2),
-                icon: FontAwesomeIcons.chevronDown,
+              Row(
+                children: [
+                  Expanded(
+                    child: _WizardButton(
+                      label: "Continue",
+                      onPressed: _selectedSources.isEmpty
+                          ? null
+                          : () => _updateStep(2),
+                      icon: FontAwesomeIcons.chevronDown,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  _WizardSquareButton(
+                    icon: FontAwesomeIcons.penToSquare,
+                    onPressed: () => _updateStep(_currentStep, manual: true),
+                  ),
+                  const SizedBox(width: 8),
+                  _ImportToggleButton(
+                    isActive: _showImportGrid,
+                    onTap: () =>
+                        setState(() => _showImportGrid = !_showImportGrid),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1375,124 +1401,113 @@ class _FolderFabContentState extends State<_FolderFabContent> {
       );
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              if (_isGenerating || _isExtracting)
-                const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              else
-                const FaIcon(
-                  FontAwesomeIcons.circleCheck,
-                  color: Colors.green,
-                  size: 20,
+    final currentCard = _presentingIndex < _streamedCards.length
+        ? _streamedCards[_presentingIndex]
+        : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Pack Placeholder at the top
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: ProjectListTile(
+            title: Text(
+              _isGenerating || _isExtracting
+                  ? "Generating Materials..."
+                  : "Materials Ready",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text("${_streamedCards.length} items total"),
+            leading: Stack(
+              alignment: Alignment.center,
+              children: [
+                FaIcon(
+                  FontAwesomeIcons.layerGroup,
+                  size: 18,
+                  color: cs.primary,
                 ),
-              const SizedBox(width: 12),
-              Text(
-                _isGenerating ? "AI is generating..." : "Generation Complete",
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          ProjectListGroup(
-            backgroundColor: cs.onSurface.withValues(alpha: 0.02),
-            children: [
-              _GenerationProgressTile(
-                label: "Parsing PDF Content",
-                status: _isExtracting ? "In Progress" : "Complete",
-                progress: _isExtracting ? 0.5 : 1.0,
-                isDone: !_isExtracting,
-              ),
-              _GenerationProgressTile(
-                label: "Material Generation",
-                status: _isGenerating ? "Synthesizing" : "Complete",
-                progress: _isGenerating ? 0.8 : 1.0,
-                isDone: !_isGenerating,
-              ),
-            ],
-          ),
-
-          if (_streamedCards.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            Text(
-              "Preview (${_streamedCards.length} items)",
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: cs.primary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 200),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: _streamedCards.length,
-                itemBuilder: (context, index) {
-                  final card = _streamedCards[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: cs.onSurface.withValues(alpha: 0.04),
-                      borderRadius: BorderRadius.circular(8),
+                if (_isGenerating || _isExtracting)
+                  const SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(Colors.blue),
                     ),
-                    child: Text(
-                      card.frontContent.isNotEmpty
-                          ? card.frontContent
-                          : (card.question.isNotEmpty
-                                ? card.question
-                                : "Generating..."),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  );
-                },
+                  ),
+              ],
+            ),
+            backgroundColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+            isSingle: true,
+            trailing: !_isGenerating && !_isExtracting
+                ? const FaIcon(
+                    FontAwesomeIcons.circleCheck,
+                    color: Colors.green,
+                    size: 16,
+                  )
+                : null,
+          ),
+        ),
+
+        const SizedBox(height: 24),
+
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Center(
+              child: _GenerationMockupCard(
+                key: ValueKey('mockup_$_presentingIndex'),
+                card: currentCard,
+                isFinishing: _isFinishingCard,
+                index: _presentingIndex,
               ),
             ),
-          ],
+          ),
+        ),
 
-          if (!_isGenerating && _metadata != null) ...[
-            const SizedBox(height: 16),
-            Text(
-              "Generation completed with ${_metadata?.totalTokens ?? 0} tokens",
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: 0.5),
-                fontStyle: FontStyle.italic,
-              ),
-              textAlign: TextAlign.center,
+        _buildStep3Buttons(context),
+      ],
+    );
+  }
+
+  Widget _buildImportGrid(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 2.2,
+          children: [
+            CardButton(
+              icon: FontAwesomeIcons.fileLines,
+              label: "Files",
+              subLabel: "PDF, DOCX, PPTX",
+              layoutDirection: CardLayoutDirection.horizontal,
+              isCompact: true,
+              accentColor: cs.primary,
+              onTap: () => _importDocument(context),
             ),
-          ],
-
-          const SizedBox(height: 32),
-          if (!_isGenerating && !_isExtracting && _streamedCards.isNotEmpty)
-            _WizardButton(
-              label: "Save to Folder",
-              onPressed: _saveMaterial,
-              icon: FontAwesomeIcons.floppyDisk,
-            )
-          else
-            _WizardButton(
-              label: "Cancel",
-              onPressed: () {
-                _generationSub?.cancel();
-                _updateStep(2);
+            CardButton(
+              icon: FontAwesomeIcons.paragraph,
+              label: "Text",
+              subLabel: "Paste content",
+              layoutDirection: CardLayoutDirection.horizontal,
+              isCompact: true,
+              accentColor: const Color(0xFF5F27CD),
+              onTap: () {
+                // TODO: Show manual text import dialog/view
               },
-              isSecondary: true,
             ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -1576,70 +1591,30 @@ class _FolderFabContentState extends State<_FolderFabContent> {
     );
   }
 
-  Widget _buildImportGrid(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionLabel(title: "Import New Sources"),
-        const SizedBox(height: 8),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          childAspectRatio: 2.3,
-          children: [
-            CardButton(
-              icon: FontAwesomeIcons.fileLines,
-              label: "Documents",
-              subLabel: "PDF only for now",
-              layoutDirection: CardLayoutDirection.horizontal,
-              isCompact: true,
-              accentColor: cs.primary,
-              onTap: () => _importDocument(context),
-            ),
-            CardButton(
-              icon: FontAwesomeIcons.image,
-              label: "Images",
-              subLabel: "TODO: Support",
-              layoutDirection: CardLayoutDirection.horizontal,
-              isCompact: true,
-              accentColor: const Color(0xFF00D2D3),
-              onTap: null,
-            ),
-            CardButton(
-              icon: FontAwesomeIcons.video,
-              label: "Videos",
-              subLabel: "TODO: Support",
-              layoutDirection: CardLayoutDirection.horizontal,
-              isCompact: true,
-              accentColor: const Color(0xFFFF9F43),
-              onTap: null,
-            ),
-            CardButton(
-              icon: FontAwesomeIcons.music,
-              label: "Audios",
-              subLabel: "TODO: Support",
-              layoutDirection: CardLayoutDirection.horizontal,
-              isCompact: true,
-              accentColor: const Color(0xFF54A0FF),
-              onTap: null,
-            ),
-            CardButton(
-              icon: FontAwesomeIcons.paragraph,
-              label: "Text",
-              subLabel: "TODO: Support",
-              layoutDirection: CardLayoutDirection.horizontal,
-              isCompact: true,
-              accentColor: const Color(0xFF5F27CD),
-              onTap: null,
-            ),
-          ],
+  Widget _buildStep3Buttons(BuildContext context) {
+    if (!_isGenerating &&
+        !_isExtracting &&
+        _presentingIndex >= _streamedCards.length) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: _WizardButton(
+          label: "Save to Folder",
+          onPressed: _saveMaterial,
+          icon: FontAwesomeIcons.floppyDisk,
         ),
-      ],
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: _WizardButton(
+        label: "Cancel",
+        onPressed: () {
+          _generationSub?.cancel();
+          _updateStep(2);
+        },
+        isSecondary: true,
+      ),
     );
   }
 
@@ -1804,6 +1779,132 @@ class _FolderFabContentState extends State<_FolderFabContent> {
   }
 }
 
+class _SourcePagePreview extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: 44,
+      height: 58,
+      decoration: BoxDecoration(
+        color: cs.onSurface.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: cs.onSurface.withValues(alpha: 0.08),
+          width: 1,
+        ),
+      ),
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 4,
+            width: 14,
+            decoration: BoxDecoration(
+              color: cs.onSurface.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 6),
+          for (int i = 0; i < 3; i++) ...[
+            Container(
+              height: 2,
+              width: double.infinity,
+              margin: EdgeInsets.only(bottom: 3, right: (i % 2 == 0) ? 8 : 4),
+              decoration: BoxDecoration(
+                color: cs.onSurface.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(1),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ImportToggleButton extends StatelessWidget {
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _ImportToggleButton({required this.isActive, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Material(
+      color: isActive
+          ? cs.primary.withValues(alpha: 0.15)
+          : cs.onSurface.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: SizedBox(
+          width: 56,
+          height: 56,
+          child: Center(
+            child: AnimatedRotation(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              turns: isActive ? 0.125 : 0, // 45 degrees
+              child: FaIcon(
+                FontAwesomeIcons.plus,
+                size: 18,
+                color: isActive
+                    ? cs.primary
+                    : cs.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WizardSquareButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final bool isSecondary;
+
+  const _WizardSquareButton({
+    required this.icon,
+    required this.onPressed,
+    this.isSecondary = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Material(
+      color: isSecondary
+          ? cs.onSurface.withValues(alpha: 0.05)
+          : cs.primary.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(16),
+        child: SizedBox(
+          width: 56,
+          height: 56,
+          child: Center(
+            child: FaIcon(
+              icon,
+              size: 18,
+              color: cs.onSurface.withValues(alpha: 0.5),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _WizardButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -1821,70 +1922,43 @@ class _WizardButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
 
     final baseColor = isSecondary
         ? cs.onSurface.withValues(alpha: 0.05)
-        : (isDark
-              ? Color.lerp(cs.primary, Colors.black, 0.4)!
-              : Color.lerp(cs.primary, Colors.white, 0.15)!);
+        : cs.primary;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isSecondary ? baseColor : null,
-        gradient: isSecondary
-            ? null
-            : LinearGradient(
-                colors: [baseColor, baseColor.withValues(alpha: 0.8)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+    return Material(
+      color: baseColor,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onPressed,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: !isSecondary && onPressed != null
-            ? [
-                BoxShadow(
-                  color: baseColor.withValues(alpha: 0.25),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ]
-            : null,
-      ),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          foregroundColor: isSecondary ? cs.onSurface : cs.onPrimary,
-          shadowColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          elevation: 0,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isSecondary ? cs.onSurface : cs.onPrimary,
-                letterSpacing: 0.5,
-                fontSize: 15,
-              ),
-            ),
-            if (icon != null) ...[
-              const SizedBox(width: 10),
-              FaIcon(
-                icon,
-                size: 14,
-                color: (isSecondary ? cs.onSurface : cs.onPrimary).withValues(
-                  alpha: 0.7,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: isSecondary ? cs.onSurface : cs.onPrimary,
+                  letterSpacing: 0.5,
+                  fontSize: 15,
                 ),
               ),
+              if (icon != null) ...[
+                const SizedBox(width: 10),
+                FaIcon(
+                  icon,
+                  size: 14,
+                  color: (isSecondary ? cs.onSurface : cs.onPrimary).withValues(
+                    alpha: 0.7,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -2027,67 +2101,7 @@ class _ConfigurableTypeTileState extends State<_ConfigurableTypeTile> {
   }
 }
 
-class _GenerationProgressTile extends StatelessWidget {
-  final String label;
-  final String status;
-  final double progress;
-  final bool isDone;
-
-  const _GenerationProgressTile({
-    required this.label,
-    required this.status,
-    required this.progress,
-    required this.isDone,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDone
-                      ? cs.onSurface
-                      : cs.onSurface.withValues(alpha: 0.7),
-                ),
-              ),
-              Text(
-                status,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: isDone ? Colors.green : cs.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: cs.onSurface.withValues(alpha: 0.05),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                isDone ? Colors.green : cs.primary,
-              ),
-              minHeight: 6,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// DELETED _GenerationProgressTile (replaced by _GenerationMockupCard)
 
 class _StrategyButton extends StatelessWidget {
   final String label;
@@ -2139,6 +2153,470 @@ class _StrategyButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GENERATION MOCKUP CARD & ANIMATIONS
+// ---------------------------------------------------------------------------
+
+class _GenerationMockupCard extends StatefulWidget {
+  final StreamedStudyCard? card;
+  final bool isFinishing;
+  final int index;
+
+  const _GenerationMockupCard({
+    super.key,
+    required this.card,
+    required this.isFinishing,
+    required this.index,
+  });
+
+  @override
+  State<_GenerationMockupCard> createState() => _GenerationMockupCardState();
+}
+
+class _GenerationMockupCardState extends State<_GenerationMockupCard>
+    with TickerProviderStateMixin {
+  late AnimationController _flipController;
+  late Animation<double> _flipAnim;
+  bool _isFlipped = false;
+
+  late AnimationController _entranceController;
+  late Animation<double> _entranceFade;
+  late Animation<Offset> _entranceSlide;
+
+  @override
+  void initState() {
+    super.initState();
+    _flipController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _flipAnim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _flipController, curve: Curves.easeInOutBack),
+    );
+
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _entranceFade = CurvedAnimation(
+      parent: _entranceController,
+      curve: Curves.easeOut,
+    );
+    _entranceSlide =
+        Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _entranceController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
+    _entranceController.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant _GenerationMockupCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.card != null) {
+      // Flip logic for flashcards
+      if (widget.card?.type == 'flashcard' &&
+          widget.card!.backContent.isNotEmpty &&
+          !_isFlipped) {
+        setState(() => _isFlipped = true);
+        _flipController.forward();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _flipController.dispose();
+    _entranceController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.card == null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              "Waiting for AI...",
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final cs = Theme.of(context).colorScheme;
+
+    // Pile animation logic: slide up and shrink
+    return AnimatedAlign(
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInQuint,
+      alignment: widget.isFinishing
+          ? const Alignment(0, -1.5)
+          : Alignment.center,
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInBack,
+        scale: widget.isFinishing ? 0.3 : 1.0,
+        child: FadeTransition(
+          opacity: _entranceFade,
+          child: SlideTransition(
+            position: _entranceSlide,
+            child: SizedBox(
+              width: double.infinity,
+              height: 380,
+              child: AnimatedBuilder(
+                animation: _flipAnim,
+                builder: (context, child) {
+                  final angle = _flipAnim.value * 3.14159;
+                  return Transform(
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(angle),
+                    alignment: Alignment.center,
+                    child: angle < 1.5708
+                        ? _buildFront(cs)
+                        : Transform(
+                            transform: Matrix4.identity()..rotateY(3.14159),
+                            alignment: Alignment.center,
+                            child: _buildBack(cs),
+                          ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFront(ColorScheme cs) {
+    return _MockupCardContainer(
+      accentColor: _getAccentColor(cs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBadge(cs),
+          const SizedBox(height: 24),
+          Text(
+            widget.card?.type == 'flashcard'
+                ? "FRONT"
+                : (widget.card?.type == 'multiple-choice-question'
+                      ? "QUESTION"
+                      : "ITEM"),
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+              color: _getAccentColor(cs).withValues(alpha: 0.5),
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Text(
+                widget.card?.type == 'flashcard'
+                    ? widget.card!.frontContent
+                    : widget.card!.question,
+                style: GoogleFonts.outfit(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  height: 1.3,
+                  color: cs.onSurface,
+                ),
+              ),
+            ),
+          ),
+          if (widget.card?.type == 'multiple-choice-question') ...[
+            const SizedBox(height: 16),
+            ..._buildMcqChoices(cs),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBack(ColorScheme cs) {
+    return _MockupCardContainer(
+      accentColor: _getAccentColor(cs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBadge(cs),
+          const SizedBox(height: 24),
+          Text(
+            "BACK",
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+              color: _getAccentColor(cs).withValues(alpha: 0.5),
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Text(
+                widget.card!.backContent,
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  height: 1.4,
+                  color: cs.onSurface.withValues(alpha: 0.9),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBadge(ColorScheme cs) {
+    final accent = _getAccentColor(cs);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: accent.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FaIcon(_getIcon(), size: 12, color: accent),
+          const SizedBox(width: 8),
+          Text(
+            _getLabel(),
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: accent,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildMcqChoices(ColorScheme cs) {
+    if (widget.card?.choices == null) return [];
+    return widget.card!.choices.asMap().entries.map((entry) {
+      final index = entry.key;
+      final text = entry.value;
+      final isStable = text.isNotEmpty; // For simplicity, if not empty
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: _ShinyMcqOption(
+          text: text,
+          index: index,
+          isStable: isStable,
+          accentColor: _getAccentColor(cs),
+        ),
+      );
+    }).toList();
+  }
+
+  Color _getAccentColor(ColorScheme cs) {
+    switch (widget.card?.type) {
+      case 'flashcard':
+        return const Color(0xFF4ECDC4);
+      case 'multiple-choice-question':
+        return const Color(0xFFFF6B6B);
+      case 'assessment':
+        return const Color(0xFFF1C40F);
+      default:
+        return cs.primary;
+    }
+  }
+
+  IconData _getIcon() {
+    switch (widget.card?.type) {
+      case 'flashcard':
+        return FontAwesomeIcons.clone;
+      case 'multiple-choice-question':
+        return FontAwesomeIcons.listCheck;
+      default:
+        return FontAwesomeIcons.wandMagicSparkles;
+    }
+  }
+
+  String _getLabel() {
+    switch (widget.card?.type) {
+      case 'flashcard':
+        return 'FLASHCARD';
+      case 'multiple-choice-question':
+        return 'PRACTICE QUIZ';
+      default:
+        return 'GENERATING';
+    }
+  }
+}
+
+class _ShinyMcqOption extends StatefulWidget {
+  final String text;
+  final int index;
+  final bool isStable;
+  final Color accentColor;
+
+  const _ShinyMcqOption({
+    required this.text,
+    required this.index,
+    required this.isStable,
+    required this.accentColor,
+  });
+
+  @override
+  State<_ShinyMcqOption> createState() => _ShinyMcqOptionState();
+}
+
+class _ShinyMcqOptionState extends State<_ShinyMcqOption>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shinyController;
+
+  @override
+  void initState() {
+    super.initState();
+    _shinyController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _ShinyMcqOption oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isStable && !oldWidget.isStable) {
+      _shinyController.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _shinyController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final char = String.fromCharCode(65 + widget.index);
+
+    return AnimatedBuilder(
+      animation: _shinyController,
+      builder: (context, child) {
+        final double shiny = _shinyController.value;
+        final Color color = Color.lerp(
+          cs.surfaceContainerHighest.withValues(alpha: 0.5),
+          Colors.green.withValues(alpha: 0.2),
+          shiny,
+        )!;
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Color.lerp(
+                cs.onSurface.withValues(alpha: 0.05),
+                Colors.green.withValues(alpha: 0.5),
+                shiny,
+              )!,
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: Color.lerp(
+                    cs.onSurface.withValues(alpha: 0.1),
+                    Colors.green,
+                    shiny,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    char,
+                    style: TextStyle(
+                      color: shiny > 0.5 ? Colors.white : cs.onSurface,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  widget.text.isEmpty ? "..." : widget.text,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: cs.onSurface.withValues(
+                      alpha: widget.text.isEmpty ? 0.3 : 0.9,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _MockupCardContainer extends StatelessWidget {
+  final Widget child;
+  final Color accentColor;
+
+  const _MockupCardContainer({required this.child, required this.accentColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withValues(alpha: 0.15),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(color: accentColor.withValues(alpha: 0.3), width: 2),
+      ),
+      child: child,
     );
   }
 }
@@ -2262,10 +2740,6 @@ class _BarAction extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// SOURCE PAGE LOADER
-// ---------------------------------------------------------------------------
 
 class _SourcePageLoader extends StatefulWidget {
   final String sourceId;
