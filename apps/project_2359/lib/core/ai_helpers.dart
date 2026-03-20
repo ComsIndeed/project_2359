@@ -49,6 +49,19 @@ class StreamedStudyCard {
   // multiple-choice-question
   List<String> choices = [];
   int? correctAnswerIndex;
+
+  DateTime? startTime;
+  DateTime? endTime;
+
+  int get totalCharacters {
+    if (type == 'flashcard') {
+      return frontContent.length + backContent.length;
+    }
+    if (type == 'multiple-choice-question') {
+      return question.length + choices.fold(0, (p, c) => p + c.length);
+    }
+    return question.length + criteria.length;
+  }
 }
 
 /// A single event emitted by [AiHelpers.generateMaterial].

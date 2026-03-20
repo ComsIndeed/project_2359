@@ -226,6 +226,13 @@ class StudyMaterialService {
     )..where((t) => t.materialId.equals(materialId))).get();
   }
 
+  Stream<List<StudyCardItem>> watchCardsByMaterialId(String materialId) {
+    AppLogger.debug('Watching cards for material: $materialId', tag: _tag);
+    return (_db.select(
+      _db.studyCardItems,
+    )..where((t) => t.materialId.equals(materialId))).watch();
+  }
+
   Future<void> insertCard(StudyCardItemsCompanion card) async {
     AppLogger.info('Inserting new card', tag: _tag);
     await _db.into(_db.studyCardItems).insert(card);

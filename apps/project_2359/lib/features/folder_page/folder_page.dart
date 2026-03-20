@@ -27,6 +27,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
+import 'package:project_2359/features/study/study_page.dart';
 
 enum FabMode { generation, sources, settings }
 
@@ -670,7 +671,15 @@ class _StudyMaterialsList extends StatelessWidget {
               onTap: isSelecting
                   ? () => onToggleSelection(material.id)
                   : () {
-                      // TODO: Navigate to study / view Card Pack
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StudyPage(
+                            materialId: material.id,
+                            materialName: material.name,
+                          ),
+                        ),
+                      );
                     },
               onLongTap: () => onToggleSelection(material.id),
             ),
@@ -874,7 +883,7 @@ class _FolderFabContentState extends State<_FolderFabContent> {
 
       _parser!.getListProperty('studyMaterials').onElement((element, index) {
         if (!mounted) return;
-        final card = StreamedStudyCard();
+        final card = StreamedStudyCard()..startTime = DateTime.now();
         setState(() => _streamedCards.add(card));
 
         final map = element.asMap;
@@ -919,8 +928,24 @@ class _FolderFabContentState extends State<_FolderFabContent> {
 
         // When the card is fully generated, wait a bit then animate it to the pile
         map.future.then((_) async {
+          card.endTime = DateTime.now();
           if (!mounted) return;
-          await Future.delayed(const Duration(milliseconds: 1500));
+
+          // Calculate CPS (Characters Per Second)
+          final durationMs = card.endTime!
+              .difference(card.startTime!)
+              .inMilliseconds;
+          final totalChars = card.totalCharacters;
+          final cps = durationMs > 0 ? (totalChars / (durationMs / 1000)) : 0;
+
+          // Adjust delay based on how fast the AI is generating.
+          // If it's fast, we speed up the "pile" transition to keep up.
+          // Min delay 400ms, Max 1500ms.
+          final int adjustedDelay = (1500 - (cps * 15))
+              .clamp(400, 1500)
+              .toInt();
+
+          await Future.delayed(Duration(milliseconds: adjustedDelay));
           if (!mounted) return;
           setState(() => _isFinishingCard = true);
           await Future.delayed(const Duration(milliseconds: 600));
@@ -1406,65 +1431,45 @@ class _FolderFabContentState extends State<_FolderFabContent> {
         : null;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        SizedBox(height: 16),
         // Pack Placeholder at the top
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: ProjectListTile(
-            title: Text(
-              _isGenerating || _isExtracting
-                  ? "Generating Materials..."
-                  : "Materials Ready",
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text("${_streamedCards.length} items total"),
-            leading: Stack(
-              alignment: Alignment.center,
-              children: [
-                FaIcon(
-                  FontAwesomeIcons.layerGroup,
-                  size: 18,
-                  color: cs.primary,
-                ),
-                if (_isGenerating || _isExtracting)
-                  const SizedBox(
-                    width: 28,
-                    height: 28,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(Colors.blue),
-                    ),
-                  ),
-              ],
-            ),
-            backgroundColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
-            isSingle: true,
-            trailing: !_isGenerating && !_isExtracting
-                ? const FaIcon(
-                    FontAwesomeIcons.circleCheck,
-                    color: Colors.green,
-                    size: 16,
-                  )
-                : null,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _GenerationPackOverview(
+            selectedTypes: _selectedTypes.toList(),
+            streamedCards: _streamedCards,
+            isGenerating: _isGenerating,
+            isExtracting: _isExtracting,
+            isPresenting: _presentingIndex < _streamedCards.length,
+            selectedSources: _selectedSources.toList(),
           ),
         ),
 
         const SizedBox(height: 24),
 
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Center(
-              child: _GenerationMockupCard(
-                key: ValueKey('mockup_$_presentingIndex'),
-                card: currentCard,
-                isFinishing: _isFinishingCard,
-                index: _presentingIndex,
+        if (_presentingIndex < _streamedCards.length)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 300, maxHeight: 450),
+              child: Center(
+                child: SizedBox(
+                  width: 340,
+                  child: _GenerationMockupCard(
+                    key: ValueKey('mockup_$_presentingIndex'),
+                    card: currentCard,
+                    isFinishing: _isFinishingCard,
+                    index: _presentingIndex,
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
+          )
+        else
+          const SizedBox(height: 0),
 
         _buildStep3Buttons(context),
       ],
@@ -1869,22 +1874,15 @@ class _ImportToggleButton extends StatelessWidget {
 class _WizardSquareButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
-  final bool isSecondary;
 
-  const _WizardSquareButton({
-    required this.icon,
-    required this.onPressed,
-    this.isSecondary = true,
-  });
+  const _WizardSquareButton({required this.icon, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
     return Material(
-      color: isSecondary
-          ? cs.onSurface.withValues(alpha: 0.05)
-          : cs.primary.withValues(alpha: 0.1),
+      color: cs.onSurface.withValues(alpha: 0.05),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onPressed,
@@ -2158,6 +2156,230 @@ class _StrategyButton extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
+// GENERATION OVERVIEW WIDGET
+// ---------------------------------------------------------------------------
+
+class _GenerationPackOverview extends StatelessWidget {
+  final List<String> selectedTypes;
+  final List<StreamedStudyCard> streamedCards;
+  final bool isGenerating;
+  final bool isExtracting;
+  final bool isPresenting;
+  final List<String> selectedSources;
+
+  const _GenerationPackOverview({
+    required this.selectedTypes,
+    required this.streamedCards,
+    required this.isGenerating,
+    required this.isExtracting,
+    required this.isPresenting,
+    required this.selectedSources,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDone = !isGenerating && !isExtracting && !isPresenting;
+
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOutQuart,
+      child: Column(
+        children: [
+          ProjectListTile(
+            title: Text(
+              selectedTypes.length > 1
+                  ? "${selectedTypes.length} Material Types"
+                  : selectedTypes.first.toUpperCase(),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              isDone
+                  ? "Generated ${streamedCards.length} items"
+                  : "Generating study materials...",
+              style: TextStyle(
+                color: isDone
+                    ? Colors.green
+                    : cs.onSurface.withValues(alpha: 0.5),
+                fontWeight: isDone ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+            leading: Stack(
+              alignment: Alignment.center,
+              children: [
+                FaIcon(
+                  FontAwesomeIcons.layerGroup,
+                  size: 18,
+                  color: cs.primary,
+                ),
+                if (!isDone)
+                  const SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(Colors.blue),
+                    ),
+                  ),
+              ],
+            ),
+            backgroundColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+            isSingle: true,
+            trailing: isDone
+                ? const FaIcon(
+                    FontAwesomeIcons.circleCheck,
+                    color: Colors.green,
+                    size: 16,
+                  )
+                : null,
+          ),
+          if (isDone) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: cs.onSurface.withValues(alpha: 0.04),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: cs.onSurface.withValues(alpha: 0.05)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildStatRow(
+                    context,
+                    "Flashcards",
+                    streamedCards
+                        .where((c) => c.type == 'flashcard')
+                        .length
+                        .toString(),
+                  ),
+                  _buildStatRow(
+                    context,
+                    "MCQs",
+                    streamedCards
+                        .where((c) => c.type == 'multiple-choice-question')
+                        .length
+                        .toString(),
+                  ),
+                  const Divider(height: 24),
+                  Text(
+                    "CREDITS USED",
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: cs.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildStatRow(
+                    context,
+                    "Input (Cached)",
+                    "1.2k tokens",
+                    isValueBold: false,
+                  ),
+                  _buildStatRow(
+                    context,
+                    "Input",
+                    "4.5k tokens",
+                    isValueBold: false,
+                  ),
+                  _buildStatRow(
+                    context,
+                    "Output",
+                    "850 tokens",
+                    isValueBold: false,
+                  ),
+                  _buildStatRow(
+                    context,
+                    "Total Credits",
+                    "0.05",
+                    isValueBold: true,
+                    suffix: " USD",
+                  ),
+                  const Divider(height: 24),
+                  Text(
+                    "SOURCES USED",
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: cs.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (var i = 0; i < selectedSources.length; i++)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: cs.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            "Source ${i + 1}",
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: cs.primary,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatRow(
+    BuildContext context,
+    String label,
+    String value, {
+    bool isValueBold = true,
+    String? suffix,
+  }) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: theme.textTheme.bodySmall),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: value,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: isValueBold
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                if (suffix != null)
+                  TextSpan(
+                    text: suffix,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // GENERATION MOCKUP CARD & ANIMATIONS
 // ---------------------------------------------------------------------------
 
@@ -2277,9 +2499,8 @@ class _GenerationMockupCardState extends State<_GenerationMockupCard>
           opacity: _entranceFade,
           child: SlideTransition(
             position: _entranceSlide,
-            child: SizedBox(
-              width: double.infinity,
-              height: 380,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 280),
               child: AnimatedBuilder(
                 animation: _flipAnim,
                 builder: (context, child) {
@@ -2335,7 +2556,12 @@ class _GenerationMockupCardState extends State<_GenerationMockupCard>
                     ? widget.card!.frontContent
                     : widget.card!.question,
                 style: GoogleFonts.outfit(
-                  fontSize: 22,
+                  fontSize: _getFontSize(
+                    widget.card?.type == 'flashcard'
+                        ? widget.card!.frontContent
+                        : widget.card!.question,
+                    isFlashcard: widget.card?.type == 'flashcard',
+                  ),
                   fontWeight: FontWeight.w700,
                   height: 1.3,
                   color: cs.onSurface,
@@ -2433,6 +2659,14 @@ class _GenerationMockupCardState extends State<_GenerationMockupCard>
         ),
       );
     }).toList();
+  }
+
+  double _getFontSize(String text, {bool isFlashcard = false}) {
+    if (!isFlashcard) return 22;
+    if (text.length > 150) return 14;
+    if (text.length > 100) return 16;
+    if (text.length > 50) return 18;
+    return 22;
   }
 
   Color _getAccentColor(ColorScheme cs) {
