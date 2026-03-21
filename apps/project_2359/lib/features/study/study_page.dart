@@ -66,21 +66,24 @@ class _StudyPageState extends State<StudyPage> {
   }
 
   void _showFinishedDialog() {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: theme.colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           "Session Finished!",
           style: GoogleFonts.outfit(
             fontWeight: FontWeight.w900,
-            color: Colors.white,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         content: Text(
           "You've completed all the cards in this pack. Great job!",
-          style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.7)),
+          style: GoogleFonts.inter(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
         ),
         actions: [
           TextButton(
@@ -100,10 +103,11 @@ class _StudyPageState extends State<StudyPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: StreamBuilder<List<StudyCardItem>>(
         stream: _cardsStream,
         builder: (context, snapshot) {
@@ -273,14 +277,14 @@ class _StudyPageState extends State<StudyPage> {
                   "No Cards Found",
                   style: theme.textTheme.displaySmall?.copyWith(
                     fontWeight: FontWeight.w900,
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   "Add some cards to this pack to start studying.",
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
               ],
@@ -540,7 +544,7 @@ class _CardContent extends StatelessWidget {
           label: text,
           icon: isBack
               ? FontAwesomeIcons.lightbulb
-              : FontAwesomeIcons.solidQuestionCircle,
+              : FontAwesomeIcons.solidCircleQuestion,
           borderRadius: 36,
           child: Padding(
             padding: const EdgeInsets.all(32.0),
@@ -577,7 +581,7 @@ class _CardContent extends StatelessWidget {
                     text,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.displaySmall?.copyWith(
-                      color: Colors.white,
+                      color: theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w800,
                       fontSize: text.length > 100 ? 18 : 24,
                       letterSpacing: -0.5,
@@ -618,7 +622,7 @@ class _CardContent extends StatelessWidget {
           question,
           textAlign: TextAlign.center,
           style: theme.textTheme.titleLarge?.copyWith(
-            color: Colors.white,
+            color: theme.colorScheme.onSurface,
             fontWeight: FontWeight.w900,
             fontSize: 22,
           ),
@@ -628,12 +632,13 @@ class _CardContent extends StatelessWidget {
           final isSelected = selectedChoice == option;
           final isCorrect = option == card.answer;
 
-          Color bgColor = Colors.white.withValues(alpha: 0.08);
+          Color bgColor = theme.colorScheme.onSurface.withValues(alpha: 0.08);
           if (selectedChoice != null) {
-            if (isCorrect)
+            if (isCorrect) {
               bgColor = Colors.green.withValues(alpha: 0.25);
-            else if (isSelected)
+            } else if (isSelected) {
               bgColor = Colors.red.withValues(alpha: 0.25);
+            }
           }
 
           return Padding(
@@ -832,8 +837,8 @@ class _StudyHeaderDelegate extends SliverPersistentHeaderDelegate {
     final t = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
 
     final bgColor = Color.lerp(
-      Colors.black.withValues(alpha: 0.0),
-      Colors.black,
+      theme.scaffoldBackgroundColor.withValues(alpha: 0.0),
+      theme.scaffoldBackgroundColor,
       (t * 1.5).clamp(0.0, 1.0),
     )!;
 
@@ -859,7 +864,9 @@ class _StudyHeaderDelegate extends SliverPersistentHeaderDelegate {
                 label: materialName,
                 icon: FontAwesomeIcons.graduationCap,
                 showBorder: false,
+                showShadow: false,
                 borderRadius: 0,
+                backgroundColor: theme.scaffoldBackgroundColor,
                 child: const SizedBox.expand(),
               ),
             ),
