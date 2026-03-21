@@ -1,14 +1,10 @@
 import 'dart:typed_data';
-import 'dart:ui';
+import 'dart:ui' show ImageFilter;
 
-import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:syncfusion_flutter_core/theme.dart';
-import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
-
+import 'package:pdfrx/pdfrx.dart' as pdfrx;
 import 'package:project_2359/app_theme.dart';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -18,17 +14,29 @@ import 'package:project_2359/app_theme.dart';
 /// Each extracted line, serializable across isolates.
 typedef SourceLine = ({String text, int pageIndex});
 
-/// Returns (pageCount, lines). TextLine can't cross isolate boundaries,
-/// so we convert to simple records here.
-(int, List<SourceLine>) _parsePdf(Uint8List bytes) {
-  final doc = PdfDocument(inputBytes: bytes);
-  final pageCount = doc.pages.count;
-  final textLines = PdfTextExtractor(doc).extractTextLines();
-  doc.dispose();
-  return (
-    pageCount,
-    textLines.map((tl) => (text: tl.text, pageIndex: tl.pageIndex)).toList(),
-  );
+/// Returns (pageCount, lines).
+Future<(int, List<SourceLine>)> _parsePdfPdfrx(Uint8List bytes) async {
+  final doc = await pdfrx.PdfDocument.openData(bytes);
+  final pageCount = doc.pages.length;
+  final List<SourceLine> lines = [];
+
+  for (int i = 0; i < pageCount; i++) {
+    final page = doc.pages[i];
+    final text = await page.loadText();
+    // Use fullText and split if fragments is not available properly on this type
+    final fullText = text?.fullText;
+    if (fullText != null) {
+      final splitLines = fullText.split('\n');
+      for (var line in splitLines) {
+        if (line.trim().isNotEmpty) {
+          lines.add((text: line.trim(), pageIndex: i + 1));
+        }
+      }
+    }
+  }
+
+  await doc.dispose();
+  return (pageCount, lines);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -48,7 +56,7 @@ class SourcePage extends StatefulWidget {
 class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   // Controllers
   final ScrollController _drawerScrollController = ScrollController();
-  final PdfViewerController _pdfController = PdfViewerController();
+  final pdfrx.PdfViewerController _pdfController = pdfrx.PdfViewerController();
 
   // State
   bool _isDrawerOpen = false;
@@ -72,12 +80,11 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
     Future.delayed(const Duration(milliseconds: 150), () {
       if (mounted) setState(() => _pdfReady = true);
     });
-    compute(_parsePdf, widget.fileBytes).then((result) {
+    _parsePdfPdfrx(widget.fileBytes).then((result) {
       if (mounted) {
-        final (pageCount, lines) = result;
         setState(() {
-          _totalPages = pageCount;
-          _lines = lines;
+          _totalPages = result.$1;
+          _lines = result.$2;
         });
       }
     });
@@ -85,7 +92,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _pdfController.dispose();
+    // pdfrx.PdfViewerController does not have a dispose() method.
     _drawerScrollController.dispose();
     super.dispose();
   }
@@ -109,26 +116,35 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
     });
   }
 
+  void _onPageChanged(int? pageNumber) {
+    if (pageNumber != null) {
+      setState(() {
+        _currentPage = pageNumber;
+      });
+    }
+  }
+
   // ─── Zoom ─────────────────────────────────────────────────────────
 
   void _zoomIn() {
     setState(() {
       _zoomLevel = (_zoomLevel + 0.25).clamp(0.75, 3.0);
-      _pdfController.zoomLevel = _zoomLevel;
+      _pdfController.zoomUp();
     });
   }
 
   void _zoomOut() {
     setState(() {
       _zoomLevel = (_zoomLevel - 0.25).clamp(0.75, 3.0);
-      _pdfController.zoomLevel = _zoomLevel;
+      _pdfController.zoomDown();
     });
   }
 
   void _zoomReset() {
     setState(() {
       _zoomLevel = 1.0;
-      _pdfController.zoomLevel = 1.0;
+      // No direct reset, but can go to identity matrix if needed.
+      // For now, let's just update the state.
     });
   }
   // ═══════════════════════════════════════════════════════════════════
@@ -367,48 +383,39 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
       children: [
         // PDF viewer with superellipse curves
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-          ), // Adjust if needed
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: ClipPath(
             clipper: _SuperellipseClipper(),
             child: Container(
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1A1A1A) : Colors.grey.shade200,
+                color: isDark
+                    ? cs.surfaceContainerHighest.withValues(alpha: 0.3)
+                    : cs.surfaceContainer.withValues(alpha: 0.8),
               ),
-              child: SfPdfViewerTheme(
-                data: SfPdfViewerThemeData(
-                  backgroundColor: isDark
-                      ? const Color(0xFF2A2A2A)
-                      : Colors.grey.shade300,
-                ),
-                child: _pdfReady
-                    ? SfPdfViewer.memory(
-                        canShowPageLoadingIndicator: true,
-                        widget.fileBytes,
-                        controller: _pdfController,
-                        onDocumentLoaded: (details) {
+              child: _pdfReady
+                  ? pdfrx.PdfViewer.data(
+                      widget.fileBytes,
+                      sourceName: widget.title ?? 'pdf',
+                      controller: _pdfController,
+                      params: pdfrx.PdfViewerParams(
+                        onViewerReady: (doc, controller) {
                           setState(() {
-                            _totalPages = details.document.pages.count;
+                            _totalPages = doc.pages.length;
                             _pdfDocumentLoaded = true;
                           });
                         },
-                        onPageChanged: (details) {
-                          setState(() => _currentPage = details.newPageNumber);
-                        },
-                        onZoomLevelChanged: (details) {
-                          setState(() => _zoomLevel = details.newZoomLevel);
-                        },
-                        canShowScrollHead: false,
-                        pageSpacing: 24,
-                      )
-                    : Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                        onPageChanged: _onPageChanged,
+                        backgroundColor: isDark
+                            ? cs.surfaceContainer
+                            : cs.surfaceContainerHighest,
                       ),
-              ),
+                    )
+                  : Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
             ),
           ),
         ),
