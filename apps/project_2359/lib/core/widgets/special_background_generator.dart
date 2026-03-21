@@ -43,11 +43,16 @@ class SpecialBackgroundUtils {
     bool isDisabled = false,
     Brightness brightness = Brightness.dark,
     Color? adaptiveColor,
+    Color? backgroundColor,
   }) {
     final cardStyle = style ?? AppTheme.cardButtonStyle;
     final seedString = seed.resolve(label, icon, subLabel);
     final hash = seedString.hashCode;
     final r = Random(hash);
+
+    if (backgroundColor != null) {
+      return (primary: backgroundColor, secondary: backgroundColor);
+    }
 
     double hue;
     if (adaptiveColor != null) {
@@ -125,6 +130,7 @@ class SpecialBackgroundUtils {
     bool isDisabled = false,
     double borderRadius = 24,
     Brightness brightness = Brightness.dark,
+    Color? backgroundColor,
   }) {
     final colors = gradientColors(
       seed: seed,
@@ -134,16 +140,20 @@ class SpecialBackgroundUtils {
       style: style,
       isDisabled: isDisabled,
       brightness: brightness,
+      backgroundColor: backgroundColor,
     );
 
     final isDark = brightness == Brightness.dark;
 
     return BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [colors.primary, colors.secondary],
-      ),
+      color: backgroundColor,
+      gradient: backgroundColor != null
+          ? null
+          : LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [colors.primary, colors.secondary],
+            ),
       borderRadius: BorderRadius.circular(borderRadius),
       border: Border.all(
         color: (isDark ? Colors.white : Colors.black).withValues(
@@ -214,6 +224,9 @@ class SpecialBackgroundGenerator extends StatefulWidget {
   /// Whether to show the outer border.
   final bool showBorder;
 
+  /// Whether to show the drop shadow.
+  final bool showShadow;
+
   /// Border radius applied to the outer container and clip.
   final double borderRadius;
 
@@ -229,6 +242,14 @@ class SpecialBackgroundGenerator extends StatefulWidget {
   /// The widget rendered on top of the background.
   final Widget child;
 
+  /// An optional background color. If provided, the generator will use this
+  /// color instead of creating a gradient.
+  final Color? backgroundColor;
+
+  /// An optional brightness. If provided, the generator will use this
+  /// to adjust the colors/patterns instead of the theme's brightness.
+  final Brightness? overrideBrightness;
+
   const SpecialBackgroundGenerator({
     super.key,
     required this.seed,
@@ -239,10 +260,13 @@ class SpecialBackgroundGenerator extends StatefulWidget {
     this.isDisabled = false,
     this.isAdaptive = true,
     this.showBorder = true,
+    this.showShadow = true,
     this.borderRadius = 24,
     this.type = SpecialBackgroundType.wavedLines,
     this.applyContentShadow = false,
     required this.child,
+    this.backgroundColor,
+    this.overrideBrightness,
   });
 
   @override
@@ -356,7 +380,8 @@ class _SpecialBackgroundGeneratorState extends State<SpecialBackgroundGenerator>
 
   @override
   Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
+    final brightness =
+        widget.overrideBrightness ?? Theme.of(context).brightness;
     final isDark = brightness == Brightness.dark;
 
     var colors = SpecialBackgroundUtils.gradientColors(
@@ -370,11 +395,13 @@ class _SpecialBackgroundGeneratorState extends State<SpecialBackgroundGenerator>
       adaptiveColor: widget.isAdaptive
           ? Theme.of(context).colorScheme.primary
           : null,
+      backgroundColor: widget.backgroundColor,
     );
 
     // Decisive vibrancy boost - ensuring dark enough for white text protection
     if (widget.type == SpecialBackgroundType.vibrantGradients &&
-        !widget.isDisabled) {
+        !widget.isDisabled &&
+        widget.backgroundColor == null) {
       final hslPrimary = HSLColor.fromColor(colors.primary);
       final hslSecondary = HSLColor.fromColor(colors.secondary);
 
@@ -398,11 +425,14 @@ class _SpecialBackgroundGeneratorState extends State<SpecialBackgroundGenerator>
     );
 
     final decoration = BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [colors.primary, colors.secondary],
-      ),
+      color: widget.backgroundColor,
+      gradient: widget.backgroundColor != null
+          ? null
+          : LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [colors.primary, colors.secondary],
+            ),
       borderRadius: BorderRadius.circular(widget.borderRadius),
       border: widget.showBorder
           ? Border.all(
@@ -413,7 +443,7 @@ class _SpecialBackgroundGeneratorState extends State<SpecialBackgroundGenerator>
             )
           : null,
       boxShadow: [
-        if (!widget.isDisabled)
+        if (!widget.isDisabled && widget.showShadow)
           BoxShadow(
             color: colors.primary.withValues(alpha: isDark ? 0.2 : 0.05),
             blurRadius: 12,
@@ -838,13 +868,16 @@ class AbstractArtPainter extends CustomPainter {
     Paint paint,
     double baseHue,
   ) {
-    // Final draw to smooth - NO TRANSPARENT BLACK
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
-    paint.shader = null;
+    final isDark = brightness == Brightness.dark;
 
     // Very faint strokes
     final strokePaint = Paint()
-      ..color = HSLColor.fromAHSL(0.1, baseHue, 1.0, 0.5).toColor()
+      ..color = HSLColor.fromAHSL(
+        isDark ? 0.1 : 0.08,
+        baseHue,
+        isDark ? 1.0 : 0.6,
+        isDark ? 0.5 : 0.8,
+      ).toColor()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
@@ -867,7 +900,12 @@ class AbstractArtPainter extends CustomPainter {
     // ── LARGE SQUARES (RIGHT) ──
     final int largeCount = 3 + r.nextInt(2);
     const double largeSize = 90;
-    fillPaint.color = HSLColor.fromAHSL(0.12, baseHue, 1.0, 0.5).toColor();
+    fillPaint.color = HSLColor.fromAHSL(
+      isDark ? 0.12 : 0.08,
+      baseHue,
+      isDark ? 1.0 : 0.6,
+      isDark ? 0.5 : 0.9,
+    ).toColor();
 
     for (int i = 0; i < largeCount; i++) {
       final section = i % sections;
@@ -894,7 +932,12 @@ class AbstractArtPainter extends CustomPainter {
     // ── MEDIUM SQUARES (MIDDLE-RIGHT) ──
     final int medCount = 7 + r.nextInt(4);
     const double medSize = 45;
-    fillPaint.color = HSLColor.fromAHSL(0.08, baseHue, 1.0, 0.5).toColor();
+    fillPaint.color = HSLColor.fromAHSL(
+      isDark ? 0.08 : 0.05,
+      baseHue,
+      isDark ? 1.0 : 0.6,
+      isDark ? 0.5 : 0.9,
+    ).toColor();
 
     for (int i = 0; i < medCount; i++) {
       final section = i % (sections * 2);
@@ -921,7 +964,12 @@ class AbstractArtPainter extends CustomPainter {
     // ── SMALL SQUARES (LEFT-ISH BREAKDOWN) ──
     final int smallCount = 15 + r.nextInt(10);
     const double smallSize = 22;
-    fillPaint.color = HSLColor.fromAHSL(0.05, baseHue, 1.0, 0.5).toColor();
+    fillPaint.color = HSLColor.fromAHSL(
+      isDark ? 0.05 : 0.03,
+      baseHue,
+      isDark ? 1.0 : 0.6,
+      isDark ? 0.5 : 0.95,
+    ).toColor();
 
     for (int i = 0; i < smallCount; i++) {
       final targetX = size.width - 270 - (r.nextDouble() * 160);
