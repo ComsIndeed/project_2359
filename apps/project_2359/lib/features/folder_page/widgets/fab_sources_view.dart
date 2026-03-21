@@ -8,7 +8,6 @@ import 'package:project_2359/features/sources_page/source_list_item.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
-import 'package:project_2359/features/sources_page/sources_page.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 
 class FabSourcesView extends StatefulWidget {
