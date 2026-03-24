@@ -12,6 +12,7 @@ dependencies:
   file_picker: ^10.3.10
   textify: ^0.5.2
   http: ^1.6.0
+  pdfrx: ^2.2.24
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:playground/features/image_occlusions/image_occlusion_textify_page.dart';
 import 'package:playground/features/image_occlusions/image_occlusion_ocr_space_page.dart';
+import 'package:playground/features/document_topic_selection/document_topic_selection_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -35,6 +36,22 @@ class HomePage extends StatelessWidget {
               );
             },
             child: const Text("Image Occlusion OCR.space"),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DocumentTopicSelectionPage(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("Document Topic Selection"),
           ),
         ],
       ),
