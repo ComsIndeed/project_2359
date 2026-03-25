@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
+import 'package:responsive_framework/responsive_framework.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
+import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/app_database.dart';
 import 'package:project_2359/features/folder_page/folder_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
 import 'package:project_2359/core/study_material_service.dart';
-import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/utils/logger.dart';
 import 'package:provider/provider.dart';
+import 'package:project_2359/features/study/study_page.dart';
+import 'package:project_2359/features/folder_page/widgets/fab_generation_view.dart';
+import 'package:project_2359/features/folder_page/widgets/fab_sources_view.dart';
+
+enum MainContentType { empty, study, generation, sources, settings }
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,11 +31,16 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final Set<String> _selectedFolderIds = {};
   final Set<String> _selectedMaterialIds = {};
-
   List<StudyFolderItem> _allFolders = [];
   List<StudyMaterialItem> _allMaterials = [];
   StreamSubscription? _folderSub;
   StreamSubscription? _materialSub;
+
+  // New state for responsive desktop layout
+  String? _selectedFolderId;
+  String? _selectedMaterialId;
+  String? _selectedMaterialName;
+  MainContentType _mainContentType = MainContentType.empty;
 
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
@@ -49,6 +62,18 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _selectedFolderIds.clear();
       _selectedMaterialIds.clear();
+    });
+  }
+
+  void _navigateToMain(
+    MainContentType type, {
+    String? materialId,
+    String? materialName,
+  }) {
+    setState(() {
+      _mainContentType = type;
+      _selectedMaterialId = materialId;
+      _selectedMaterialName = materialName;
     });
   }
 
@@ -139,6 +164,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
+      return _buildLandscapeLayout();
+    }
+    return _buildMobileLayout();
+  }
+
+  Widget _buildMobileLayout() {
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -212,7 +244,6 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // MAIN CONTENT
                 SafeArea(
-                  bottom: false,
                   child: ListView(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     physics: const ClampingScrollPhysics(),
@@ -237,6 +268,8 @@ class _HomePageState extends State<HomePage> {
                         searchQuery: _searchQuery,
                         selectedIds: _selectedFolderIds,
                         onToggleSelection: _toggleFolderSelection,
+                        onSelect:
+                            (id) {}, // Not used on mobile due to internal check
                         isSelecting: _isSelecting,
                       ),
 
@@ -251,6 +284,8 @@ class _HomePageState extends State<HomePage> {
                         backgroundColor: theme.colorScheme.surfaceContainer,
                         selectedIds: _selectedFolderIds,
                         onToggleSelection: _toggleFolderSelection,
+                        onSelect:
+                            (id) {}, // Not used on mobile due to internal check
                         isSelecting: _isSelecting,
                       ),
                       const SizedBox(height: 48),
@@ -280,6 +315,377 @@ class _HomePageState extends State<HomePage> {
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildLandscapeLayout() {
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Row(
+        children: [
+          // Sidebar 1: Collections (Narrow)
+          _buildSidebarA(),
+          // Sidebar 2: Folder Contents (Wider)
+          if (_selectedFolderId != null) _buildSidebarB(),
+          // Main Content
+          Expanded(child: _buildMainContent()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSidebarA() {
+    return Container(
+      width: 280,
+      decoration: BoxDecoration(
+        border: Border(
+          right: BorderSide(
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.08),
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          const Padding(padding: EdgeInsets.all(24.0), child: _HomeHeader()),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                _PinnedFoldersSection(
+                  stream: _pinnedFoldersStream,
+                  searchQuery: _searchQuery,
+                  selectedIds: _selectedFolderIds,
+                  onToggleSelection: _toggleFolderSelection,
+                  onSelect: (id) => setState(() {
+                    _selectedFolderId = id;
+                    _mainContentType = MainContentType.empty;
+                    _selectedMaterialId = null;
+                  }),
+                  isSelecting: _isSelecting,
+                ),
+                const SizedBox(height: 24),
+                const _SectionHeader(title: "Collections"),
+                _FolderList(
+                  stream: _foldersStream,
+                  searchQuery: _searchQuery,
+                  selectedIds: _selectedFolderIds,
+                  onToggleSelection: _toggleFolderSelection,
+                  onSelect: (id) => setState(() {
+                    _selectedFolderId = id;
+                    _mainContentType = MainContentType.empty;
+                    _selectedMaterialId = null;
+                  }),
+                  isSelecting: _isSelecting,
+                ),
+                const SizedBox(height: 24),
+                _SidebarAButton(
+                  icon: FontAwesomeIcons.gear,
+                  label: "Settings",
+                  isSelected: _mainContentType == MainContentType.settings,
+                  onTap: () => _navigateToMain(MainContentType.settings),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSidebarB() {
+    final theme = Theme.of(context);
+    if (_selectedFolderId == null) return const SizedBox.shrink();
+
+    final service = context.read<StudyMaterialService>();
+    final materialsStream = service.watchMaterialsByFolderId(
+      _selectedFolderId!,
+    );
+
+    return Container(
+      width: 320,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainer.withValues(alpha: 0.3),
+        border: Border(
+          right: BorderSide(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "Folder Contents",
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ),
+                IconButton.filledTonal(
+                  onPressed: () {
+                    _navigateToMain(MainContentType.generation);
+                  },
+                  icon: const FaIcon(FontAwesomeIcons.plus, size: 14),
+                  style: IconButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                StreamBuilder<List<StudyMaterialItem>>(
+                  stream: materialsStream,
+                  builder: (context, snapshot) {
+                    final materials = snapshot.data ?? [];
+                    if (materials.isEmpty) return const SizedBox.shrink();
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const _SectionHeader(title: "Materials"),
+                        for (var m in materials)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child:
+                                GestureDetector(
+                                      onSecondaryTapDown: (details) =>
+                                          _showContextMenu(
+                                            context,
+                                            details.globalPosition,
+                                            m.id,
+                                          ),
+                                      child: ProjectCardTile(
+                                        title: Text(m.name),
+                                        subtitle: Text(
+                                          m.description ?? "Card Pack",
+                                        ),
+                                        isSelected: _selectedMaterialId == m.id,
+                                        onTap: () {
+                                          _navigateToMain(
+                                            MainContentType.study,
+                                            materialId: m.id,
+                                            materialName: m.name,
+                                          );
+                                        },
+                                      ),
+                                    )
+                                    .animate(
+                                      key: ValueKey(
+                                        "ani_mat_${_selectedFolderId!}_${m.id}",
+                                      ),
+                                    )
+                                    .fadeIn(duration: 250.ms)
+                                    .slideX(
+                                      begin: 0.1,
+                                      end: 0,
+                                      curve: Curves.easeOutCubic,
+                                    ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                StreamBuilder<List<SourceItem>>(
+                  stream: context.read<SourceService>().watchSourcesByFolderId(
+                    _selectedFolderId!,
+                  ),
+                  builder: (context, snapshot) {
+                    final sources = snapshot.data ?? [];
+                    if (sources.isEmpty) return const SizedBox.shrink();
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const _SectionHeader(title: "Sources"),
+                        for (var s in sources)
+                          Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: ProjectCardTile(
+                                  title: Text(s.label),
+                                  subtitle: Text(
+                                    "${s.type.toUpperCase()} | ${s.extractedContent?.length ?? 0} chars",
+                                  ),
+                                  isSelected: false,
+                                  onTap: () {
+                                    _navigateToMain(MainContentType.sources);
+                                  },
+                                ),
+                              )
+                              .animate(
+                                key: ValueKey(
+                                  "ani_src_${_selectedFolderId!}_${s.id}",
+                                ),
+                              )
+                              .fadeIn(duration: 250.ms)
+                              .slideX(
+                                begin: 0.1,
+                                end: 0,
+                                curve: Curves.easeOutCubic,
+                              ),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainContent() {
+    final theme = Theme.of(context);
+
+    switch (_mainContentType) {
+      case MainContentType.study:
+        if (_selectedMaterialId != null) {
+          return StudyPage(
+            key: ValueKey('study_$_selectedMaterialId'),
+            materialId: _selectedMaterialId!,
+            materialName: _selectedMaterialName ?? "Material",
+          );
+        }
+        break;
+      case MainContentType.generation:
+        if (_selectedFolderId != null) {
+          return ClipRRect(
+            child: Scaffold(
+              backgroundColor: theme.scaffoldBackgroundColor,
+              body: FabGenerationView(folderId: _selectedFolderId!),
+            ),
+          );
+        }
+        break;
+      case MainContentType.sources:
+        if (_selectedFolderId != null) {
+          return ClipRRect(
+            child: Scaffold(
+              backgroundColor: theme.scaffoldBackgroundColor,
+              body: FabSourcesView(folderId: _selectedFolderId!),
+            ),
+          );
+        }
+        break;
+      case MainContentType.settings:
+        return const SettingsPage();
+      case MainContentType.empty:
+        break;
+    }
+
+    return Container(
+      color: theme.colorScheme.surface,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FaIcon(
+              FontAwesomeIcons.ghost,
+              size: 64,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "Select something to view.",
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "idk what else to tell you yet...",
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showContextMenu(
+    BuildContext context,
+    Offset position,
+    String id, {
+    bool isFolder = false,
+  }) {
+    final theme = Theme.of(context);
+
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx,
+        position.dy,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 8,
+      items: <PopupMenuEntry<dynamic>>[
+        PopupMenuItem(
+          child: const Row(
+            children: [
+              FaIcon(FontAwesomeIcons.checkDouble, size: 14),
+              SizedBox(width: 12),
+              Text("Multi-select"),
+            ],
+          ),
+          onTap: () {
+            if (isFolder) {
+              _toggleFolderSelection(id);
+            } else {
+              setState(() {
+                if (_selectedMaterialIds.contains(id)) {
+                  _selectedMaterialIds.remove(id);
+                } else {
+                  _selectedMaterialIds.add(id);
+                }
+              });
+            }
+          },
+        ),
+        PopupMenuItem(
+          child: const Row(
+            children: [
+              FaIcon(FontAwesomeIcons.thumbtack, size: 14),
+              SizedBox(width: 12),
+              Text("Pin"),
+            ],
+          ),
+          onTap: () => _handlePinSelected(pin: true),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          onTap: _handleDeleteSelected,
+          child: Row(
+            children: [
+              FaIcon(
+                FontAwesomeIcons.trashCan,
+                size: 14,
+                color: theme.colorScheme.error,
+              ),
+              const SizedBox(width: 12),
+              Text("Delete", style: TextStyle(color: theme.colorScheme.error)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -313,6 +719,7 @@ class _FolderList extends StatelessWidget {
   final Color? backgroundColor;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
+  final ValueChanged<String> onSelect;
   final bool isSelecting;
 
   const _FolderList({
@@ -321,6 +728,7 @@ class _FolderList extends StatelessWidget {
     this.backgroundColor,
     required this.selectedIds,
     required this.onToggleSelection,
+    required this.onSelect,
     required this.isSelecting,
   });
 
@@ -395,15 +803,23 @@ class _FolderList extends StatelessWidget {
                   isSelected: selectedIds.contains(pair.$1.id),
                   onTap: isSelecting
                       ? () => onToggleSelection(pair.$1.id)
-                      : () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FolderPage(
-                              folderId: pair.$1.id,
-                              initialFolderName: pair.$1.name,
-                            ),
-                          ),
-                        ),
+                      : () {
+                          if (ResponsiveBreakpoints.of(
+                            context,
+                          ).largerThan(MOBILE)) {
+                            onSelect(pair.$1.id);
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FolderPage(
+                                  folderId: pair.$1.id,
+                                  initialFolderName: pair.$1.name,
+                                ),
+                              ),
+                            );
+                          }
+                        },
                   onLongTap: () => onToggleSelection(pair.$1.id),
                 ),
               ),
@@ -499,22 +915,22 @@ class _NewButtonExpandedContent extends StatefulWidget {
 }
 
 class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
-  final TextEditingController _folderNameController = TextEditingController();
-  bool _isCreatingFolder = false;
+  final TextEditingController folderNameController = TextEditingController();
+  bool isCreatingFolder = false;
 
   @override
   void initState() {
     super.initState();
-    _folderNameController.addListener(() {
+    folderNameController.addListener(() {
       setState(() {}); // Trigger rebuild to show/hide the button
     });
   }
 
-  Future<void> _createFolder() async {
-    final name = _folderNameController.text.trim();
+  Future<void> createFolder() async {
+    final name = folderNameController.text.trim();
     if (name.isEmpty) return;
 
-    setState(() => _isCreatingFolder = true);
+    setState(() => isCreatingFolder = true);
     try {
       final service = context.read<StudyMaterialService>();
       final id = DateTime.now().millisecondsSinceEpoch.toString();
@@ -528,12 +944,12 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
       );
 
       if (mounted) {
-        _folderNameController.clear();
+        folderNameController.clear();
         ExpandableFab.of(context).close();
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isCreatingFolder = false);
+        setState(() => isCreatingFolder = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Error: $e"),
@@ -546,7 +962,7 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
 
   @override
   void dispose() {
-    _folderNameController.dispose();
+    folderNameController.dispose();
     super.dispose();
   }
 
@@ -581,7 +997,7 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
                   children: [
                     Expanded(
                       child: TextField(
-                        controller: _folderNameController,
+                        controller: folderNameController,
                         decoration: InputDecoration(
                           hintText: "Enter Name...",
                           hintStyle: TextStyle(
@@ -618,20 +1034,20 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
                             ),
                           ),
                         ),
-                        onSubmitted: (_) => _createFolder(),
+                        onSubmitted: (_) => createFolder(),
                       ),
                     ),
                     AnimatedSize(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOutCubic,
-                      child: _folderNameController.text.isNotEmpty
+                      child: folderNameController.text.isNotEmpty
                           ? Padding(
                               padding: const EdgeInsets.only(left: 10),
                               child: IconButton(
-                                onPressed: _isCreatingFolder
+                                onPressed: isCreatingFolder
                                     ? null
-                                    : _createFolder,
-                                icon: _isCreatingFolder
+                                    : createFolder,
+                                icon: isCreatingFolder
                                     ? const SizedBox(
                                         height: 18,
                                         width: 18,
@@ -831,6 +1247,7 @@ class _PinnedFoldersSection extends StatelessWidget {
   final String searchQuery;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
+  final ValueChanged<String> onSelect;
   final bool isSelecting;
 
   const _PinnedFoldersSection({
@@ -838,6 +1255,7 @@ class _PinnedFoldersSection extends StatelessWidget {
     required this.searchQuery,
     required this.selectedIds,
     required this.onToggleSelection,
+    required this.onSelect,
     required this.isSelecting,
   });
 
@@ -900,15 +1318,23 @@ class _PinnedFoldersSection extends StatelessWidget {
                       isSelected: selectedIds.contains(pair.$1.id),
                       onTap: isSelecting
                           ? () => onToggleSelection(pair.$1.id)
-                          : () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FolderPage(
-                                  folderId: pair.$1.id,
-                                  initialFolderName: pair.$1.name,
-                                ),
-                              ),
-                            ),
+                          : () {
+                              if (ResponsiveBreakpoints.of(
+                                context,
+                              ).largerThan(MOBILE)) {
+                                onSelect(pair.$1.id);
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FolderPage(
+                                      folderId: pair.$1.id,
+                                      initialFolderName: pair.$1.name,
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
                       onLongTap: () => onToggleSelection(pair.$1.id),
                     ),
                   ),
@@ -918,6 +1344,58 @@ class _PinnedFoldersSection extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _SidebarAButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _SidebarAButton({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = isSelected
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurface.withValues(alpha: 0.5);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 56,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primary.withValues(alpha: 0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FaIcon(icon, size: 20, color: color),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: color,
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
