@@ -7,6 +7,11 @@ on:
       - 'apps/**'
       - '.github/workflows/build-on-commit.yml'
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 # Prevent concurrent deployments to avoid conflicts
 concurrency:
   group: "pages-${{ github.ref }}"
@@ -283,93 +288,48 @@ jobs:
       (needs.build-project-2359-web.outputs.success == 'true' || needs.build-playground-web.outputs.success == 'true')
     runs-on: ubuntu-latest
     continue-on-error: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     outputs:
       success: ${{ steps.set_success.outputs.success }}
     
     permissions:
-      contents: write
+      pages: write
+      id-token: write
       
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          fetch-depth: 0
-        continue-on-error: true
-
-      - name: Create gh-pages branch if not exists
-        run: |
-          if ! git rev-parse --verify gh-pages >/dev/null 2>&1; then
-            git checkout --orphan gh-pages
-            git reset --hard
-            git commit --allow-empty -m "Initialize gh-pages"
-            git push origin gh-pages
-          fi
-        continue-on-error: true
-
-      - name: Checkout gh-pages
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: gh-pages-content
-
       - name: Download Project 2359 Web Build
         if: needs.build-project-2359-web.outputs.success == 'true'
         uses: actions/download-artifact@v4
         with:
           name: project-2359-web
-          path: project-2359-web
+          path: deploy
 
       - name: Download Playground Web Build
         if: needs.build-playground-web.outputs.success == 'true'
         uses: actions/download-artifact@v4
         with:
           name: playground-web
-          path: playground-web
+          path: deploy/dev/playground
 
-      - name: Prepare deployment directory
+      - name: Create .nojekyll
+        run: touch deploy/.nojekyll
+
+      - name: Show deployment structure
         run: |
-          mkdir -p deploy
-          
-          # Copy existing gh-pages content to preserve other files
-          if [ -d "gh-pages-content" ]; then
-            cp -r gh-pages-content/* deploy/ 2>/dev/null || true
-            rm -rf deploy/.git
-          fi
-          
-          # Deploy Project 2359 to root (if built)
-          if [ -d "project-2359-web" ]; then
-            echo "📦 Deploying Project 2359 to root..."
-            # Remove old root files but keep dev folder
-            find deploy -maxdepth 1 -type f -delete 2>/dev/null || true
-            for dir in deploy/*/; do
-              [ "$(basename "$dir")" != "dev" ] && rm -rf "$dir" 2>/dev/null || true
-            done
-            cp -r project-2359-web/* deploy/
-          fi
-          
-          # Deploy Playground to /dev/playground (if built)
-          if [ -d "playground-web" ]; then
-            echo "📦 Deploying Playground to /dev/playground..."
-            mkdir -p deploy/dev/playground
-            rm -rf deploy/dev/playground/*
-            cp -r playground-web/* deploy/dev/playground/
-          fi
-          
-          # Create .nojekyll to bypass Jekyll processing
-          touch deploy/.nojekyll
-          
           echo "📁 Deployment structure:"
           ls -la deploy/
           [ -d "deploy/dev" ] && ls -la deploy/dev/ || true
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          personal_token: ${{ secrets.GH_PAT }}
-          publish_dir: ./deploy
-          destination_dir: .
-          keep_files: false
+          path: deploy
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: Set success status
         id: set_success
