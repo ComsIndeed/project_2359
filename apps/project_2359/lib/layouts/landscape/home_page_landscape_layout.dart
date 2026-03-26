@@ -47,6 +47,7 @@ class _HomePageLandscapeLayoutState extends State<HomePageLandscapeLayout> {
           curve: Curves.easeOutCubic,
           width: _isCollapsed ? 80 : 280,
           decoration: BoxDecoration(
+            color: cs.surface,
             border: Border(
               right: BorderSide(color: cs.onSurface.withValues(alpha: 0.08)),
             ),

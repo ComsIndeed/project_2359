@@ -358,15 +358,18 @@ class _HomePageState extends State<HomePage> {
   /// TODO: Refactor the UI into layouts and contents.
   /// That way, only the layout changes, the contents aren't repeated.
   Widget _buildLandscapeLayout() {
-    return HomePageLandscapeLayout(
-      header: const _HomeHeader(isLandscape: true),
-      sidebarA: _buildSidebarA(),
-      sidebarB: _selectedFolderId != null ? _buildSidebarB() : null,
-      mainContent: _buildMainContent(),
-      onSettingsTap: () => _navigateToMain(MainContentType.settings),
-      onProfileTap: () {
-        // TODO: Profile implementation
-      },
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: HomePageLandscapeLayout(
+        header: const _HomeHeader(isLandscape: true),
+        sidebarA: _buildSidebarA(),
+        sidebarB: _selectedFolderId != null ? _buildSidebarB() : null,
+        mainContent: _buildMainContent(),
+        onSettingsTap: () => _navigateToMain(MainContentType.settings),
+        onProfileTap: () {
+          // TODO: Profile implementation
+        },
+      ),
     );
   }
 
