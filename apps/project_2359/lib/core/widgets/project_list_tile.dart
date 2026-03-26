@@ -44,6 +44,7 @@ class ProjectListTile extends StatelessWidget {
   final ProjectTransitionType? transitionType;
   final bool isSelected;
   final bool isSelecting;
+  final bool isCompact;
   final VoidCallback? onLongPress;
 
   const ProjectListTile({
@@ -66,6 +67,7 @@ class ProjectListTile extends StatelessWidget {
     this.transitionType,
     this.isSelected = false,
     this.isSelecting = false,
+    this.isCompact = false,
     this.onLongPress,
   });
 
@@ -267,7 +269,8 @@ class ProjectListTile extends StatelessWidget {
 
     Widget innerContent = Padding(
       padding:
-          padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding ??
+          EdgeInsets.symmetric(horizontal: 16, vertical: isCompact ? 8 : 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

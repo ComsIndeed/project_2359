@@ -13,11 +13,13 @@ import 'package:project_2359/core/widgets/special_background_generator.dart';
 class StudyPage extends StatefulWidget {
   final String materialId;
   final String materialName;
+  final bool showBackButton;
 
   const StudyPage({
     super.key,
     required this.materialId,
     required this.materialName,
+    this.showBackButton = true,
   });
 
   @override
@@ -138,6 +140,7 @@ class _StudyPageState extends State<StudyPage> {
                       current: _currentIndex + 1,
                       total: total,
                       onBack: () => Navigator.pop(context),
+                      showBackButton: widget.showBackButton,
                     ),
                   ),
                   SliverFillRemaining(
@@ -259,6 +262,7 @@ class _StudyPageState extends State<StudyPage> {
             current: 0,
             total: 0,
             onBack: () => Navigator.pop(context),
+            showBackButton: widget.showBackButton,
           ),
         ),
         SliverFillRemaining(
@@ -802,6 +806,7 @@ class _StudyHeaderDelegate extends SliverPersistentHeaderDelegate {
   final int current;
   final int total;
   final VoidCallback onBack;
+  final bool showBackButton;
 
   _StudyHeaderDelegate({
     required this.materialName,
@@ -810,6 +815,7 @@ class _StudyHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.current,
     required this.total,
     required this.onBack,
+    this.showBackButton = true,
   });
 
   static const double _collapsedBarHeight = 64.0;
@@ -825,7 +831,8 @@ class _StudyHeaderDelegate extends SliverPersistentHeaderDelegate {
       oldDelegate.materialName != materialName ||
       oldDelegate.progress != progress ||
       oldDelegate.current != current ||
-      oldDelegate.total != total;
+      oldDelegate.total != total ||
+      oldDelegate.showBackButton != showBackButton;
 
   @override
   Widget build(
@@ -879,15 +886,17 @@ class _StudyHeaderDelegate extends SliverPersistentHeaderDelegate {
                   height: _collapsedBarHeight,
                   child: Row(
                     children: [
-                      IconButton(
-                        icon: const FaIcon(
-                          FontAwesomeIcons.chevronLeft,
-                          size: 20,
+                      if (showBackButton) ...[
+                        IconButton(
+                          icon: const FaIcon(
+                            FontAwesomeIcons.chevronLeft,
+                            size: 20,
+                          ),
+                          onPressed: onBack,
+                          color: Colors.white,
                         ),
-                        onPressed: onBack,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 4),
+                        const SizedBox(width: 4),
+                      ],
                       Expanded(
                         child: Text(
                           t > 0.5 ? materialName : "STUDY SESSION",

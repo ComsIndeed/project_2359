@@ -44,10 +44,16 @@ Future<(int, List<SourceLine>)> _parsePdfPdfrx(Uint8List bytes) async {
 // ═══════════════════════════════════════════════════════════════════
 
 class SourcePage extends StatefulWidget {
-  const SourcePage({super.key, required this.fileBytes, this.title});
+  const SourcePage({
+    super.key,
+    required this.fileBytes,
+    this.title,
+    this.showBackButton = true,
+  });
 
   final Uint8List fileBytes;
   final String? title;
+  final bool showBackButton;
 
   @override
   State<SourcePage> createState() => _SourcePageState();
@@ -210,12 +216,14 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Row(
           children: [
-            _appBarButton(
-              cs: cs,
-              icon: FontAwesomeIcons.arrowLeft,
-              onTap: () => Navigator.pop(context),
-            ),
-            const SizedBox(width: 12),
+            if (widget.showBackButton) ...[
+              _appBarButton(
+                cs: cs,
+                icon: FontAwesomeIcons.arrowLeft,
+                onTap: () => Navigator.pop(context),
+              ),
+              const SizedBox(width: 12),
+            ],
 
             Expanded(
               child: Column(

@@ -13,6 +13,7 @@ class ProjectCardTile extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final double? minHeight;
   final bool isSelected;
+  final bool isCompact;
 
   const ProjectCardTile({
     super.key,
@@ -26,6 +27,7 @@ class ProjectCardTile extends StatelessWidget {
     this.padding,
     this.minHeight,
     this.isSelected = false,
+    this.isCompact = false,
   });
 
   @override
@@ -63,10 +65,15 @@ class ProjectCardTile extends StatelessWidget {
         decoration: ShapeDecoration(color: effectiveBg, shape: effectiveShape),
         clipBehavior: Clip.antiAlias,
         child: Container(
-          constraints: BoxConstraints(minHeight: minHeight ?? 92),
+          constraints: BoxConstraints(
+            minHeight: minHeight ?? (isCompact ? 68 : 92),
+          ),
           padding:
               padding ??
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              EdgeInsets.symmetric(
+                horizontal: isCompact ? 16 : 20,
+                vertical: isCompact ? 10 : 16,
+              ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

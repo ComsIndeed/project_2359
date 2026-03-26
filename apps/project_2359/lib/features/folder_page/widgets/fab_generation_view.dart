@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:llm_json_stream/llm_json_stream.dart';
 import 'package:project_2359/app_database.dart';
@@ -346,6 +347,10 @@ class _FabGenerationViewState extends State<FabGenerationView> {
 
   @override
   Widget build(BuildContext context) {
+    if (ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
+      return _buildLandscapeWizard(context);
+    }
+
     final Widget currentWidget;
     final ValueKey key;
 
@@ -405,6 +410,64 @@ class _FabGenerationViewState extends State<FabGenerationView> {
     );
   }
 
+  Widget _buildLandscapeWizard(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      child: Column(
+        children: [
+          _buildWizardStepWrapper(
+            step: 1,
+            child: _buildStep1(context),
+            title: "1. Select Sources",
+          ),
+          const SizedBox(height: 32),
+          _buildWizardStepWrapper(
+            step: 2,
+            child: _buildStep2(context),
+            title: "2. Configure Materials",
+          ),
+          const SizedBox(height: 32),
+          _buildWizardStepWrapper(
+            step: 3,
+            child: _buildStep3(context),
+            title: "3. Generation Results",
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWizardStepWrapper({
+    required int step,
+    required Widget child,
+    required String title,
+  }) {
+    final bool isFocused = _currentStep == step;
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 300),
+      opacity: isFocused ? 1.0 : 0.4,
+      child: IgnorePointer(
+        ignoring: !isFocused && step > _currentStep,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: isFocused ? null : Colors.grey,
+                ),
+              ),
+            ),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildStep1(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
@@ -458,11 +521,24 @@ class _FabGenerationViewState extends State<FabGenerationView> {
                           ),
                           leading: const WizardSourcePagePreview(),
                           isSelected: _selectedSources.contains(source.id),
-                          onTap: () => setState(
-                            () => _selectedSources.contains(source.id)
-                                ? _selectedSources.remove(source.id)
-                                : _selectedSources.add(source.id),
-                          ),
+                          onTap: () {
+                            setState(() {
+                              if (_selectedSources.contains(source.id)) {
+                                _selectedSources.remove(source.id);
+                              } else {
+                                _selectedSources.add(source.id);
+                              }
+
+                              // Auto-advance in landscape
+                              if (ResponsiveBreakpoints.of(
+                                    context,
+                                  ).largerThan(MOBILE) &&
+                                  _selectedSources.isNotEmpty &&
+                                  _currentStep < 2) {
+                                _updateStep(2);
+                              }
+                            });
+                          },
                           trailing: _selectedSources.contains(source.id)
                               ? const FaIcon(
                                   FontAwesomeIcons.circleCheck,
@@ -487,30 +563,40 @@ class _FabGenerationViewState extends State<FabGenerationView> {
                     : const SizedBox.shrink(),
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: WizardButton(
-                      label: "Continue",
-                      onPressed: _selectedSources.isEmpty
-                          ? null
-                          : () => _updateStep(2),
-                      icon: FontAwesomeIcons.chevronDown,
+              if (!ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                Row(
+                  children: [
+                    Expanded(
+                      child: WizardButton(
+                        label: "Continue",
+                        onPressed: _selectedSources.isEmpty
+                            ? null
+                            : () => _updateStep(2),
+                        icon: FontAwesomeIcons.chevronDown,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  WizardSquareButton(
-                    icon: FontAwesomeIcons.penToSquare,
-                    onPressed: () => _updateStep(_currentStep, manual: true),
-                  ),
-                  const SizedBox(width: 8),
-                  ImportToggleButton(
+                    const SizedBox(width: 8),
+                    WizardSquareButton(
+                      icon: FontAwesomeIcons.penToSquare,
+                      onPressed: () => _updateStep(_currentStep, manual: true),
+                    ),
+                    const SizedBox(width: 8),
+                    ImportToggleButton(
+                      isActive: _showImportGrid,
+                      onTap: () =>
+                          setState(() => _showImportGrid = !_showImportGrid),
+                    ),
+                  ],
+                )
+              else
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ImportToggleButton(
                     isActive: _showImportGrid,
                     onTap: () =>
                         setState(() => _showImportGrid = !_showImportGrid),
                   ),
-                ],
-              ),
+                ),
             ],
           ),
         );
@@ -549,11 +635,23 @@ class _FabGenerationViewState extends State<FabGenerationView> {
             ConfigurableTypeTile(
               type: type,
               isSelected: _selectedTypes.contains(type.id),
-              onToggle: () => setState(
-                () => _selectedTypes.contains(type.id)
-                    ? _selectedTypes.remove(type.id)
-                    : _selectedTypes.add(type.id),
-              ),
+              onToggle: () {
+                setState(() {
+                  if (_selectedTypes.contains(type.id)) {
+                    _selectedTypes.remove(type.id);
+                  } else {
+                    _selectedTypes.add(type.id);
+                  }
+
+                  // Auto-advance in landscape
+                  if (ResponsiveBreakpoints.of(context).largerThan(MOBILE) &&
+                      _selectedTypes.isNotEmpty &&
+                      _currentStep < 3) {
+                    _updateStep(3);
+                    _startGeneration();
+                  }
+                });
+              },
             ),
             const SizedBox(height: 8),
           ],
@@ -583,11 +681,18 @@ class _FabGenerationViewState extends State<FabGenerationView> {
             ),
           ),
           const SizedBox(height: 16),
-          WizardButton(
-            label: "Begin Generation",
-            onPressed: _selectedTypes.isEmpty ? null : _startGeneration,
-            icon: FontAwesomeIcons.chevronDown,
-          ),
+          if (!ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+            WizardButton(
+              label: "Begin Generation",
+              onPressed: _selectedTypes.isEmpty ? null : _startGeneration,
+              icon: FontAwesomeIcons.chevronDown,
+            )
+          else if (_selectedTypes.isNotEmpty)
+            WizardButton(
+              label: "Regenerate / Refine",
+              onPressed: _startGeneration,
+              icon: FontAwesomeIcons.wandMagicSparkles,
+            ),
         ],
       ),
     );

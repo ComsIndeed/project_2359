@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -16,10 +17,19 @@ import 'package:project_2359/core/study_material_service.dart';
 import 'package:project_2359/core/utils/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:project_2359/features/study/study_page.dart';
+import 'package:project_2359/features/source_page/source_page.dart';
 import 'package:project_2359/features/folder_page/widgets/fab_generation_view.dart';
 import 'package:project_2359/features/folder_page/widgets/fab_sources_view.dart';
+import 'package:project_2359/layouts/landscape/home_page_landscape_layout.dart';
 
-enum MainContentType { empty, study, generation, sources, settings }
+enum MainContentType {
+  empty,
+  study,
+  generation,
+  sources,
+  settings,
+  sourceDetail,
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -40,6 +50,8 @@ class _HomePageState extends State<HomePage> {
   String? _selectedFolderId;
   String? _selectedMaterialId;
   String? _selectedMaterialName;
+  String? _selectedSourceId;
+  Uint8List? _selectedSourceBlob;
   MainContentType _mainContentType = MainContentType.empty;
 
   final TextEditingController _searchController = TextEditingController();
@@ -69,12 +81,37 @@ class _HomePageState extends State<HomePage> {
     MainContentType type, {
     String? materialId,
     String? materialName,
+    String? sourceId,
+    Uint8List? sourceBlob,
   }) {
     setState(() {
       _mainContentType = type;
       _selectedMaterialId = materialId;
       _selectedMaterialName = materialName;
+      _selectedSourceId = sourceId;
+      _selectedSourceBlob = sourceBlob;
     });
+  }
+
+  Future<void> _loadSourceAndNavigate(SourceItem source) async {
+    final service = context.read<SourceService>();
+    final blob = await service.getSourceBlobBySourceId(source.id);
+    if (blob != null) {
+      _navigateToMain(
+        MainContentType.sourceDetail,
+        sourceId: source.id,
+        sourceBlob: blob.bytes,
+      );
+    } else {
+      // Fallback if no blob: if it's a text source, maybe we can use extractedContent?
+      // For now, let's just use empty bytes or notify
+      AppLogger.warning(
+        'No blob found for source: ${source.id}',
+        tag: 'HomePage',
+      );
+      // If it's a text source, we might want to wrap it in a PDF or show a text viewer
+      // But SourcePage expects PDF bytes.
+    }
   }
 
   Future<void> _handlePinSelected({required bool pin}) async {
@@ -321,79 +358,51 @@ class _HomePageState extends State<HomePage> {
   /// TODO: Refactor the UI into layouts and contents.
   /// That way, only the layout changes, the contents aren't repeated.
   Widget _buildLandscapeLayout() {
-    final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: Row(
-        children: [
-          // Sidebar 1: Collections (Narrow)
-          _buildSidebarA(),
-          // Sidebar 2: Folder Contents (Wider)
-          if (_selectedFolderId != null) _buildSidebarB(),
-          // Main Content
-          Expanded(child: _buildMainContent()),
-        ],
-      ),
+    return HomePageLandscapeLayout(
+      header: const _HomeHeader(isLandscape: true),
+      sidebarA: _buildSidebarA(),
+      sidebarB: _selectedFolderId != null ? _buildSidebarB() : null,
+      mainContent: _buildMainContent(),
+      onSettingsTap: () => _navigateToMain(MainContentType.settings),
+      onProfileTap: () {
+        // TODO: Profile implementation
+      },
     );
   }
 
   Widget _buildSidebarA() {
-    return Container(
-      width: 280,
-      decoration: BoxDecoration(
-        border: Border(
-          right: BorderSide(
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurface.withValues(alpha: 0.08),
-          ),
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      children: [
+        _PinnedFoldersSection(
+          stream: _pinnedFoldersStream,
+          searchQuery: _searchQuery,
+          selectedIds: _selectedFolderIds,
+          onToggleSelection: _toggleFolderSelection,
+          onSelect: (id) => setState(() {
+            _selectedFolderId = id;
+            _mainContentType = MainContentType.empty;
+            _selectedMaterialId = null;
+          }),
+          isSelecting: _isSelecting,
+          isLandscape: true,
         ),
-      ),
-      child: Column(
-        children: [
-          const Padding(padding: EdgeInsets.all(24.0), child: _HomeHeader()),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _PinnedFoldersSection(
-                  stream: _pinnedFoldersStream,
-                  searchQuery: _searchQuery,
-                  selectedIds: _selectedFolderIds,
-                  onToggleSelection: _toggleFolderSelection,
-                  onSelect: (id) => setState(() {
-                    _selectedFolderId = id;
-                    _mainContentType = MainContentType.empty;
-                    _selectedMaterialId = null;
-                  }),
-                  isSelecting: _isSelecting,
-                ),
-                const SizedBox(height: 24),
-                const _SectionHeader(title: "Collections"),
-                _FolderList(
-                  stream: _foldersStream,
-                  searchQuery: _searchQuery,
-                  selectedIds: _selectedFolderIds,
-                  onToggleSelection: _toggleFolderSelection,
-                  onSelect: (id) => setState(() {
-                    _selectedFolderId = id;
-                    _mainContentType = MainContentType.empty;
-                    _selectedMaterialId = null;
-                  }),
-                  isSelecting: _isSelecting,
-                ),
-                const SizedBox(height: 24),
-                _SidebarAButton(
-                  icon: FontAwesomeIcons.gear,
-                  label: "Settings",
-                  isSelected: _mainContentType == MainContentType.settings,
-                  onTap: () => _navigateToMain(MainContentType.settings),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        const SizedBox(height: 24),
+        const _SectionHeader(title: "Collections"),
+        _FolderList(
+          stream: _foldersStream,
+          searchQuery: _searchQuery,
+          selectedIds: _selectedFolderIds,
+          onToggleSelection: _toggleFolderSelection,
+          onSelect: (id) => setState(() {
+            _selectedFolderId = id;
+            _mainContentType = MainContentType.empty;
+            _selectedMaterialId = null;
+          }),
+          isSelecting: _isSelecting,
+          isLandscape: true,
+        ),
+      ],
     );
   }
 
@@ -432,16 +441,11 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-                IconButton.filledTonal(
+                IconButton(
                   onPressed: () {
                     _navigateToMain(MainContentType.generation);
                   },
-                  icon: const FaIcon(FontAwesomeIcons.plus, size: 14),
-                  style: IconButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
                 ),
               ],
             ),
@@ -465,7 +469,7 @@ class _HomePageState extends State<HomePage> {
                             child:
                                 GestureDetector(
                                       onSecondaryTapDown: (details) =>
-                                          _showContextMenu(
+                                          _showCoolContextMenu(
                                             context,
                                             details.globalPosition,
                                             m.id,
@@ -476,6 +480,12 @@ class _HomePageState extends State<HomePage> {
                                           m.description ?? "Card Pack",
                                         ),
                                         isSelected: _selectedMaterialId == m.id,
+                                        isCompact: true,
+                                        leading: FaIcon(
+                                          FontAwesomeIcons.layerGroup,
+                                          size: 18,
+                                          color: theme.colorScheme.primary,
+                                        ),
                                         onTap: () {
                                           _navigateToMain(
                                             MainContentType.study,
@@ -516,15 +526,29 @@ class _HomePageState extends State<HomePage> {
                         for (var s in sources)
                           Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
-                                child: ProjectCardTile(
-                                  title: Text(s.label),
-                                  subtitle: Text(
-                                    "${s.type.toUpperCase()} | ${s.extractedContent?.length ?? 0} chars",
+                                child: GestureDetector(
+                                  onSecondaryTapDown: (details) =>
+                                      _showCoolContextMenu(
+                                        context,
+                                        details.globalPosition,
+                                        s.id,
+                                      ),
+                                  child: ProjectCardTile(
+                                    title: Text(s.label),
+                                    subtitle: Text(
+                                      "${s.type.toUpperCase()} | ${s.extractedContent?.length ?? 0} chars",
+                                    ),
+                                    isSelected: false,
+                                    isCompact: true,
+                                    leading: FaIcon(
+                                      FontAwesomeIcons.fileLines,
+                                      size: 18,
+                                      color: theme.colorScheme.secondary,
+                                    ),
+                                    onTap: () {
+                                      _loadSourceAndNavigate(s);
+                                    },
                                   ),
-                                  isSelected: false,
-                                  onTap: () {
-                                    _navigateToMain(MainContentType.sources);
-                                  },
                                 ),
                               )
                               .animate(
@@ -552,6 +576,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildMainContent() {
     final theme = Theme.of(context);
+    final isLandscape = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
 
     switch (_mainContentType) {
       case MainContentType.study:
@@ -560,6 +585,7 @@ class _HomePageState extends State<HomePage> {
             key: ValueKey('study_$_selectedMaterialId'),
             materialId: _selectedMaterialId!,
             materialName: _selectedMaterialName ?? "Material",
+            showBackButton: !isLandscape,
           );
         }
         break;
@@ -570,6 +596,15 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: theme.scaffoldBackgroundColor,
               body: FabGenerationView(folderId: _selectedFolderId!),
             ),
+          );
+        }
+        break;
+      case MainContentType.sourceDetail:
+        if (_selectedSourceBlob != null) {
+          return SourcePage(
+            fileBytes: _selectedSourceBlob!,
+            title: _selectedSourceId,
+            showBackButton: !isLandscape,
           );
         }
         break;
@@ -621,73 +656,132 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showContextMenu(
+  void _showCoolContextMenu(
     BuildContext context,
     Offset position,
     String id, {
     bool isFolder = false,
   }) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
-    showMenu(
+    showGeneralDialog(
       context: context,
-      position: RelativeRect.fromLTRB(
-        position.dx,
-        position.dy,
-        position.dx,
-        position.dy,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 8,
-      items: <PopupMenuEntry<dynamic>>[
-        PopupMenuItem(
-          child: const Row(
-            children: [
-              FaIcon(FontAwesomeIcons.checkDouble, size: 14),
-              SizedBox(width: 12),
-              Text("Multi-select"),
-            ],
-          ),
-          onTap: () {
-            if (isFolder) {
-              _toggleFolderSelection(id);
-            } else {
-              setState(() {
-                if (_selectedMaterialIds.contains(id)) {
-                  _selectedMaterialIds.remove(id);
-                } else {
-                  _selectedMaterialIds.add(id);
-                }
-              });
-            }
-          },
-        ),
-        PopupMenuItem(
-          child: const Row(
-            children: [
-              FaIcon(FontAwesomeIcons.thumbtack, size: 14),
-              SizedBox(width: 12),
-              Text("Pin"),
-            ],
-          ),
-          onTap: () => _handlePinSelected(pin: true),
-        ),
-        const PopupMenuDivider(),
-        PopupMenuItem(
-          onTap: _handleDeleteSelected,
-          child: Row(
-            children: [
-              FaIcon(
-                FontAwesomeIcons.trashCan,
-                size: 14,
-                color: theme.colorScheme.error,
+      barrierDismissible: true,
+      barrierLabel: "Dismiss",
+      barrierColor: Colors.transparent,
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
+      transitionBuilder: (context, anim1, anim2, child) {
+        final curve = Curves.easeOutBack.transform(anim1.value);
+        return Stack(
+          children: [
+            Positioned(
+              left: position.dx,
+              top: position.dy,
+              child: Transform.scale(
+                scale: curve,
+                alignment: Alignment.topLeft,
+                child: FadeTransition(
+                  opacity: anim1,
+                  child: Material(
+                    elevation: 12,
+                    clipBehavior: Clip.antiAlias,
+                    color: cs.surfaceContainerHighest,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: cs.onSurface.withValues(alpha: 0.1),
+                      ),
+                    ),
+                    child: IntrinsicWidth(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildMenuItem(
+                            context,
+                            icon: FontAwesomeIcons.checkDouble,
+                            label: "Multi-select",
+                            onTap: () {
+                              Navigator.pop(context);
+                              if (isFolder) {
+                                _toggleFolderSelection(id);
+                              } else {
+                                setState(() {
+                                  if (_selectedMaterialIds.contains(id)) {
+                                    _selectedMaterialIds.remove(id);
+                                  } else {
+                                    _selectedMaterialIds.add(id);
+                                  }
+                                });
+                              }
+                            },
+                          ),
+                          _buildMenuItem(
+                            context,
+                            icon: FontAwesomeIcons.thumbtack,
+                            label: "Pin",
+                            onTap: () {
+                              Navigator.pop(context);
+                              _handlePinSelected(pin: true);
+                            },
+                          ),
+                          Divider(
+                            height: 1,
+                            color: cs.onSurface.withValues(alpha: 0.05),
+                          ),
+                          _buildMenuItem(
+                            context,
+                            icon: FontAwesomeIcons.trashCan,
+                            label: "Delete",
+                            isDestructive: true,
+                            onTap: () {
+                              Navigator.pop(context);
+                              _handleDeleteSelected();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(width: 12),
-              Text("Delete", style: TextStyle(color: theme.colorScheme.error)),
-            ],
-          ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMenuItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final color = isDestructive ? cs.error : cs.onSurface;
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            FaIcon(icon, size: 14, color: color.withValues(alpha: 0.7)),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -715,6 +809,119 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
+class _PinnedFoldersSection extends StatelessWidget {
+  final Stream<List<(StudyFolderItem, int)>> stream;
+  final String searchQuery;
+  final Set<String> selectedIds;
+  final ValueChanged<String> onToggleSelection;
+  final ValueChanged<String> onSelect;
+  final bool isSelecting;
+  final bool isLandscape;
+
+  const _PinnedFoldersSection({
+    required this.stream,
+    required this.searchQuery,
+    required this.selectedIds,
+    required this.onToggleSelection,
+    required this.onSelect,
+    required this.isSelecting,
+    this.isLandscape = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return StreamBuilder<List<(StudyFolderItem, int)>>(
+      stream: stream,
+      builder: (context, snapshot) {
+        final folderPairs = (snapshot.data ?? []).where((p) {
+          if (searchQuery.isEmpty) return true;
+          return p.$1.name.toLowerCase().contains(searchQuery.toLowerCase());
+        }).toList();
+
+        if (folderPairs.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _SectionHeader(title: "Pinned"),
+            for (final pair in folderPairs)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: GestureDetector(
+                  onSecondaryTapDown: (details) =>
+                      (context.findAncestorStateOfType<_HomePageState>())
+                          ?._showCoolContextMenu(
+                            context,
+                            details.globalPosition,
+                            pair.$1.id,
+                            isFolder: true,
+                          ),
+                  child: ProjectCardTile(
+                    title: Row(
+                      children: [
+                        FaIcon(
+                          FontAwesomeIcons.thumbtack,
+                          size: 14,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            pair.$1.name,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    subtitle: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        FaIcon(
+                          FontAwesomeIcons.layerGroup,
+                          size: 10,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.4,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text("${pair.$2} Card${pair.$2 == 1 ? '' : 's'}"),
+                      ],
+                    ),
+                    isSelected: selectedIds.contains(pair.$1.id),
+                    isCompact: isLandscape,
+                    onTap: isSelecting
+                        ? () => onToggleSelection(pair.$1.id)
+                        : () {
+                            if (ResponsiveBreakpoints.of(
+                              context,
+                            ).largerThan(MOBILE)) {
+                              onSelect(pair.$1.id);
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FolderPage(
+                                    folderId: pair.$1.id,
+                                    initialFolderName: pair.$1.name,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                    onLongTap: () => onToggleSelection(pair.$1.id),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class _FolderList extends StatelessWidget {
   final Stream<List<(StudyFolderItem, int)>> stream;
   final String searchQuery;
@@ -723,6 +930,7 @@ class _FolderList extends StatelessWidget {
   final ValueChanged<String> onToggleSelection;
   final ValueChanged<String> onSelect;
   final bool isSelecting;
+  final bool isLandscape;
 
   const _FolderList({
     required this.stream,
@@ -732,6 +940,7 @@ class _FolderList extends StatelessWidget {
     required this.onToggleSelection,
     required this.onSelect,
     required this.isSelecting,
+    this.isLandscape = false,
   });
 
   @override
@@ -769,60 +978,71 @@ class _FolderList extends StatelessWidget {
             for (final pair in folderPairs)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: ProjectCardTile(
-                  title: Row(
-                    children: [
-                      if (pair.$1.isPinned) ...[
-                        FaIcon(
-                          FontAwesomeIcons.thumbtack,
-                          size: 14,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                      Expanded(
-                        child: Text(
-                          pair.$1.name,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  subtitle: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      FaIcon(
-                        FontAwesomeIcons.layerGroup,
-                        size: 10,
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.4,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text("${pair.$2} Card${pair.$2 == 1 ? '' : 's'}"),
-                    ],
-                  ),
-                  isSelected: selectedIds.contains(pair.$1.id),
-                  onTap: isSelecting
-                      ? () => onToggleSelection(pair.$1.id)
-                      : () {
-                          if (ResponsiveBreakpoints.of(
+                child: GestureDetector(
+                  onSecondaryTapDown: (details) =>
+                      (context.findAncestorStateOfType<_HomePageState>())
+                          ?._showCoolContextMenu(
                             context,
-                          ).largerThan(MOBILE)) {
-                            onSelect(pair.$1.id);
-                          } else {
-                            Navigator.push(
+                            details.globalPosition,
+                            pair.$1.id,
+                            isFolder: true,
+                          ),
+                  child: ProjectCardTile(
+                    title: Row(
+                      children: [
+                        if (pair.$1.isPinned) ...[
+                          FaIcon(
+                            FontAwesomeIcons.thumbtack,
+                            size: 14,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        Expanded(
+                          child: Text(
+                            pair.$1.name,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    subtitle: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        FaIcon(
+                          FontAwesomeIcons.layerGroup,
+                          size: 10,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.4,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text("${pair.$2} Card${pair.$2 == 1 ? '' : 's'}"),
+                      ],
+                    ),
+                    isSelected: selectedIds.contains(pair.$1.id),
+                    isCompact: isLandscape,
+                    onTap: isSelecting
+                        ? () => onToggleSelection(pair.$1.id)
+                        : () {
+                            if (ResponsiveBreakpoints.of(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => FolderPage(
-                                  folderId: pair.$1.id,
-                                  initialFolderName: pair.$1.name,
+                            ).largerThan(MOBILE)) {
+                              onSelect(pair.$1.id);
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FolderPage(
+                                    folderId: pair.$1.id,
+                                    initialFolderName: pair.$1.name,
+                                  ),
                                 ),
-                              ),
-                            );
-                          }
-                        },
-                  onLongTap: () => onToggleSelection(pair.$1.id),
+                              );
+                            }
+                          },
+                    onLongTap: () => onToggleSelection(pair.$1.id),
+                  ),
                 ),
               ),
           ],
@@ -833,7 +1053,8 @@ class _FolderList extends StatelessWidget {
 }
 
 class _HomeHeader extends StatelessWidget {
-  const _HomeHeader();
+  final bool isLandscape;
+  const _HomeHeader({this.isLandscape = false});
 
   @override
   Widget build(BuildContext context) {
@@ -865,7 +1086,7 @@ class _HomeHeader extends StatelessWidget {
           ),
         ),
         // Settings Action
-        const _HeaderActions(),
+        if (!isLandscape) const _HeaderActions(),
       ],
     );
   }
@@ -1235,164 +1456,6 @@ class _BarAction extends StatelessWidget {
               style: theme.textTheme.labelSmall?.copyWith(
                 color: color,
                 fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PinnedFoldersSection extends StatelessWidget {
-  final Stream<List<(StudyFolderItem, int)>> stream;
-  final String searchQuery;
-  final Set<String> selectedIds;
-  final ValueChanged<String> onToggleSelection;
-  final ValueChanged<String> onSelect;
-  final bool isSelecting;
-
-  const _PinnedFoldersSection({
-    required this.stream,
-    required this.searchQuery,
-    required this.selectedIds,
-    required this.onToggleSelection,
-    required this.onSelect,
-    required this.isSelecting,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return StreamBuilder<List<(StudyFolderItem, int)>>(
-      stream: stream,
-      builder: (context, snapshot) {
-        final pinned = (snapshot.data ?? []).where((p) {
-          if (searchQuery.isEmpty) return true;
-          return p.$1.name.toLowerCase().contains(searchQuery.toLowerCase());
-        }).toList();
-
-        if (pinned.isEmpty) return const SizedBox.shrink();
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _SectionHeader(title: "Pinned"),
-            const SizedBox(height: 8),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final pair in pinned)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: ProjectCardTile(
-                      title: Row(
-                        children: [
-                          FaIcon(
-                            FontAwesomeIcons.thumbtack,
-                            size: 14,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              pair.$1.name,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      subtitle: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          FaIcon(
-                            FontAwesomeIcons.layerGroup,
-                            size: 10,
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.4,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text("${pair.$2} Card${pair.$2 == 1 ? '' : 's'}"),
-                        ],
-                      ),
-                      isSelected: selectedIds.contains(pair.$1.id),
-                      onTap: isSelecting
-                          ? () => onToggleSelection(pair.$1.id)
-                          : () {
-                              if (ResponsiveBreakpoints.of(
-                                context,
-                              ).largerThan(MOBILE)) {
-                                onSelect(pair.$1.id);
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => FolderPage(
-                                      folderId: pair.$1.id,
-                                      initialFolderName: pair.$1.name,
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                      onLongTap: () => onToggleSelection(pair.$1.id),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 24),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _SidebarAButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _SidebarAButton({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = isSelected
-        ? theme.colorScheme.primary
-        : theme.colorScheme.onSurface.withValues(alpha: 0.5);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 56,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? theme.colorScheme.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FaIcon(icon, size: 20, color: color),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: color,
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
           ],

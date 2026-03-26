@@ -148,11 +148,13 @@ class _FabSourcesViewState extends State<FabSourcesView> {
 class SourcePageLoader extends StatefulWidget {
   final String sourceId;
   final String sourceLabel;
+  final bool showBackButton;
 
   const SourcePageLoader({
     super.key,
     required this.sourceId,
     required this.sourceLabel,
+    this.showBackButton = true,
   });
 
   @override
@@ -193,6 +195,10 @@ class _SourcePageLoaderState extends State<SourcePageLoader> {
       );
     }
 
-    return SourcePage(fileBytes: _blob!.bytes, title: widget.sourceLabel);
+    return SourcePage(
+      fileBytes: _blob!.bytes,
+      title: widget.sourceLabel,
+      showBackButton: widget.showBackButton,
+    );
   }
 }
