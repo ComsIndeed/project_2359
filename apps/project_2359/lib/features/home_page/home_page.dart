@@ -318,6 +318,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// TODO: Refactor the UI into layouts and contents.
+  /// That way, only the layout changes, the contents aren't repeated.
   Widget _buildLandscapeLayout() {
     final theme = Theme.of(context);
     return Scaffold(
