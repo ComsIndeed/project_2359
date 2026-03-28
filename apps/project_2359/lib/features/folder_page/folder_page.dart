@@ -11,6 +11,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/study/study_page.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:project_2359/core/widgets/project_list_tile.dart';
+import 'package:project_2359/features/sources_page/source_list_item.dart';
 
 import 'package:project_2359/features/folder_page/widgets/fab_generation_view.dart';
 import 'package:project_2359/features/folder_page/widgets/fab_sources_view.dart';
@@ -41,6 +44,24 @@ class _FolderPageState extends State<FolderPage> {
   List<SourceItem>? _currentSources;
   StreamSubscription? _sourcesSub;
   FabMode _fabMode = FabMode.generation;
+  final PageController _pageController = PageController();
+  int _currentPageIndex = 0;
+
+  void _onPageChanged(int index) {
+    if (mounted) {
+      setState(() {
+        _currentPageIndex = index;
+      });
+    }
+  }
+
+  void _requestPage(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOutQuart,
+    );
+  }
 
   bool get _isSelecting => _selectedMaterialIds.isNotEmpty;
 
@@ -158,6 +179,7 @@ class _FolderPageState extends State<FolderPage> {
   void dispose() {
     _materialSub?.cancel();
     _sourcesSub?.cancel();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -239,64 +261,50 @@ class _FolderPageState extends State<FolderPage> {
                 icon: FontAwesomeIcons.folder,
                 showBorder: false,
                 showShadow: false,
-                backgroundColor: Colors.black,
+                backgroundColor: null,
                 borderRadius: 0,
                 child: const SizedBox.expand(),
               ),
             ),
-            StreamBuilder<List<StudyMaterialItem>>(
-              stream: _materialsStream,
-              builder: (context, snapshot) {
-                final materials = snapshot.data ?? [];
-
-                return CustomScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  slivers: [
-                    // COLLAPSING HEADER → APPBAR
-                    SliverPersistentHeader(
-                      pinned: true,
-                      delegate: _CollapsingHeaderDelegate(
-                        folderName: folderName,
-                        topPadding: MediaQuery.of(context).padding.top,
-                        onBack: () => Navigator.pop(context),
-                        onSourcesTap: () {
-                          setState(() => _fabMode = FabMode.sources);
-                          ExpandableFab.of(context).expand();
-                        },
-                        onSettingsTap: () {
-                          setState(() => _fabMode = FabMode.settings);
-                          ExpandableFab.of(context).expand();
-                        },
-                      ),
+            NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _CollapsingHeaderDelegate(
+                      folderName: folderName,
+                      topPadding: MediaQuery.of(context).padding.top,
+                      onBack: () => Navigator.pop(context),
+                      currentIndex: _currentPageIndex,
+                      onPageRequested: _requestPage,
                     ),
-
-                    // SECTION LABEL
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12, // Increased spacing
-                      ),
-                      sliver: SliverToBoxAdapter(
-                        child: const _SectionLabel(title: "Card Packs"),
-                      ),
-                    ),
-
-                    // MATERIALS LIST
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
-                      sliver: SliverToBoxAdapter(
-                        child: _StudyMaterialsList(
-                          materials: materials,
-                          folderId: widget.folderId,
-                          selectedIds: _selectedMaterialIds,
-                          onToggleSelection: _toggleMaterialSelection,
-                          isSelecting: _isSelecting,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
+                  ),
+                ];
               },
+              body: PageView(
+                controller: _pageController,
+                onPageChanged: _onPageChanged,
+                children: [
+                  // PAGE 0: CARDS
+                  _CardsPage(
+                    materials: _allMaterials,
+                    folderId: widget.folderId,
+                    selectedIds: _selectedMaterialIds,
+                    onToggleSelection: _toggleMaterialSelection,
+                    isSelecting: _isSelecting,
+                  ),
+                  // PAGE 1: SOURCES
+                  _SourcesPage(
+                    folderId: widget.folderId,
+                    sources: _currentSources ?? [],
+                  ),
+                  // PAGE 2: SETTINGS
+                  _SettingsPage(
+                    folderId: widget.folderId,
+                    folderName: folderName,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -313,21 +321,21 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
   final String folderName;
   final double topPadding;
   final VoidCallback onBack;
-  final VoidCallback onSourcesTap;
-  final VoidCallback onSettingsTap;
+  final int currentIndex;
+  final ValueChanged<int> onPageRequested;
 
   _CollapsingHeaderDelegate({
     required this.folderName,
     required this.topPadding,
     required this.onBack,
-    required this.onSourcesTap,
-    required this.onSettingsTap,
+    required this.currentIndex,
+    required this.onPageRequested,
   });
 
   static const double _collapsedBarHeight = 64.0;
 
   @override
-  double get maxExtent => 240 + topPadding; // Increased to avoid overflow
+  double get maxExtent => 280 + topPadding; // Increased to avoid overflow
 
   @override
   double get minExtent => _collapsedBarHeight + topPadding;
@@ -367,78 +375,87 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Removed redundant background (now fullscreen in main body)
-
           // ── EXPANDED CONTENT ──
           Positioned(
             left: 20,
             right: 20,
             top: topPadding + _collapsedBarHeight,
-            bottom: 0,
             child: Opacity(
               opacity: (1.0 - t * 2.5).clamp(0.0, 1.0),
               child: IgnorePointer(
                 ignoring: t > 0.4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Tagline
-                    Text(
-                      "FOLDER",
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.4),
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 2.0,
-                        fontSize: 9,
+                child: SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Tagline
+                      Text(
+                        "FOLDER",
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.4),
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.0,
+                          fontSize: 9,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Title with Accent Bar
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 4,
-                          height: 32,
-                          margin: const EdgeInsets.only(top: 4, right: 12),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            folderName,
-                            style: theme.textTheme.displaySmall?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              letterSpacing: -0.8,
-                              fontSize: 28,
+                      const SizedBox(height: 8),
+                      // Title with Accent Bar
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 32,
+                            margin: const EdgeInsets.only(top: 4, right: 12),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary,
+                              borderRadius: BorderRadius.circular(2),
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    // Header Actions
-                    Row(
-                      children: [
-                        _HeaderCircleAction(
-                          icon: FontAwesomeIcons.layerGroup,
-                          onTap: onSourcesTap,
-                          label: "Sources",
-                        ),
-                        const SizedBox(width: 16),
-                        _HeaderCircleAction(
-                          icon: FontAwesomeIcons.gear,
-                          onTap: onSettingsTap,
-                          label: "Settings",
-                        ),
-                      ],
-                    ),
-                  ],
+                          Expanded(
+                            child: Text(
+                              folderName,
+                              style: theme.textTheme.displaySmall?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: -0.8,
+                                fontSize: 28,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      // Header Actions
+                      Row(
+                        children: [
+                          _HeaderCircleAction(
+                            icon: FontAwesomeIcons.solidClone,
+                            onTap: () => onPageRequested(0),
+                            label: "Cards",
+                            isActive: currentIndex == 0,
+                          ),
+                          const SizedBox(width: 16),
+                          _HeaderCircleAction(
+                            icon: FontAwesomeIcons.layerGroup,
+                            onTap: () => onPageRequested(1),
+                            label: "Sources",
+                            isActive: currentIndex == 1,
+                          ),
+                          const SizedBox(width: 16),
+                          _HeaderCircleAction(
+                            icon: FontAwesomeIcons.gear,
+                            onTap: () => onPageRequested(2),
+                            label: "Settings",
+                            isActive: currentIndex == 2,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -482,12 +499,19 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _CompactIconButton(
+                          icon: FontAwesomeIcons.solidClone,
+                          onTap: () => onPageRequested(0),
+                          isActive: currentIndex == 0,
+                        ),
+                        _CompactIconButton(
                           icon: FontAwesomeIcons.layerGroup,
-                          onTap: onSourcesTap,
+                          onTap: () => onPageRequested(1),
+                          isActive: currentIndex == 1,
                         ),
                         _CompactIconButton(
                           icon: FontAwesomeIcons.gear,
-                          onTap: onSettingsTap,
+                          onTap: () => onPageRequested(2),
+                          isActive: currentIndex == 2,
                         ),
                       ],
                     ),
@@ -506,11 +530,13 @@ class _HeaderCircleAction extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool isActive;
 
   const _HeaderCircleAction({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.isActive = false,
   });
 
   @override
@@ -523,24 +549,46 @@ class _HeaderCircleAction extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: isActive
+                  ? theme.colorScheme.primary
+                  : Colors.white.withValues(alpha: 0.05),
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.08),
+                color: isActive
+                    ? theme.colorScheme.primary
+                    : Colors.white.withValues(alpha: 0.08),
                 width: 1,
               ),
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : [],
             ),
-            child: Center(child: FaIcon(icon, size: 16, color: Colors.white)),
+            child: Center(
+              child: FaIcon(
+                icon,
+                size: 16,
+                color: isActive ? Colors.black : Colors.white,
+              ),
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: Colors.white.withValues(alpha: 0.4),
+              color: isActive
+                  ? Colors.white
+                  : Colors.white.withValues(alpha: 0.4),
               fontWeight: FontWeight.bold,
               letterSpacing: 0.2,
             ),
@@ -554,15 +602,223 @@ class _HeaderCircleAction extends StatelessWidget {
 class _CompactIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
+  final bool isActive;
 
-  const _CompactIconButton({required this.icon, required this.onTap});
+  const _CompactIconButton({
+    required this.icon,
+    required this.onTap,
+    this.isActive = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return IconButton(
       onPressed: onTap,
-      icon: FaIcon(icon, size: 16),
-      color: Colors.white.withValues(alpha: 0.6),
+      icon: FaIcon(
+        icon,
+        size: 16,
+        color: isActive
+            ? theme.colorScheme.primary
+            : Colors.white.withValues(alpha: 0.6),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// PAGE CONTENT WIDGETS
+// ---------------------------------------------------------------------------
+
+class _CardsPage extends StatelessWidget {
+  final List<StudyMaterialItem> materials;
+  final String folderId;
+  final Set<String> selectedIds;
+  final ValueChanged<String> onToggleSelection;
+  final bool isSelecting;
+
+  const _CardsPage({
+    required this.materials,
+    required this.folderId,
+    required this.selectedIds,
+    required this.onToggleSelection,
+    required this.isSelecting,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _SectionLabel(title: "Card Packs"),
+          const SizedBox(height: 12),
+          _StudyMaterialsList(
+            materials: materials,
+            folderId: folderId,
+            selectedIds: selectedIds,
+            onToggleSelection: onToggleSelection,
+            isSelecting: isSelecting,
+          ),
+          const SizedBox(height: 100), // FAB spacing
+        ],
+      ),
+    );
+  }
+}
+
+class _SourcesPage extends StatelessWidget {
+  final String folderId;
+  final List<SourceItem> sources;
+
+  const _SourcesPage({required this.folderId, required this.sources});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const _SectionLabel(title: "Folder Sources"),
+          const SizedBox(height: 12),
+          if (sources.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 60),
+                child: Column(
+                  children: [
+                    FaIcon(
+                      FontAwesomeIcons.layerGroup,
+                      size: 32,
+                      color: cs.onSurface.withValues(alpha: 0.1),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "No sources yet",
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurface.withValues(alpha: 0.4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            ProjectListGroup(
+              backgroundColor: Colors.white.withValues(alpha: 0.05),
+              children: [
+                for (var i = 0; i < sources.length; i++)
+                  SourceListItem(
+                        title: sources[i].label,
+                        subtitle: sources[i].path ?? "Source Document",
+                        icon: FontAwesomeIcons.fileLines,
+                        initialStatus: SourceIndexingStatus.indexed,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SourcePageLoader(
+                                sourceId: sources[i].id,
+                                sourceLabel: sources[i].label,
+                              ),
+                            ),
+                          );
+                        },
+                        onDelete: () {
+                          // Handled via BLoC usually, but here we're just listing
+                        },
+                      )
+                      .animate()
+                      .fadeIn(delay: (i * 50).ms)
+                      .slideY(begin: 0.1, curve: Curves.easeOutQuad),
+              ],
+            ),
+          const SizedBox(height: 100),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsPage extends StatelessWidget {
+  final String folderId;
+  final String folderName;
+
+  const _SettingsPage({required this.folderId, required this.folderName});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const _SectionLabel(title: "Folder Settings"),
+          const SizedBox(height: 12),
+          ProjectListGroup(
+            backgroundColor: Colors.white.withValues(alpha: 0.05),
+            children: [
+              ProjectListTile.simple(
+                label: "Rename Folder",
+                icon: FontAwesomeIcons.pen,
+                showDivider: true,
+                onTap: () {},
+              ).animate().fadeIn(delay: 0.ms).slideY(begin: 0.1),
+              ProjectListTile.simple(
+                label: "Delete Folder",
+                icon: FontAwesomeIcons.trashCan,
+                isAlert: true,
+                onTap: () async {
+                  // Re-implement or share from FabSettingsView
+                  final service = context.read<StudyMaterialService>();
+                  final confirmed =
+                      await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("Delete Folder?"),
+                          content: const Text(
+                            "Are you sure you want to delete this folder? This action cannot be undone.",
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
+                              ),
+                              child: const Text("Delete"),
+                            ),
+                          ],
+                        ),
+                      ) ??
+                      false;
+
+                  if (confirmed) {
+                    await service.deleteFolder(folderId);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
+                  }
+                },
+              ).animate().fadeIn(delay: 50.ms).slideY(begin: 0.1),
+            ],
+          ),
+          const SizedBox(height: 100),
+        ],
+      ),
     );
   }
 }
@@ -636,42 +892,46 @@ class _StudyMaterialsList extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        for (final material in materials)
+        for (var i = 0; i < materials.length; i++)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: ProjectCardTile(
-              backgroundColor: theme.colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.5),
-              leading: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const FaIcon(
-                  FontAwesomeIcons.clone,
-                  size: 18,
-                  color: Colors.white,
-                ),
-              ),
-              title: Text(material.name),
-              subtitle: Text(material.description ?? "Card Pack"),
-              isSelected: selectedIds.contains(material.id),
-              onTap: isSelecting
-                  ? () => onToggleSelection(material.id)
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StudyPage(
-                            materialId: material.id,
-                            materialName: material.name,
-                          ),
+            child:
+                ProjectCardTile(
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.5),
+                      leading: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                    },
-              onLongTap: () => onToggleSelection(material.id),
-            ),
+                        child: const FaIcon(
+                          FontAwesomeIcons.clone,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                      title: Text(materials[i].name),
+                      subtitle: Text(materials[i].description ?? "Card Pack"),
+                      isSelected: selectedIds.contains(materials[i].id),
+                      onTap: isSelecting
+                          ? () => onToggleSelection(materials[i].id)
+                          : () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => StudyPage(
+                                    materialId: materials[i].id,
+                                    materialName: materials[i].name,
+                                  ),
+                                ),
+                              );
+                            },
+                      onLongTap: () => onToggleSelection(materials[i].id),
+                    )
+                    .animate()
+                    .fadeIn(delay: (i * 50).ms)
+                    .slideY(begin: 0.1, curve: Curves.easeOutQuad),
           ),
       ],
     );
