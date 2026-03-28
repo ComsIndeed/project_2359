@@ -13,12 +13,12 @@ import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/study/study_page.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
-import 'package:project_2359/features/sources_page/source_list_item.dart';
 
 import 'package:project_2359/features/folder_page/widgets/fab_generation_view.dart';
 import 'package:project_2359/features/folder_page/widgets/fab_sources_view.dart';
 import 'package:project_2359/features/folder_page/widgets/fab_settings_view.dart';
 import 'package:project_2359/features/folder_page/widgets/fab_study_options_view.dart';
+import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 
 enum FabMode { generation, sources, settings, study }
 
@@ -435,7 +435,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                           _HeaderCircleAction(
                             icon: FontAwesomeIcons.solidClone,
                             onTap: () => onPageRequested(0),
-                            label: "Cards",
+                            label: "Decks",
                             isActive: currentIndex == 0,
                           ),
                           const SizedBox(width: 16),
@@ -675,6 +675,17 @@ class _SourcesPage extends StatelessWidget {
 
   const _SourcesPage({required this.folderId, required this.sources});
 
+  IconData _getSourceIcon(String type) {
+    switch (type.toLowerCase()) {
+      case 'pdf':
+        return FontAwesomeIcons.filePdf;
+      case 'text':
+        return FontAwesomeIcons.fileLines;
+      default:
+        return FontAwesomeIcons.fileLines;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -711,33 +722,55 @@ class _SourcesPage extends StatelessWidget {
               ),
             )
           else
-            ProjectListGroup(
-              backgroundColor: Colors.white.withValues(alpha: 0.05),
+            Column(
               children: [
                 for (var i = 0; i < sources.length; i++)
-                  SourceListItem(
-                        title: sources[i].label,
-                        subtitle: sources[i].path ?? "Source Document",
-                        icon: FontAwesomeIcons.fileLines,
-                        initialStatus: SourceIndexingStatus.indexed,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SourcePageLoader(
-                                sourceId: sources[i].id,
-                                sourceLabel: sources[i].label,
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child:
+                        ProjectCardTile(
+                              backgroundColor: theme
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withValues(alpha: 0.5),
+                              minHeight: 100,
+                              title: Text(sources[i].label),
+                              subtitle: Row(
+                                children: [
+                                  FaIcon(
+                                    _getSourceIcon(sources[i].type),
+                                    size: 10,
+                                    color: cs.onSurface.withValues(alpha: 0.3),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "${sources[i].type.toUpperCase()} | ${sources[i].extractedContent?.length ?? 0} chars",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: cs.onSurface.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          );
-                        },
-                        onDelete: () {
-                          // Handled via BLoC usually, but here we're just listing
-                        },
-                      )
-                      .animate()
-                      .fadeIn(delay: (i * 50).ms)
-                      .slideY(begin: 0.1, curve: Curves.easeOutQuad),
+                              leading: const WizardSourcePagePreview(),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SourcePageLoader(
+                                      sourceId: sources[i].id,
+                                      sourceLabel: sources[i].label,
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                            .animate()
+                            .fadeIn(delay: (i * 50).ms)
+                            .slideY(begin: 0.1, curve: Curves.easeOutQuad),
+                  ),
               ],
             ),
           const SizedBox(height: 100),
@@ -755,13 +788,16 @@ class _SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const _SectionLabel(title: "Folder Settings"),
+          const _SectionLabel(title: "General"),
           const SizedBox(height: 12),
           ProjectListGroup(
             backgroundColor: Colors.white.withValues(alpha: 0.05),
@@ -771,13 +807,50 @@ class _SettingsPage extends StatelessWidget {
                 icon: FontAwesomeIcons.pen,
                 showDivider: true,
                 onTap: () {},
-              ).animate().fadeIn(delay: 0.ms).slideY(begin: 0.1),
+              ).animate().fadeIn(delay: 50.ms).slideY(begin: 0.1),
+              ProjectListTile.simple(
+                label: "Folder Icon & Color",
+                icon: FontAwesomeIcons.palette,
+                showDivider: true,
+                onTap: () {},
+              ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1),
+              ProjectListTile.simple(
+                label: "Collaboration & Sharing",
+                icon: FontAwesomeIcons.userGroup,
+                onTap: () {},
+              ).animate().fadeIn(delay: 150.ms).slideY(begin: 0.1),
+            ],
+          ),
+          const SizedBox(height: 24),
+          const _SectionLabel(title: "Content & Data"),
+          const SizedBox(height: 12),
+          ProjectListGroup(
+            backgroundColor: Colors.white.withValues(alpha: 0.05),
+            children: [
+              ProjectListTile.simple(
+                label: "Archive Folder",
+                icon: FontAwesomeIcons.boxArchive,
+                showDivider: true,
+                onTap: () {},
+              ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
+              ProjectListTile.simple(
+                label: "Download All Sources",
+                icon: FontAwesomeIcons.cloudArrowDown,
+                onTap: () {},
+              ).animate().fadeIn(delay: 250.ms).slideY(begin: 0.1),
+            ],
+          ),
+          const SizedBox(height: 24),
+          const _SectionLabel(title: "Danger Zone"),
+          const SizedBox(height: 12),
+          ProjectListGroup(
+            backgroundColor: Colors.white.withValues(alpha: 0.05),
+            children: [
               ProjectListTile.simple(
                 label: "Delete Folder",
                 icon: FontAwesomeIcons.trashCan,
                 isAlert: true,
                 onTap: () async {
-                  // Re-implement or share from FabSettingsView
                   final service = context.read<StudyMaterialService>();
                   final confirmed =
                       await showDialog<bool>(
@@ -795,9 +868,7 @@ class _SettingsPage extends StatelessWidget {
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
                               style: TextButton.styleFrom(
-                                foregroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
+                                foregroundColor: cs.error,
                               ),
                               child: const Text("Delete"),
                             ),
@@ -813,7 +884,7 @@ class _SettingsPage extends StatelessWidget {
                     }
                   }
                 },
-              ).animate().fadeIn(delay: 50.ms).slideY(begin: 0.1),
+              ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
             ],
           ),
           const SizedBox(height: 100),
@@ -899,18 +970,7 @@ class _StudyMaterialsList extends StatelessWidget {
                 ProjectCardTile(
                       backgroundColor: theme.colorScheme.surfaceContainerHighest
                           .withValues(alpha: 0.5),
-                      leading: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const FaIcon(
-                          FontAwesomeIcons.clone,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                      ),
+                      leading: const WizardFlashcardPreview(),
                       title: Text(materials[i].name),
                       subtitle: Text(materials[i].description ?? "Card Pack"),
                       isSelected: selectedIds.contains(materials[i].id),

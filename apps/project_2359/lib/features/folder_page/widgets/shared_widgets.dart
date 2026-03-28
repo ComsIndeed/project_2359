@@ -415,3 +415,55 @@ class WizardSourcePagePreview extends StatelessWidget {
     );
   }
 }
+
+class WizardFlashcardPreview extends StatelessWidget {
+  const WizardFlashcardPreview({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: 48,
+      height: 64,
+      child: Stack(
+        children: [
+          // Background card (shifted slightly)
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Container(
+              width: 40,
+              height: 54,
+              decoration: BoxDecoration(
+                color: cs.onSurface.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: cs.onSurface.withValues(alpha: 0.1)),
+              ),
+            ),
+          ),
+          // Foreground card
+          Positioned(
+            left: 0,
+            top: 0,
+            child: Container(
+              width: 40,
+              height: 54,
+              decoration: BoxDecoration(
+                color: cs.onSurface.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: cs.onSurface.withValues(alpha: 0.1)),
+              ),
+              child: Center(
+                child: FaIcon(
+                  FontAwesomeIcons.clone,
+                  size: 14,
+                  color: cs.primary.withValues(alpha: 0.3),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
