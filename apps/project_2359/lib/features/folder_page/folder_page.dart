@@ -228,59 +228,77 @@ class _FolderPageState extends State<FolderPage> {
             initialSources: _currentSources,
           );
         },
-        body: StreamBuilder<List<StudyMaterialItem>>(
-          stream: _materialsStream,
-          builder: (context, snapshot) {
-            final materials = snapshot.data ?? [];
+        body: Stack(
+          children: [
+            // Full-screen animated background
+            Positioned.fill(
+              child: SpecialBackgroundGenerator(
+                type: SpecialBackgroundType.geometricSquares,
+                seed: GenerationSeed.fromString(folderName),
+                label: folderName,
+                icon: FontAwesomeIcons.folder,
+                showBorder: false,
+                showShadow: false,
+                backgroundColor: Colors.black,
+                borderRadius: 0,
+                child: const SizedBox.expand(),
+              ),
+            ),
+            StreamBuilder<List<StudyMaterialItem>>(
+              stream: _materialsStream,
+              builder: (context, snapshot) {
+                final materials = snapshot.data ?? [];
 
-            return CustomScrollView(
-              physics: const ClampingScrollPhysics(),
-              slivers: [
-                // COLLAPSING HEADER → APPBAR
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _CollapsingHeaderDelegate(
-                    folderName: folderName,
-                    topPadding: MediaQuery.of(context).padding.top,
-                    onBack: () => Navigator.pop(context),
-                    onSourcesTap: () {
-                      setState(() => _fabMode = FabMode.sources);
-                      ExpandableFab.of(context).expand();
-                    },
-                    onSettingsTap: () {
-                      setState(() => _fabMode = FabMode.settings);
-                      ExpandableFab.of(context).expand();
-                    },
-                  ),
-                ),
-
-                // SECTION LABEL
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12, // Increased spacing
-                  ),
-                  sliver: SliverToBoxAdapter(
-                    child: const _SectionLabel(title: "Card Packs"),
-                  ),
-                ),
-
-                // MATERIALS LIST
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
-                  sliver: SliverToBoxAdapter(
-                    child: _StudyMaterialsList(
-                      materials: materials,
-                      folderId: widget.folderId,
-                      selectedIds: _selectedMaterialIds,
-                      onToggleSelection: _toggleMaterialSelection,
-                      isSelecting: _isSelecting,
+                return CustomScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  slivers: [
+                    // COLLAPSING HEADER → APPBAR
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _CollapsingHeaderDelegate(
+                        folderName: folderName,
+                        topPadding: MediaQuery.of(context).padding.top,
+                        onBack: () => Navigator.pop(context),
+                        onSourcesTap: () {
+                          setState(() => _fabMode = FabMode.sources);
+                          ExpandableFab.of(context).expand();
+                        },
+                        onSettingsTap: () {
+                          setState(() => _fabMode = FabMode.settings);
+                          ExpandableFab.of(context).expand();
+                        },
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            );
-          },
+
+                    // SECTION LABEL
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12, // Increased spacing
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: const _SectionLabel(title: "Card Packs"),
+                      ),
+                    ),
+
+                    // MATERIALS LIST
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+                      sliver: SliverToBoxAdapter(
+                        child: _StudyMaterialsList(
+                          materials: materials,
+                          folderId: widget.folderId,
+                          selectedIds: _selectedMaterialIds,
+                          onToggleSelection: _toggleMaterialSelection,
+                          isSelecting: _isSelecting,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -349,27 +367,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // ── BACKGROUND DECORATION (SQUARES PATTERN) ──
-          Positioned(
-            right: -20,
-            top: -20,
-            bottom: -20,
-            width: 300,
-            child: Opacity(
-              opacity: (1.0 - t).clamp(0.0, 1.0),
-              child: SpecialBackgroundGenerator(
-                type: SpecialBackgroundType.geometricSquares,
-                seed: GenerationSeed.fromString(folderName),
-                label: folderName,
-                icon: FontAwesomeIcons.folder,
-                showBorder: false,
-                showShadow: false,
-                backgroundColor: theme.scaffoldBackgroundColor,
-                borderRadius: 0,
-                child: const SizedBox.expand(),
-              ),
-            ),
-          ),
+          // Removed redundant background (now fullscreen in main body)
 
           // ── EXPANDED CONTENT ──
           Positioned(
