@@ -13,14 +13,8 @@ import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/study/study_page.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
-
-import 'package:project_2359/features/folder_page/widgets/fab_generation_view.dart';
-import 'package:project_2359/features/folder_page/widgets/fab_sources_view.dart';
-import 'package:project_2359/features/folder_page/widgets/fab_settings_view.dart';
-import 'package:project_2359/features/folder_page/widgets/fab_study_options_view.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
-
-enum FabMode { generation, sources, settings, study }
+import 'package:project_2359/features/card_creation_page/card_creation_page.dart';
 
 class FolderPage extends StatefulWidget {
   final String folderId;
@@ -43,7 +37,6 @@ class _FolderPageState extends State<FolderPage> {
   StreamSubscription? _materialSub;
   List<SourceItem>? _currentSources;
   StreamSubscription? _sourcesSub;
-  FabMode _fabMode = FabMode.generation;
   final PageController _pageController = PageController();
   int _currentPageIndex = 0;
 
@@ -208,7 +201,7 @@ class _FolderPageState extends State<FolderPage> {
                 selectedMaterials.every((m) => !m.isPinned);
             final isMixed = !allPinned && !allUnpinned;
 
-            return _SelectionActionBar(
+            return SelectionActionBar(
               selectedCount: _selectedMaterialIds.length,
               onClose: _clearSelection,
               onPin: () => _handlePinSelected(pin: true),
@@ -220,8 +213,13 @@ class _FolderPageState extends State<FolderPage> {
           }
           return InkWell(
             onTap: () {
-              setState(() => _fabMode = FabMode.generation);
-              expand();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      CardCreationPage(folderId: widget.folderId),
+                ),
+              );
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -242,14 +240,8 @@ class _FolderPageState extends State<FolderPage> {
             ),
           );
         },
-        expandedBuilder: (context, isOpen, expand, close) {
-          return _FolderFabContent(
-            folderId: widget.folderId,
-            folderName: folderName,
-            mode: _fabMode,
-            initialSources: _currentSources,
-          );
-        },
+        expandedBuilder: (context, isOpen, expand, close) =>
+            const SizedBox.shrink(),
         body: Stack(
           children: [
             // Full-screen animated background
@@ -1022,179 +1014,4 @@ class _SectionLabel extends StatelessWidget {
 // DELETED _SourcesBottomSheet
 
 // ---------------------------------------------------------------------------
-// COMPACT GENERATION WIZARD CONTENT
-// ---------------------------------------------------------------------------
-
-class _FolderFabContent extends StatefulWidget {
-  final String folderId;
-  final String folderName;
-  final FabMode mode;
-  final List<SourceItem>? initialSources;
-
-  const _FolderFabContent({
-    required this.folderId,
-    required this.folderName,
-    required this.mode,
-    this.initialSources,
-  });
-
-  @override
-  State<_FolderFabContent> createState() => _FolderFabContentState();
-}
-
-class _FolderFabContentState extends State<_FolderFabContent> {
-  late FabMode _currentMode;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentMode = widget.mode;
-  }
-
-  @override
-  void didUpdateWidget(_FolderFabContent oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.mode != widget.mode) {
-      setState(() {
-        _currentMode = widget.mode;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    switch (_currentMode) {
-      case FabMode.generation:
-        return FabGenerationView(
-          folderId: widget.folderId,
-          initialSources: widget.initialSources,
-        );
-      case FabMode.sources:
-        return FabSourcesView(
-          folderId: widget.folderId,
-          initialSources: widget.initialSources,
-        );
-      case FabMode.settings:
-        return FabSettingsView(
-          folderId: widget.folderId,
-          folderName: widget.folderName,
-        );
-      case FabMode.study:
-        return FabStudyOptionsView(folderId: widget.folderId);
-    }
-  }
-}
-
-class _SelectionActionBar extends StatelessWidget {
-  final int selectedCount;
-  final VoidCallback onClose;
-  final VoidCallback onPin;
-  final VoidCallback onUnpin;
-  final VoidCallback onDelete;
-  final bool isUnpin;
-  final bool isPinDisabled;
-
-  const _SelectionActionBar({
-    required this.selectedCount,
-    required this.onClose,
-    required this.onPin,
-    required this.onUnpin,
-    required this.onDelete,
-    this.isUnpin = false,
-    this.isPinDisabled = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            onPressed: onClose,
-            icon: const FaIcon(FontAwesomeIcons.xmark, size: 16),
-            visualDensity: VisualDensity.compact,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            "$selectedCount Selected",
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(width: 16),
-          _BarAction(
-            icon: isUnpin
-                ? FontAwesomeIcons.thumbtack
-                : FontAwesomeIcons.thumbtack,
-            label: isUnpin ? "Unpin" : "Pin",
-            onTap: isUnpin ? onUnpin : onPin,
-            isDisabled: isPinDisabled,
-          ),
-          const SizedBox(width: 8),
-          _BarAction(
-            icon: FontAwesomeIcons.trashCan,
-            label: "Delete",
-            onTap: onDelete,
-            isDestructive: true,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BarAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isDestructive;
-  final bool isDisabled;
-
-  const _BarAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.isDestructive = false,
-    this.isDisabled = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = isDisabled
-        ? theme.colorScheme.onSurface.withValues(alpha: 0.2)
-        : isDestructive
-        ? theme.colorScheme.error
-        : theme.colorScheme.onSurface;
-
-    return InkWell(
-      onTap: isDisabled ? null : onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FaIcon(icon, size: 14, color: color),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// SELECTION ACTION BAR

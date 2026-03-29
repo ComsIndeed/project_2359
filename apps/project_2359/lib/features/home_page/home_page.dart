@@ -18,18 +18,11 @@ import 'package:project_2359/core/utils/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:project_2359/features/study/study_page.dart';
 import 'package:project_2359/features/source_page/source_page.dart';
-import 'package:project_2359/features/folder_page/widgets/fab_generation_view.dart';
-import 'package:project_2359/features/folder_page/widgets/fab_sources_view.dart';
 import 'package:project_2359/layouts/landscape/home_page_landscape_layout.dart';
+import 'package:project_2359/features/card_creation_page/card_creation_page.dart';
+import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 
-enum MainContentType {
-  empty,
-  study,
-  generation,
-  sources,
-  settings,
-  sourceDetail,
-}
+enum MainContentType { empty, study, sourceDetail, settings }
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -361,7 +354,18 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: HomePageLandscapeLayout(
-        header: const _HomeHeader(isLandscape: true),
+        header: _HomeHeader(
+          isLandscape: true,
+          onPlusTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    CardCreationPage(folderId: _selectedFolderId ?? "default"),
+              ),
+            );
+          },
+        ),
         sidebarA: _buildSidebarA(),
         sidebarB: _selectedFolderId != null ? _buildSidebarB() : null,
         mainContent: _buildMainContent(),
@@ -381,6 +385,7 @@ class _HomePageState extends State<HomePage> {
           stream: _pinnedFoldersStream,
           searchQuery: _searchQuery,
           selectedIds: _selectedFolderIds,
+          activeFolderId: _selectedFolderId,
           onToggleSelection: _toggleFolderSelection,
           onSelect: (id) => setState(() {
             _selectedFolderId = id;
@@ -396,6 +401,7 @@ class _HomePageState extends State<HomePage> {
           stream: _foldersStream,
           searchQuery: _searchQuery,
           selectedIds: _selectedFolderIds,
+          activeFolderId: _selectedFolderId,
           onToggleSelection: _toggleFolderSelection,
           onSelect: (id) => setState(() {
             _selectedFolderId = id;
@@ -418,6 +424,10 @@ class _HomePageState extends State<HomePage> {
       _selectedFolderId!,
     );
 
+    final folderName = _allFolders.any((f) => f.id == _selectedFolderId)
+        ? _allFolders.firstWhere((f) => f.id == _selectedFolderId).name
+        : "Folder Contents";
+
     return Container(
       width: 320,
       decoration: BoxDecoration(
@@ -436,7 +446,8 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Expanded(
                   child: Text(
-                    "Folder Contents",
+                    folderName,
+                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                       letterSpacing: -0.5,
@@ -446,9 +457,20 @@ class _HomePageState extends State<HomePage> {
                 ),
                 IconButton(
                   onPressed: () {
-                    _navigateToMain(MainContentType.generation);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            CardCreationPage(folderId: _selectedFolderId!),
+                      ),
+                    );
                   },
-                  icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
+                  icon: const FaIcon(FontAwesomeIcons.circlePlus, size: 18),
+                  style: IconButton.styleFrom(
+                    backgroundColor: theme.colorScheme.onSurface.withValues(
+                      alpha: 0.05,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -478,17 +500,17 @@ class _HomePageState extends State<HomePage> {
                                             m.id,
                                           ),
                                       child: ProjectCardTile(
+                                        backgroundColor: theme
+                                            .colorScheme
+                                            .surfaceContainerHighest
+                                            .withValues(alpha: 0.5),
                                         title: Text(m.name),
                                         subtitle: Text(
                                           m.description ?? "Card Pack",
                                         ),
                                         isSelected: _selectedMaterialId == m.id,
                                         isCompact: true,
-                                        leading: FaIcon(
-                                          FontAwesomeIcons.layerGroup,
-                                          size: 18,
-                                          color: theme.colorScheme.primary,
-                                        ),
+                                        leading: const WizardFlashcardPreview(),
                                         onTap: () {
                                           _navigateToMain(
                                             MainContentType.study,
@@ -537,17 +559,17 @@ class _HomePageState extends State<HomePage> {
                                         s.id,
                                       ),
                                   child: ProjectCardTile(
+                                    backgroundColor: theme
+                                        .colorScheme
+                                        .surfaceContainerHighest
+                                        .withValues(alpha: 0.5),
                                     title: Text(s.label),
                                     subtitle: Text(
                                       "${s.type.toUpperCase()} | ${s.extractedContent?.length ?? 0} chars",
                                     ),
                                     isSelected: false,
                                     isCompact: true,
-                                    leading: FaIcon(
-                                      FontAwesomeIcons.fileLines,
-                                      size: 18,
-                                      color: theme.colorScheme.secondary,
-                                    ),
+                                    leading: const WizardSourcePagePreview(),
                                     onTap: () {
                                       _loadSourceAndNavigate(s);
                                     },
@@ -592,32 +614,12 @@ class _HomePageState extends State<HomePage> {
           );
         }
         break;
-      case MainContentType.generation:
-        if (_selectedFolderId != null) {
-          return ClipRRect(
-            child: Scaffold(
-              backgroundColor: theme.scaffoldBackgroundColor,
-              body: FabGenerationView(folderId: _selectedFolderId!),
-            ),
-          );
-        }
-        break;
       case MainContentType.sourceDetail:
         if (_selectedSourceBlob != null) {
           return SourcePage(
             fileBytes: _selectedSourceBlob!,
             title: _selectedSourceId,
             showBackButton: !isLandscape,
-          );
-        }
-        break;
-      case MainContentType.sources:
-        if (_selectedFolderId != null) {
-          return ClipRRect(
-            child: Scaffold(
-              backgroundColor: theme.scaffoldBackgroundColor,
-              body: FabSourcesView(folderId: _selectedFolderId!),
-            ),
           );
         }
         break;
@@ -816,10 +818,11 @@ class _PinnedFoldersSection extends StatelessWidget {
   final Stream<List<(StudyFolderItem, int)>> stream;
   final String searchQuery;
   final Set<String> selectedIds;
-  final ValueChanged<String> onToggleSelection;
-  final ValueChanged<String> onSelect;
+  final Function(String) onToggleSelection;
+  final Function(String) onSelect;
   final bool isSelecting;
   final bool isLandscape;
+  final String? activeFolderId;
 
   const _PinnedFoldersSection({
     required this.stream,
@@ -829,6 +832,7 @@ class _PinnedFoldersSection extends StatelessWidget {
     required this.onSelect,
     required this.isSelecting,
     this.isLandscape = false,
+    this.activeFolderId,
   });
 
   @override
@@ -893,7 +897,9 @@ class _PinnedFoldersSection extends StatelessWidget {
                         Text("${pair.$2} Card${pair.$2 == 1 ? '' : 's'}"),
                       ],
                     ),
-                    isSelected: selectedIds.contains(pair.$1.id),
+                    isSelected:
+                        selectedIds.contains(pair.$1.id) ||
+                        (isLandscape && activeFolderId == pair.$1.id),
                     isCompact: isLandscape,
                     onTap: isSelecting
                         ? () => onToggleSelection(pair.$1.id)
@@ -930,10 +936,11 @@ class _FolderList extends StatelessWidget {
   final String searchQuery;
   final Color? backgroundColor;
   final Set<String> selectedIds;
-  final ValueChanged<String> onToggleSelection;
-  final ValueChanged<String> onSelect;
+  final Function(String) onToggleSelection;
+  final Function(String) onSelect;
   final bool isSelecting;
   final bool isLandscape;
+  final String? activeFolderId;
 
   const _FolderList({
     required this.stream,
@@ -944,6 +951,7 @@ class _FolderList extends StatelessWidget {
     required this.onSelect,
     required this.isSelecting,
     this.isLandscape = false,
+    this.activeFolderId,
   });
 
   @override
@@ -1023,7 +1031,9 @@ class _FolderList extends StatelessWidget {
                         Text("${pair.$2} Card${pair.$2 == 1 ? '' : 's'}"),
                       ],
                     ),
-                    isSelected: selectedIds.contains(pair.$1.id),
+                    isSelected:
+                        selectedIds.contains(pair.$1.id) ||
+                        (isLandscape && activeFolderId == pair.$1.id),
                     isCompact: isLandscape,
                     onTap: isSelecting
                         ? () => onToggleSelection(pair.$1.id)
@@ -1057,7 +1067,8 @@ class _FolderList extends StatelessWidget {
 
 class _HomeHeader extends StatelessWidget {
   final bool isLandscape;
-  const _HomeHeader({this.isLandscape = false});
+  final VoidCallback? onPlusTap;
+  const _HomeHeader({this.isLandscape = false, this.onPlusTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1090,6 +1101,16 @@ class _HomeHeader extends StatelessWidget {
         ),
         // Settings Action
         if (!isLandscape) const _HeaderActions(),
+        if (isLandscape)
+          IconButton(
+            onPressed: onPlusTap,
+            icon: const FaIcon(FontAwesomeIcons.circlePlus, size: 18),
+            style: IconButton.styleFrom(
+              backgroundColor: theme.colorScheme.onSurface.withValues(
+                alpha: 0.05,
+              ),
+            ),
+          ),
       ],
     );
   }

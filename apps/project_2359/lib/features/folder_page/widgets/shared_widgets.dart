@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_2359/core/widgets/sensor_reactive_border.dart';
+import 'package:project_2359/app_database.dart';
+import 'package:project_2359/features/source_page/source_page.dart';
+import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:provider/provider.dart';
 
 class SectionLabel extends StatelessWidget {
   final String title;
@@ -464,6 +468,64 @@ class WizardFlashcardPreview extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class SourcePageLoader extends StatefulWidget {
+  final String sourceId;
+  final String sourceLabel;
+  final bool showBackButton;
+
+  const SourcePageLoader({
+    super.key,
+    required this.sourceId,
+    required this.sourceLabel,
+    this.showBackButton = true,
+  });
+
+  @override
+  State<SourcePageLoader> createState() => _SourcePageLoaderState();
+}
+
+class _SourcePageLoaderState extends State<SourcePageLoader> {
+  SourceItemBlob? _blob;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBlob();
+  }
+
+  Future<void> _loadBlob() async {
+    final sourceService = SourceService(context.read<AppDatabase>());
+    final blob = await sourceService.getSourceBlobBySourceId(widget.sourceId);
+    if (mounted) {
+      setState(() {
+        _blob = blob;
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (_blob == null) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: Text("File data not found")),
+      );
+    }
+
+    return SourcePage(
+      fileBytes: _blob!.bytes,
+      title: widget.sourceLabel,
+      showBackButton: widget.showBackButton,
     );
   }
 }
