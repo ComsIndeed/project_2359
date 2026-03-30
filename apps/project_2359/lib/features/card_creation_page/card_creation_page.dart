@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -20,6 +21,8 @@ class CardCreationPage extends StatefulWidget {
 }
 
 class _CardCreationPageState extends State<CardCreationPage> {
+  Uint8List? _pdfBytes;
+  String? _pdfTitle;
   PdfDocument? _document;
   List<SourceItem>? _availableSources;
   StreamSubscription? _sourcesSub;
@@ -58,9 +61,9 @@ class _CardCreationPageState extends State<CardCreationPage> {
       final service = context.read<SourceService>();
       final blob = await service.getSourceBlobBySourceId(source.id);
       if (blob != null && mounted) {
-        final doc = await PdfDocument.openData(blob.bytes);
         setState(() {
-          _document = doc;
+          _pdfBytes = blob.bytes;
+          _pdfTitle = source.label;
         });
       }
     } catch (e) {
@@ -76,65 +79,49 @@ class _CardCreationPageState extends State<CardCreationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final topPadding = MediaQuery.of(context).padding.top;
-
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          _buildPdfView(),
-          if (_isLoading) const Center(child: CircularProgressIndicator()),
-
-          // Back Button
-          Positioned(
-            top: topPadding,
-            left: 4,
-            child: IconButton(
-              icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 20),
-              onPressed: () {
-                if (_document != null) {
-                  setState(() => _document = null);
-                } else {
-                  Navigator.pop(context);
-                }
-              },
-              color: Colors.white,
-            ),
-          ),
-        ],
+      appBar: AppBar(
+        title: Text(_pdfTitle ?? 'Create Card'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (_pdfBytes != null) {
+              setState(() {
+                _pdfBytes = null;
+                _pdfTitle = null;
+                _document = null;
+              });
+            } else {
+              Navigator.pop(context);
+            }
+          },
+        ),
       ),
+      body: _buildPdfView(),
     );
   }
 
   Widget _buildPdfView() {
-    if (_document == null) {
-      final theme = Theme.of(context);
-      final cs = theme.colorScheme;
-
-      return _buildPdfList(cs, theme);
+    if (_pdfBytes == null) {
+      return _buildPdfList(Theme.of(context).colorScheme, Theme.of(context));
     }
 
-    return PageView.builder(
-      itemCount: _document!.pages.length,
-      scrollDirection: Axis.vertical,
-      itemBuilder: (context, index) {
-        return _buildPdfSlide(index);
-      },
+    return PdfViewer.data(
+      _pdfBytes!,
+      sourceName: _pdfTitle ?? 'pdf',
+      params: PdfViewerParams(
+        onViewerReady: (doc, controller) {
+          if (mounted) {
+            setState(() {
+              _document = doc;
+            });
+          }
+        },
+        backgroundColor: Colors.black,
+      ),
     );
   }
-
-  Widget _buildPdfSlide(int index) => Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Container(
-      decoration: ShapeDecoration(
-        shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadius.circular(32),
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: PdfPageView(document: _document!, pageNumber: index + 1),
-    ),
-  );
 
   SingleChildScrollView _buildPdfList(ColorScheme cs, ThemeData theme) {
     final topPadding = MediaQuery.of(context).padding.top;
