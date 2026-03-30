@@ -1,7 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../core/widgets/expandable_container.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pdfrx/pdfrx.dart';
+import 'package:provider/provider.dart';
+
+import 'package:project_2359/app_database.dart';
+import 'package:project_2359/core/widgets/project_card_tile.dart';
+import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
+import 'package:project_2359/features/sources_page/source_service.dart';
 
 class CardCreationPage extends StatefulWidget {
   final String folderId;
@@ -12,241 +20,220 @@ class CardCreationPage extends StatefulWidget {
 }
 
 class _CardCreationPageState extends State<CardCreationPage> {
-  ExpandableContainerMode _mode = ExpandableContainerMode.dynamic;
-
-  double _freeformHeightFactor = 0.45;
-  final double _freeformWidthFactor = 0.35;
+  PdfDocument? _document;
+  List<SourceItem>? _availableSources;
+  StreamSubscription? _sourcesSub;
+  bool _isLoading = false;
 
   @override
-  Widget build(BuildContext context) {
-    final breakpoints = ResponsiveBreakpoints.of(context);
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
-    final isMobile = breakpoints.isMobile || breakpoints.isPhone;
-
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: _buildAppBar(context),
-      body: ExpandableContainer(
-        mode: _mode,
-        isLandscape: isLandscape && !isMobile,
-        freeformHeightFactor: _freeformHeightFactor,
-        freeformWidthFactor: _freeformWidthFactor,
-        onCollapse: () =>
-            setState(() => _mode = ExpandableContainerMode.collapsed),
-        onExpand: () => setState(() => _mode = ExpandableContainerMode.dynamic),
-        body: _buildMainContent(),
-        collapsedChild: _buildDock(isVertical: isLandscape && !isMobile),
-        expandedChild: _buildToolsContent(isLandscape && !isMobile),
-      ),
-    );
+  void initState() {
+    super.initState();
+    _initSources();
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      title: Text(
-        'Card Creation (${widget.folderId})',
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(
-            _mode == ExpandableContainerMode.fullscreen
-                ? Icons.fullscreen_exit
-                : Icons.fullscreen,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            setState(() {
-              if (_mode == ExpandableContainerMode.fullscreen) {
-                _mode = ExpandableContainerMode.dynamic;
-              } else {
-                _mode = ExpandableContainerMode.fullscreen;
-              }
-            });
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.save_outlined, color: Colors.white),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.more_vert, color: Colors.white),
-          onPressed: () {},
-        ),
-      ],
-    );
+  @override
+  void dispose() {
+    _sourcesSub?.cancel();
+    super.dispose();
   }
 
-  Widget _buildMainContent() {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Colors.blue.shade900, Colors.purple.shade900, Colors.black],
-        ),
-      ),
-      child: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.image_outlined, size: 64, color: Colors.white54),
-            SizedBox(height: 16),
-            Text(
-              'Main Preview Area',
-              style: TextStyle(color: Colors.white70, fontSize: 18),
-            ),
-          ],
-        ),
-      ),
-    ).animate().fadeIn(duration: 800.ms).scale(begin: const Offset(0.95, 0.95));
+  void _initSources() {
+    final service = context.read<SourceService>();
+    _sourcesSub = service.watchSourcesByFolderId(widget.folderId).listen((
+      sources,
+    ) {
+      if (mounted) {
+        setState(() {
+          _availableSources = sources;
+        });
+      }
+    });
   }
 
-  Widget _buildToolsContent(bool isVertical) {
-    return Column(
-      children: [
-        if (!isVertical) _buildGrabber(),
-        if (isVertical) const SizedBox(height: 64), // Space from top if sidebar
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                isVertical ? 'Tool Sidebar' : 'Content Tools',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  isVertical ? Icons.chevron_right : Icons.keyboard_arrow_down,
-                ),
-                onPressed: () =>
-                    setState(() => _mode = ExpandableContainerMode.collapsed),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: 15,
-            itemBuilder: (context, index) => ListTile(
-              leading: Icon(
-                _getToolIcon(index),
-                color: Theme.of(context).primaryColor,
-              ),
-              title: Text('Creation Tool Item $index'),
-              subtitle: Text('Modify element $index'),
-              onTap: () {},
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  Future<void> _loadSource(SourceItem source) async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
 
-  IconData _getToolIcon(int index) {
-    switch (index % 4) {
-      case 0:
-        return Icons.text_fields;
-      case 1:
-        return Icons.palette;
-      case 2:
-        return Icons.image;
-      case 3:
-        return Icons.animation;
-      default:
-        return Icons.edit;
+    try {
+      final service = context.read<SourceService>();
+      final blob = await service.getSourceBlobBySourceId(source.id);
+      if (blob != null && mounted) {
+        final doc = await PdfDocument.openData(blob.bytes);
+        setState(() {
+          _document = doc;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load PDF: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Widget _buildDock({required bool isVertical}) {
-    return InkWell(
-      onTap: () => setState(() => _mode = ExpandableContainerMode.dynamic),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: isVertical
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.auto_awesome_motion,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                    onPressed: () =>
-                        setState(() => _mode = ExpandableContainerMode.dynamic),
-                  ),
-                  const SizedBox(height: 12),
-                  const Icon(Icons.palette, color: Colors.white70),
-                  const SizedBox(height: 12),
-                  const Icon(Icons.text_fields, color: Colors.white70),
-                ],
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.auto_awesome_motion,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                    onPressed: () =>
-                        setState(() => _mode = ExpandableContainerMode.dynamic),
-                  ),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.palette, color: Colors.white70),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.text_fields, color: Colors.white70),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.image_search, color: Colors.white70),
-                ],
-              ),
+  @override
+  Widget build(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          _buildPdfView(),
+          if (_isLoading) const Center(child: CircularProgressIndicator()),
+
+          // Back Button
+          Positioned(
+            top: topPadding,
+            left: 4,
+            child: IconButton(
+              icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 20),
+              onPressed: () {
+                if (_document != null) {
+                  setState(() => _document = null);
+                } else {
+                  Navigator.pop(context);
+                }
+              },
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildGrabber() {
-    return GestureDetector(
-      onVerticalDragUpdate: (details) {
-        setState(() {
-          _mode = ExpandableContainerMode.freeform;
-          _freeformHeightFactor -=
-              details.delta.dy / MediaQuery.of(context).size.height;
-          _freeformHeightFactor = _freeformHeightFactor.clamp(0.2, 0.9);
-        });
+  Widget _buildPdfView() {
+    if (_document == null) {
+      final theme = Theme.of(context);
+      final cs = theme.colorScheme;
+
+      return _buildPdfList(cs, theme);
+    }
+
+    return PageView.builder(
+      itemCount: _document!.pages.length,
+      scrollDirection: Axis.vertical,
+      itemBuilder: (context, index) {
+        return _buildPdfSlide(index);
       },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        color: Colors.transparent,
-        child: Center(
-          child: Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(2),
+    );
+  }
+
+  Widget _buildPdfSlide(int index) => Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Container(
+      decoration: ShapeDecoration(
+        shape: RoundedSuperellipseBorder(
+          borderRadius: BorderRadius.circular(32),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: PdfPageView(document: _document!, pageNumber: index + 1),
+    ),
+  );
+
+  SingleChildScrollView _buildPdfList(ColorScheme cs, ThemeData theme) {
+    final topPadding = MediaQuery.of(context).padding.top;
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(20, topPadding + 64, 20, 100),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Simplified Header
+          Center(
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: cs.onSurface.withValues(alpha: 0.03),
+                    shape: BoxShape.circle,
+                  ),
+                  child:
+                      FaIcon(
+                            FontAwesomeIcons.filePdf,
+                            size: 28,
+                            color: cs.onSurface.withValues(alpha: 0.1),
+                          )
+                          .animate(onPlay: (c) => c.repeat())
+                          .shimmer(
+                            duration: 2.seconds,
+                            color: cs.primary.withValues(alpha: 0.1),
+                          ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "Create from Source",
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                    color: cs.onSurface.withValues(alpha: 0.9),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Choose a document from this folder",
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurface.withValues(alpha: 0.4),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
+          const SizedBox(height: 32),
+
+          const SectionLabel(title: "Select Document"),
+          const SizedBox(height: 16),
+
+          if (_availableSources == null)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(40.0),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (_availableSources!.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Text(
+                  "No sources in this folder",
+                  style: TextStyle(color: cs.onSurface.withValues(alpha: 0.3)),
+                ),
+              ),
+            )
+          else
+            Column(
+              children: [
+                for (var i = 0; i < _availableSources!.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child:
+                        ProjectCardTile(
+                              backgroundColor: cs.surfaceContainerHighest
+                                  .withValues(alpha: 0.5),
+                              minHeight: 100,
+                              title: Text(_availableSources![i].label),
+                              subtitle: Text(
+                                "${_availableSources![i].type.toUpperCase()} | ${_availableSources![i].extractedContent?.length ?? 0} chars",
+                              ),
+                              leading: const WizardSourcePagePreview(),
+                              onTap: () => _loadSource(_availableSources![i]),
+                            )
+                            .animate()
+                            .fadeIn(delay: (i * 100).ms)
+                            .slideY(begin: 0.1, curve: Curves.easeOutQuad),
+                  ),
+              ],
+            ),
+        ],
       ),
     );
   }

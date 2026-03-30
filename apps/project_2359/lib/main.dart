@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
+import 'package:pdfrx/pdfrx.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/study_material_service.dart';
 import 'package:project_2359/core/study_scheduler_service.dart';
@@ -18,6 +19,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   AppLogger.info('--- Application starting ---', tag: 'Main');
+
+  pdfrxInitialize();
+  AppLogger.info('PDFRX initialized', tag: 'Main');
 
   AppLogger.info('Initializing Supabase...', tag: 'Main');
   await Supabase.initialize(
