@@ -11,13 +11,35 @@ import 'package:pdfrx/pdfrx.dart';
 class PdfTextBoundaryDetector {
   const PdfTextBoundaryDetector._();
 
-  /// Algorithm Version: 1.2.1
-  /// Updated: 2026-03-31 21:44
+  /// Algorithm Version: 1.3.0
+  /// Updated: 2026-03-31 21:53
   /// NOTE: Increment this version whenever the heuristic logic is modified.
-  static const algorithmVersion = '1.2.1-20260331';
+  static const algorithmVersion = '1.3.0-20260331';
 
   /// Ratio threshold for font size similarity.
-  static const _fontSizeRatioThreshold = 1.35;
+  /// Relaxed to 1.6 to allow for Bold/Style variations and sub-headers.
+  static const _fontSizeRatioThreshold = 1.6;
+
+  /// Common abbreviations that contain periods but do NOT end sentences.
+  static const _abbreviations = {
+    'et al.',
+    'e.g.',
+    'i.e.',
+    'vs.',
+    'prof.',
+    'dr.',
+    'mr.',
+    'ms.',
+    'mrs.',
+    'inc.',
+    'ltd.',
+    'approx.',
+    'cf.',
+    'ibid.',
+    'op. cit.',
+    'vol.',
+    'no.',
+  };
 
   /// Tolerance for line-spacing consistency (as percentage of line height).
   /// If spacing changes by more than this, we check for paragraph breaks.
@@ -80,6 +102,24 @@ class PdfTextBoundaryDetector {
       return false;
     }
 
+    // Abbreviation check (Academic): if the text preceding '.' is "et al", "dr", etc.
+    if (c == 0x2E) {
+      for (final abbrev in _abbreviations) {
+        final lastBit = abbrev.substring(0, abbrev.length - 1);
+        if (i >= lastBit.length) {
+          final prefix = s.substring(i - lastBit.length, i).toLowerCase();
+          if (prefix == lastBit.toLowerCase()) {
+            // Check that it's a word boundary before the abbreviation.
+            if (i - lastBit.length == 0 ||
+                _isWhitespace(s.codeUnitAt(i - lastBit.length - 1)) ||
+                s.codeUnitAt(i - lastBit.length - 1) == 0x28 /* '(' */ ) {
+              return false;
+            }
+          }
+        }
+      }
+    }
+
     // Must be followed by whitespace, uppercase, or end-of-text.
     if (i + 1 >= s.length) return true;
     final next = s.codeUnitAt(i + 1);
@@ -137,26 +177,46 @@ class PdfTextBoundaryDetector {
     return false;
   }
 
-  /// Groups fragments by **line-spacing consistency** and **alignment**
-  /// to find the paragraph block at [charIndex].
+  /// TODO: MISSION LOG - Improving PDF Text Selection
+  /// Current Heuristics:
+  /// - Geometric Pre-Sorting (v1.3.0): Since PDF stream order != visual order,
+  ///   we sort fragments by [top-desc, left-asc] before grouping.
+  /// - Line-Based Consistency (v1.2.x): We group segments into lines, then
+  ///   detect paragraph breaks via vertical spacing "massive leaps".
+  /// - Asymmetric Spacing (v1.2.1): Only ignore spacing fluctuations that
+  ///   are smaller than the current trend. Significant increases (leaps)
+  ///   are forced breaks.
+  /// - Short-Line Trigger (v1.2.1): Break when a line ends early and gap increases.
+  /// - Formatting Immunity (v1.2.2): Ignore font size shifts on the SAME line.
+  /// - Abbreviation Check (v1.3.0): academic citations like 'et al.' don't
+  ///   break sentences.
+  /// - KNOWN LIMITATION: If a first line has a different point size (header),
+  ///   it might still break if it's significantly larger (>60%) than body.
   static (int, int) _findFragmentBlockBounds(PdfPageText text, int charIndex) {
-    final fragments = text.fragments;
+    var fragments = List<PdfPageTextFragment>.from(text.fragments);
     if (fragments.isEmpty) return (0, text.fullText.length);
 
+    // SORT GEOMETRICALLY: Essential because PDF data streams are often
+    // out of visual order. Visual consistency depends on geometric order.
+    fragments.sort((a, b) {
+      final yComp = b.bounds.top.compareTo(a.bounds.top);
+      if (yComp != 0) return yComp;
+      return a.bounds.left.compareTo(b.bounds.left);
+    });
+
     final targetFragIdx = text.getFragmentIndexForTextIndex(charIndex);
-    if (targetFragIdx < 0 || targetFragIdx >= fragments.length) {
-      return (0, text.fullText.length);
-    }
+    // Find the fragment in our SORTED list that matches the original fragment.
+    final originalTarget =
+        text.fragments[targetFragIdx < 0 ? 0 : targetFragIdx];
 
     // 1. Group ALL fragments on the page into logical lines.
     final lines = _groupIntoLines(fragments);
     if (lines.isEmpty) return (0, text.fullText.length);
 
-    // 2. Find which line contains our target fragment.
-    final targetFragment = fragments[targetFragIdx];
+    // 2. Find which line contains our original target fragment.
     int lineIdx = -1;
     for (var i = 0; i < lines.length; i++) {
-      if (lines[i].fragments.contains(targetFragment)) {
+      if (lines[i].fragments.contains(originalTarget)) {
         lineIdx = i;
         break;
       }
@@ -282,12 +342,12 @@ class PdfTextBoundaryDetector {
       final f = fragments[i];
 
       // Two fragments are on the same line if they overlap vertically
-      // by more than 50% of the smaller fragment's height.
+      // even slightly (15% height). This handles Bold/Italic baseline shifts.
       final h1 = (currentBounds.top - currentBounds.bottom).abs();
       final h2 = (f.bounds.top - f.bounds.bottom).abs();
       final overlap = _verticalOverlap(currentBounds, f.bounds);
 
-      if (overlap > (h1 < h2 ? h1 : h2) * 0.5) {
+      if (overlap > (h1 < h2 ? h1 : h2) * 0.15) {
         currentFragments.add(f);
         currentBounds = _union(currentBounds, f.bounds);
       } else {
