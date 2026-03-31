@@ -11,33 +11,23 @@ import 'package:pdfrx/pdfrx.dart';
 class PdfTextBoundaryDetector {
   const PdfTextBoundaryDetector._();
 
-  /// Ratio threshold: if a fragment's char height differs from the
-  /// reference by more than this factor, it's considered a different
-  /// text block (e.g. header vs body).
+  /// Algorithm Version: 1.2.0
+  /// Updated: 2026-03-31 21:35
+  /// NOTE: Increment this version whenever the heuristic logic is modified.
+  static const algorithmVersion = '1.2.0-20260331';
+
+  /// Ratio threshold for font size similarity.
   static const _fontSizeRatioThreshold = 1.35;
 
-  /// Maximum Y-gap (in multiples of reference line height) allowed
-  /// between consecutive fragments within the same paragraph.
-  /// Normal line spacing is ~1.2–1.5× font size, so 2.5× handles
-  /// most body-text line wrapping while still breaking on paragraph gaps.
-  static const _paragraphGapMultiplier = 2.5;
-
-  /// Maximum X-gap (in multiples of reference line height) allowed
-  /// between consecutive fragments on the same line or block.
-  /// Normal word spacing is ~0.2-0.5x font size, so 3.0x handles
-  /// column gutters and large Table of Contents gaps.
-  static const _horizontalGapMultiplier = 3.0;
+  /// Tolerance for line-spacing consistency (as percentage of line height).
+  /// If spacing changes by more than this, we check for paragraph breaks.
+  static const _spacingConsistencyThreshold = 0.6;
 
   // ─── Sentence Detection ──────────────────────────────────────────
 
   /// Finds the sentence containing the character at [charIndex].
   ///
   /// Returns a `(start, end)` range where `end` is exclusive.
-  ///
-  /// Boundaries are:
-  /// - Punctuation terminators (`.` `!` `?`) followed by whitespace.
-  /// - Font-size changes (detected via character bounding-box heights).
-  /// - Start / end of the full text.
   static (int start, int end) findSentenceBounds(
     PdfPageText text,
     int charIndex,
@@ -47,12 +37,11 @@ class PdfTextBoundaryDetector {
 
     final clamped = charIndex.clamp(0, s.length - 1);
 
-    // Get the "visual block" that shares the same font size first,
-    // then narrow down to sentence within that block.
-    final (blockStart, blockEnd) = _findSameSizeBlock(text, clamped);
+    // Get the paragraph block first, then find sentence within it.
+    final (paraStart, paraEnd) = findParagraphBounds(text, clamped);
 
-    final start = _findSentenceStart(s, clamped, lowerBound: blockStart);
-    final end = _findSentenceEnd(s, clamped, upperBound: blockEnd);
+    final start = _findSentenceStart(s, clamped, lowerBound: paraStart);
+    final end = _findSentenceEnd(s, clamped, upperBound: paraEnd);
     return (start, end);
   }
 
@@ -102,12 +91,6 @@ class PdfTextBoundaryDetector {
   /// Finds the paragraph/block containing the character at [charIndex].
   ///
   /// Returns a `(start, end)` range where `end` is exclusive.
-  ///
-  /// Strategy:
-  /// 1. Try newline-based boundaries (`\n\n` or `\r\n\r\n`).
-  /// 2. If no double-newlines exist (common in PDFs), fall back to
-  ///    grouping fragments by **font-size consistency** AND
-  ///    **vertical proximity**.
   static (int start, int end) findParagraphBounds(
     PdfPageText text,
     int charIndex,
@@ -121,12 +104,11 @@ class PdfTextBoundaryDetector {
     final newlineBounds = _findNewlineParagraphBounds(s, clamped);
     if (newlineBounds != null) return newlineBounds;
 
-    // Fallback: fragment grouping by size + proximity.
+    // Fallback: line-based grouping by proximity and consistency.
     return _findFragmentBlockBounds(text, clamped);
   }
 
   /// Searches for double-newline paragraph breaks.
-  /// Returns null if `fullText` contains no double-newlines at all.
   static (int, int)? _findNewlineParagraphBounds(String s, int from) {
     if (!s.contains('\n\n') && !s.contains('\r\n\r\n')) return null;
 
@@ -155,167 +137,198 @@ class PdfTextBoundaryDetector {
     return false;
   }
 
-  // ─── Shared: Font-Size-Aware Block Detection ─────────────────────
-
-  /// Returns the character range of the contiguous block around
-  /// [charIndex] that shares the same approximate font size.
-  ///
-  /// Used by both sentence (to clamp bounds) and paragraph detection.
-  static (int, int) _findSameSizeBlock(PdfPageText text, int charIndex) {
-    final fragments = text.fragments;
-    if (fragments.isEmpty) return (0, text.fullText.length);
-
-    final targetIdx = text.getFragmentIndexForTextIndex(charIndex);
-    if (targetIdx < 0 || targetIdx >= fragments.length) {
-      return (0, text.fullText.length);
-    }
-
-    final refHeight = _fragmentCharHeight(fragments[targetIdx]);
-    final maxVGap = refHeight * _paragraphGapMultiplier;
-    final maxHGap = refHeight * _horizontalGapMultiplier;
-
-    // Walk backward.
-    var blockStart = targetIdx;
-    for (var i = targetIdx - 1; i >= 0; i--) {
-      final f = fragments[i];
-      if (!_isSimilarSize(refHeight, _fragmentCharHeight(f))) break;
-
-      // Check proximity with the fragment that comes AFTER it (closer to targetIdx).
-      // If the gap is too large, it belongs to a different block.
-      final vGap = _verticalGap(f, fragments[i + 1]);
-      final hGap = _horizontalGap(f, fragments[i + 1]);
-      if (vGap > maxVGap || hGap > maxHGap) break;
-
-      blockStart = i;
-    }
-
-    // Walk forward.
-    var blockEnd = targetIdx;
-    for (var i = targetIdx + 1; i < fragments.length; i++) {
-      final f = fragments[i];
-      if (!_isSimilarSize(refHeight, _fragmentCharHeight(f))) break;
-
-      // Check proximity with the fragment that comes BEFORE it.
-      final vGap = _verticalGap(fragments[i - 1], f);
-      final hGap = _horizontalGap(fragments[i - 1], f);
-      if (vGap > maxVGap || hGap > maxHGap) break;
-
-      blockEnd = i;
-    }
-
-    return (fragments[blockStart].index, fragments[blockEnd].end);
-  }
-
-  /// Groups fragments by **font-size similarity** AND **vertical
-  /// proximity** to find the paragraph block at [charIndex].
+  /// Groups fragments by **line-spacing consistency** and **alignment**
+  /// to find the paragraph block at [charIndex].
   static (int, int) _findFragmentBlockBounds(PdfPageText text, int charIndex) {
     final fragments = text.fragments;
     if (fragments.isEmpty) return (0, text.fullText.length);
 
-    final targetIdx = text.getFragmentIndexForTextIndex(charIndex);
-    if (targetIdx < 0 || targetIdx >= fragments.length) {
+    final targetFragIdx = text.getFragmentIndexForTextIndex(charIndex);
+    if (targetFragIdx < 0 || targetFragIdx >= fragments.length) {
       return (0, text.fullText.length);
     }
 
-    final target = fragments[targetIdx];
-    final refHeight = _fragmentCharHeight(target);
-    final maxVGap = refHeight * _paragraphGapMultiplier;
-    final maxHGap = refHeight * _horizontalGapMultiplier;
+    // 1. Group ALL fragments on the page into logical lines.
+    final lines = _groupIntoLines(fragments);
+    if (lines.isEmpty) return (0, text.fullText.length);
 
-    // Walk backward: include fragment if same font size AND close proximity.
-    var blockStart = targetIdx;
-    for (var i = targetIdx - 1; i >= 0; i--) {
-      final f = fragments[i];
-      // Font size check.
-      if (!_isSimilarSize(refHeight, _fragmentCharHeight(f))) break;
-      // Proximity check: compare with its neighbor.
-      final vGap = _verticalGap(f, fragments[i + 1]);
-      final hGap = _horizontalGap(f, fragments[i + 1]);
-      if (vGap > maxVGap || hGap > maxHGap) break;
-      blockStart = i;
+    // 2. Find which line contains our target fragment.
+    final targetFragment = fragments[targetFragIdx];
+    int lineIdx = -1;
+    for (var i = 0; i < lines.length; i++) {
+      if (lines[i].fragments.contains(targetFragment)) {
+        lineIdx = i;
+        break;
+      }
+    }
+    if (lineIdx == -1) return (0, text.fullText.length);
+
+    final refLine = lines[lineIdx];
+    final refHeight = _lineHeight(refLine);
+
+    // 3. Expand backward.
+    var startLineIdx = lineIdx;
+    double? lastGap;
+    for (var i = lineIdx - 1; i >= 0; i--) {
+      final line = lines[i];
+      final nextLine = lines[i + 1];
+
+      if (!_isLineSimilar(refLine, line)) break;
+
+      final gap = _verticalLineGap(line, nextLine);
+
+      // Paragraph break check.
+      // A break occurs if:
+      // - The gap is significantly larger than previous gaps (or line height).
+      // - The alignment shifts significantly.
+      if (gap > refHeight * 1.5) break;
+
+      if (lastGap != null &&
+          (gap - lastGap).abs() > refHeight * _spacingConsistencyThreshold) {
+        // Spacing jump. Check "sides of sides" (lookahead) to see if it restores.
+        if (i > 0) {
+          final prevLine = lines[i - 1];
+          final prevGap = _verticalLineGap(prevLine, line);
+          if ((prevGap - lastGap).abs() >
+              refHeight * _spacingConsistencyThreshold) {
+            // Trend definitely changed.
+            break;
+          }
+          // The current line 'i' is the "random thing" but spacing restores.
+        } else {
+          break;
+        }
+      }
+
+      // Alignment check.
+      if ((line.bounds.left - nextLine.bounds.left).abs() > refHeight * 2.0)
+        break;
+
+      lastGap = gap;
+      startLineIdx = i;
     }
 
-    // Walk forward.
-    var blockEnd = targetIdx;
-    for (var i = targetIdx + 1; i < fragments.length; i++) {
-      final f = fragments[i];
-      if (!_isSimilarSize(refHeight, _fragmentCharHeight(f))) break;
-      final vGap = _verticalGap(fragments[i - 1], f);
-      final hGap = _horizontalGap(fragments[i - 1], f);
-      if (vGap > maxVGap || hGap > maxHGap) break;
-      blockEnd = i;
+    // 4. Expand forward.
+    var endLineIdx = lineIdx;
+    lastGap = null;
+    for (var i = lineIdx + 1; i < lines.length; i++) {
+      final line = lines[i];
+      final prevLine = lines[i - 1];
+
+      if (!_isLineSimilar(refLine, line)) break;
+
+      final gap = _verticalLineGap(prevLine, line);
+      if (gap > refHeight * 1.5) break;
+
+      if (lastGap != null &&
+          (gap - lastGap).abs() > refHeight * _spacingConsistencyThreshold) {
+        if (i < lines.length - 1) {
+          final nextLine = lines[i + 1];
+          final nextGap = _verticalLineGap(line, nextLine);
+          if ((nextGap - lastGap).abs() >
+              refHeight * _spacingConsistencyThreshold) {
+            break;
+          }
+        } else {
+          break;
+        }
+      }
+
+      if ((line.bounds.left - prevLine.bounds.left).abs() > refHeight * 2.0)
+        break;
+
+      lastGap = gap;
+      endLineIdx = i;
     }
 
-    return (fragments[blockStart].index, fragments[blockEnd].end);
+    return (
+      lines[startLineIdx].fragments.first.index,
+      lines[endLineIdx].fragments.last.end,
+    );
   }
 
-  // ─── Fragment Measurement Helpers ────────────────────────────────
+  // ─── Line Grouping Helpers ───────────────────────────────────────
 
-  /// Estimates the "font size" of a fragment from its bounding-box
-  /// height. Uses the fragment's bounds (top − bottom in PDF coords).
-  static double _fragmentCharHeight(PdfPageTextFragment f) {
-    return (f.bounds.top - f.bounds.bottom).abs();
+  static List<_Line> _groupIntoLines(List<PdfPageTextFragment> fragments) {
+    if (fragments.isEmpty) return [];
+    final lines = <_Line>[];
+
+    var currentFragments = <PdfPageTextFragment>[fragments.first];
+    var currentBounds = fragments.first.bounds;
+
+    for (var i = 1; i < fragments.length; i++) {
+      final f = fragments[i];
+
+      // Two fragments are on the same line if they overlap vertically
+      // by more than 50% of the smaller fragment's height.
+      final h1 = (currentBounds.top - currentBounds.bottom).abs();
+      final h2 = (f.bounds.top - f.bounds.bottom).abs();
+      final overlap = _verticalOverlap(currentBounds, f.bounds);
+
+      if (overlap > (h1 < h2 ? h1 : h2) * 0.5) {
+        currentFragments.add(f);
+        currentBounds = _union(currentBounds, f.bounds);
+      } else {
+        lines.add(_Line(currentFragments, currentBounds));
+        currentFragments = [f];
+        currentBounds = f.bounds;
+      }
+    }
+    lines.add(_Line(currentFragments, currentBounds));
+    return lines;
   }
 
-  /// Whether two heights are "close enough" to be the same font size.
-  static bool _isSimilarSize(double refHeight, double otherHeight) {
-    if (refHeight <= 0 || otherHeight <= 0) return true;
-    final ratio = otherHeight / refHeight;
+  static double _verticalOverlap(PdfRect a, PdfRect b) {
+    final aMin = a.bottom < a.top ? a.bottom : a.top;
+    final aMax = a.bottom < a.top ? a.top : a.bottom;
+    final bMin = b.bottom < b.top ? b.bottom : b.top;
+    final bMax = b.bottom < b.top ? b.top : b.bottom;
+
+    final intersectionMin = aMin > bMin ? aMin : bMin;
+    final intersectionMax = aMax < bMax ? aMax : bMax;
+
+    return (intersectionMax - intersectionMin).clamp(0, double.infinity);
+  }
+
+  static PdfRect _union(PdfRect a, PdfRect b) {
+    return PdfRect(
+      a.left < b.left ? a.left : b.left,
+      a.top > b.top ? a.top : b.top,
+      a.right > b.right ? a.right : b.right,
+      a.bottom < b.bottom ? a.bottom : b.bottom,
+    );
+  }
+
+  static double _lineHeight(_Line line) =>
+      (line.bounds.top - line.bounds.bottom).abs();
+
+  static double _verticalLineGap(_Line a, _Line b) {
+    final aBottom = a.bounds.bottom < a.bounds.top
+        ? a.bounds.bottom
+        : a.bounds.top;
+    final bTop = b.bounds.bottom < b.bounds.top
+        ? b.bounds.top
+        : b.bounds.bottom;
+    return (aBottom - bTop).abs();
+  }
+
+  static bool _isLineSimilar(_Line ref, _Line other) {
+    final h1 = _lineHeight(ref);
+    final h2 = _lineHeight(other);
+    if (h1 <= 0 || h2 <= 0) return true;
+    final ratio = h2 / h1;
     return ratio > (1 / _fontSizeRatioThreshold) &&
         ratio < _fontSizeRatioThreshold;
   }
-
-  /// The vertical gap between two fragments. Uses their bounding-box
-  /// edges rather than midpoints, so overlapping lines return ~0.
-  static double _verticalGap(PdfPageTextFragment a, PdfPageTextFragment b) {
-    // PDF coords: top > bottom.  Laid-out order: a comes before b.
-    // Gap = space between the bottom of the higher fragment and
-    //        the top of the lower fragment.
-    final aMin = a.bounds.bottom < a.bounds.top
-        ? a.bounds.bottom
-        : a.bounds.top;
-    final aMax = a.bounds.bottom < a.bounds.top
-        ? a.bounds.top
-        : a.bounds.bottom;
-    final bMin = b.bounds.bottom < b.bounds.top
-        ? b.bounds.bottom
-        : b.bounds.top;
-    final bMax = b.bounds.bottom < b.bounds.top
-        ? b.bounds.top
-        : b.bounds.bottom;
-
-    // If they overlap vertically, gap is 0 (same line or adjacent).
-    if (aMax >= bMin && bMax >= aMin) return 0;
-
-    // Otherwise, the gap is the distance between the closest edges.
-    return (aMin > bMax) ? (aMin - bMax) : (bMin - aMax);
-  }
-
-  /// The horizontal gap between two fragments.
-  static double _horizontalGap(PdfPageTextFragment a, PdfPageTextFragment b) {
-    final aLeft = a.bounds.left < a.bounds.right
-        ? a.bounds.left
-        : a.bounds.right;
-    final aRight = a.bounds.left < a.bounds.right
-        ? a.bounds.right
-        : a.bounds.left;
-    final bLeft = b.bounds.left < b.bounds.right
-        ? b.bounds.left
-        : b.bounds.right;
-    final bRight = b.bounds.left < b.bounds.right
-        ? b.bounds.right
-        : b.bounds.left;
-
-    // If they overlap horizontally, gap is 0.
-    if (aRight >= bLeft && bRight >= aLeft) return 0;
-
-    return (aLeft > bRight) ? (aLeft - bRight) : (bLeft - aRight);
-  }
-
-  // ─── Text Helpers ────────────────────────────────────────────────
 
   static bool _isWhitespace(int c) =>
       c == 0x20 || c == 0x09 || c == 0x0A || c == 0x0D;
 
   static bool _isUppercase(int c) => c >= 0x41 && c <= 0x5A;
+}
+
+class _Line {
+  final List<PdfPageTextFragment> fragments;
+  final PdfRect bounds;
+  _Line(this.fragments, this.bounds);
 }

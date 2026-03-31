@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:file_picker/file_picker.dart';
@@ -50,8 +49,33 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PDF Recognition Test'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('PDF Recognition Test'),
+            Text(
+              'Algo: ${PdfTextBoundaryDetector.algorithmVersion}',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Colors.white70,
+                fontSize: 10,
+              ),
+            ),
+          ],
+        ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Reload & Re-analyze',
+            onPressed: () {
+              setState(() {
+                _boundariesCache.clear();
+                _textCache.clear();
+                _loadingPages.clear();
+              });
+              _controller.invalidate();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.file_open),
             onPressed: _pickFile,
