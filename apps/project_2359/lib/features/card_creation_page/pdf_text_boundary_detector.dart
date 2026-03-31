@@ -22,6 +22,12 @@ class PdfTextBoundaryDetector {
   /// most body-text line wrapping while still breaking on paragraph gaps.
   static const _paragraphGapMultiplier = 2.5;
 
+  /// Maximum X-gap (in multiples of reference line height) allowed
+  /// between consecutive fragments on the same line or block.
+  /// Normal word spacing is ~0.2-0.5x font size, so 3.0x handles
+  /// column gutters and large Table of Contents gaps.
+  static const _horizontalGapMultiplier = 3.0;
+
   // ─── Sentence Detection ──────────────────────────────────────────
 
   /// Finds the sentence containing the character at [charIndex].
@@ -165,18 +171,35 @@ class PdfTextBoundaryDetector {
     }
 
     final refHeight = _fragmentCharHeight(fragments[targetIdx]);
+    final maxVGap = refHeight * _paragraphGapMultiplier;
+    final maxHGap = refHeight * _horizontalGapMultiplier;
 
     // Walk backward.
     var blockStart = targetIdx;
     for (var i = targetIdx - 1; i >= 0; i--) {
-      if (!_isSimilarSize(refHeight, _fragmentCharHeight(fragments[i]))) break;
+      final f = fragments[i];
+      if (!_isSimilarSize(refHeight, _fragmentCharHeight(f))) break;
+
+      // Check proximity with the fragment that comes AFTER it (closer to targetIdx).
+      // If the gap is too large, it belongs to a different block.
+      final vGap = _verticalGap(f, fragments[i + 1]);
+      final hGap = _horizontalGap(f, fragments[i + 1]);
+      if (vGap > maxVGap || hGap > maxHGap) break;
+
       blockStart = i;
     }
 
     // Walk forward.
     var blockEnd = targetIdx;
     for (var i = targetIdx + 1; i < fragments.length; i++) {
-      if (!_isSimilarSize(refHeight, _fragmentCharHeight(fragments[i]))) break;
+      final f = fragments[i];
+      if (!_isSimilarSize(refHeight, _fragmentCharHeight(f))) break;
+
+      // Check proximity with the fragment that comes BEFORE it.
+      final vGap = _verticalGap(fragments[i - 1], f);
+      final hGap = _horizontalGap(fragments[i - 1], f);
+      if (vGap > maxVGap || hGap > maxHGap) break;
+
       blockEnd = i;
     }
 
@@ -196,17 +219,19 @@ class PdfTextBoundaryDetector {
 
     final target = fragments[targetIdx];
     final refHeight = _fragmentCharHeight(target);
-    final maxGap = refHeight * _paragraphGapMultiplier;
+    final maxVGap = refHeight * _paragraphGapMultiplier;
+    final maxHGap = refHeight * _horizontalGapMultiplier;
 
-    // Walk backward: include fragment if same font size AND close Y.
+    // Walk backward: include fragment if same font size AND close proximity.
     var blockStart = targetIdx;
     for (var i = targetIdx - 1; i >= 0; i--) {
       final f = fragments[i];
       // Font size check.
       if (!_isSimilarSize(refHeight, _fragmentCharHeight(f))) break;
-      // Vertical gap check: compare with its neighbor.
-      final gap = _verticalGap(f, fragments[i + 1]);
-      if (gap > maxGap) break;
+      // Proximity check: compare with its neighbor.
+      final vGap = _verticalGap(f, fragments[i + 1]);
+      final hGap = _horizontalGap(f, fragments[i + 1]);
+      if (vGap > maxVGap || hGap > maxHGap) break;
       blockStart = i;
     }
 
@@ -215,8 +240,9 @@ class PdfTextBoundaryDetector {
     for (var i = targetIdx + 1; i < fragments.length; i++) {
       final f = fragments[i];
       if (!_isSimilarSize(refHeight, _fragmentCharHeight(f))) break;
-      final gap = _verticalGap(fragments[i - 1], f);
-      if (gap > maxGap) break;
+      final vGap = _verticalGap(fragments[i - 1], f);
+      final hGap = _horizontalGap(fragments[i - 1], f);
+      if (vGap > maxVGap || hGap > maxHGap) break;
       blockEnd = i;
     }
 
@@ -263,6 +289,27 @@ class PdfTextBoundaryDetector {
 
     // Otherwise, the gap is the distance between the closest edges.
     return (aMin > bMax) ? (aMin - bMax) : (bMin - aMax);
+  }
+
+  /// The horizontal gap between two fragments.
+  static double _horizontalGap(PdfPageTextFragment a, PdfPageTextFragment b) {
+    final aLeft = a.bounds.left < a.bounds.right
+        ? a.bounds.left
+        : a.bounds.right;
+    final aRight = a.bounds.left < a.bounds.right
+        ? a.bounds.right
+        : a.bounds.left;
+    final bLeft = b.bounds.left < b.bounds.right
+        ? b.bounds.left
+        : b.bounds.right;
+    final bRight = b.bounds.left < b.bounds.right
+        ? b.bounds.right
+        : b.bounds.left;
+
+    // If they overlap horizontally, gap is 0.
+    if (aRight >= bLeft && bRight >= aLeft) return 0;
+
+    return (aLeft > bRight) ? (aLeft - bRight) : (bLeft - aRight);
   }
 
   // ─── Text Helpers ────────────────────────────────────────────────
