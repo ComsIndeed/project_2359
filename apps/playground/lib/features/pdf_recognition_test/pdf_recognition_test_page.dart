@@ -15,6 +15,8 @@ class PdfRecognitionTestPage extends StatefulWidget {
 class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
   String? _pdfPath;
   RecognitionGranularity _granularity = RecognitionGranularity.sentence;
+  bool _useLookahead = true;
+  bool _showAllFragments = false;
   final Map<int, List<(int, int)>> _boundariesCache = {};
   final PdfViewerController _controller = PdfViewerController();
 
@@ -64,6 +66,35 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: Icon(
+              _showAllFragments ? Icons.visibility : Icons.visibility_off,
+              color: _showAllFragments ? Colors.blue : null,
+            ),
+            tooltip: 'Show All Fragments (Wireframe)',
+            onPressed: () {
+              setState(() {
+                _showAllFragments = !_showAllFragments;
+              });
+              _controller.invalidate();
+            },
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.bolt,
+              color: _useLookahead ? Colors.orange : Colors.grey,
+            ),
+            tooltip: 'Use Lookahead (Spacial Logic)',
+            onPressed: () {
+              setState(() {
+                _useLookahead = !_useLookahead;
+                _boundariesCache.clear();
+                _textCache.clear();
+                _loadingPages.clear();
+              });
+              _controller.invalidate();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Reload & Re-analyze',
@@ -142,18 +173,29 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
   }
 
   void _drawBoundaries(Canvas canvas, Rect pageRect, PdfPage page) {
+    final pageText = _textCache[page.pageNumber];
     final boundaries = _boundariesCache[page.pageNumber];
-    if (boundaries == null) {
+
+    if (pageText == null || boundaries == null) {
       _loadPageBoundaries(page.pageNumber);
       return;
     }
 
-    final pageText = _textCache[page.pageNumber];
-    if (pageText == null) return;
+    // DEBUG: Show all detected fragments as wireframes
+    if (_showAllFragments) {
+      final fragmentPaint = Paint()
+        ..color = Colors.blue.withOpacity(0.5)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.5;
 
-    debugPrint(
-      '[PAGE ${page.pageNumber}] Drawing ${boundaries.length} boundaries. pageRect: $pageRect',
-    );
+      for (final fragment in pageText.fragments) {
+        final rect = fragment.bounds.toRectInDocument(
+          page: page,
+          pageRect: pageRect,
+        );
+        canvas.drawRect(rect, fragmentPaint);
+      }
+    }
 
     for (int i = 0; i < boundaries.length; i++) {
       final (start, end) = boundaries[i];
@@ -163,28 +205,16 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
       try {
         final range = pageText.getRangeFromAB(start, end - 1);
         for (final rect in range.enumerateFragmentBoundingRects()) {
-          // Calculate BOTH ways for logging comparison
-          final rectInPage = rect.bounds.toRect(
-            page: page,
-            scaledPageSize: pageRect.size,
-          );
           final rectInDoc = rect.bounds.toRectInDocument(
             page: page,
             pageRect: pageRect,
           );
-
-          if (i == 0) {
-            // Log only first one per page to avoid spam
-            debugPrint(
-              '[PAGE ${page.pageNumber}] Example Rect 0: InPage=$rectInPage, InDoc=$rectInDoc',
-            );
-          }
-
-          // Use rectInDoc as it's the most likely candidate for document-level overlays
           canvas.drawRect(rectInDoc, paint);
         }
       } catch (e) {
-        debugPrint('[PAGE ${page.pageNumber}] Error mapping range: $e');
+        debugPrint(
+          '[PAGE ${page.pageNumber}] Error mapping range: $start-$end: $e',
+        );
       }
     }
   }
@@ -239,10 +269,15 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
 
       while (currentIndex < fullLength) {
         final (start, end) = _granularity == RecognitionGranularity.sentence
-            ? PdfTextBoundaryDetector.findSentenceBounds(pageText, currentIndex)
+            ? PdfTextBoundaryDetector.findSentenceBounds(
+                pageText,
+                currentIndex,
+                useLookahead: _useLookahead,
+              )
             : PdfTextBoundaryDetector.findParagraphBounds(
                 pageText,
                 currentIndex,
+                useLookahead: _useLookahead,
               );
 
         if (start >= end) {

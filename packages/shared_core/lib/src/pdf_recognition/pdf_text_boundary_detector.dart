@@ -1,5 +1,13 @@
 import 'package:pdfrx/pdfrx.dart';
 
+/// TODO: FOllow up with this:
+// Lets make the look ahead stuff more obvious because I cant see anything changing from it. I love how thoughtful you were with these tho
+// But anyway
+// YOO I THINK I KNOW THE ISSUE:
+// Its not that the problem is the bold texts, ITS THAT INDENTS CAUSES IT I THINK???? Can we handle that for a second?
+// Because notice the text after the SOP header, its treated as a seperate paragraph for some reason
+// But on the items on the significance of the study, that has bold texts but they get read just fine
+
 /// Detects sentence and paragraph boundaries within PDF page text.
 ///
 /// PDFs don't inherently structure text into sentences or paragraphs.
@@ -11,10 +19,10 @@ import 'package:pdfrx/pdfrx.dart';
 class PdfTextBoundaryDetector {
   const PdfTextBoundaryDetector._();
 
-  /// Algorithm Version: 1.3.0
-  /// Updated: 2026-03-31 21:53
+  /// Algorithm Version: 1.3.1
+  /// Updated: 2026-03-31 23:15
   /// NOTE: Increment this version whenever the heuristic logic is modified.
-  static const algorithmVersion = '1.3.0-20260331';
+  static const algorithmVersion = '1.3.1-20260331';
 
   /// Ratio threshold for font size similarity.
   /// Relaxed to 1.6 to allow for Bold/Style variations and sub-headers.
@@ -52,15 +60,20 @@ class PdfTextBoundaryDetector {
   /// Returns a `(start, end)` range where `end` is exclusive.
   static (int start, int end) findSentenceBounds(
     PdfPageText text,
-    int charIndex,
-  ) {
+    int charIndex, {
+    bool useLookahead = true,
+  }) {
     final s = text.fullText;
     if (s.isEmpty) return (0, 0);
 
     final clamped = charIndex.clamp(0, s.length - 1);
 
     // Get the paragraph block first, then find sentence within it.
-    final (paraStart, paraEnd) = findParagraphBounds(text, clamped);
+    final (paraStart, paraEnd) = findParagraphBounds(
+      text,
+      clamped,
+      useLookahead: useLookahead,
+    );
 
     final start = _findSentenceStart(s, clamped, lowerBound: paraStart);
     final end = _findSentenceEnd(s, clamped, upperBound: paraEnd);
@@ -133,8 +146,9 @@ class PdfTextBoundaryDetector {
   /// Returns a `(start, end)` range where `end` is exclusive.
   static (int start, int end) findParagraphBounds(
     PdfPageText text,
-    int charIndex,
-  ) {
+    int charIndex, {
+    bool useLookahead = true,
+  }) {
     final s = text.fullText;
     if (s.isEmpty) return (0, 0);
 
@@ -145,7 +159,7 @@ class PdfTextBoundaryDetector {
     if (newlineBounds != null) return newlineBounds;
 
     // Fallback: line-based grouping by proximity and consistency.
-    return _findFragmentBlockBounds(text, clamped);
+    return _findFragmentBlockBounds(text, clamped, useLookahead: useLookahead);
   }
 
   /// Searches for double-newline paragraph breaks.
@@ -192,7 +206,11 @@ class PdfTextBoundaryDetector {
   ///   break sentences.
   /// - KNOWN LIMITATION: If a first line has a different point size (header),
   ///   it might still break if it's significantly larger (>60%) than body.
-  static (int, int) _findFragmentBlockBounds(PdfPageText text, int charIndex) {
+  static (int, int) _findFragmentBlockBounds(
+    PdfPageText text,
+    int charIndex, {
+    bool useLookahead = true,
+  }) {
     var fragments = List<PdfPageTextFragment>.from(text.fragments);
     if (fragments.isEmpty) return (0, text.fullText.length);
 
@@ -247,7 +265,8 @@ class PdfTextBoundaryDetector {
         if (jump > refHeight * 0.3) break; // Leap detected. Break.
 
         // Minor noise or reduction. Use lookahead for consistency.
-        if (jump.abs() > refHeight * _spacingConsistencyThreshold) {
+        if (useLookahead &&
+            jump.abs() > refHeight * _spacingConsistencyThreshold) {
           if (i > 0) {
             final prevLine = lines[i - 1];
             final prevGap = _verticalLineGap(prevLine, line);
@@ -286,7 +305,8 @@ class PdfTextBoundaryDetector {
         final jump = gap - lastGap;
         if (jump > refHeight * 0.3) break; // Leap detected. Break.
 
-        if (jump.abs() > refHeight * _spacingConsistencyThreshold) {
+        if (useLookahead &&
+            jump.abs() > refHeight * _spacingConsistencyThreshold) {
           if (i < lines.length - 1) {
             final nextLine = lines[i + 1];
             final nextGap = _verticalLineGap(line, nextLine);
