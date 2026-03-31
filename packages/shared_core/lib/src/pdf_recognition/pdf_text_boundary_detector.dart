@@ -11,10 +11,10 @@ import 'package:pdfrx/pdfrx.dart';
 class PdfTextBoundaryDetector {
   const PdfTextBoundaryDetector._();
 
-  /// Algorithm Version: 1.2.0
-  /// Updated: 2026-03-31 21:35
+  /// Algorithm Version: 1.2.1
+  /// Updated: 2026-03-31 21:44
   /// NOTE: Increment this version whenever the heuristic logic is modified.
-  static const algorithmVersion = '1.2.0-20260331';
+  static const algorithmVersion = '1.2.1-20260331';
 
   /// Ratio threshold for font size similarity.
   static const _fontSizeRatioThreshold = 1.35;
@@ -177,26 +177,27 @@ class PdfTextBoundaryDetector {
 
       final gap = _verticalLineGap(line, nextLine);
 
-      // Paragraph break check.
-      // A break occurs if:
-      // - The gap is significantly larger than previous gaps (or line height).
-      // - The alignment shifts significantly.
+      // Absolute break thresholds.
       if (gap > refHeight * 1.5) break;
 
-      if (lastGap != null &&
-          (gap - lastGap).abs() > refHeight * _spacingConsistencyThreshold) {
-        // Spacing jump. Check "sides of sides" (lookahead) to see if it restores.
-        if (i > 0) {
-          final prevLine = lines[i - 1];
-          final prevGap = _verticalLineGap(prevLine, line);
-          if ((prevGap - lastGap).abs() >
-              refHeight * _spacingConsistencyThreshold) {
-            // Trend definitely changed.
+      // Relative break threshold (Asymmetric).
+      // We break immediately on significant spacing INCREASES (leaps).
+      if (lastGap != null) {
+        final jump = gap - lastGap;
+        if (jump > refHeight * 0.3) break; // Leap detected. Break.
+
+        // Minor noise or reduction. Use lookahead for consistency.
+        if (jump.abs() > refHeight * _spacingConsistencyThreshold) {
+          if (i > 0) {
+            final prevLine = lines[i - 1];
+            final prevGap = _verticalLineGap(prevLine, line);
+            if ((prevGap - lastGap).abs() >
+                refHeight * _spacingConsistencyThreshold) {
+              break;
+            }
+          } else {
             break;
           }
-          // The current line 'i' is the "random thing" but spacing restores.
-        } else {
-          break;
         }
       }
 
@@ -218,20 +219,31 @@ class PdfTextBoundaryDetector {
       if (!_isLineSimilar(refLine, line)) break;
 
       final gap = _verticalLineGap(prevLine, line);
+
       if (gap > refHeight * 1.5) break;
 
-      if (lastGap != null &&
-          (gap - lastGap).abs() > refHeight * _spacingConsistencyThreshold) {
-        if (i < lines.length - 1) {
-          final nextLine = lines[i + 1];
-          final nextGap = _verticalLineGap(line, nextLine);
-          if ((nextGap - lastGap).abs() >
-              refHeight * _spacingConsistencyThreshold) {
+      if (lastGap != null) {
+        final jump = gap - lastGap;
+        if (jump > refHeight * 0.3) break; // Leap detected. Break.
+
+        if (jump.abs() > refHeight * _spacingConsistencyThreshold) {
+          if (i < lines.length - 1) {
+            final nextLine = lines[i + 1];
+            final nextGap = _verticalLineGap(line, nextLine);
+            if ((nextGap - lastGap).abs() >
+                refHeight * _spacingConsistencyThreshold) {
+              break;
+            }
+          } else {
             break;
           }
-        } else {
-          break;
         }
+      }
+
+      // Trailing short line detection: if the previous line ended very early,
+      // and we just saw a gap increase (even a small one), break.
+      if (lastGap != null && _isShortLine(prevLine, refLine)) {
+        if (gap > lastGap + 1.0) break;
       }
 
       if ((line.bounds.left - prevLine.bounds.left).abs() > refHeight * 2.0)
@@ -245,6 +257,16 @@ class PdfTextBoundaryDetector {
       lines[startLineIdx].fragments.first.index,
       lines[endLineIdx].fragments.last.end,
     );
+  }
+
+  // ─── Line Measurement Helpers ────────────────────────────────────
+
+  /// Returns true if a line is significantly shorter than the reference line.
+  static bool _isShortLine(_Line line, _Line ref) {
+    final w1 = (line.bounds.right - line.bounds.left).abs();
+    final w2 = (ref.bounds.right - ref.bounds.left).abs();
+    if (w2 <= 0) return false;
+    return w1 < w2 * 0.75; // Less than 75% width.
   }
 
   // ─── Line Grouping Helpers ───────────────────────────────────────
