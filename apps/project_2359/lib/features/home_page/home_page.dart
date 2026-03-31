@@ -356,15 +356,7 @@ class _HomePageState extends State<HomePage> {
       body: HomePageLandscapeLayout(
         header: _HomeHeader(
           isLandscape: true,
-          onPlusTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    CardCreationPage(folderId: _selectedFolderId ?? "default"),
-              ),
-            );
-          },
+          onPlusTap: () => _showNewMenu(context),
         ),
         sidebarA: _buildSidebarA(),
         sidebarB: _selectedFolderId != null ? _buildSidebarB() : null,
@@ -789,6 +781,73 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  void _showNewMenu(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "Dismiss",
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
+      transitionBuilder: (context, anim1, anim2, child) {
+        final curve = Curves.easeInOutCubicEmphasized.transform(anim1.value);
+        return Stack(
+          children: [
+            Center(
+              child: Opacity(
+                opacity: anim1.value,
+                child: Transform.scale(
+                  scale: 0.8 + (0.2 * curve),
+                  child: Container(
+                    width: 400,
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 40,
+                    ),
+                    decoration: ShapeDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.98),
+                      shadows: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: isDark ? 0.4 : 0.12,
+                          ),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
+                          spreadRadius: -2,
+                        ),
+                      ],
+                      shape: RoundedSuperellipseBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        side: BorderSide(
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.2,
+                          ),
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: _NewButtonExpandedContent(
+                        onActionCompleted: () => Navigator.pop(context),
+                        activeFolderId: _selectedFolderId,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -1154,7 +1213,13 @@ class _HeaderActions extends StatelessWidget {
 }
 
 class _NewButtonExpandedContent extends StatefulWidget {
-  const _NewButtonExpandedContent();
+  final VoidCallback? onActionCompleted;
+  final String? activeFolderId;
+
+  const _NewButtonExpandedContent({
+    this.onActionCompleted,
+    this.activeFolderId,
+  });
 
   @override
   State<_NewButtonExpandedContent> createState() =>
@@ -1192,7 +1257,16 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
 
       if (mounted) {
         folderNameController.clear();
-        ExpandableFab.of(context).close();
+        if (widget.onActionCompleted != null) {
+          widget.onActionCompleted!();
+        } else {
+          try {
+            ExpandableFab.of(context).close();
+          } catch (_) {
+            // Fallback for when not used inside ExpandableFab but callback is missing
+            Navigator.maybePop(context);
+          }
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -1358,6 +1432,29 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
                 Colors.transparent, // Let FAB background show through
             margin: const EdgeInsets.symmetric(horizontal: 8),
             children: [
+              ProjectListTile.simple(
+                label: "New Card Pack",
+                icon: FontAwesomeIcons.layerGroup,
+                showDivider: true,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CardCreationPage(
+                        folderId: widget.activeFolderId ?? "default",
+                      ),
+                    ),
+                  );
+                  if (widget.onActionCompleted != null) {
+                    widget.onActionCompleted!();
+                  } else {
+                    try {
+                      ExpandableFab.of(context).close();
+                    } catch (_) {}
+                  }
+                },
+                showChevron: false,
+              ),
               ProjectListTile.simple(
                 label: "Scan Documents",
                 icon: FontAwesomeIcons.camera,
