@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:project_2359/core/widgets/expandable_container.dart';
+import 'package:project_2359/features/card_creation_page/smart_text_selection_handler.dart';
 import 'package:provider/provider.dart';
 
 import 'package:project_2359/app_database.dart';
@@ -28,6 +29,8 @@ class _CardCreationPageState extends State<CardCreationPage> {
   List<SourceItem>? _availableSources;
   StreamSubscription? _sourcesSub;
   final PdfViewerController _controller = PdfViewerController();
+  final SmartTextSelectionHandler _smartSelection =
+      const SmartTextSelectionHandler();
   bool _isLoading = false;
 
   @override
@@ -82,8 +85,19 @@ class _CardCreationPageState extends State<CardCreationPage> {
   @override
   Widget build(BuildContext context) {
     return ExpandableContainer(
+      boundaryMargins: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       builder: (context, controller) {
-        return Text("Hello");
+        return Row(
+          children: [
+            Spacer(),
+            IconButton(
+              onPressed: () {
+                // TODO: Non-functional button
+              },
+              icon: FaIcon(FontAwesomeIcons.barsStaggered),
+            ),
+          ],
+        );
       },
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -128,6 +142,8 @@ class _CardCreationPageState extends State<CardCreationPage> {
           }
         },
         backgroundColor: Colors.black,
+        textSelectionParams: const PdfTextSelectionParams(enabled: true),
+        onGeneralTap: _smartSelection.handleTap,
       ),
     );
   }
