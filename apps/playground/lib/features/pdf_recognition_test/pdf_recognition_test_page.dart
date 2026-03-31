@@ -40,41 +40,10 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
       setState(() {
         _pdfPath = result.files.single.path;
         _boundariesCache.clear();
+        _textCache.clear();
+        _loadingPages.clear();
       });
     }
-  }
-
-  Future<List<(int, int)>> _getBoundaries(int pageNumber) async {
-    if (_boundariesCache.containsKey(pageNumber)) {
-      return _boundariesCache[pageNumber]!;
-    }
-
-    final page = _controller.pages[pageNumber - 1];
-    final pageText = await page.loadStructuredText();
-    if (pageText.fullText.isEmpty) return [];
-
-    final List<(int, int)> boundaries = [];
-    int currentIndex = 0;
-    final fullLength = pageText.fullText.length;
-
-    while (currentIndex < fullLength) {
-      // Find the next boundary starting from currentIndex
-      final (start, end) = _granularity == RecognitionGranularity.sentence
-          ? PdfTextBoundaryDetector.findSentenceBounds(pageText, currentIndex)
-          : PdfTextBoundaryDetector.findParagraphBounds(pageText, currentIndex);
-
-      if (start >= end || start < currentIndex) {
-        // Fallback or skip if boundary detection fails to progress
-        currentIndex++;
-        continue;
-      }
-
-      boundaries.add((start, end));
-      currentIndex = end;
-    }
-
-    _boundariesCache[pageNumber] = boundaries;
-    return boundaries;
   }
 
   @override
@@ -107,6 +76,8 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
               setState(() {
                 _granularity = value.first;
                 _boundariesCache.clear();
+                _textCache.clear();
+                _loadingPages.clear();
               });
             },
           ),
@@ -146,30 +117,144 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
     );
   }
 
-  Future<void> _drawBoundaries(
-    Canvas canvas,
-    Rect pageRect,
-    PdfPage page,
-  ) async {
-    final boundaries = await _getBoundaries(page.pageNumber);
-    final pageText = await page.loadStructuredText();
+  void _drawBoundaries(Canvas canvas, Rect pageRect, PdfPage page) {
+    final boundaries = _boundariesCache[page.pageNumber];
+    if (boundaries == null) {
+      _loadPageBoundaries(page.pageNumber);
+      return;
+    }
+
+    final pageText = _textCache[page.pageNumber];
+    if (pageText == null) return;
+
+    debugPrint(
+      '[PAGE ${page.pageNumber}] Drawing ${boundaries.length} boundaries. pageRect: $pageRect',
+    );
 
     for (int i = 0; i < boundaries.length; i++) {
       final (start, end) = boundaries[i];
       final color = _colors[i % _colors.length];
       final paint = Paint()..color = color;
 
-      // Create a range object for the segment
-      final range = pageText.getRangeFromAB(start, end - 1);
+      try {
+        final range = pageText.getRangeFromAB(start, end - 1);
+        for (final rect in range.enumerateFragmentBoundingRects()) {
+          // Calculate BOTH ways for logging comparison
+          final rectInPage = rect.bounds.toRect(
+            page: page,
+            scaledPageSize: pageRect.size,
+          );
+          final rectInDoc = rect.bounds.toRectInDocument(
+            page: page,
+            pageRect: pageRect,
+          );
 
-      // Enumerate rects for the range and draw them
-      for (final rect in range.enumerateFragmentBoundingRects()) {
-        final flutterRect = rect.bounds.toRect(
-          page: page,
-          scaledPageSize: pageRect.size,
-        );
-        canvas.drawRect(flutterRect, paint);
+          if (i == 0) {
+            // Log only first one per page to avoid spam
+            debugPrint(
+              '[PAGE ${page.pageNumber}] Example Rect 0: InPage=$rectInPage, InDoc=$rectInDoc',
+            );
+          }
+
+          // Use rectInDoc as it's the most likely candidate for document-level overlays
+          canvas.drawRect(rectInDoc, paint);
+        }
+      } catch (e) {
+        debugPrint('[PAGE ${page.pageNumber}] Error mapping range: $e');
       }
     }
   }
+
+  final Map<int, PdfPageText> _textCache = {};
+  final Set<int> _loadingPages = {};
+
+  Future<void> _loadPageBoundaries(int pageNumber) async {
+    if (_loadingPages.contains(pageNumber)) return;
+    _loadingPages.add(pageNumber);
+
+    try {
+      PdfPageText? pageText;
+      int attempts = 0;
+      const maxAttempts = 3;
+
+      while (attempts < maxAttempts) {
+        final pageList = _controller.pages;
+        if (pageNumber > pageList.length) {
+          debugPrint(
+            '[_loadPageBoundaries] Page $pageNumber not in list yet (len: ${pageList.length})',
+          );
+          await Future.delayed(const Duration(milliseconds: 500));
+          attempts++;
+          continue;
+        }
+
+        final page = pageList[pageNumber - 1];
+        pageText = await page.loadStructuredText();
+
+        if (pageText.fullText.isNotEmpty) break;
+
+        debugPrint(
+          '[_loadPageBoundaries] Page $pageNumber returned empty text. Retry ${attempts + 1}/$maxAttempts...',
+        );
+        await Future.delayed(const Duration(milliseconds: 1000));
+        attempts++;
+      }
+
+      if (pageText == null || pageText.fullText.isEmpty) {
+        debugPrint(
+          '[_loadPageBoundaries] Page $pageNumber: Giving up after $attempts attempts. Text is empty.',
+        );
+        _boundariesCache[pageNumber] =
+            []; // Cache empty to avoid infinite retries
+        return;
+      }
+
+      final List<(int, int)> boundaries = [];
+      int currentIndex = 0;
+      final fullLength = pageText.fullText.length;
+
+      while (currentIndex < fullLength) {
+        final (start, end) = _granularity == RecognitionGranularity.sentence
+            ? PdfTextBoundaryDetector.findSentenceBounds(pageText, currentIndex)
+            : PdfTextBoundaryDetector.findParagraphBounds(
+                pageText,
+                currentIndex,
+              );
+
+        if (start >= end) {
+          currentIndex++;
+          continue;
+        }
+
+        final effectiveEnd = end.clamp(currentIndex + 1, fullLength);
+        final effectiveStart = start.clamp(currentIndex, effectiveEnd - 1);
+
+        boundaries.add((effectiveStart, effectiveEnd));
+        currentIndex = effectiveEnd;
+
+        while (currentIndex < fullLength &&
+            _isWhitespace(pageText.fullText.codeUnitAt(currentIndex))) {
+          currentIndex++;
+        }
+      }
+
+      if (mounted) {
+        debugPrint(
+          '[PAGE $pageNumber] Analysis complete. Boundaries: ${boundaries.length}, Text length: $fullLength',
+        );
+        setState(() {
+          _textCache[pageNumber] = pageText!;
+          _boundariesCache[pageNumber] = boundaries;
+        });
+        _controller.invalidate();
+      }
+    } catch (e, stack) {
+      debugPrint('[PAGE $pageNumber] Analysis error: $e');
+      debugPrint(stack.toString());
+    } finally {
+      _loadingPages.remove(pageNumber);
+    }
+  }
+
+  bool _isWhitespace(int c) => c == 0x20 || c == 0x09 || c == 0x0A || c == 0x0D;
 }
