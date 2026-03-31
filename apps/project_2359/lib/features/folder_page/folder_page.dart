@@ -14,6 +14,11 @@ import 'package:project_2359/features/study/study_page.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:uuid/uuid.dart';
+import 'package:drift/drift.dart' as drift;
+import 'package:project_2359/core/tables/source_items.dart'; // For SourceType
+import 'package:project_2359/core/tables/source_item_blobs.dart'; // For SourceFileType
 import 'package:project_2359/features/card_creation_page/card_creation_page.dart';
 
 class FolderPage extends StatefulWidget {
@@ -127,6 +132,65 @@ class _FolderPageState extends State<FolderPage> {
 
   late Stream<List<StudyMaterialItem>> _materialsStream;
 
+  Future<void> _importSources() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        allowMultiple: true,
+        withData: true,
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final sourceService = SourceService(context.read<AppDatabase>());
+      final uuid = const Uuid();
+
+      for (final file in result.files) {
+        if (file.bytes == null) continue;
+
+        final sourceId = uuid.v4();
+        final blobId = uuid.v4();
+
+        await sourceService.insertSource(
+          SourceItemsCompanion(
+            id: drift.Value(sourceId),
+            folderId: drift.Value(widget.folderId),
+            label: drift.Value(file.name),
+            type: drift.Value(SourceType.document.name),
+            isPinned: const drift.Value(false),
+          ),
+        );
+
+        await sourceService.insertSourceBlob(
+          SourceItemBlobsCompanion(
+            id: drift.Value(blobId),
+            sourceItemId: drift.Value(sourceId),
+            sourceItemName: drift.Value(file.name),
+            type: drift.Value(SourceFileType.pdf.name),
+            bytes: drift.Value(file.bytes!),
+          ),
+        );
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Successfully imported ${result.files.length} sources',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error importing sources: $e')));
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -187,6 +251,7 @@ class _FolderPageState extends State<FolderPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: ExpandableFab(
+        isVisible: _currentPageIndex != 2,
         collapsedBuilder: (context, isOpen, expand, close) {
           if (_isSelecting) {
             final selectedMaterials = _allMaterials
@@ -211,37 +276,149 @@ class _FolderPageState extends State<FolderPage> {
               onDelete: _handleDeleteSelected,
             );
           }
-          return InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      CardCreationPage(folderId: widget.folderId),
-                ),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const FaIcon(FontAwesomeIcons.plus, size: 14),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Create',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.2,
+
+          final isSources = _currentPageIndex == 1;
+          final String title = isSources ? "Import Sources" : "Create Cards";
+          final IconData mainIcon = isSources
+              ? FontAwesomeIcons.layerGroup
+              : FontAwesomeIcons.plus;
+
+          return IntrinsicHeight(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Main Button
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      if (isSources) {
+                        _importSources();
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CardCreationPage(folderId: widget.folderId),
+                          ),
+                        );
+                      }
+                    },
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      bottomLeft: Radius.circular(24),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 14, 16, 14),
+                      child: Row(
+                        children: [
+                          FaIcon(mainIcon, size: 14),
+                          const SizedBox(width: 12),
+                          Text(
+                            title,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ],
-              ),
+                ),
+                // Divider
+                Container(
+                  width: 1,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  color: Colors.white.withValues(alpha: 0.1),
+                ),
+                // Expand Trigger
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: expand,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      child: FaIcon(
+                        FontAwesomeIcons.chevronUp,
+                        size: 14,
+                        color: Colors.white54,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         },
-        expandedBuilder: (context, isOpen, expand, close) =>
-            const SizedBox.shrink(),
+        expandedBuilder: (context, isOpen, expand, close) {
+          final isSources = _currentPageIndex == 1;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, top: 4),
+                  child: Row(
+                    children: [
+                      Text(
+                        isSources ? "IMPORT OPTIONS" : "CREATION TOOLS",
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white.withValues(alpha: 0.4),
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const FaIcon(FontAwesomeIcons.xmark, size: 16),
+                        onPressed: close,
+                        color: Colors.white24,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                if (isSources) ...[
+                  _FabMenuItem(
+                    label: "Import from Text",
+                    icon: FontAwesomeIcons.fileLines,
+                    onTap: () {
+                      close();
+                      // Logic for text import
+                    },
+                  ),
+                  _FabMenuItem(
+                    label: "Import from YouTube",
+                    icon: FontAwesomeIcons.youtube,
+                    onTap: () {
+                      close();
+                      // Logic for youtube import
+                    },
+                  ),
+                ] else ...[
+                  _FabMenuItem(
+                    label: "Quick AI Card Gen",
+                    icon: FontAwesomeIcons.wandMagicSparkles,
+                    onTap: () {
+                      close();
+                      // Logic for AI Generation
+                    },
+                  ),
+                ],
+                const SizedBox(height: 6),
+              ],
+            ),
+          );
+        },
         body: Stack(
           children: [
             // Full-screen animated background
@@ -1012,6 +1189,52 @@ class _SectionLabel extends StatelessWidget {
 }
 
 // DELETED _SourcesBottomSheet
+
+// ---------------------------------------------------------------------------
+// HELPER COMPONENTS
+// ---------------------------------------------------------------------------
+
+class _FabMenuItem extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _FabMenuItem({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                FaIcon(icon, size: 14, color: theme.colorScheme.primary),
+                const SizedBox(width: 12),
+                Text(
+                  label,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 // ---------------------------------------------------------------------------
 // SELECTION ACTION BAR

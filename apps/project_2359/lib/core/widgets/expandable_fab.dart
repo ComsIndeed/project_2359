@@ -40,6 +40,7 @@ class ExpandableFab extends StatefulWidget {
   final double? expandedWidth;
   final double? expandedHeight;
   final Alignment alignment;
+  final bool isVisible;
 
   const ExpandableFab({
     required this.body,
@@ -52,6 +53,7 @@ class ExpandableFab extends StatefulWidget {
     this.expandedWidth,
     this.expandedHeight,
     this.alignment = Alignment.bottomCenter,
+    this.isVisible = true,
   });
 
   @override
@@ -196,74 +198,82 @@ class ExpandableFabState extends State<ExpandableFab> {
             ),
           ),
           AnimatedPositioned(
-            bottom: _isOpen ? 8 : 24,
+            bottom: widget.isVisible ? (_isOpen ? 8 : 24) : -120,
             left: 20,
             right: 20,
             duration: widget.duration,
             curve: widget.curve,
-            child: Align(
-              alignment: widget.alignment,
-              child: Container(
-                decoration: ShapeDecoration(
-                  color:
-                      _overrideColor ??
-                      widget.backgroundColor ??
-                      theme.colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.98,
+            child: AnimatedOpacity(
+              opacity: widget.isVisible ? 1.0 : 0.0,
+              duration: widget.duration,
+              curve: widget.curve,
+              child: Align(
+                alignment: widget.alignment,
+                child: Container(
+                  decoration: ShapeDecoration(
+                    color:
+                        _overrideColor ??
+                        widget.backgroundColor ??
+                        theme.colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.98,
+                        ),
+                    shadows: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.4 : 0.12,
+                        ),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
+                        spreadRadius: -2,
                       ),
-                  shadows: [
-                    BoxShadow(
-                      color: Colors.black.withValues(
-                        alpha: isDark ? 0.4 : 0.12,
+                    ],
+                    shape: RoundedSuperellipseBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      side: BorderSide(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.2,
+                        ),
+                        width: 1.0,
                       ),
-                      blurRadius: 18,
-                      offset: const Offset(0, 6),
-                      spreadRadius: -2,
-                    ),
-                  ],
-                  shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    side: BorderSide(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
-                      width: 1.0,
                     ),
                   ),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Material(
-                  color: Colors.transparent,
-                  child: AnimatedSize(
-                    duration: widget.duration,
-                    curve: widget.curve,
-                    alignment: Alignment.bottomCenter,
-                    clipBehavior: Clip.antiAlias,
-                    child: AnimatedSwitcher(
+                  clipBehavior: Clip.antiAlias,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: AnimatedSize(
                       duration: widget.duration,
-                      switchInCurve: widget.curve,
-                      switchOutCurve: widget.curve,
-                      layoutBuilder: (currentChild, previousChildren) => Stack(
-                        alignment: Alignment.bottomCenter,
-                        children: [
-                          for (final child in previousChildren)
-                            Positioned(child: child),
-                          ?currentChild,
-                        ],
-                      ),
-                      child: _isOpen
-                          ? KeyedSubtree(
-                              key: const ValueKey("expanded"),
-                              child: _SizeReporter(
-                                onSizeChanged: _onExpandedSizeChanged,
-                                child: expandedChild,
-                              ),
-                            )
-                          : KeyedSubtree(
-                              key: const ValueKey("collapsed"),
-                              child: _SizeReporter(
-                                onSizeChanged: _onCollapsedSizeChanged,
-                                child: collapsedChildRaw,
-                              ),
+                      curve: widget.curve,
+                      alignment: Alignment.bottomCenter,
+                      clipBehavior: Clip.antiAlias,
+                      child: AnimatedSwitcher(
+                        duration: widget.duration,
+                        switchInCurve: widget.curve,
+                        switchOutCurve: widget.curve,
+                        layoutBuilder: (currentChild, previousChildren) =>
+                            Stack(
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                for (final child in previousChildren)
+                                  Positioned(child: child),
+                                ?currentChild,
+                              ],
                             ),
+                        child: _isOpen
+                            ? KeyedSubtree(
+                                key: const ValueKey("expanded"),
+                                child: _SizeReporter(
+                                  onSizeChanged: _onExpandedSizeChanged,
+                                  child: expandedChild,
+                                ),
+                              )
+                            : KeyedSubtree(
+                                key: const ValueKey("collapsed"),
+                                child: _SizeReporter(
+                                  onSizeChanged: _onCollapsedSizeChanged,
+                                  child: collapsedChildRaw,
+                                ),
+                              ),
+                      ),
                     ),
                   ),
                 ),
