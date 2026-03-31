@@ -13,6 +13,8 @@ dependencies:
   textify: ^0.5.2
   http: ^1.6.0
   pdfrx: ^2.2.24
+  shared_core:
+    path: ../../packages/shared_core
 
 dev_dependencies:
   flutter_test:

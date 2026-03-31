@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 
-import 'pdf_text_boundary_detector.dart';
+import 'package:shared_core/shared_core.dart';
 
 /// Handles smart tap-based text selection on a PDF viewer.
 ///

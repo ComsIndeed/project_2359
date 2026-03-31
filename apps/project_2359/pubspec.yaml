@@ -39,6 +39,8 @@ dependencies:
   sensors_plus: ^7.0.0
   pdfrx: ^2.2.24
   responsive_framework: ^1.5.1
+  shared_core:
+    path: ../../packages/shared_core
 
 dev_dependencies:
   flutter_test:

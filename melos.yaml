@@ -1,0 +1,4 @@
+name: project_2359_workspace
+packages:
+  - apps/*
+  - packages/*
