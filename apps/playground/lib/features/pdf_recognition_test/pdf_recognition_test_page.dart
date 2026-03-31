@@ -135,9 +135,7 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
               _pdfPath!,
               controller: _controller,
               params: PdfViewerParams(
-                textSelectionParams: const PdfTextSelectionParams(
-                  enableTextSelection: true,
-                ),
+                textSelectionParams: const PdfTextSelectionParams(),
                 pagePaintCallbacks: [
                   (canvas, pageRect, page) {
                     _drawBoundaries(canvas, pageRect, page);
