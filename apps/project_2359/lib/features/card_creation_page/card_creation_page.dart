@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pdfrx/pdfrx.dart';
+import 'package:project_2359/core/widgets/expandable_container.dart';
 import 'package:provider/provider.dart';
 
 import 'package:project_2359/app_database.dart';
@@ -26,6 +27,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
   PdfDocument? _document;
   List<SourceItem>? _availableSources;
   StreamSubscription? _sourcesSub;
+  final PdfViewerController _controller = PdfViewerController();
   bool _isLoading = false;
 
   @override
@@ -79,37 +81,44 @@ class _CardCreationPageState extends State<CardCreationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: Text(_pdfTitle ?? 'Create Card'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (_pdfBytes != null) {
-              setState(() {
-                _pdfBytes = null;
-                _pdfTitle = null;
-                _document = null;
-              });
-            } else {
-              Navigator.pop(context);
-            }
-          },
+    return ExpandableContainer(
+      builder: (context, controller) {
+        return Text("Hello");
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          title: Text(_pdfTitle ?? 'Create Card'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              if (_pdfBytes != null) {
+                setState(() {
+                  _pdfBytes = null;
+                  _pdfTitle = null;
+                  _document = null;
+                });
+              } else {
+                Navigator.pop(context);
+              }
+            },
+          ),
         ),
+        body: _buildPdfView(),
       ),
-      body: _buildPdfView(),
     );
   }
 
   Widget _buildPdfView() {
     if (_pdfBytes == null) {
-      return _buildPdfList(Theme.of(context).colorScheme, Theme.of(context));
+      return _buildPdfList(context);
     }
 
     return PdfViewer.data(
       _pdfBytes!,
       sourceName: _pdfTitle ?? 'pdf',
+      controller: _controller,
+      useProgressiveLoading: true,
       params: PdfViewerParams(
         onViewerReady: (doc, controller) {
           if (mounted) {
@@ -123,59 +132,15 @@ class _CardCreationPageState extends State<CardCreationPage> {
     );
   }
 
-  SingleChildScrollView _buildPdfList(ColorScheme cs, ThemeData theme) {
+  Widget _buildPdfList(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final topPadding = MediaQuery.of(context).padding.top;
+
     return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.fromLTRB(20, topPadding + 64, 20, 100),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Simplified Header
-          Center(
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: cs.onSurface.withValues(alpha: 0.03),
-                    shape: BoxShape.circle,
-                  ),
-                  child:
-                      FaIcon(
-                            FontAwesomeIcons.filePdf,
-                            size: 28,
-                            color: cs.onSurface.withValues(alpha: 0.1),
-                          )
-                          .animate(onPlay: (c) => c.repeat())
-                          .shimmer(
-                            duration: 2.seconds,
-                            color: cs.primary.withValues(alpha: 0.1),
-                          ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  "Create from Source",
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.5,
-                    color: cs.onSurface.withValues(alpha: 0.9),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Choose a document from this folder",
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.4),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 32),
-
           const SectionLabel(title: "Select Document"),
           const SizedBox(height: 16),
 
@@ -199,6 +164,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
           else
             Column(
               children: [
+                // TODO: Make this use a list view
                 for (var i = 0; i < _availableSources!.length; i++)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
