@@ -73,46 +73,48 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
     return Stack(
       children: [
         widget.child,
-        Padding(
-          padding: widget.boundaryMargins,
-          child: AnimatedAlign(
-            duration: widget.duration,
-            alignment: _controller.alignment,
-            child: ClipPath(
-              clipper: ShapeBorderClipper(
-                shape: RoundedSuperellipseBorder(
-                  borderRadius: BorderRadius.circular(32),
-                ),
-              ),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Material(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.surface.withValues(alpha: 0.7),
-                  elevation: 8,
+        SizedBox.expand(
+          child: Padding(
+            padding: widget.boundaryMargins,
+            child: AnimatedAlign(
+              duration: widget.duration,
+              alignment: _controller.alignment,
+              child: ClipPath(
+                clipper: ShapeBorderClipper(
                   shape: RoundedSuperellipseBorder(
                     borderRadius: BorderRadius.circular(32),
-                    side: BorderSide(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.1),
-                      width: 1,
-                    ),
                   ),
-                  clipBehavior: Clip.antiAlias,
-                  child: AnimatedSize(
-                    duration: widget.duration,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: (_controller.size == null)
-                          ? widget.builder(context, _controller)
-                          : AnimatedContainer(
-                              duration: widget.duration,
-                              width: _controller.size!.$1,
-                              height: _controller.size!.$2,
-                              child: widget.builder(context, _controller),
-                            ),
+                ),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Material(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surface.withValues(alpha: 0.7),
+                    elevation: 8,
+                    shape: RoundedSuperellipseBorder(
+                      borderRadius: BorderRadius.circular(32),
+                      side: BorderSide(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.1),
+                        width: 1,
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: AnimatedSize(
+                      duration: widget.duration,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: (_controller.size == null)
+                            ? widget.builder(context, _controller)
+                            : AnimatedContainer(
+                                duration: widget.duration,
+                                width: _controller.size!.$1,
+                                height: _controller.size!.$2,
+                                child: widget.builder(context, _controller),
+                              ),
+                      ),
                     ),
                   ),
                 ),

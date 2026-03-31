@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pdfrx/pdfrx.dart';
-import 'package:project_2359/core/widgets/expandable_container.dart';
-import 'package:project_2359/features/card_creation_page/smart_text_selection_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import 'package:project_2359/app_database.dart';
+import 'package:project_2359/core/widgets/expandable_container.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
+import 'package:project_2359/features/card_creation_page/smart_text_selection_handler.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 
@@ -84,17 +85,39 @@ class _CardCreationPageState extends State<CardCreationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = ResponsiveBreakpoints.of(context).isDesktop;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final useVerticalToolbar = isDesktop || isLandscape;
+
     return ExpandableContainer(
+      initialAlignment: useVerticalToolbar
+          ? Alignment.centerRight
+          : Alignment.bottomCenter,
       boundaryMargins: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       builder: (context, controller) {
-        return Row(
+        return Flex(
+          direction: useVerticalToolbar ? Axis.vertical : Axis.horizontal,
+          mainAxisSize: MainAxisSize.max,
           children: [
-            Spacer(),
             IconButton(
               onPressed: () {
-                // TODO: Non-functional button
+                // TODO: Implement menu functionality
               },
-              icon: FaIcon(FontAwesomeIcons.barsStaggered),
+              icon: const FaIcon(FontAwesomeIcons.barsStaggered),
+            ),
+            IconButton(
+              onPressed: () {
+                // TODO: Implement menu functionality
+              },
+              icon: const FaIcon(FontAwesomeIcons.barsStaggered),
+            ),
+            const Spacer(),
+            IconButton(
+              onPressed: () {
+                // TODO: Implement menu functionality
+              },
+              icon: const FaIcon(FontAwesomeIcons.barsStaggered),
             ),
           ],
         );
