@@ -36,49 +36,68 @@ class _ExpandableCardCreationToolbarState
     if (_mode == CardCreationToolbarMode.cardCreation) {
       // TODO: Implement card creation UI
     }
-    return Flex(
-      direction: widget.useVerticalToolbar ? Axis.vertical : Axis.horizontal,
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Expanded(
-          child: ValueListenableBuilder(
-            valueListenable: widget.selectedTextNotifier,
-            builder: (context, text, _) {
-              return AnimatedSwitcher(
-                duration: 300.ms,
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: ScaleTransition(
-                      scale: Tween<double>(
-                        begin: 0.95,
-                        end: 1.0,
-                      ).animate(animation),
-                      child: child,
-                    ),
-                  );
-                },
-                child: (text == null || text.isEmpty)
-                    ? const SizedBox.shrink()
-                    : _buildSelectedTextButton(text),
-              );
-            },
+    return ClipRect(
+      child: Flex(
+        direction: widget.useVerticalToolbar ? Axis.vertical : Axis.horizontal,
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Expanded(
+            child: ValueListenableBuilder(
+              valueListenable: widget.selectedTextNotifier,
+              builder: (context, text, _) {
+                return AnimatedSwitcher(
+                  duration: 400.ms,
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, animation) {
+                    final key = child.key;
+                    final isEntering =
+                        (text != null && key is ValueKey && key.value == text);
+
+                    final slideAnimation =
+                        Tween<Offset>(
+                          begin: isEntering
+                              ? const Offset(0, 0.45)
+                              : const Offset(0, -0.45),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          ),
+                        );
+
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: slideAnimation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: (text == null || text.isEmpty)
+                      ? const SizedBox.shrink(key: ValueKey('empty_text'))
+                      : _buildSelectedTextButton(text, key: ValueKey(text)),
+                );
+              },
+            ),
           ),
-        ),
-        IconButton(
-          onPressed: () {
-            // TODO: Implement menu functionality
-          },
-          icon: const FaIcon(FontAwesomeIcons.barsStaggered),
-        ),
-      ],
+          IconButton(
+            onPressed: () {
+              // TODO: Implement menu functionality
+            },
+            icon: const FaIcon(FontAwesomeIcons.barsStaggered),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildSelectedTextButton(String text) {
+  Widget _buildSelectedTextButton(String text, {Key? key}) {
     final cs = Theme.of(context).colorScheme;
     return InkWell(
+      key: key,
       onTap: () {
         setState(() {
           _mode = CardCreationToolbarMode.cardCreation;
