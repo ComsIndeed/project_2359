@@ -15,6 +15,10 @@ class ExpandableContainer extends StatefulWidget {
   builder;
   final ExpandableContainerController? controller;
   final Alignment initialAlignment;
+  final EdgeInsets? initialPadding;
+  final double? initialBlur;
+  final Color? initialColor;
+  final BorderSide? initialBorder;
 
   const ExpandableContainer({
     super.key,
@@ -25,6 +29,10 @@ class ExpandableContainer extends StatefulWidget {
     this.controller,
     this.initialAlignment = Alignment.bottomCenter,
     this.boundaryMargins = const EdgeInsets.all(12),
+    this.initialPadding,
+    this.initialBlur,
+    this.initialColor,
+    this.initialBorder,
   });
 
   @override
@@ -41,6 +49,10 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
         widget.controller ??
         ExpandableContainerController(
           initialAlignment: widget.initialAlignment,
+          padding: widget.initialPadding,
+          blur: widget.initialBlur,
+          color: widget.initialColor,
+          border: widget.initialBorder,
         );
     _controller.addListener(_rebuild);
   }
@@ -54,6 +66,10 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
           widget.controller ??
           ExpandableContainerController(
             initialAlignment: widget.initialAlignment,
+            padding: widget.initialPadding,
+            blur: widget.initialBlur,
+            color: widget.initialColor,
+            border: widget.initialBorder,
           );
       _controller.addListener(_rebuild);
     }
@@ -77,6 +93,12 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
         Theme.of(context).colorScheme.surface.withValues(alpha: 0.7);
     final padding = _controller.padding ?? const EdgeInsets.all(12);
     final blur = _controller.blur ?? 10.0;
+    final border =
+        _controller.border ??
+        BorderSide(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+          width: 1,
+        );
 
     return Stack(
       children: [
@@ -114,12 +136,7 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
                       color: color,
                       shape: RoundedSuperellipseBorder(
                         borderRadius: BorderRadius.circular(32),
-                        side: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.1),
-                          width: 1,
-                        ),
+                        side: border,
                       ),
                       shadows: [
                         BoxShadow(
@@ -168,22 +185,26 @@ class ExpandableContainerController extends ChangeNotifier {
   EdgeInsets? _padding;
   double? _blur;
   Color? _color;
+  BorderSide? _border;
 
   ExpandableContainerController({
     Alignment initialAlignment = Alignment.bottomCenter,
     EdgeInsets? padding,
     double? blur,
     Color? color,
+    BorderSide? border,
   }) : _alignment = initialAlignment,
        _padding = padding,
        _blur = blur,
-       _color = color;
+       _color = color,
+       _border = border;
 
   (double, double)? get size => _size;
   Alignment get alignment => _alignment;
   EdgeInsets? get padding => _padding;
   double? get blur => _blur;
   Color? get color => _color;
+  BorderSide? get border => _border;
 
   void setSize({double? width, double? height}) {
     if (width != null && height != null) {
@@ -211,6 +232,11 @@ class ExpandableContainerController extends ChangeNotifier {
 
   void setColor(Color? color) {
     _color = color;
+    notifyListeners();
+  }
+
+  void setBorder(BorderSide? border) {
+    _border = border;
     notifyListeners();
   }
 
