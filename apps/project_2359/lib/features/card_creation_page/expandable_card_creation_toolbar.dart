@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/widgets/expandable_container.dart';
+import 'package:project_2359/core/widgets/icon_widgets/card_icon.dart';
 
 enum CardCreationToolbarMode { collapsed, cardCreation, imageOcclusion }
 
@@ -33,15 +34,12 @@ class _ExpandableCardCreationToolbarState
     if (_mode == CardCreationToolbarMode.cardCreation) {
       // TODO: Implement card creation UI
     }
-
-    final cs = Theme.of(context).colorScheme;
-
     return Flex(
       direction: widget.useVerticalToolbar ? Axis.vertical : Axis.horizontal,
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Flexible(
+        Expanded(
           child: ValueListenableBuilder(
             valueListenable: widget.selectionNotifier,
             builder: (context, selection, _) {
@@ -68,55 +66,13 @@ class _ExpandableCardCreationToolbarState
                           final text = snapshot.data ?? "";
                           if (text.isEmpty) return const SizedBox.shrink();
 
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: InkWell(
-                              onTap: () {
-                                setState(() {
-                                  _mode = CardCreationToolbarMode.cardCreation;
-                                });
-                              },
-                              borderRadius: BorderRadius.circular(20),
-                              child: Container(
-                                padding: const EdgeInsets.fromLTRB(6, 6, 12, 6),
-                                decoration: ShapeDecoration(
-                                  shape: StadiumBorder(
-                                    side: BorderSide(
-                                      color: cs.outlineVariant.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _buildPrettyCardIcon(cs),
-                                    const SizedBox(width: 8),
-                                    Flexible(
-                                      child: Text(
-                                        text.replaceAll('\n', ' '),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: cs.onSurface,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
+                          return _buildSelectedTextButton(text);
                         },
                       ),
               );
             },
           ),
         ),
-        const Spacer(),
         IconButton(
           onPressed: () {
             // TODO: Implement menu functionality
@@ -127,29 +83,35 @@ class _ExpandableCardCreationToolbarState
     );
   }
 
-  Widget _buildPrettyCardIcon(ColorScheme cs) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: ShapeDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [cs.primary, cs.tertiary],
+  Widget _buildSelectedTextButton(String text) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _mode = CardCreationToolbarMode.cardCreation;
+        });
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          children: [
+            const CardIcon(),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                text.replaceAll('\n', ' '),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
+              ),
+            ),
+          ],
         ),
-        shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        shadows: [
-          BoxShadow(
-            color: cs.primary.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: const Center(
-        child: FaIcon(FontAwesomeIcons.plus, size: 12, color: Colors.white),
       ),
     );
   }
