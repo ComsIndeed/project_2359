@@ -140,97 +140,52 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
           cs: cs,
         ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 8),
 
         // Bottom Buttons
         Row(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Expanded(
-              child: TextButton(
-                onPressed: () {
-                  widget.controller.setMode(CardCreationToolbarMode.collapsed);
-                },
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  foregroundColor: cs.onSurfaceVariant.withValues(alpha: 0.8),
+            IconButton(onPressed: () {}, icon: Icon(Icons.image_outlined)),
+            IconButton(onPressed: () {}, icon: Icon(Icons.tag_outlined)),
+            const Spacer(),
+            TextButton(
+              onPressed: () {
+                widget.controller.setMode(CardCreationToolbarMode.collapsed);
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                shape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.3,
-                  ),
+                foregroundColor: cs.onSurfaceVariant.withValues(alpha: 0.8),
+              ),
+              child: const Text(
+                "Cancel",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
                 ),
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(
-              flex: 2,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: cs.primary.withValues(alpha: 0.25),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: FilledButton.icon(
-                  onPressed: () {
-                    // TODO: Implement card saving logic
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Card Saved! (Simulated)")),
-                    );
-                    widget.controller.resetCardFields();
-                    widget.controller.setMode(
-                      CardCreationToolbarMode.collapsed,
-                    );
-                  },
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    backgroundColor: cs.primary,
-                    foregroundColor: cs.onPrimary,
-                    shape: RoundedSuperellipseBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    elevation:
-                        0, // Elevation is handled by the Container's shadow for more control
-                  ),
-                  icon: const Icon(Icons.add_rounded, size: 22),
-                  label: const Text(
-                    "Add Card",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.8,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
+            FilledButton.icon(
+              onPressed: () {
+                // TODO: Implement card saving logic
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Card Saved! (Simulated)")),
+                );
+                widget.controller.resetCardFields();
+                widget.controller.setMode(CardCreationToolbarMode.collapsed);
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: cs.primary.withAlpha(50),
               ),
+              icon: const Icon(Icons.add_rounded, size: 22),
+              label: const Text("Add Card"),
             ),
           ],
         ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
-
-        const SizedBox(height: 12),
-
-        // Nice to have options
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _buildOptionChip(Icons.auto_awesome, "AI Polish", cs),
-              const SizedBox(width: 8),
-              _buildOptionChip(Icons.image_outlined, "Add Image", cs),
-              const SizedBox(width: 8),
-              _buildOptionChip(Icons.tag_outlined, "Tags", cs),
-            ],
-          ),
-        ).animate().fadeIn(delay: 500.ms),
       ],
     );
   }
@@ -250,19 +205,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
           decoration: InputDecoration(
             labelText: label,
             filled: true,
-            fillColor: cs.surface,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
-            // border: OutlineInputBorder(
-            //   borderRadius: BorderRadius.circular(12),
-            //   borderSide: BorderSide.none,
-            // ),
-            // focusedBorder: OutlineInputBorder(
-            //   borderRadius: BorderRadius.circular(12),
-            //   borderSide: BorderSide(color: cs.primary, width: 1.5),
-            // ),
+            fillColor: cs.surface.withAlpha(100),
           ),
         ),
       ],

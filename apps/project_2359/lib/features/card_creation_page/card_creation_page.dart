@@ -42,6 +42,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
   /// Incremented on each document load to force a full PdfViewer remount,
   /// which clears all internal caches (image cache, text cache, layout, etc.).
   int _pdfKey = 0;
+  String? _currentSourceId;
 
   @override
   void initState() {
@@ -87,6 +88,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
           _selectedTextNotifier.value = null;
           _pdfBytes = blob.bytes;
           _pdfTitle = source.label;
+          _currentSourceId = source.id;
         });
       }
     } catch (e) {
@@ -148,8 +150,20 @@ class _CardCreationPageState extends State<CardCreationPage> {
               ),
               flexibleSpace: ClipRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(color: Colors.black.withValues(alpha: 0.25)),
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.7),
+                          Colors.black.withValues(alpha: 0.3),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
               leading: IconButton(
@@ -157,9 +171,11 @@ class _CardCreationPageState extends State<CardCreationPage> {
                 onPressed: () {
                   if (_pdfBytes != null) {
                     setState(() {
+                      _controller = PdfViewerController();
                       _pdfBytes = null;
                       _pdfTitle = null;
                       _document = null;
+                      _currentSourceId = null;
                       _selectionNotifier.value = null;
                       _selectedTextNotifier.value = null;
                     });
@@ -177,44 +193,41 @@ class _CardCreationPageState extends State<CardCreationPage> {
   }
 
   Widget _buildPdfView() {
-    final topPadding = MediaQuery.of(context).padding.top;
     if (_pdfBytes == null) {
       return _buildPdfList(context);
     }
 
-    return Padding(
-      padding: EdgeInsets.only(top: topPadding + kToolbarHeight),
-      child: KeyedSubtree(
-        key: ValueKey(_pdfKey),
-        child: PdfViewer.data(
-          _pdfBytes!,
-          sourceName: 'pdf_$_pdfKey',
-          controller: _controller,
-          useProgressiveLoading: true,
-          params: PdfViewerParams(
-            onViewerReady: (doc, controller) {
-              if (mounted) {
-                setState(() {
-                  _document = doc;
-                });
-              }
+    return KeyedSubtree(
+      key: ValueKey(_pdfKey),
+      child: PdfViewer.data(
+        _pdfBytes!,
+        sourceName: 'pdf_$_currentSourceId',
+        controller: _controller,
+        useProgressiveLoading: true,
+        params: PdfViewerParams(
+          margin: 8,
+          onViewerReady: (doc, controller) {
+            if (mounted) {
+              setState(() {
+                _document = doc;
+              });
+            }
+          },
+          backgroundColor: Colors.black,
+          textSelectionParams: PdfTextSelectionParams(
+            enabled: true,
+            onTextSelectionChange: (pdfTextSelection) {
+              _selectionNotifier.value = pdfTextSelection;
+              pdfTextSelection.getSelectedText().then((text) {
+                if (_selectionNotifier.value == pdfTextSelection) {
+                  _selectedTextNotifier.value = text;
+                }
+              });
             },
-            backgroundColor: Colors.black,
-            textSelectionParams: PdfTextSelectionParams(
-              enabled: true,
-              onTextSelectionChange: (pdfTextSelection) {
-                _selectionNotifier.value = pdfTextSelection;
-                pdfTextSelection.getSelectedText().then((text) {
-                  if (_selectionNotifier.value == pdfTextSelection) {
-                    _selectedTextNotifier.value = text;
-                  }
-                });
-              },
-            ),
-            onGeneralTap: labsSettings.smartSelectionEnabled
-                ? _smartSelection.handleTap
-                : null,
           ),
+          onGeneralTap: labsSettings.smartSelectionEnabled
+              ? _smartSelection.handleTap
+              : null,
         ),
       ),
     );
@@ -225,15 +238,11 @@ class _CardCreationPageState extends State<CardCreationPage> {
     final topPadding = MediaQuery.of(context).padding.top;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        topPadding + kToolbarHeight + 24,
-        20,
-        100,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          SizedBox(height: topPadding + kToolbarHeight + 24),
           const SectionLabel(title: "Select Document"),
           const SizedBox(height: 16),
 
