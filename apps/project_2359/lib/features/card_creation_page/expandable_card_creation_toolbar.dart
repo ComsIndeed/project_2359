@@ -13,12 +13,14 @@ class ExpandableCardCreationToolbar extends StatefulWidget {
     required this.controller,
     required this.useVerticalToolbar,
     required this.selectionNotifier,
+    required this.selectedTextNotifier,
   });
 
   final BuildContext context;
   final ExpandableContainerController controller;
   final bool useVerticalToolbar;
   final ValueNotifier<dynamic> selectionNotifier;
+  final ValueNotifier<String?> selectedTextNotifier;
 
   @override
   State<ExpandableCardCreationToolbar> createState() =>
@@ -41,8 +43,8 @@ class _ExpandableCardCreationToolbarState
       children: [
         Expanded(
           child: ValueListenableBuilder(
-            valueListenable: widget.selectionNotifier,
-            builder: (context, selection, _) {
+            valueListenable: widget.selectedTextNotifier,
+            builder: (context, text, _) {
               return AnimatedSwitcher(
                 duration: 300.ms,
                 transitionBuilder: (child, animation) {
@@ -57,18 +59,9 @@ class _ExpandableCardCreationToolbarState
                     ),
                   );
                 },
-                child: (selection == null)
+                child: (text == null || text.isEmpty)
                     ? const SizedBox.shrink()
-                    : FutureBuilder<String?>(
-                        key: ValueKey(selection.hashCode),
-                        future: (selection as dynamic).getSelectedText(),
-                        builder: (context, snapshot) {
-                          final text = snapshot.data ?? "";
-                          if (text.isEmpty) return const SizedBox.shrink();
-
-                          return _buildSelectedTextButton(text);
-                        },
-                      ),
+                    : _buildSelectedTextButton(text),
               );
             },
           ),

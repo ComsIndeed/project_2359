@@ -35,6 +35,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
       const SmartTextSelectionHandler();
   bool _isLoading = false;
   final ValueNotifier<dynamic> _selectionNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> _selectedTextNotifier = ValueNotifier(null);
 
   /// Incremented on each document load to force a full PdfViewer remount,
   /// which clears all internal caches (image cache, text cache, layout, etc.).
@@ -50,6 +51,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
   void dispose() {
     _sourcesSub?.cancel();
     _selectionNotifier.dispose();
+    _selectedTextNotifier.dispose();
     super.dispose();
   }
 
@@ -80,6 +82,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
           _pdfKey++;
           _document = null;
           _selectionNotifier.value = null;
+          _selectedTextNotifier.value = null;
           _pdfBytes = blob.bytes;
           _pdfTitle = source.label;
         });
@@ -118,6 +121,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
             controller: controller,
             useVerticalToolbar: useVerticalToolbar,
             selectionNotifier: _selectionNotifier,
+            selectedTextNotifier: _selectedTextNotifier,
           ),
           child: Scaffold(
             backgroundColor: Colors.black,
@@ -132,6 +136,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
                       _pdfTitle = null;
                       _document = null;
                       _selectionNotifier.value = null;
+                      _selectedTextNotifier.value = null;
                     });
                   } else {
                     Navigator.pop(context);
@@ -171,8 +176,13 @@ class _CardCreationPageState extends State<CardCreationPage> {
           backgroundColor: Colors.black,
           textSelectionParams: PdfTextSelectionParams(
             enabled: true,
-            onTextSelectionChange: (pdfTextSelection) async {
+            onTextSelectionChange: (pdfTextSelection) {
               _selectionNotifier.value = pdfTextSelection;
+              pdfTextSelection.getSelectedText().then((text) {
+                if (_selectionNotifier.value == pdfTextSelection) {
+                  _selectedTextNotifier.value = text;
+                }
+              });
             },
           ),
           onGeneralTap: labsSettings.smartSelectionEnabled
