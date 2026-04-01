@@ -19,10 +19,10 @@ import 'package:pdfrx/pdfrx.dart';
 class PdfTextBoundaryDetector {
   const PdfTextBoundaryDetector._();
 
-  /// Algorithm Version: 1.3.3
-  /// Updated: 2026-04-01 12:03
+  /// Algorithm Version: 1.3.4
+  /// Updated: 2026-04-01 12:43
   /// NOTE: Increment this version whenever the heuristic logic is modified.
-  static const algorithmVersion = '1.3.3-20260401';
+  static const algorithmVersion = '1.3.4-20260401';
 
   /// Ratio threshold for font size similarity.
   /// Relaxed to 1.6 to allow for Bold/Style variations and sub-headers.
@@ -259,28 +259,25 @@ class PdfTextBoundaryDetector {
 
       final gap = _verticalLineGap(line, nextLine);
 
-      // Absolute break thresholds.
-      if (gap > refHeight * 1.5) {
-        break;
-      }
+      // Absolute break thresholds (Higher threshold for paragraph integrity).
+      if (gap > refHeight * 1.8) break;
 
-      // Relative break threshold (Asymmetric).
-      // We break immediately on significant spacing INCREASES (leaps).
       if (lastGap != null) {
-        final jump = gap - lastGap;
-        if (jump > refHeight * 0.3) {
-          break; // Leap detected. Break.
-        }
+        final jump = (gap - lastGap).abs();
 
-        // Minor noise or reduction. Use lookahead for consistency.
-        if (useLookahead &&
-            jump.abs() > refHeight * _spacingConsistencyThreshold) {
-          if (i > 0) {
-            final prevLine = lines[i - 1];
-            final prevGap = _verticalLineGap(prevLine, line);
-            if ((prevGap - lastGap).abs() >
+        // If we see a significant spacing change, check if it's just a "Ghost Line" (Watermark)
+        // by looking one step further back.
+        if (jump > refHeight * 0.35) {
+          if (useLookahead && i > 0) {
+            final ghostPrev = lines[i - 1];
+            final ghostGap = _verticalLineGap(ghostPrev, line);
+            // If the line *before* the watermark restores the normal spacing streak, skip the watermark.
+            if ((ghostGap - lastGap).abs() <
                 refHeight * _spacingConsistencyThreshold) {
-              break;
+              // Streak restored! We "swallow" the watermark line and keep the paragraph.
+              gap; // Keep current gap for calculation but don't break.
+            } else {
+              break; // Genuine spacing leap. Break.
             }
           } else {
             break;
@@ -288,10 +285,7 @@ class PdfTextBoundaryDetector {
         }
       }
 
-      // Alignment check (v1.3.3 Relaxed to 5.0 to handle deep indents).
-      if ((line.bounds.left - nextLine.bounds.left).abs() > refHeight * 5.0) {
-        break;
-      }
+      // v1.3.4: Removed Alignment shift checks. We don't care if lines are shifted horizontally.
 
       lastGap = gap;
       startLineIdx = i;
@@ -308,24 +302,23 @@ class PdfTextBoundaryDetector {
 
       final gap = _verticalLineGap(prevLine, line);
 
-      if (gap > refHeight * 1.5) {
-        break;
-      }
+      // Absolute break thresholds.
+      if (gap > refHeight * 1.8) break;
 
       if (lastGap != null) {
-        final jump = gap - lastGap;
-        if (jump > refHeight * 0.3) {
-          break; // Leap detected. Break.
-        }
+        final jump = (gap - lastGap).abs();
 
-        if (useLookahead &&
-            jump.abs() > refHeight * _spacingConsistencyThreshold) {
-          if (i < lines.length - 1) {
-            final nextLine = lines[i + 1];
-            final nextGap = _verticalLineGap(line, nextLine);
-            if ((nextGap - lastGap).abs() >
+        // Ghost Line / Watermark skip logic (Forward).
+        if (jump > refHeight * 0.35) {
+          if (useLookahead && i < lines.length - 1) {
+            final ghostNext = lines[i + 1];
+            final ghostGap = _verticalLineGap(line, ghostNext);
+            if ((ghostGap - lastGap).abs() <
                 refHeight * _spacingConsistencyThreshold) {
-              break;
+              // Streak potentially restored after this line.
+              // We'll allow this line as it might be a watermark or a single mid-paragraph header.
+            } else {
+              break; // Genuine gap increase. Paragraph ended.
             }
           } else {
             break;
@@ -333,17 +326,14 @@ class PdfTextBoundaryDetector {
         }
       }
 
-      // Trailing short line detection: if the previous line ended very early,
-      // and we just saw a gap increase (even a small one), break.
+      // v1.3.4: Ignore "Short line" endings if the spacing is perfectly consistent.
+      // We only use short-line as a tie-breaker IF the spacing is already suspicious.
       if (lastGap != null && _isShortLine(prevLine, refLine)) {
-        if (gap > lastGap + 1.0) {
+        final spacingLeap = gap - lastGap;
+        if (spacingLeap > refHeight * 0.2) {
+          // If the previous line was short AND the gap increased, it's definitely the end.
           break;
         }
-      }
-
-      // Alignment check (v1.3.3 Relaxed to 5.0 to handle deep indents).
-      if ((line.bounds.left - prevLine.bounds.left).abs() > refHeight * 5.0) {
-        break;
       }
 
       lastGap = gap;
