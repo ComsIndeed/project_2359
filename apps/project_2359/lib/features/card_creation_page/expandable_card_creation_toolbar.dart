@@ -6,7 +6,7 @@ import 'package:project_2359/core/widgets/expandable_container.dart';
 enum CardCreationToolbarMode { collapsed, cardCreation, imageOcclusion }
 
 class ExpandableCardCreationToolbar extends StatefulWidget {
-  const ExpandableCardCreationToolbar({
+  ExpandableCardCreationToolbar({
     super.key,
     required this.context,
     required this.controller,
@@ -73,7 +73,8 @@ class _ExpandableCardCreationToolbarState
                             child: InkWell(
                               onTap: () {
                                 setState(() {
-                                  _mode = CardCreationToolbarMode.cardCreation;
+                                  _mode = C
+                                       ardCreationToolbarMode.cardCreation;
                                 });
                               },
                               borderRadius: BorderRadius.circular(20),
@@ -116,7 +117,7 @@ class _ExpandableCardCreationToolbarState
             },
           ),
         ),
-        if (!widget.useVerticalToolbar) const Spacer(),
+        const Spacer(),
         IconButton(
           onPressed: () {
             // TODO: Implement menu functionality
