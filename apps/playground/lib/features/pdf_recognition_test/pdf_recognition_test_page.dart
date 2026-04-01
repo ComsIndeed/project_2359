@@ -92,6 +92,9 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
                 _textCache.clear();
                 _loadingPages.clear();
               });
+              debugPrint(
+                '[LOOKAHEAD] ${_useLookahead ? "ENABLED" : "DISABLED"}',
+              );
               _controller.invalidate();
             },
           ),
@@ -162,6 +165,36 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
               controller: _controller,
               params: PdfViewerParams(
                 textSelectionParams: const PdfTextSelectionParams(),
+                onGeneralTap: (context, controller, details) {
+                  Future.microtask(() async {
+                    final hit = controller.getPdfPageHitTestResult(
+                      details.documentPosition,
+                      useDocumentLayoutCoordinates: true,
+                    );
+                    if (hit != null) {
+                      final pageText = await hit.page.loadStructuredText();
+                      final charIndex = _findCharIndex(pageText, hit.offset);
+                      if (charIndex >= 0) {
+                        final frag = pageText.getFragmentForTextIndex(
+                          charIndex,
+                        );
+                        debugPrint(
+                          '[INSPECT] Tapped Fragment: "${frag?.text}"\n'
+                          'PDF Coords: ${hit.offset}\n'
+                          'CharIndex: $charIndex\n'
+                          'FragBounds: ${frag?.bounds}',
+                        );
+                      } else {
+                        debugPrint(
+                          '[INSPECT] No fragment found at ${hit.offset}',
+                        );
+                      }
+                    } else {
+                      debugPrint('[INSPECT] No hit detected');
+                    }
+                  });
+                  return false;
+                },
                 pagePaintCallbacks: [
                   (canvas, pageRect, page) {
                     _drawBoundaries(canvas, pageRect, page);
@@ -181,12 +214,12 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
       return;
     }
 
-    // DEBUG: Show all detected fragments as wireframes
+    // DEBUG: Show all detected fragments as wireframes (THICKER v1.3.3)
     if (_showAllFragments) {
       final fragmentPaint = Paint()
-        ..color = Colors.blue.withOpacity(0.5)
+        ..color = Colors.blue.withOpacity(0.6)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.5;
+        ..strokeWidth = 2.0;
 
       for (final fragment in pageText.fragments) {
         final rect = fragment.bounds.toRectInDocument(
@@ -313,6 +346,13 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
     } finally {
       _loadingPages.remove(pageNumber);
     }
+  }
+
+  int _findCharIndex(PdfPageText text, PdfPoint point) {
+    for (int i = 0; i < text.charRects.length; i++) {
+      if (text.charRects[i].containsPoint(point)) return i;
+    }
+    return -1;
   }
 
   bool _isWhitespace(int c) => c == 0x20 || c == 0x09 || c == 0x0A || c == 0x0D;

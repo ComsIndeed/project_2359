@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 /// TODO: FOllow up with this:
@@ -19,10 +20,10 @@ import 'package:pdfrx/pdfrx.dart';
 class PdfTextBoundaryDetector {
   const PdfTextBoundaryDetector._();
 
-  /// Algorithm Version: 1.3.1
-  /// Updated: 2026-03-31 23:15
+  /// Algorithm Version: 1.3.3
+  /// Updated: 2026-04-01 12:03
   /// NOTE: Increment this version whenever the heuristic logic is modified.
-  static const algorithmVersion = '1.3.1-20260331';
+  static const algorithmVersion = '1.3.3-20260401';
 
   /// Ratio threshold for font size similarity.
   /// Relaxed to 1.6 to allow for Bold/Style variations and sub-headers.
@@ -217,9 +218,13 @@ class PdfTextBoundaryDetector {
     // SORT GEOMETRICALLY: Essential because PDF data streams are often
     // out of visual order. Visual consistency depends on geometric order.
     fragments.sort((a, b) {
-      final yComp = b.bounds.top.compareTo(a.bounds.top);
-      if (yComp != 0) return yComp;
-      return a.bounds.left.compareTo(b.bounds.left);
+      // Fuzzy Y-sort: If two fragments are within 3px vertically,
+      // treat them as being on the same line for sorting purposes.
+      final yDiff = (a.bounds.top - b.bounds.top).abs();
+      if (yDiff < 3.0) {
+        return a.bounds.left.compareTo(b.bounds.left);
+      }
+      return b.bounds.top.compareTo(a.bounds.top);
     });
 
     final targetFragIdx = text.getFragmentIndexForTextIndex(charIndex);
@@ -256,13 +261,19 @@ class PdfTextBoundaryDetector {
       final gap = _verticalLineGap(line, nextLine);
 
       // Absolute break thresholds.
-      if (gap > refHeight * 1.5) break;
+      if (gap > refHeight * 1.5) {
+        debugPrint('[DETECTOR-B] Break: Absolute gap ($gap) > 1.5*H');
+        break;
+      }
 
       // Relative break threshold (Asymmetric).
       // We break immediately on significant spacing INCREASES (leaps).
       if (lastGap != null) {
         final jump = gap - lastGap;
-        if (jump > refHeight * 0.3) break; // Leap detected. Break.
+        if (jump > refHeight * 0.3) {
+          debugPrint('[DETECTOR-B] Break: Leap jump ($jump) > 0.3*H');
+          break; // Leap detected. Break.
+        }
 
         // Minor noise or reduction. Use lookahead for consistency.
         if (useLookahead &&
@@ -272,17 +283,21 @@ class PdfTextBoundaryDetector {
             final prevGap = _verticalLineGap(prevLine, line);
             if ((prevGap - lastGap).abs() >
                 refHeight * _spacingConsistencyThreshold) {
+              debugPrint('[DETECTOR-B] Break: Spacing inconsistency');
               break;
             }
           } else {
+            debugPrint('[DETECTOR-B] Break: Start of list lack of history');
             break;
           }
         }
       }
 
-      // Alignment check.
-      if ((line.bounds.left - nextLine.bounds.left).abs() > refHeight * 2.0)
+      // Alignment check (v1.3.3 Relaxed to 5.0 to handle deep indents).
+      if ((line.bounds.left - nextLine.bounds.left).abs() > refHeight * 5.0) {
+        debugPrint('[DETECTOR-B] Break: Alignment shift');
         break;
+      }
 
       lastGap = gap;
       startLineIdx = i;
@@ -299,11 +314,17 @@ class PdfTextBoundaryDetector {
 
       final gap = _verticalLineGap(prevLine, line);
 
-      if (gap > refHeight * 1.5) break;
+      if (gap > refHeight * 1.5) {
+        debugPrint('[DETECTOR-F] Break: Absolute gap ($gap) > 1.5*H');
+        break;
+      }
 
       if (lastGap != null) {
         final jump = gap - lastGap;
-        if (jump > refHeight * 0.3) break; // Leap detected. Break.
+        if (jump > refHeight * 0.3) {
+          debugPrint('[DETECTOR-F] Break: Leap jump ($jump) > 0.3*H');
+          break; // Leap detected. Break.
+        }
 
         if (useLookahead &&
             jump.abs() > refHeight * _spacingConsistencyThreshold) {
@@ -312,9 +333,11 @@ class PdfTextBoundaryDetector {
             final nextGap = _verticalLineGap(line, nextLine);
             if ((nextGap - lastGap).abs() >
                 refHeight * _spacingConsistencyThreshold) {
+              debugPrint('[DETECTOR-F] Break: Spacing inconsistency');
               break;
             }
           } else {
+            debugPrint('[DETECTOR-F] Break: End of list lack of history');
             break;
           }
         }
@@ -323,11 +346,17 @@ class PdfTextBoundaryDetector {
       // Trailing short line detection: if the previous line ended very early,
       // and we just saw a gap increase (even a small one), break.
       if (lastGap != null && _isShortLine(prevLine, refLine)) {
-        if (gap > lastGap + 1.0) break;
+        if (gap > lastGap + 1.0) {
+          debugPrint('[DETECTOR-F] Break: Short line ending');
+          break;
+        }
       }
 
-      if ((line.bounds.left - prevLine.bounds.left).abs() > refHeight * 2.0)
+      // Alignment check (v1.3.3 Relaxed to 5.0 to handle deep indents).
+      if ((line.bounds.left - prevLine.bounds.left).abs() > refHeight * 5.0) {
+        debugPrint('[DETECTOR-F] Break: Alignment shift');
         break;
+      }
 
       lastGap = gap;
       endLineIdx = i;
