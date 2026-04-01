@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/widgets/expandable_container.dart';
-import 'package:project_2359/core/widgets/icon_widgets/card_icon.dart';
+import 'package:project_2359/features/card_creation_page/selected_text_button.dart';
 
 enum CardCreationToolbarMode { collapsed, cardCreation, imageOcclusion }
 
@@ -43,7 +43,7 @@ class _ExpandableCardCreationToolbarState
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(
-            child: ValueListenableBuilder(
+            child: ValueListenableBuilder<String?>(
               valueListenable: widget.selectedTextNotifier,
               builder: (context, text, _) {
                 return AnimatedSwitcher(
@@ -78,7 +78,15 @@ class _ExpandableCardCreationToolbarState
                   },
                   child: (text == null || text.isEmpty)
                       ? const SizedBox.shrink(key: ValueKey('empty_text'))
-                      : _buildSelectedTextButton(text, key: ValueKey(text)),
+                      : SelectedTextButton(
+                          key: ValueKey(text),
+                          text: text,
+                          onTap: () {
+                            setState(() {
+                              _mode = CardCreationToolbarMode.cardCreation;
+                            });
+                          },
+                        ),
                 );
               },
             ),
@@ -90,40 +98,6 @@ class _ExpandableCardCreationToolbarState
             icon: const FaIcon(FontAwesomeIcons.barsStaggered),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSelectedTextButton(String text, {Key? key}) {
-    final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      key: key,
-      onTap: () {
-        setState(() {
-          _mode = CardCreationToolbarMode.cardCreation;
-        });
-      },
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: Row(
-          children: [
-            const CardIcon(),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                text.replaceAll('\n', ' '),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurface,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
