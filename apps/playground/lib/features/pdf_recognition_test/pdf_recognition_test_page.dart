@@ -14,11 +14,22 @@ class PdfRecognitionTestPage extends StatefulWidget {
 
 class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
   String? _pdfPath;
-  RecognitionGranularity _granularity = RecognitionGranularity.sentence;
+  String _viewMode = 'paragraph';
   bool _useLookahead = true;
   bool _showAllFragments = false;
   final Map<int, List<(int, int)>> _boundariesCache = {};
   final PdfViewerController _controller = PdfViewerController();
+
+  ({
+    String text,
+    Rect rect,
+    int pageNumber,
+    PdfViewerGeneralTapHandlerDetails details,
+  })?
+  _tappedInfo;
+
+  final Map<int, PdfPageText> _textCache = {};
+  final Set<int> _loadingPages = {};
 
   final List<Color> _colors = [
     Colors.red.withOpacity(0.3),
@@ -106,6 +117,7 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
                 _boundariesCache.clear();
                 _textCache.clear();
                 _loadingPages.clear();
+                _tappedInfo = null;
               });
               _controller.invalidate();
             },
@@ -116,28 +128,18 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
             tooltip: 'Import PDF',
           ),
           const SizedBox(width: 8),
-          SegmentedButton<RecognitionGranularity>(
+          SegmentedButton<String>(
             segments: const [
-              ButtonSegment(
-                value: RecognitionGranularity.sentence,
-                label: Text('Sentence'),
-                icon: Icon(Icons.short_text),
-              ),
-              ButtonSegment(
-                value: RecognitionGranularity.paragraph,
-                label: Text('Paragraph'),
-                icon: Icon(Icons.notes),
-              ),
+              ButtonSegment(value: 'none', label: Text('None')),
+              ButtonSegment(value: 'sentence', label: Text('Sentence')),
+              ButtonSegment(value: 'paragraph', label: Text('Paragraph')),
             ],
-            selected: {_granularity},
-            onSelectionChanged: (value) {
-              setState(() {
-                _granularity = value.first;
-                _boundariesCache.clear();
-                _textCache.clear();
-                _loadingPages.clear();
-              });
-            },
+            selected: {_viewMode},
+            onSelectionChanged: (val) => setState(() {
+              _viewMode = val.first;
+              _boundariesCache.clear();
+              _tappedInfo = null;
+            }),
           ),
           const SizedBox(width: 16),
         ],
@@ -178,19 +180,29 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
                         final frag = pageText.getFragmentForTextIndex(
                           charIndex,
                         );
-                        debugPrint(
-                          '[INSPECT] Tapped Fragment: "${frag?.text}"\n'
-                          'PDF Coords: ${hit.offset}\n'
-                          'CharIndex: $charIndex\n'
-                          'FragBounds: ${frag?.bounds}',
-                        );
+                        setState(() {
+                          _tappedInfo = (
+                            text: frag?.text ?? '',
+                            rect:
+                                frag?.bounds.toRectInDocument(
+                                  page: hit.page,
+                                  pageRect: Rect.fromLTWH(
+                                    0,
+                                    0,
+                                    hit.page.width,
+                                    hit.page.height,
+                                  ),
+                                ) ??
+                                Rect.zero,
+                            pageNumber: hit.page.pageNumber,
+                            details: details,
+                          );
+                        });
                       } else {
-                        debugPrint(
-                          '[INSPECT] No fragment found at ${hit.offset}',
-                        );
+                        setState(() => _tappedInfo = null);
                       }
                     } else {
-                      debugPrint('[INSPECT] No hit detected');
+                      setState(() => _tappedInfo = null);
                     }
                   });
                   return false;
@@ -214,12 +226,32 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
       return;
     }
 
-    // DEBUG: Show all detected fragments as wireframes (THICKER v1.3.3)
+    if (_viewMode != 'none') {
+      final paint = Paint()..style = PaintingStyle.fill;
+      for (int i = 0; i < boundaries.length; i++) {
+        final (start, end) = boundaries[i];
+        paint.color = _colors[i % _colors.length];
+        try {
+          final range = pageText.getRangeFromAB(start, end - 1);
+          for (final rect in range.enumerateFragmentBoundingRects()) {
+            canvas.drawRect(
+              rect.bounds.toRectInDocument(page: page, pageRect: pageRect),
+              paint,
+            );
+          }
+        } catch (e) {
+          debugPrint(
+            '[PAGE ${page.pageNumber}] Error mapping range: $start-$end: $e',
+          );
+        }
+      }
+    }
+
     if (_showAllFragments) {
       final fragmentPaint = Paint()
-        ..color = Colors.blue.withOpacity(0.6)
+        ..color = Colors.blue.withOpacity(0.4)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.0;
+        ..strokeWidth = 1.5;
 
       for (final fragment in pageText.fragments) {
         final rect = fragment.bounds.toRectInDocument(
@@ -230,30 +262,28 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
       }
     }
 
-    for (int i = 0; i < boundaries.length; i++) {
-      final (start, end) = boundaries[i];
-      final color = _colors[i % _colors.length];
-      final paint = Paint()..color = color;
+    final tapped = _tappedInfo;
+    if (tapped != null && tapped.pageNumber == page.pageNumber) {
+      final localPos = tapped.details.documentPosition;
+      final hudRect = Rect.fromCenter(center: localPos, width: 180, height: 60);
+      final hudPaint = Paint()..color = Colors.black.withOpacity(0.85);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(hudRect, const Radius.circular(8)),
+        hudPaint,
+      );
 
-      try {
-        final range = pageText.getRangeFromAB(start, end - 1);
-        for (final rect in range.enumerateFragmentBoundingRects()) {
-          final rectInDoc = rect.bounds.toRectInDocument(
-            page: page,
-            pageRect: pageRect,
-          );
-          canvas.drawRect(rectInDoc, paint);
-        }
-      } catch (e) {
-        debugPrint(
-          '[PAGE ${page.pageNumber}] Error mapping range: $start-$end: $e',
-        );
-      }
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text:
+              'Fragment: "${tapped.text.substring(0, tapped.text.length.clamp(0, 15))}..."\n'
+              'Pos: ${localPos.dx.toStringAsFixed(1)}, ${localPos.dy.toStringAsFixed(1)}',
+          style: const TextStyle(color: Colors.white, fontSize: 10),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout(maxWidth: 170);
+      textPainter.paint(canvas, hudRect.topLeft + const Offset(10, 10));
     }
   }
-
-  final Map<int, PdfPageText> _textCache = {};
-  final Set<int> _loadingPages = {};
 
   Future<void> _loadPageBoundaries(int pageNumber) async {
     if (_loadingPages.contains(pageNumber)) return;
@@ -267,9 +297,6 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
       while (attempts < maxAttempts) {
         final pageList = _controller.pages;
         if (pageNumber > pageList.length) {
-          debugPrint(
-            '[_loadPageBoundaries] Page $pageNumber not in list yet (len: ${pageList.length})',
-          );
           await Future.delayed(const Duration(milliseconds: 500));
           attempts++;
           continue;
@@ -277,31 +304,24 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
 
         final page = pageList[pageNumber - 1];
         pageText = await page.loadStructuredText();
-
         if (pageText.fullText.isNotEmpty) break;
 
-        debugPrint(
-          '[_loadPageBoundaries] Page $pageNumber returned empty text. Retry ${attempts + 1}/$maxAttempts...',
-        );
         await Future.delayed(const Duration(milliseconds: 1000));
         attempts++;
       }
 
       if (pageText == null || pageText.fullText.isEmpty) {
-        debugPrint(
-          '[_loadPageBoundaries] Page $pageNumber: Giving up after $attempts attempts. Text is empty.',
-        );
-        _boundariesCache[pageNumber] =
-            []; // Cache empty to avoid infinite retries
+        _boundariesCache[pageNumber] = [];
         return;
       }
+      _textCache[pageNumber] = pageText;
 
       final List<(int, int)> boundaries = [];
       int currentIndex = 0;
       final fullLength = pageText.fullText.length;
 
       while (currentIndex < fullLength) {
-        final (start, end) = _granularity == RecognitionGranularity.sentence
+        final (start, end) = _viewMode == 'sentence'
             ? PdfTextBoundaryDetector.findSentenceBounds(
                 pageText,
                 currentIndex,
@@ -313,17 +333,10 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
                 useLookahead: _useLookahead,
               );
 
-        if (start >= end) {
-          currentIndex++;
-          continue;
-        }
+        boundaries.add((start, end));
+        currentIndex = end;
 
-        final effectiveEnd = end.clamp(currentIndex + 1, fullLength);
-        final effectiveStart = start.clamp(currentIndex, effectiveEnd - 1);
-
-        boundaries.add((effectiveStart, effectiveEnd));
-        currentIndex = effectiveEnd;
-
+        // Skip whitespace between blocks
         while (currentIndex < fullLength &&
             _isWhitespace(pageText.fullText.codeUnitAt(currentIndex))) {
           currentIndex++;
@@ -331,9 +344,6 @@ class _PdfRecognitionTestPageState extends State<PdfRecognitionTestPage> {
       }
 
       if (mounted) {
-        debugPrint(
-          '[PAGE $pageNumber] Analysis complete. Boundaries: ${boundaries.length}, Text length: $fullLength',
-        );
         setState(() {
           _textCache[pageNumber] = pageText!;
           _boundariesCache[pageNumber] = boundaries;
