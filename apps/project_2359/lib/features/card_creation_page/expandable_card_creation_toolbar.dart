@@ -6,7 +6,7 @@ import 'package:project_2359/core/widgets/expandable_container.dart';
 enum CardCreationToolbarMode { collapsed, cardCreation, imageOcclusion }
 
 class ExpandableCardCreationToolbar extends StatefulWidget {
-  ExpandableCardCreationToolbar({
+  const ExpandableCardCreationToolbar({
     super.key,
     required this.context,
     required this.controller,
@@ -73,8 +73,7 @@ class _ExpandableCardCreationToolbarState
                             child: InkWell(
                               onTap: () {
                                 setState(() {
-                                  _mode = C
-                                       ardCreationToolbarMode.cardCreation;
+                                  _mode = CardCreationToolbarMode.cardCreation;
                                 });
                               },
                               borderRadius: BorderRadius.circular(20),
