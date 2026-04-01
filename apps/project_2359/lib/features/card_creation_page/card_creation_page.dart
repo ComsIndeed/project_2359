@@ -17,6 +17,7 @@ import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/features/card_creation_page/smart_text_selection_handler.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 
 class CardCreationPage extends StatefulWidget {
   final String folderId;
@@ -153,21 +154,30 @@ class _CardCreationPageState extends State<CardCreationPage> {
                   filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.25),
+                          width: 1,
+                        ),
+                      ),
+                      color: Colors.black.withValues(alpha: 0.6),
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.black.withValues(alpha: 0.7),
-                          Colors.black.withValues(alpha: 0.3),
+                          Colors.black.withValues(alpha: 0.7),
                         ],
                       ),
                     ),
                   ),
                 ),
               ),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+              leadingWidth: 100, // accommodate 'Back' text
+              leading: ProjectBackButton(
+                color: Colors.white,
                 onPressed: () {
                   if (_pdfBytes != null) {
                     setState(() {

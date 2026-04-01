@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pdfrx/pdfrx.dart' as pdfrx;
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 
 // ═══════════════════════════════════════════════════════════════════
 // Background PDF parsing (runs in isolate via compute)
@@ -217,12 +218,8 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
         child: Row(
           children: [
             if (widget.showBackButton) ...[
-              _appBarButton(
-                cs: cs,
-                icon: FontAwesomeIcons.arrowLeft,
-                onTap: () => Navigator.pop(context),
-              ),
-              const SizedBox(width: 12),
+              ProjectBackButton(onPressed: () => Navigator.pop(context)),
+              const SizedBox(width: 4),
             ],
 
             Expanded(

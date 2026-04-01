@@ -13,6 +13,7 @@ import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/study/study_page.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -640,11 +641,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 20),
-                    onPressed: onBack,
-                    color: Colors.white,
-                  ),
+                  ProjectBackButton(onPressed: onBack),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Opacity(

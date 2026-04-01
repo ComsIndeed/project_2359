@@ -23,7 +23,7 @@ class SelectedTextButton extends StatelessWidget {
           children: [
             const CardIcon(),
             const SizedBox(width: 8),
-            Flexible(
+            Expanded(
               child: Text(
                 text.replaceAll('\n', ' '),
                 maxLines: 2,
@@ -34,6 +34,11 @@ class SelectedTextButton extends StatelessWidget {
                   color: cs.onSurface,
                 ),
               ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.close_rounded, size: 20),
             ),
           ],
         ),
