@@ -11,6 +11,7 @@ import 'package:project_2359/core/widgets/special_search_bar.dart';
 import 'package:project_2359/core/widgets/tap_to_slide.dart';
 import 'package:project_2359/features/source_page/source_page.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_state.dart';
@@ -62,13 +63,8 @@ class _SourcesPageState extends State<SourcesPage> {
                         padding: const EdgeInsets.symmetric(vertical: 24),
                         child: Row(
                           children: [
-                            IconButton(
+                            ProjectBackButton(
                               onPressed: () => Navigator.of(context).pop(),
-                              icon: const FaIcon(
-                                FontAwesomeIcons.chevronLeft,
-                                size: 24,
-                              ),
-                              padding: const EdgeInsets.all(8),
                             ),
                             const SizedBox(width: 16),
                             Text(

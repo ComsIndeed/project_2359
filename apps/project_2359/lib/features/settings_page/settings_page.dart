@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/tap_to_slide.dart';
@@ -55,13 +56,8 @@ class SettingsPage extends StatelessWidget {
                     // --- Custom Header ---
                     Row(
                       children: [
-                        IconButton(
+                        ProjectBackButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          icon: const FaIcon(
-                            FontAwesomeIcons.chevronLeft,
-                            size: 24,
-                          ),
-                          padding: const EdgeInsets.all(8),
                         ),
                         const SizedBox(width: 16),
                         Text('Settings', style: theme.textTheme.displaySmall),

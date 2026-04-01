@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/study_material_service.dart';
 import 'package:project_2359/core/tables/study_card_items.dart';
@@ -887,14 +888,7 @@ class _StudyHeaderDelegate extends SliverPersistentHeaderDelegate {
                   child: Row(
                     children: [
                       if (showBackButton) ...[
-                        IconButton(
-                          icon: const FaIcon(
-                            FontAwesomeIcons.chevronLeft,
-                            size: 20,
-                          ),
-                          onPressed: onBack,
-                          color: Colors.white,
-                        ),
+                        ProjectBackButton(onPressed: onBack),
                         const SizedBox(width: 4),
                       ],
                       Expanded(

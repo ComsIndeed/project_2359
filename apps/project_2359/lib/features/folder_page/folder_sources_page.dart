@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:project_2359/app_database.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/core/widgets/section_header.dart';
@@ -91,7 +92,7 @@ class _FolderSourcesPageState extends State<FolderSourcesPage> {
                         padding: const EdgeInsets.symmetric(vertical: 24),
                         child: Row(
                           children: [
-                            IconButton(
+                            ProjectBackButton(
                               onPressed: () {
                                 // Reload all sources when going back to global state if necessary
                                 context.read<SourcesPageBloc>().add(
@@ -99,11 +100,6 @@ class _FolderSourcesPageState extends State<FolderSourcesPage> {
                                 );
                                 Navigator.of(context).pop();
                               },
-                              icon: const FaIcon(
-                                FontAwesomeIcons.chevronDown,
-                                size: 24,
-                              ),
-                              padding: const EdgeInsets.all(8),
                             ),
                             const SizedBox(width: 16),
                             Expanded(

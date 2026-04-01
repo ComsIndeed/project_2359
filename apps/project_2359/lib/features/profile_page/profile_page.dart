@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -21,11 +22,7 @@ class _ProfilePageState extends State<ProfilePage> {
             // Header
             Row(
               children: [
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 24),
-                  padding: const EdgeInsets.all(8),
-                ),
+                ProjectBackButton(onPressed: () => Navigator.of(context).pop()),
               ],
             ),
             const SizedBox(height: 24),
