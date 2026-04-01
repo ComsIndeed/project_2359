@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
@@ -139,10 +140,8 @@ class _StoragePageState extends State<StoragePage> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Row(
                 children: [
-                  IconButton(
+                  ProjectBackButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 24),
-                    padding: const EdgeInsets.all(8),
                   ),
                   const SizedBox(width: 16),
                   Text('Storage', style: theme.textTheme.displaySmall),

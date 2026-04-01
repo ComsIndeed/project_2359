@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/app_theme.dart';
 
 class CreditsPage extends StatelessWidget {
@@ -17,10 +18,8 @@ class CreditsPage extends StatelessWidget {
             // --- Header (Back Button only) ---
             Align(
               alignment: Alignment.centerLeft,
-              child: IconButton(
+              child: ProjectBackButton(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 24),
-                padding: const EdgeInsets.all(8),
               ),
             ),
             const SizedBox(height: 16),

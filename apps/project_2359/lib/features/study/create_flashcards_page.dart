@@ -9,6 +9,7 @@ import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/study_material_service.dart';
 import 'package:project_2359/core/tables/study_card_items.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 
 /// A card in the flashcard editor — front (question) and back (answer).
@@ -219,23 +220,8 @@ class _CreateFlashcardsPageState extends State<CreateFlashcardsPage> {
               ),
               child: Row(
                 children: [
-                  TextButton.icon(
+                  ProjectBackButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 14),
-                    label: const Text("Back"),
-                    style: TextButton.styleFrom(
-                      foregroundColor: cs.onSurface,
-                      backgroundColor: cs.surfaceContainerHighest.withValues(
-                        alpha: 0.5,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(

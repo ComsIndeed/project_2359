@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/widgets/slide_fade_text.dart';
 import 'package:project_2359/features/auth/auth_cubit.dart';
@@ -500,13 +501,11 @@ class _AuthPageState extends State<AuthPage> {
                 Positioned(
                   top: MediaQuery.of(context).padding.top + 8,
                   left: 16,
-                  child: IconButton(
+                  child: ProjectBackButton(
                     onPressed: () {
                       ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
                       Navigator.of(context).pop();
                     },
-                    icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 24),
-                    padding: const EdgeInsets.all(8),
                   ),
                 ),
               ],
