@@ -10,6 +10,7 @@ import 'package:project_2359/features/profile_page/profile_page.dart';
 import 'package:project_2359/features/settings_page/storage_page.dart';
 import 'package:project_2359/features/settings_page/log_page.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
+import 'package:project_2359/core/settings/labs_settings.dart';
 import 'package:project_2359/theme_notifier.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -35,7 +36,7 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: ListenableBuilder(
-          listenable: themeNotifier,
+          listenable: Listenable.merge([themeNotifier, labsSettings]),
           builder: (context, _) {
             return StreamBuilder<AuthState>(
               stream: Supabase.instance.client.auth.onAuthStateChange,
@@ -363,6 +364,21 @@ class SettingsPage extends StatelessWidget {
                       ],
                     ),
 
+                    // ── Labs ──
+                    _SectionTitle(title: 'Labs'),
+                    _SettingsCard(
+                      children: [
+                        _SettingsToggleTile(
+                          icon: FontAwesomeIcons.wandMagicSparkles,
+                          title: 'Smart Selection',
+                          subtitle: 'Experimental PDF text selection',
+                          value: labsSettings.smartSelectionEnabled,
+                          onChanged: (value) =>
+                              labsSettings.setSmartSelectionEnabled(value),
+                        ),
+                      ],
+                    ),
+
                     // ── Legal ──
                     _SectionTitle(title: 'Legal'),
                     _SettingsCard(
@@ -577,6 +593,56 @@ class _SettingsCard extends StatelessWidget {
       shape: AppTheme.cardShape,
       clipBehavior: Clip.antiAlias,
       child: Column(mainAxisSize: MainAxisSize.min, children: children),
+    );
+  }
+}
+
+class _SettingsToggleTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _SettingsToggleTile({
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          FaIcon(
+            icon,
+            size: 18,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: theme.textTheme.bodyLarge),
+                if (subtitle != null)
+                  Text(
+                    subtitle!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Switch.adaptive(value: value, onChanged: onChanged),
+        ],
+      ),
     );
   }
 }

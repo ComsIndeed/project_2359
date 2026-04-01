@@ -3,12 +3,13 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pdfrx/pdfrx.dart';
+import 'package:project_2359/features/card_creation_page/expandable_card_creation_toolbar.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import 'package:project_2359/app_database.dart';
+import 'package:project_2359/core/settings/labs_settings.dart';
 import 'package:project_2359/core/widgets/expandable_container.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/features/card_creation_page/smart_text_selection_handler.dart';
@@ -29,10 +30,15 @@ class _CardCreationPageState extends State<CardCreationPage> {
   PdfDocument? _document;
   List<SourceItem>? _availableSources;
   StreamSubscription? _sourcesSub;
-  final PdfViewerController _controller = PdfViewerController();
+  PdfViewerController _controller = PdfViewerController();
   final SmartTextSelectionHandler _smartSelection =
       const SmartTextSelectionHandler();
   bool _isLoading = false;
+  final ValueNotifier<dynamic> _selectionNotifier = ValueNotifier(null);
+
+  /// Incremented on each document load to force a full PdfViewer remount,
+  /// which clears all internal caches (image cache, text cache, layout, etc.).
+  int _pdfKey = 0;
 
   @override
   void initState() {
@@ -43,6 +49,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
   @override
   void dispose() {
     _sourcesSub?.cancel();
+    _selectionNotifier.dispose();
     super.dispose();
   }
 
@@ -68,6 +75,11 @@ class _CardCreationPageState extends State<CardCreationPage> {
       final blob = await service.getSourceBlobBySourceId(source.id);
       if (blob != null && mounted) {
         setState(() {
+          // Create a fresh controller so the new PdfViewer has clean state.
+          _controller = PdfViewerController();
+          _pdfKey++;
+          _document = null;
+          _selectionNotifier.value = null;
           _pdfBytes = blob.bytes;
           _pdfTitle = source.label;
         });
@@ -88,61 +100,49 @@ class _CardCreationPageState extends State<CardCreationPage> {
     final isDesktop = ResponsiveBreakpoints.of(context).isDesktop;
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
-    final useVerticalToolbar = isDesktop || isLandscape;
+    return ListenableBuilder(
+      listenable: labsSettings,
+      builder: (context, _) {
+        final useVerticalToolbar = isDesktop || isLandscape;
 
-    return ExpandableContainer(
-      initialAlignment: useVerticalToolbar
-          ? Alignment.centerRight
-          : Alignment.bottomCenter,
-      boundaryMargins: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      builder: (context, controller) {
-        return Flex(
-          direction: useVerticalToolbar ? Axis.vertical : Axis.horizontal,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            IconButton(
-              onPressed: () {
-                // TODO: Implement menu functionality
-              },
-              icon: const FaIcon(FontAwesomeIcons.barsStaggered),
+        return ExpandableContainer(
+          initialAlignment: useVerticalToolbar
+              ? Alignment.centerRight
+              : Alignment.bottomCenter,
+          boundaryMargins: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 2,
+          ),
+          builder: (context, controller) => ExpandableCardCreationToolbar(
+            context: context,
+            controller: controller,
+            useVerticalToolbar: useVerticalToolbar,
+            selectionNotifier: _selectionNotifier,
+          ),
+          child: Scaffold(
+            backgroundColor: Colors.black,
+            appBar: AppBar(
+              title: Text(_pdfTitle ?? 'Create Card'),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  if (_pdfBytes != null) {
+                    setState(() {
+                      _pdfBytes = null;
+                      _pdfTitle = null;
+                      _document = null;
+                      _selectionNotifier.value = null;
+                    });
+                  } else {
+                    Navigator.pop(context);
+                  }
+                },
+              ),
             ),
-            IconButton(
-              onPressed: () {
-                // TODO: Implement menu functionality
-              },
-              icon: const FaIcon(FontAwesomeIcons.barsStaggered),
-            ),
-            const Spacer(),
-            IconButton(
-              onPressed: () {
-                // TODO: Implement menu functionality
-              },
-              icon: const FaIcon(FontAwesomeIcons.barsStaggered),
-            ),
-          ],
+            body: _buildPdfView(),
+          ),
         );
       },
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(
-          title: Text(_pdfTitle ?? 'Create Card'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              if (_pdfBytes != null) {
-                setState(() {
-                  _pdfBytes = null;
-                  _pdfTitle = null;
-                  _document = null;
-                });
-              } else {
-                Navigator.pop(context);
-              }
-            },
-          ),
-        ),
-        body: _buildPdfView(),
-      ),
     );
   }
 
@@ -151,22 +151,34 @@ class _CardCreationPageState extends State<CardCreationPage> {
       return _buildPdfList(context);
     }
 
-    return PdfViewer.data(
-      _pdfBytes!,
-      sourceName: _pdfTitle ?? 'pdf',
-      controller: _controller,
-      useProgressiveLoading: true,
-      params: PdfViewerParams(
-        onViewerReady: (doc, controller) {
-          if (mounted) {
-            setState(() {
-              _document = doc;
-            });
-          }
-        },
-        backgroundColor: Colors.black,
-        textSelectionParams: const PdfTextSelectionParams(enabled: true),
-        onGeneralTap: _smartSelection.handleTap,
+    // KeyedSubtree forces a full unmount/remount when _pdfKey changes,
+    // which guarantees a completely fresh PdfViewer internal state.
+    return KeyedSubtree(
+      key: ValueKey(_pdfKey),
+      child: PdfViewer.data(
+        _pdfBytes!,
+        sourceName: 'pdf_$_pdfKey',
+        controller: _controller,
+        useProgressiveLoading: true,
+        params: PdfViewerParams(
+          onViewerReady: (doc, controller) {
+            if (mounted) {
+              setState(() {
+                _document = doc;
+              });
+            }
+          },
+          backgroundColor: Colors.black,
+          textSelectionParams: PdfTextSelectionParams(
+            enabled: true,
+            onTextSelectionChange: (pdfTextSelection) async {
+              _selectionNotifier.value = pdfTextSelection;
+            },
+          ),
+          onGeneralTap: labsSettings.smartSelectionEnabled
+              ? _smartSelection.handleTap
+              : null,
+        ),
       ),
     );
   }

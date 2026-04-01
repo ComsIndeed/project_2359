@@ -12,6 +12,7 @@ import 'package:project_2359/features/sources_page/sources_page_bloc/sources_pag
 import 'package:project_2359/theme_notifier.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/core/utils/logger.dart';
+import 'package:project_2359/core/settings/labs_settings.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -36,6 +37,7 @@ Future<void> main() async {
   }
 
   await themeNotifier.init();
+  await labsSettings.init();
 
   AppLogger.info('Initializing services...', tag: 'Main');
   final database = AppDatabase();
