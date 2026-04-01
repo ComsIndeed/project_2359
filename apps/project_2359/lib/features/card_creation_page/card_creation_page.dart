@@ -17,6 +17,8 @@ import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/features/card_creation_page/smart_text_selection_handler.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
+import 'package:project_2359/features/card_creation_page/widgets/pdf_occlusion_overlay.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
 
 class CardCreationPage extends StatefulWidget {
@@ -39,6 +41,8 @@ class _CardCreationPageState extends State<CardCreationPage> {
   bool _isLoading = false;
   final ValueNotifier<dynamic> _selectionNotifier = ValueNotifier(null);
   final ValueNotifier<String?> _selectedTextNotifier = ValueNotifier(null);
+  final CardCreationToolbarController _toolbarController =
+      CardCreationToolbarController();
 
   /// Incremented on each document load to force a full PdfViewer remount,
   /// which clears all internal caches (image cache, text cache, layout, etc.).
@@ -56,6 +60,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
     _sourcesSub?.cancel();
     _selectionNotifier.dispose();
     _selectedTextNotifier.dispose();
+    _toolbarController.dispose();
     super.dispose();
   }
 
@@ -130,6 +135,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
           builder: (context, controller) => ExpandableCardCreationToolbar(
             context: context,
             controller: controller,
+            toolbarController: _toolbarController,
             useVerticalToolbar: useVerticalToolbar,
             selectionNotifier: _selectionNotifier,
             selectedTextNotifier: _selectedTextNotifier,
@@ -209,36 +215,51 @@ class _CardCreationPageState extends State<CardCreationPage> {
 
     return KeyedSubtree(
       key: ValueKey(_pdfKey),
-      child: PdfViewer.data(
-        _pdfBytes!,
-        sourceName: 'pdf_$_currentSourceId',
-        controller: _controller,
-        useProgressiveLoading: true,
-        params: PdfViewerParams(
-          margin: 8,
-          onViewerReady: (doc, controller) {
-            if (mounted) {
-              setState(() {
-                _document = doc;
-              });
-            }
-          },
-          backgroundColor: Colors.black,
-          textSelectionParams: PdfTextSelectionParams(
-            enabled: true,
-            onTextSelectionChange: (pdfTextSelection) {
-              _selectionNotifier.value = pdfTextSelection;
-              pdfTextSelection.getSelectedText().then((text) {
-                if (_selectionNotifier.value == pdfTextSelection) {
-                  _selectedTextNotifier.value = text;
-                }
-              });
-            },
-          ),
-          onGeneralTap: labsSettings.smartSelectionEnabled
-              ? _smartSelection.handleTap
-              : null,
-        ),
+      child: ListenableBuilder(
+        listenable: _toolbarController,
+        builder: (context, _) {
+          return Stack(
+            children: [
+              PdfViewer.data(
+                _pdfBytes!,
+                sourceName: 'pdf_$_currentSourceId',
+                controller: _controller,
+                useProgressiveLoading: true,
+                params: PdfViewerParams(
+                  margin: 8,
+                  onViewerReady: (doc, controller) {
+                    if (mounted) {
+                      setState(() {
+                        _document = doc;
+                      });
+                    }
+                  },
+                  backgroundColor: Colors.black,
+                  textSelectionParams: PdfTextSelectionParams(
+                    enabled: true,
+                    onTextSelectionChange: (pdfTextSelection) {
+                      _selectionNotifier.value = pdfTextSelection;
+                      pdfTextSelection.getSelectedText().then((text) {
+                        if (_selectionNotifier.value == pdfTextSelection) {
+                          _selectedTextNotifier.value = text;
+                        }
+                      });
+                    },
+                  ),
+                  onGeneralTap: labsSettings.smartSelectionEnabled
+                      ? _smartSelection.handleTap
+                      : null,
+                ),
+              ),
+              if (_toolbarController.mode ==
+                  CardCreationToolbarMode.imageOcclusion)
+                PdfOcclusionOverlay(
+                  controller: _controller,
+                  toolbarController: _toolbarController,
+                ),
+            ],
+          );
+        },
       ),
     );
   }

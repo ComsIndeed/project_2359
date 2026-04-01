@@ -12,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'package:project_2359/app_database.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/ai_helpers.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
@@ -344,26 +345,7 @@ class _GenerateMaterialsWizardPageState
                                     ),
                                   ),
                                 )
-                              : TextButton.icon(
-                                  onPressed: _previousPage,
-                                  icon: const FaIcon(
-                                    FontAwesomeIcons.arrowUp,
-                                    size: 14,
-                                  ),
-                                  label: const Text("Back"),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: cs.onSurface,
-                                    backgroundColor: cs.surfaceContainerHighest
-                                        .withValues(alpha: 0.5),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 10,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
+                              : ProjectBackButton(onPressed: _previousPage),
                           Text(
                             _currentPage == 0
                                 ? "Select Sources"

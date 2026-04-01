@@ -5,6 +5,8 @@ import 'package:project_2359/core/widgets/expandable_container.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_mode_content.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
 import 'package:project_2359/features/card_creation_page/selected_text_button.dart';
+import 'package:project_2359/core/widgets/icon_widgets/image_occlusion_icon.dart';
+import 'package:project_2359/features/card_creation_page/widgets/image_occlusion_editor.dart';
 
 enum CardCreationToolbarMode { collapsed, menu, cardCreation, imageOcclusion }
 
@@ -13,6 +15,7 @@ class ExpandableCardCreationToolbar extends StatefulWidget {
     super.key,
     required this.context,
     required this.controller,
+    required this.toolbarController,
     required this.useVerticalToolbar,
     required this.selectionNotifier,
     required this.selectedTextNotifier,
@@ -23,6 +26,7 @@ class ExpandableCardCreationToolbar extends StatefulWidget {
   final bool useVerticalToolbar;
   final ValueNotifier<dynamic> selectionNotifier;
   final ValueNotifier<String?> selectedTextNotifier;
+  final CardCreationToolbarController toolbarController;
 
   @override
   State<ExpandableCardCreationToolbar> createState() =>
@@ -31,8 +35,6 @@ class ExpandableCardCreationToolbar extends StatefulWidget {
 
 class _ExpandableCardCreationToolbarState
     extends State<ExpandableCardCreationToolbar> {
-  final _toolbarController = CardCreationToolbarController();
-
   @override
   void initState() {
     super.initState();
@@ -44,18 +46,19 @@ class _ExpandableCardCreationToolbarState
   @override
   void dispose() {
     widget.selectedTextNotifier.removeListener(_onSelectedTextChanged);
-    _toolbarController.dispose();
     super.dispose();
   }
 
   void _onSelectedTextChanged() {
-    _toolbarController.updateSelectedText(widget.selectedTextNotifier.value);
+    widget.toolbarController.updateSelectedText(
+      widget.selectedTextNotifier.value,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _toolbarController,
+      listenable: widget.toolbarController,
       builder: (context, _) {
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -63,12 +66,12 @@ class _ExpandableCardCreationToolbarState
           children: [
             Stack(
               children: [
-                if (_toolbarController.mode !=
+                if (widget.toolbarController.mode !=
                     CardCreationToolbarMode.collapsed)
                   Align(
                     alignment: Alignment.topRight,
                     child: IconButton(
-                      onPressed: () => _toolbarController.setMode(
+                      onPressed: () => widget.toolbarController.setMode(
                         CardCreationToolbarMode.collapsed,
                       ),
                       icon: const Icon(Icons.close),
@@ -76,7 +79,7 @@ class _ExpandableCardCreationToolbarState
                   ),
                 Padding(
                   padding:
-                      _toolbarController.mode !=
+                      widget.toolbarController.mode !=
                           CardCreationToolbarMode.collapsed
                       ? const EdgeInsets.only(top: 32.0)
                       : EdgeInsets.zero,
@@ -91,16 +94,17 @@ class _ExpandableCardCreationToolbarState
   }
 
   Widget _buildContent(BuildContext context) {
-    if (_toolbarController.mode == CardCreationToolbarMode.imageOcclusion) {
-      return const Text("Image Occlusion");
+    if (widget.toolbarController.mode ==
+        CardCreationToolbarMode.imageOcclusion) {
+      return ImageOcclusionEditor(controller: widget.toolbarController);
     }
 
-    if (_toolbarController.mode == CardCreationToolbarMode.menu) {
+    if (widget.toolbarController.mode == CardCreationToolbarMode.menu) {
       return const Text("Menu");
     }
 
-    if (_toolbarController.mode == CardCreationToolbarMode.cardCreation) {
-      return CardCreationModeContent(controller: _toolbarController);
+    if (widget.toolbarController.mode == CardCreationToolbarMode.cardCreation) {
+      return CardCreationModeContent(controller: widget.toolbarController);
     }
 
     return ClipRect(
@@ -148,7 +152,7 @@ class _ExpandableCardCreationToolbarState
                       : SelectedTextButton(
                           key: ValueKey(text),
                           text: text,
-                          onTap: () => _toolbarController.setMode(
+                          onTap: () => widget.toolbarController.setMode(
                             CardCreationToolbarMode.cardCreation,
                           ),
                         ),
@@ -157,8 +161,14 @@ class _ExpandableCardCreationToolbarState
             ),
           ),
           IconButton(
+            onPressed: () => widget.toolbarController.setMode(
+              CardCreationToolbarMode.imageOcclusion,
+            ),
+            icon: const ImageOcclusionIcon(),
+          ).animate().fadeIn().scale(delay: 100.ms),
+          IconButton(
             onPressed: () =>
-                _toolbarController.setMode(CardCreationToolbarMode.menu),
+                widget.toolbarController.setMode(CardCreationToolbarMode.menu),
             icon: const FaIcon(FontAwesomeIcons.barsStaggered),
           ).animate().fadeIn().scale(delay: 200.ms),
         ],
