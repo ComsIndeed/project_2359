@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:pdfrx/pdfrx.dart';
@@ -116,6 +118,12 @@ class _CardCreationPageState extends State<CardCreationPage> {
             horizontal: 12,
             vertical: 2,
           ),
+          initialBorder: BorderSide(
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.5),
+            width: 1,
+          ),
           builder: (context, controller) => ExpandableCardCreationToolbar(
             context: context,
             controller: controller,
@@ -125,10 +133,27 @@ class _CardCreationPageState extends State<CardCreationPage> {
           ),
           child: Scaffold(
             backgroundColor: Colors.black,
+            extendBodyBehindAppBar: true,
             appBar: AppBar(
-              title: Text(_pdfTitle ?? 'Create Card'),
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              centerTitle: true,
+              title: Text(
+                _pdfTitle ?? 'Create Card',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              ),
+              flexibleSpace: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  child: Container(color: Colors.black.withValues(alpha: 0.25)),
+                ),
+              ),
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
                 onPressed: () {
                   if (_pdfBytes != null) {
                     setState(() {
@@ -152,42 +177,44 @@ class _CardCreationPageState extends State<CardCreationPage> {
   }
 
   Widget _buildPdfView() {
+    final topPadding = MediaQuery.of(context).padding.top;
     if (_pdfBytes == null) {
       return _buildPdfList(context);
     }
 
-    // KeyedSubtree forces a full unmount/remount when _pdfKey changes,
-    // which guarantees a completely fresh PdfViewer internal state.
-    return KeyedSubtree(
-      key: ValueKey(_pdfKey),
-      child: PdfViewer.data(
-        _pdfBytes!,
-        sourceName: 'pdf_$_pdfKey',
-        controller: _controller,
-        useProgressiveLoading: true,
-        params: PdfViewerParams(
-          onViewerReady: (doc, controller) {
-            if (mounted) {
-              setState(() {
-                _document = doc;
-              });
-            }
-          },
-          backgroundColor: Colors.black,
-          textSelectionParams: PdfTextSelectionParams(
-            enabled: true,
-            onTextSelectionChange: (pdfTextSelection) {
-              _selectionNotifier.value = pdfTextSelection;
-              pdfTextSelection.getSelectedText().then((text) {
-                if (_selectionNotifier.value == pdfTextSelection) {
-                  _selectedTextNotifier.value = text;
-                }
-              });
+    return Padding(
+      padding: EdgeInsets.only(top: topPadding + kToolbarHeight),
+      child: KeyedSubtree(
+        key: ValueKey(_pdfKey),
+        child: PdfViewer.data(
+          _pdfBytes!,
+          sourceName: 'pdf_$_pdfKey',
+          controller: _controller,
+          useProgressiveLoading: true,
+          params: PdfViewerParams(
+            onViewerReady: (doc, controller) {
+              if (mounted) {
+                setState(() {
+                  _document = doc;
+                });
+              }
             },
+            backgroundColor: Colors.black,
+            textSelectionParams: PdfTextSelectionParams(
+              enabled: true,
+              onTextSelectionChange: (pdfTextSelection) {
+                _selectionNotifier.value = pdfTextSelection;
+                pdfTextSelection.getSelectedText().then((text) {
+                  if (_selectionNotifier.value == pdfTextSelection) {
+                    _selectedTextNotifier.value = text;
+                  }
+                });
+              },
+            ),
+            onGeneralTap: labsSettings.smartSelectionEnabled
+                ? _smartSelection.handleTap
+                : null,
           ),
-          onGeneralTap: labsSettings.smartSelectionEnabled
-              ? _smartSelection.handleTap
-              : null,
         ),
       ),
     );
@@ -198,7 +225,12 @@ class _CardCreationPageState extends State<CardCreationPage> {
     final topPadding = MediaQuery.of(context).padding.top;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(20, topPadding + 64, 20, 100),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        topPadding + kToolbarHeight + 24,
+        20,
+        100,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
