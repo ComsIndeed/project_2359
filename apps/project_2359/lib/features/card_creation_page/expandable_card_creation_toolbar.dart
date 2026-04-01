@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/widgets/expandable_container.dart';
+import 'package:project_2359/features/card_creation_page/card_creation_mode_content.dart';
+import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
 import 'package:project_2359/features/card_creation_page/selected_text_button.dart';
 
-enum CardCreationToolbarMode { collapsed, cardCreation, imageOcclusion }
+enum CardCreationToolbarMode { collapsed, menu, cardCreation, imageOcclusion }
 
 class ExpandableCardCreationToolbar extends StatefulWidget {
   const ExpandableCardCreationToolbar({
@@ -29,13 +31,53 @@ class ExpandableCardCreationToolbar extends StatefulWidget {
 
 class _ExpandableCardCreationToolbarState
     extends State<ExpandableCardCreationToolbar> {
-  CardCreationToolbarMode _mode = CardCreationToolbarMode.collapsed;
+  final _controller = CardCreationToolbarController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (_mode == CardCreationToolbarMode.cardCreation) {
-      // TODO: Implement card creation UI
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_controller.mode != CardCreationToolbarMode.collapsed) ...[
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  onPressed: () =>
+                      _controller.setMode(CardCreationToolbarMode.collapsed),
+                  icon: const Icon(Icons.close),
+                ),
+              ),
+              const SizedBox(width: double.infinity, height: 16),
+            ],
+            _buildContent(context),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    if (_controller.mode == CardCreationToolbarMode.imageOcclusion) {
+      return const Text("Image Occlusion");
     }
+
+    if (_controller.mode == CardCreationToolbarMode.menu) {
+      return const Text("Menu");
+    }
+
+    if (_controller.mode == CardCreationToolbarMode.cardCreation) {
+      return CardCreationModeContent();
+    }
+
     return ClipRect(
       child: Flex(
         direction: widget.useVerticalToolbar ? Axis.vertical : Axis.horizontal,
@@ -81,20 +123,16 @@ class _ExpandableCardCreationToolbarState
                       : SelectedTextButton(
                           key: ValueKey(text),
                           text: text,
-                          onTap: () {
-                            setState(() {
-                              _mode = CardCreationToolbarMode.cardCreation;
-                            });
-                          },
+                          onTap: () => _controller.setMode(
+                            CardCreationToolbarMode.cardCreation,
+                          ),
                         ),
                 );
               },
             ),
           ),
           IconButton(
-            onPressed: () {
-              // TODO: Implement menu functionality
-            },
+            onPressed: () => _controller.setMode(CardCreationToolbarMode.menu),
             icon: const FaIcon(FontAwesomeIcons.barsStaggered),
           ),
         ],
