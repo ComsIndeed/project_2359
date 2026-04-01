@@ -31,32 +31,46 @@ class ExpandableCardCreationToolbar extends StatefulWidget {
 
 class _ExpandableCardCreationToolbarState
     extends State<ExpandableCardCreationToolbar> {
-  final _controller = CardCreationToolbarController();
+  final _toolbarController = CardCreationToolbarController();
+
+  @override
+  void initState() {
+    super.initState();
+    widget.selectedTextNotifier.addListener(_onSelectedTextChanged);
+  }
 
   @override
   void dispose() {
-    _controller.dispose();
+    widget.selectedTextNotifier.removeListener(_onSelectedTextChanged);
+    _toolbarController.dispose();
     super.dispose();
+  }
+
+  void _onSelectedTextChanged() {
+    _toolbarController.updateSelectedText(widget.selectedTextNotifier.value);
   }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _controller,
+      listenable: _toolbarController,
       builder: (context, _) {
         return Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_controller.mode != CardCreationToolbarMode.collapsed) ...[
+            if (_toolbarController.mode !=
+                CardCreationToolbarMode.collapsed) ...[
               Align(
                 alignment: Alignment.centerRight,
                 child: IconButton(
-                  onPressed: () =>
-                      _controller.setMode(CardCreationToolbarMode.collapsed),
+                  onPressed: () => _toolbarController.setMode(
+                    CardCreationToolbarMode.collapsed,
+                  ),
                   icon: const Icon(Icons.close),
-                ),
+                ).animate().scale().fadeIn(),
               ),
-              const SizedBox(width: double.infinity, height: 16),
+              const SizedBox(height: 8),
             ],
             _buildContent(context),
           ],
@@ -66,16 +80,16 @@ class _ExpandableCardCreationToolbarState
   }
 
   Widget _buildContent(BuildContext context) {
-    if (_controller.mode == CardCreationToolbarMode.imageOcclusion) {
+    if (_toolbarController.mode == CardCreationToolbarMode.imageOcclusion) {
       return const Text("Image Occlusion");
     }
 
-    if (_controller.mode == CardCreationToolbarMode.menu) {
+    if (_toolbarController.mode == CardCreationToolbarMode.menu) {
       return const Text("Menu");
     }
 
-    if (_controller.mode == CardCreationToolbarMode.cardCreation) {
-      return CardCreationModeContent();
+    if (_toolbarController.mode == CardCreationToolbarMode.cardCreation) {
+      return CardCreationModeContent(controller: _toolbarController);
     }
 
     return ClipRect(
@@ -123,7 +137,7 @@ class _ExpandableCardCreationToolbarState
                       : SelectedTextButton(
                           key: ValueKey(text),
                           text: text,
-                          onTap: () => _controller.setMode(
+                          onTap: () => _toolbarController.setMode(
                             CardCreationToolbarMode.cardCreation,
                           ),
                         ),
@@ -132,9 +146,10 @@ class _ExpandableCardCreationToolbarState
             ),
           ),
           IconButton(
-            onPressed: () => _controller.setMode(CardCreationToolbarMode.menu),
+            onPressed: () =>
+                _toolbarController.setMode(CardCreationToolbarMode.menu),
             icon: const FaIcon(FontAwesomeIcons.barsStaggered),
-          ),
+          ).animate().fadeIn().scale(delay: 200.ms),
         ],
       ),
     );

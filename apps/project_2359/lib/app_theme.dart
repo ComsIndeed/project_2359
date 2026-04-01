@@ -7,6 +7,8 @@ class AppTheme {
   static const Color error = Color(0xFFFF5252);
   static const Color warning = Color(0xFFFFAB40);
 
+  /// `RoundedSuperellipseBorder` is a border shape that exists within the Flutter library. Do not bother looking up its definition, it just exists as a shape.
+
   static ShapeBorder defaultShape = RoundedSuperellipseBorder(
     borderRadius: BorderRadius.circular(32),
   );
