@@ -37,6 +37,8 @@ class _ExpandableCardCreationToolbarState
   void initState() {
     super.initState();
     widget.selectedTextNotifier.addListener(_onSelectedTextChanged);
+    // Sync initial value
+    _onSelectedTextChanged();
   }
 
   @override
@@ -59,20 +61,29 @@ class _ExpandableCardCreationToolbarState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_toolbarController.mode !=
-                CardCreationToolbarMode.collapsed) ...[
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  onPressed: () => _toolbarController.setMode(
-                    CardCreationToolbarMode.collapsed,
+            Stack(
+              children: [
+                if (_toolbarController.mode !=
+                    CardCreationToolbarMode.collapsed)
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      onPressed: () => _toolbarController.setMode(
+                        CardCreationToolbarMode.collapsed,
+                      ),
+                      icon: const Icon(Icons.close),
+                    ).animate().scale().fadeIn(),
                   ),
-                  icon: const Icon(Icons.close),
-                ).animate().scale().fadeIn(),
-              ),
-              const SizedBox(height: 8),
-            ],
-            _buildContent(context),
+                Padding(
+                  padding:
+                      _toolbarController.mode !=
+                          CardCreationToolbarMode.collapsed
+                      ? const EdgeInsets.only(top: 32.0)
+                      : EdgeInsets.zero,
+                  child: _buildContent(context),
+                ),
+              ],
+            ),
           ],
         );
       },

@@ -42,199 +42,195 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: ShapeDecoration(
-        color: cs.surfaceContainerHigh.withValues(alpha: 0.8),
-        shape: const RoundedSuperellipseBorder(
-          borderRadius: BorderRadius.all(Radius.circular(24)),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Source Header
-          Row(
-            children: [
-              Icon(Icons.format_quote, size: 16, color: cs.primary),
-              const SizedBox(width: 8),
-              Text(
-                "SOURCE TEXT",
-                style: textTheme.labelSmall?.copyWith(
-                  letterSpacing: 1.2,
-                  color: cs.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Source Header
+        Row(
+          children: [
+            Icon(Icons.format_quote, size: 12, color: cs.primary),
+            const SizedBox(width: 4),
+            Text(
+              "Source Text",
+              style: textTheme.labelSmall?.copyWith(
+                letterSpacing: 1.2,
+                color: cs.primary,
+                fontWeight: FontWeight.bold,
               ),
-            ],
-          ).animate().fadeIn(duration: 300.ms).slideX(begin: -0.1),
-
-          const SizedBox(height: 8),
-
-          // Source Container
-          StreamBuilder<String?>(
-                stream: widget.controller.selectedTextStream,
-                builder: (context, snapshot) {
-                  final text = snapshot.data ?? "No text selected";
-                  return Container(
-                    padding: const EdgeInsets.all(12),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: cs.outlineVariant.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Text(
-                      text,
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontStyle: FontStyle.italic,
-                        color: cs.onSurfaceVariant,
-                      ),
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                },
-              )
-              .animate()
-              .fadeIn(delay: 100.ms)
-              .scale(begin: const Offset(0.98, 0.98)),
-
-          const SizedBox(height: 20),
-
-          // Front Field
-          _buildTextField(
-            controller: _frontController,
-            label: "FRONT",
-            hint: "Question or term...",
-            cs: cs,
-          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
-
-          const SizedBox(height: 12),
-
-          // Back Field
-          _buildTextField(
-            controller: _backController,
-            label: "BACK",
-            hint: "Answer or definition...",
-            cs: cs,
-          ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
-
-          const SizedBox(height: 24),
-
-          // Bottom Buttons
-          Row(
-            children: [
-              Expanded(
-                child: TextButton(
-                  onPressed: () {
-                    widget.controller.setMode(
-                      CardCreationToolbarMode.collapsed,
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text("Cancel"),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: FilledButton.icon(
-                  onPressed: () {
-                    // TODO: Implement card saving logic
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Card Saved! (Simulated)")),
-                    );
-                    widget.controller.resetCardFields();
-                    widget.controller.setMode(
-                      CardCreationToolbarMode.collapsed,
-                    );
-                  },
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: const Icon(Icons.add),
-                  label: const Text("Add Card"),
-                ),
-              ),
-            ],
-          ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
-
-          const SizedBox(height: 12),
-
-          // Nice to have options
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _buildOptionChip(Icons.auto_awesome, "AI Polish", cs),
-                const SizedBox(width: 8),
-                _buildOptionChip(Icons.image_outlined, "Add Image", cs),
-                const SizedBox(width: 8),
-                _buildOptionChip(Icons.tag_outlined, "Tags", cs),
-              ],
             ),
-          ).animate().fadeIn(delay: 500.ms),
-        ],
-      ),
+          ],
+        ).animate().fadeIn(duration: 300.ms).slideX(begin: -0.1),
+
+        const SizedBox(height: 8),
+
+        // Source Container
+        Builder(
+              builder: (context) {
+                final selection = widget.controller.selectedText;
+                final isPlaceholder = selection == null || selection.isEmpty;
+                final text = isPlaceholder ? "No text selected" : selection;
+
+                return Stack(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: cs.primary.withValues(alpha: 0.05),
+                        borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(20),
+                          bottomRight: Radius.circular(20),
+                          topLeft: Radius.circular(6),
+                          bottomLeft: Radius.circular(6),
+                        ),
+                        border: Border(
+                          left: BorderSide(
+                            color: cs.primary.withValues(alpha: 0.6),
+                            width: 5,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        text,
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontStyle: FontStyle.italic,
+                          height: 1.6,
+                          letterSpacing: 0.3,
+                          color: isPlaceholder
+                              ? cs.onSurfaceVariant.withValues(alpha: 0.4)
+                              : cs.onSurfaceVariant,
+                        ),
+                        maxLines: 8,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Positioned(
+                      right: 12,
+                      top: 8,
+                      child: Icon(
+                        Icons.format_quote,
+                        color: cs.primary.withValues(alpha: 0.1),
+                        size: 32,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            )
+            .animate()
+            .fadeIn(delay: 100.ms)
+            .scale(begin: const Offset(0.98, 0.98)),
+
+        const SizedBox(height: 20),
+
+        // Front Field
+        _buildTextField(
+          controller: _frontController,
+          label: "Front",
+          cs: cs,
+        ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
+
+        const SizedBox(height: 4),
+
+        // Back Field
+        _buildTextField(
+          controller: _backController,
+          label: "Back",
+          cs: cs,
+        ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
+
+        const SizedBox(height: 24),
+
+        // Bottom Buttons
+        Row(
+          children: [
+            Expanded(
+              child: TextButton(
+                onPressed: () {
+                  widget.controller.setMode(CardCreationToolbarMode.collapsed);
+                },
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text("Cancel"),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 2,
+              child: FilledButton.icon(
+                onPressed: () {
+                  // TODO: Implement card saving logic
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Card Saved! (Simulated)")),
+                  );
+                  widget.controller.resetCardFields();
+                  widget.controller.setMode(CardCreationToolbarMode.collapsed);
+                },
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.add),
+                label: const Text("Add Card"),
+              ),
+            ),
+          ],
+        ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
+
+        const SizedBox(height: 12),
+
+        // Nice to have options
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _buildOptionChip(Icons.auto_awesome, "AI Polish", cs),
+              const SizedBox(width: 8),
+              _buildOptionChip(Icons.image_outlined, "Add Image", cs),
+              const SizedBox(width: 8),
+              _buildOptionChip(Icons.tag_outlined, "Tags", cs),
+            ],
+          ),
+        ).animate().fadeIn(delay: 500.ms),
+      ],
     );
   }
 
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
-    required String hint,
     required ColorScheme cs,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            color: cs.onSurfaceVariant.withValues(alpha: 0.7),
-            letterSpacing: 1.1,
-          ),
-        ),
-        const SizedBox(height: 4),
         TextField(
           controller: controller,
+          minLines: 2,
           maxLines: null,
           decoration: InputDecoration(
-            hintText: hint,
+            labelText: label,
             filled: true,
             fillColor: cs.surface,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 12,
             ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: cs.outlineVariant.withValues(alpha: 0.2),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: cs.primary, width: 1.5),
-            ),
+            // border: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(12),
+            //   borderSide: BorderSide.none,
+            // ),
+            // focusedBorder: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(12),
+            //   borderSide: BorderSide(color: cs.primary, width: 1.5),
+            // ),
           ),
         ),
       ],

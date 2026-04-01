@@ -7,10 +7,12 @@ class CardCreationToolbarController extends ChangeNotifier {
   final StreamController<String?> _selectedTextController =
       StreamController<String?>.broadcast();
 
+  String? _selectedText;
   String _frontText = '';
   String _backText = '';
 
   CardCreationToolbarMode get mode => _mode;
+  String? get selectedText => _selectedText;
   Stream<String?> get selectedTextStream => _selectedTextController.stream;
 
   String get frontText => _frontText;
@@ -22,10 +24,9 @@ class CardCreationToolbarController extends ChangeNotifier {
   }
 
   void updateSelectedText(String? text) {
+    _selectedText = text;
     _selectedTextController.add(text);
-    // When text is first selected and we are in card creation mode,
-    // maybe we want to auto-fill front if it's empty?
-    // For now, just keep the stream updated.
+    notifyListeners();
   }
 
   void setFrontText(String text) {
