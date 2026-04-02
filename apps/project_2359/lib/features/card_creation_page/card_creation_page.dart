@@ -4,24 +4,19 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:project_2359/features/card_creation_page/expandable_card_creation_toolbar.dart';
 import 'package:provider/provider.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/settings/labs_settings.dart';
 import 'package:project_2359/core/widgets/expandable_container.dart';
-import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/features/card_creation_page/smart_text_selection_handler.dart';
-import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
 import 'package:project_2359/features/card_creation_page/widgets/pdf_occlusion_overlay.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
-import 'package:project_2359/core/widgets/shortcut_widgets.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:flutter/services.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 class CardCreationPage extends StatefulWidget {
   final String folderId;
@@ -56,10 +51,13 @@ class _CardCreationPageState extends State<CardCreationPage> {
   void initState() {
     super.initState();
     _containerController = ExpandableContainerController(
-      isVisible: _pdfBytes != null,
+      isVisible: true, // Always visible to show the toolbar initially
     );
     _initSources();
     _toolbarController.addListener(_onToolbarChanged);
+
+    // Set initial mode to pdfList
+    _toolbarController.setMode(CardCreationToolbarMode.pdfList);
   }
 
   void _initSources() {
@@ -143,11 +141,23 @@ class _CardCreationPageState extends State<CardCreationPage> {
     super.dispose();
   }
 
-  void _onToolbarChanged() {
+  void _onToolbarChanged() async {
     final requestedId = _toolbarController.requestedSourceId;
     if (requestedId != null) {
-      final source = _availableSources?.firstWhere((s) => s.id == requestedId);
-      if (source != null) {
+      // Find source in cache or fetch from DB
+      SourceItem? source;
+      final results =
+          _availableSources?.where((s) => s.id == requestedId).toList() ?? [];
+      if (results.isNotEmpty) {
+        source = results.first;
+      }
+
+      if (source == null) {
+        final service = context.read<SourceService>();
+        source = await service.getSourceById(requestedId);
+      }
+
+      if (source != null && mounted) {
         _loadSource(source);
         _toolbarController.setMode(CardCreationToolbarMode.collapsed);
       }
@@ -280,7 +290,12 @@ class _CardCreationPageState extends State<CardCreationPage> {
                       _currentSourceId = null;
                       _selectionNotifier.value = null;
                       _selectedTextNotifier.value = null;
-                      _containerController.setVisible(false);
+                      _containerController.setVisible(
+                        true,
+                      ); // Don't hide, stay in list mode
+                      _toolbarController.setMode(
+                        CardCreationToolbarMode.pdfList,
+                      );
                     });
                   } else {
                     Navigator.pop(context);
@@ -297,7 +312,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
 
   Widget _buildPdfView() {
     if (_pdfBytes == null) {
-      return _buildPdfList(context);
+      return Container(color: Colors.black);
     }
 
     return KeyedSubtree(
@@ -348,100 +363,6 @@ class _CardCreationPageState extends State<CardCreationPage> {
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildPdfList(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final topPadding = MediaQuery.of(context).padding.top;
-
-    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: isMobile ? double.infinity : 720,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(height: topPadding + kToolbarHeight + 24),
-              const SectionLabel(title: "Select Document"),
-              const SizedBox(height: 16),
-
-              if (_availableSources == null)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(40.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              else if (_availableSources!.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: Text(
-                      "No sources in this folder",
-                      style: TextStyle(
-                        color: cs.onSurface.withValues(alpha: 0.3),
-                      ),
-                    ),
-                  ),
-                )
-              else
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // TODO: Make this use a list view
-                    for (var i = 0; i < _availableSources!.length; i++)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child:
-                            ProjectCardTile(
-                                  backgroundColor: cs.surfaceContainerHighest
-                                      .withValues(alpha: 0.5),
-                                  minHeight: 100,
-                                  title: ShortcutDisplay(
-                                    showInline: true,
-                                    info: i < 10
-                                        ? ShortcutInfo(
-                                            label: 'Select',
-                                            key: [
-                                              LogicalKeyboardKey.digit1,
-                                              LogicalKeyboardKey.digit2,
-                                              LogicalKeyboardKey.digit3,
-                                              LogicalKeyboardKey.digit4,
-                                              LogicalKeyboardKey.digit5,
-                                              LogicalKeyboardKey.digit6,
-                                              LogicalKeyboardKey.digit7,
-                                              LogicalKeyboardKey.digit8,
-                                              LogicalKeyboardKey.digit9,
-                                              LogicalKeyboardKey.digit0,
-                                            ][i],
-                                            modifiers: [ShortcutModifier.alt],
-                                          )
-                                        : null,
-                                    child: Text(_availableSources![i].label),
-                                  ),
-                                  subtitle: Text(
-                                    "${_availableSources![i].type.toUpperCase()} | ${_availableSources![i].extractedContent?.length ?? 0} chars",
-                                  ),
-                                  leading: const WizardSourcePagePreview(),
-                                  onTap: () =>
-                                      _loadSource(_availableSources![i]),
-                                )
-                                .animate()
-                                .fadeIn(delay: (i * 100).ms)
-                                .slideY(begin: 0.1, curve: Curves.easeOutQuad),
-                      ),
-                  ],
-                ),
-            ],
-          ),
-        ),
       ),
     );
   }
