@@ -46,12 +46,6 @@ class SelectedTextButton extends StatelessWidget {
                 ),
               ),
             ),
-            // const Spacer(),
-            const SizedBox(width: 8),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.close_rounded, size: 20),
-            ),
           ],
         ),
       ),

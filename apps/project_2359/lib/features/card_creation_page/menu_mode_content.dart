@@ -57,7 +57,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
       listenable: widget.controller,
       builder: (context, _) {
         final isPdfMode =
-            widget.controller.mode == CardCreationToolbarMode.pdfList;
+            widget.controller.mode == CardCreationToolbarMode.sourcesList;
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -110,7 +110,8 @@ class _MenuModeContentState extends State<MenuModeContent> {
   }
 
   Widget _buildModeToggleButton(ColorScheme cs) {
-    final isPdfMode = widget.controller.mode == CardCreationToolbarMode.pdfList;
+    final isPdfMode =
+        widget.controller.mode == CardCreationToolbarMode.sourcesList;
     return Material(
       color: cs.primary.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(12),
@@ -123,7 +124,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
           widget.controller.setMode(
             isPdfMode
                 ? CardCreationToolbarMode.cardsList
-                : CardCreationToolbarMode.pdfList,
+                : CardCreationToolbarMode.sourcesList,
           );
           // Register post frame callback to disable animation after the new list renders
           WidgetsBinding.instance.addPostFrameCallback((_) {

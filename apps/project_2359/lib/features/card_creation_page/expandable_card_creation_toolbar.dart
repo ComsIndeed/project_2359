@@ -19,7 +19,7 @@ enum CardCreationToolbarMode {
   cardCreation,
   imageOcclusion,
   cardsList,
-  pdfList,
+  sourcesList,
 }
 
 class ExpandableCardCreationToolbar extends StatefulWidget {
@@ -158,7 +158,7 @@ class _ExpandableCardCreationToolbarState
 
     if (widget.toolbarController.mode == CardCreationToolbarMode.menu ||
         widget.toolbarController.mode == CardCreationToolbarMode.cardsList ||
-        widget.toolbarController.mode == CardCreationToolbarMode.pdfList) {
+        widget.toolbarController.mode == CardCreationToolbarMode.sourcesList) {
       return MenuModeContent(controller: widget.toolbarController);
     }
 
@@ -166,25 +166,33 @@ class _ExpandableCardCreationToolbarState
       return CardCreationModeContent(controller: widget.toolbarController);
     }
 
+    final hasSelection =
+        widget.toolbarController.selectedText?.isNotEmpty == true;
+
     return ClipRect(
       child: Flex(
         direction: Axis.horizontal,
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Expanded(child: _buildTextButtonContent()),
-          IconButton(
-            onPressed: () => widget.toolbarController.setMode(
-              CardCreationToolbarMode.imageOcclusion,
-            ),
-            icon: const ImageOcclusionIcon(),
-          ).animate().fadeIn().scale(delay: 100.ms),
+          if (!hasSelection)
+            IconButton(
+              onPressed: () => widget.toolbarController.setMode(
+                CardCreationToolbarMode.imageOcclusion,
+              ),
+              icon: const ImageOcclusionIcon(),
+            ).animate().fadeIn().scale(delay: 100.ms),
+          if (hasSelection)
+            Expanded(child: _buildTextButtonContent())
+          else
+            const Spacer(),
+
           IconButton(
             onPressed: () {
               if (widget.toolbarController.mode ==
                       CardCreationToolbarMode.cardsList ||
                   widget.toolbarController.mode ==
-                      CardCreationToolbarMode.pdfList) {
+                      CardCreationToolbarMode.sourcesList) {
                 widget.toolbarController.setMode(
                   CardCreationToolbarMode.collapsed,
                 );
@@ -202,56 +210,47 @@ class _ExpandableCardCreationToolbarState
   }
 
   Widget _buildTextButtonContent() {
-    return ValueListenableBuilder<String?>(
-      valueListenable: widget.selectedTextNotifier,
-      builder: (context, text, _) {
-        return AnimatedSwitcher(
-          duration: 400.ms,
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          transitionBuilder: (child, animation) {
-            final key = child.key;
-            final isEntering =
-                (text != null && key is ValueKey && key.value == text);
+    final text = widget.toolbarController.selectedText;
+    return AnimatedSwitcher(
+      duration: 400.ms,
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) {
+        final key = child.key;
+        final isEntering =
+            (text != null && key is ValueKey && key.value == text);
 
-            final slideAnimation =
-                Tween<Offset>(
-                  begin: isEntering
-                      ? const Offset(0, 0.45)
-                      : const Offset(0, -0.45),
-                  end: Offset.zero,
-                ).animate(
-                  CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  ),
-                );
-
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(position: slideAnimation, child: child),
+        final slideAnimation =
+            Tween<Offset>(
+              begin: isEntering
+                  ? const Offset(0, 0.45)
+                  : const Offset(0, -0.45),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
             );
-          },
-          child: (text == null || text.isEmpty)
-              ? const SizedBox.shrink(key: ValueKey('empty_text'))
-              : Theme(
-                  // Ensure the button is constrained on desktop
-                  data: Theme.of(context),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: double.infinity,
-                    ),
-                    child: SelectedTextButton(
-                      key: ValueKey(text),
-                      text: text,
-                      onTap: () => widget.toolbarController.setMode(
-                        CardCreationToolbarMode.cardCreation,
-                      ),
-                    ),
-                  ),
-                ),
+
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(position: slideAnimation, child: child),
         );
       },
+      child: (text == null || text.isEmpty)
+          ? const SizedBox.shrink(key: ValueKey('empty_text'))
+          : Theme(
+              // Ensure the button is constrained on desktop
+              data: Theme.of(context),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: double.infinity),
+                child: SelectedTextButton(
+                  key: ValueKey(text),
+                  text: text,
+                  onTap: () => widget.toolbarController.setMode(
+                    CardCreationToolbarMode.cardCreation,
+                  ),
+                ),
+              ),
+            ),
     );
   }
 }

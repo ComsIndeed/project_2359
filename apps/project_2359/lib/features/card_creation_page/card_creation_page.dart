@@ -57,7 +57,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
     _toolbarController.addListener(_onToolbarChanged);
 
     // Set initial mode to pdfList
-    _toolbarController.setMode(CardCreationToolbarMode.pdfList);
+    _toolbarController.setMode(CardCreationToolbarMode.sourcesList);
   }
 
   void _initSources() {
@@ -294,7 +294,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
                         true,
                       ); // Don't hide, stay in list mode
                       _toolbarController.setMode(
-                        CardCreationToolbarMode.pdfList,
+                        CardCreationToolbarMode.sourcesList,
                       );
                     });
                   } else {
