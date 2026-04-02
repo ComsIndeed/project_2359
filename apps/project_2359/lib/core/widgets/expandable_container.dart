@@ -19,6 +19,7 @@ class ExpandableContainer extends StatefulWidget {
   final double? initialBlur;
   final Color? initialColor;
   final BorderSide? initialBorder;
+  final bool isInitiallyVisible;
 
   const ExpandableContainer({
     super.key,
@@ -33,6 +34,7 @@ class ExpandableContainer extends StatefulWidget {
     this.initialBlur,
     this.initialColor,
     this.initialBorder,
+    this.isInitiallyVisible = true,
   });
 
   @override
@@ -53,6 +55,7 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
           blur: widget.initialBlur,
           color: widget.initialColor,
           border: widget.initialBorder,
+          isVisible: widget.isInitiallyVisible,
         );
     _controller.addListener(_rebuild);
   }
@@ -70,6 +73,7 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
             blur: widget.initialBlur,
             color: widget.initialColor,
             border: widget.initialBorder,
+            isVisible: widget.isInitiallyVisible,
           );
       _controller.addListener(_rebuild);
     }
@@ -110,61 +114,82 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
               duration: widget.duration,
               alignment: _controller.alignment,
               curve: widget.curve,
-              child: ClipPath(
-                clipper: ShapeBorderClipper(
-                  shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                ),
-                child: TweenAnimationBuilder<double>(
+              child: AnimatedOpacity(
+                duration: widget.duration,
+                curve: widget.curve,
+                opacity: _controller.isVisible ? 1.0 : 0.0,
+                child: AnimatedSlide(
                   duration: widget.duration,
                   curve: widget.curve,
-                  tween: Tween<double>(end: blur),
-                  builder: (context, blurValue, child) {
-                    return BackdropFilter(
-                      filter: ImageFilter.blur(
-                        sigmaX: blurValue,
-                        sigmaY: blurValue,
-                      ),
-                      child: child!,
-                    );
-                  },
-                  child: AnimatedContainer(
+                  offset: _controller.isVisible
+                      ? Offset.zero
+                      : const Offset(0, 0.1),
+                  child: AnimatedScale(
                     duration: widget.duration,
                     curve: widget.curve,
-                    decoration: ShapeDecoration(
-                      color: color,
-                      shape: RoundedSuperellipseBorder(
-                        borderRadius: BorderRadius.circular(32),
-                        side: border,
-                      ),
-                      shadows: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 16,
-                          offset: const Offset(0, 8),
+                    scale: _controller.isVisible ? 1.0 : 0.9,
+                    alignment: Alignment.bottomCenter,
+                    child: ClipPath(
+                      clipper: ShapeBorderClipper(
+                        shape: RoundedSuperellipseBorder(
+                          borderRadius: BorderRadius.circular(32),
                         ),
-                      ],
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: AnimatedSize(
+                      ),
+                      child: TweenAnimationBuilder<double>(
                         duration: widget.duration,
                         curve: widget.curve,
-                        child: AnimatedPadding(
+                        tween: Tween<double>(end: blur),
+                        builder: (context, blurValue, child) {
+                          return BackdropFilter(
+                            filter: ImageFilter.blur(
+                              sigmaX: blurValue,
+                              sigmaY: blurValue,
+                            ),
+                            child: child!,
+                          );
+                        },
+                        child: AnimatedContainer(
                           duration: widget.duration,
                           curve: widget.curve,
-                          padding: padding,
-                          child: (_controller.size == null)
-                              ? widget.builder(context, _controller)
-                              : AnimatedContainer(
-                                  duration: widget.duration,
-                                  curve: widget.curve,
-                                  width: _controller.size!.$1,
-                                  height: _controller.size!.$2,
-                                  child: widget.builder(context, _controller),
-                                ),
+                          decoration: ShapeDecoration(
+                            color: color,
+                            shape: RoundedSuperellipseBorder(
+                              borderRadius: BorderRadius.circular(32),
+                              side: border,
+                            ),
+                            shadows: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 16,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: AnimatedSize(
+                              duration: widget.duration,
+                              curve: widget.curve,
+                              child: AnimatedPadding(
+                                duration: widget.duration,
+                                curve: widget.curve,
+                                padding: padding,
+                                child: (_controller.size == null)
+                                    ? widget.builder(context, _controller)
+                                    : AnimatedContainer(
+                                        duration: widget.duration,
+                                        curve: widget.curve,
+                                        width: _controller.size!.$1,
+                                        height: _controller.size!.$2,
+                                        child: widget.builder(
+                                          context,
+                                          _controller,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -186,6 +211,7 @@ class ExpandableContainerController extends ChangeNotifier {
   double? _blur;
   Color? _color;
   BorderSide? _border;
+  bool _isVisible;
 
   ExpandableContainerController({
     Alignment initialAlignment = Alignment.bottomCenter,
@@ -193,11 +219,13 @@ class ExpandableContainerController extends ChangeNotifier {
     double? blur,
     Color? color,
     BorderSide? border,
+    bool isVisible = true,
   }) : _alignment = initialAlignment,
        _padding = padding,
        _blur = blur,
        _color = color,
-       _border = border;
+       _border = border,
+       _isVisible = isVisible;
 
   (double, double)? get size => _size;
   Alignment get alignment => _alignment;
@@ -205,6 +233,7 @@ class ExpandableContainerController extends ChangeNotifier {
   double? get blur => _blur;
   Color? get color => _color;
   BorderSide? get border => _border;
+  bool get isVisible => _isVisible;
 
   void setSize({double? width, double? height}) {
     if (width != null && height != null) {
@@ -237,6 +266,16 @@ class ExpandableContainerController extends ChangeNotifier {
 
   void setBorder(BorderSide? border) {
     _border = border;
+    notifyListeners();
+  }
+
+  void setVisible(bool visible) {
+    _isVisible = visible;
+    notifyListeners();
+  }
+
+  void toggleVisible() {
+    _isVisible = !_isVisible;
     notifyListeners();
   }
 

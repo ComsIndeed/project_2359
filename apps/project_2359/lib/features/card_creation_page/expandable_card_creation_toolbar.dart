@@ -219,18 +219,11 @@ class _ExpandableCardCreationToolbarState
                     constraints: const BoxConstraints(
                       maxWidth: double.infinity,
                     ),
-                    child: ShortcutDisplay(
-                      info: const ShortcutInfo(
-                        label: 'Create Card',
-                        key: LogicalKeyboardKey.enter,
-                        modifiers: [ShortcutModifier.alt],
-                      ),
-                      child: SelectedTextButton(
-                        key: ValueKey(text),
-                        text: text,
-                        onTap: () => widget.toolbarController.setMode(
-                          CardCreationToolbarMode.cardCreation,
-                        ),
+                    child: SelectedTextButton(
+                      key: ValueKey(text),
+                      text: text,
+                      onTap: () => widget.toolbarController.setMode(
+                        CardCreationToolbarMode.cardCreation,
                       ),
                     ),
                   ),

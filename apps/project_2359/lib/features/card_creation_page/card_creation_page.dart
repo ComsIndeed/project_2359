@@ -21,6 +21,7 @@ import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/shortcut_widgets.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:flutter/services.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class CardCreationPage extends StatefulWidget {
   final String folderId;
@@ -44,6 +45,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
   final ValueNotifier<String?> _selectedTextNotifier = ValueNotifier(null);
   final CardCreationToolbarController _toolbarController =
       CardCreationToolbarController();
+  late final ExpandableContainerController _containerController;
 
   /// Incremented on each document load to force a full PdfViewer remount,
   /// which clears all internal caches (image cache, text cache, layout, etc.).
@@ -53,6 +55,9 @@ class _CardCreationPageState extends State<CardCreationPage> {
   @override
   void initState() {
     super.initState();
+    _containerController = ExpandableContainerController(
+      isVisible: _pdfBytes != null,
+    );
     _initSources();
   }
 
@@ -137,6 +142,21 @@ class _CardCreationPageState extends State<CardCreationPage> {
     super.dispose();
   }
 
+  @override
+  void reassemble() {
+    super.reassemble();
+    // Hot reload invalidates the native render context.
+    // Force a full PdfViewer remount so it rebuilds cleanly.
+    if (_pdfBytes != null) {
+      setState(() {
+        // _controller.dispose(); // Does not exist apparently
+        _controller = PdfViewerController();
+        _pdfKey++;
+        _document = null;
+      });
+    }
+  }
+
   Future<void> _loadSource(SourceItem source) async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
@@ -155,6 +175,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
           _pdfBytes = blob.bytes;
           _pdfTitle = source.label;
           _currentSourceId = source.id;
+          _containerController.setVisible(true);
         });
       }
     } catch (e) {
@@ -185,6 +206,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
             ).colorScheme.onSurface.withValues(alpha: 0.5),
             width: 1,
           ),
+          controller: _containerController,
           builder: (context, controller) => ExpandableCardCreationToolbar(
             context: context,
             containerController: controller,
@@ -246,6 +268,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
                       _currentSourceId = null;
                       _selectionNotifier.value = null;
                       _selectedTextNotifier.value = null;
+                      _containerController.setVisible(false);
                     });
                   } else {
                     Navigator.pop(context);
@@ -321,80 +344,92 @@ class _CardCreationPageState extends State<CardCreationPage> {
     final cs = Theme.of(context).colorScheme;
     final topPadding = MediaQuery.of(context).padding.top;
 
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(height: topPadding + kToolbarHeight + 24),
-          const SectionLabel(title: "Select Document"),
-          const SizedBox(height: 16),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: isMobile ? double.infinity : 720,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: topPadding + kToolbarHeight + 24),
+              const SectionLabel(title: "Select Document"),
+              const SizedBox(height: 16),
 
-          if (_availableSources == null)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(40.0),
-                child: CircularProgressIndicator(),
-              ),
-            )
-          else if (_availableSources!.isEmpty)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 40),
-                child: Text(
-                  "No sources in this folder",
-                  style: TextStyle(color: cs.onSurface.withValues(alpha: 0.3)),
-                ),
-              ),
-            )
-          else
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // TODO: Make this use a list view
-                for (var i = 0; i < _availableSources!.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child:
-                        ShortcutDisplay(
-                              showInline: true,
-                              info: i < 10
-                                  ? ShortcutInfo(
-                                      label: 'Select',
-                                      key: [
-                                        LogicalKeyboardKey.digit1,
-                                        LogicalKeyboardKey.digit2,
-                                        LogicalKeyboardKey.digit3,
-                                        LogicalKeyboardKey.digit4,
-                                        LogicalKeyboardKey.digit5,
-                                        LogicalKeyboardKey.digit6,
-                                        LogicalKeyboardKey.digit7,
-                                        LogicalKeyboardKey.digit8,
-                                        LogicalKeyboardKey.digit9,
-                                        LogicalKeyboardKey.digit0,
-                                      ][i],
-                                      modifiers: [ShortcutModifier.alt],
-                                    )
-                                  : null,
-                              child: ProjectCardTile(
-                                backgroundColor: cs.surfaceContainerHighest
-                                    .withValues(alpha: 0.5),
-                                minHeight: 100,
-                                title: Text(_availableSources![i].label),
-                                subtitle: Text(
-                                  "${_availableSources![i].type.toUpperCase()} | ${_availableSources![i].extractedContent?.length ?? 0} chars",
-                                ),
-                                leading: const WizardSourcePagePreview(),
-                                onTap: () => _loadSource(_availableSources![i]),
-                              ),
-                            )
-                            .animate()
-                            .fadeIn(delay: (i * 100).ms)
-                            .slideY(begin: 0.1, curve: Curves.easeOutQuad),
+              if (_availableSources == null)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(40.0),
+                    child: CircularProgressIndicator(),
                   ),
-              ],
-            ),
-        ],
+                )
+              else if (_availableSources!.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 40),
+                    child: Text(
+                      "No sources in this folder",
+                      style: TextStyle(
+                        color: cs.onSurface.withValues(alpha: 0.3),
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // TODO: Make this use a list view
+                    for (var i = 0; i < _availableSources!.length; i++)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child:
+                            ProjectCardTile(
+                                  backgroundColor: cs.surfaceContainerHighest
+                                      .withValues(alpha: 0.5),
+                                  minHeight: 100,
+                                  title: ShortcutDisplay(
+                                    showInline: true,
+                                    info: i < 10
+                                        ? ShortcutInfo(
+                                            label: 'Select',
+                                            key: [
+                                              LogicalKeyboardKey.digit1,
+                                              LogicalKeyboardKey.digit2,
+                                              LogicalKeyboardKey.digit3,
+                                              LogicalKeyboardKey.digit4,
+                                              LogicalKeyboardKey.digit5,
+                                              LogicalKeyboardKey.digit6,
+                                              LogicalKeyboardKey.digit7,
+                                              LogicalKeyboardKey.digit8,
+                                              LogicalKeyboardKey.digit9,
+                                              LogicalKeyboardKey.digit0,
+                                            ][i],
+                                            modifiers: [ShortcutModifier.alt],
+                                          )
+                                        : null,
+                                    child: Text(_availableSources![i].label),
+                                  ),
+                                  subtitle: Text(
+                                    "${_availableSources![i].type.toUpperCase()} | ${_availableSources![i].extractedContent?.length ?? 0} chars",
+                                  ),
+                                  leading: const WizardSourcePagePreview(),
+                                  onTap: () =>
+                                      _loadSource(_availableSources![i]),
+                                )
+                                .animate()
+                                .fadeIn(delay: (i * 100).ms)
+                                .slideY(begin: 0.1, curve: Curves.easeOutQuad),
+                      ),
+                  ],
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
