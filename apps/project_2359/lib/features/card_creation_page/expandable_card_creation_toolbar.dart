@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/widgets/expandable_container.dart';
+import 'package:project_2359/features/card_creation_page/menu_mode_content.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_mode_content.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
@@ -12,7 +13,14 @@ import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/shortcut_widgets.dart';
 import 'package:flutter/services.dart';
 
-enum CardCreationToolbarMode { collapsed, menu, cardCreation, imageOcclusion }
+enum CardCreationToolbarMode {
+  collapsed,
+  menu,
+  cardCreation,
+  imageOcclusion,
+  cardsList,
+  pdfList,
+}
 
 class ExpandableCardCreationToolbar extends StatefulWidget {
   const ExpandableCardCreationToolbar({
@@ -148,8 +156,10 @@ class _ExpandableCardCreationToolbarState
       return ImageOcclusionEditor(controller: widget.toolbarController);
     }
 
-    if (widget.toolbarController.mode == CardCreationToolbarMode.menu) {
-      return const Text("Menu");
+    if (widget.toolbarController.mode == CardCreationToolbarMode.menu ||
+        widget.toolbarController.mode == CardCreationToolbarMode.cardsList ||
+        widget.toolbarController.mode == CardCreationToolbarMode.pdfList) {
+      return MenuModeContent(controller: widget.toolbarController);
     }
 
     if (widget.toolbarController.mode == CardCreationToolbarMode.cardCreation) {
@@ -170,8 +180,20 @@ class _ExpandableCardCreationToolbarState
             icon: const ImageOcclusionIcon(),
           ).animate().fadeIn().scale(delay: 100.ms),
           IconButton(
-            onPressed: () =>
-                widget.toolbarController.setMode(CardCreationToolbarMode.menu),
+            onPressed: () {
+              if (widget.toolbarController.mode ==
+                      CardCreationToolbarMode.cardsList ||
+                  widget.toolbarController.mode ==
+                      CardCreationToolbarMode.pdfList) {
+                widget.toolbarController.setMode(
+                  CardCreationToolbarMode.collapsed,
+                );
+              } else {
+                widget.toolbarController.setMode(
+                  CardCreationToolbarMode.cardsList,
+                );
+              }
+            },
             icon: const FaIcon(FontAwesomeIcons.barsStaggered),
           ).animate().fadeIn().scale(delay: 200.ms),
         ],

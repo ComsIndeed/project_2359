@@ -59,6 +59,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
       isVisible: _pdfBytes != null,
     );
     _initSources();
+    _toolbarController.addListener(_onToolbarChanged);
   }
 
   void _initSources() {
@@ -140,6 +141,17 @@ class _CardCreationPageState extends State<CardCreationPage> {
     _selectedTextNotifier.dispose();
     _toolbarController.dispose();
     super.dispose();
+  }
+
+  void _onToolbarChanged() {
+    final requestedId = _toolbarController.requestedSourceId;
+    if (requestedId != null) {
+      final source = _availableSources?.firstWhere((s) => s.id == requestedId);
+      if (source != null) {
+        _loadSource(source);
+        _toolbarController.setMode(CardCreationToolbarMode.collapsed);
+      }
+    }
   }
 
   @override

@@ -16,6 +16,12 @@ class CardCreationToolbarController extends ChangeNotifier {
   Rect? _occlusionRect;
   Uint8List? _capturedOcclusionImage;
 
+  // List State
+  String _searchQuery = '';
+  final Set<String> _selectedItemIds = {};
+  String? _requestedSourceId;
+  String? _requestedCardId;
+
   CardCreationToolbarMode get mode => _mode;
   String? get selectedText => _selectedText;
   Stream<String?> get selectedTextStream => _selectedTextController.stream;
@@ -25,6 +31,11 @@ class CardCreationToolbarController extends ChangeNotifier {
 
   Rect? get occlusionRect => _occlusionRect;
   Uint8List? get capturedOcclusionImage => _capturedOcclusionImage;
+
+  String get searchQuery => _searchQuery;
+  Set<String> get selectedItemIds => _selectedItemIds;
+  String? get requestedSourceId => _requestedSourceId;
+  String? get requestedCardId => _requestedCardId;
 
   void updateOcclusionRect(Rect? rect) {
     _occlusionRect = rect;
@@ -61,6 +72,38 @@ class CardCreationToolbarController extends ChangeNotifier {
     _frontText = '';
     _backText = '';
     notifyListeners();
+  }
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  void toggleSelection(String id) {
+    if (_selectedItemIds.contains(id)) {
+      _selectedItemIds.remove(id);
+    } else {
+      _selectedItemIds.add(id);
+    }
+    notifyListeners();
+  }
+
+  void clearSelection() {
+    _selectedItemIds.clear();
+    notifyListeners();
+  }
+
+  void requestSource(String id) {
+    _requestedSourceId = id;
+    notifyListeners();
+    // Reset after notify so listeners can react and we don't trigger again
+    _requestedSourceId = null;
+  }
+
+  void requestCard(String id) {
+    _requestedCardId = id;
+    notifyListeners();
+    _requestedCardId = null;
   }
 
   @override
