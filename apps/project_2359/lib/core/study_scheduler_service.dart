@@ -95,7 +95,7 @@ class StudySchedulerService {
           StudySessionEventsCompanion.insert(
             id: const Uuid().v4(),
             cardId: cardId,
-            materialId: row.materialId,
+            materialId: Value(row.materialId),
             rating: rating.index,
             reviewedAt: reviewLog.reviewDateTime.toUtc().toIso8601String(),
             scheduledDays: scheduledDays,

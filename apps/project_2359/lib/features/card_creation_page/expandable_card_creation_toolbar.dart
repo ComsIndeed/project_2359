@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/widgets/expandable_container.dart';
-import 'package:project_2359/features/card_creation_page/menu_mode_content.dart';
+import 'package:project_2359/features/card_creation_page/cards_list_mode_content.dart';
+import 'package:project_2359/features/card_creation_page/sources_list_mode_content.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_mode_content.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
@@ -27,16 +28,18 @@ class ExpandableCardCreationToolbar extends StatefulWidget {
     super.key,
     required this.context,
     required this.containerController,
-    required this.toolbarController,
-    required this.selectionNotifier,
     required this.selectedTextNotifier,
+    required this.toolbarController,
+    required this.folderId,
+    this.sourceId,
   });
 
   final BuildContext context;
   final ExpandableContainerController containerController;
-  final ValueNotifier<dynamic> selectionNotifier;
   final ValueNotifier<String?> selectedTextNotifier;
   final CardCreationToolbarController toolbarController;
+  final String folderId;
+  final String? sourceId;
 
   @override
   State<ExpandableCardCreationToolbar> createState() =>
@@ -156,14 +159,26 @@ class _ExpandableCardCreationToolbarState
       return ImageOcclusionEditor(controller: widget.toolbarController);
     }
 
-    if (widget.toolbarController.mode == CardCreationToolbarMode.menu ||
-        widget.toolbarController.mode == CardCreationToolbarMode.cardsList ||
-        widget.toolbarController.mode == CardCreationToolbarMode.sourcesList) {
-      return MenuModeContent(controller: widget.toolbarController);
+    if (widget.toolbarController.mode == CardCreationToolbarMode.cardsList) {
+      return CardsListModeContent(
+        controller: widget.toolbarController,
+        folderId: widget.folderId,
+      );
+    }
+
+    if (widget.toolbarController.mode == CardCreationToolbarMode.sourcesList) {
+      return SourcesListModeContent(
+        controller: widget.toolbarController,
+        folderId: widget.folderId,
+      );
     }
 
     if (widget.toolbarController.mode == CardCreationToolbarMode.cardCreation) {
-      return CardCreationModeContent(controller: widget.toolbarController);
+      return CardCreationModeContent(
+        controller: widget.toolbarController,
+        folderId: widget.folderId,
+        sourceId: widget.sourceId,
+      );
     }
 
     final hasSelection =

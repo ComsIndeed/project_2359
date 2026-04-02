@@ -1587,6 +1587,20 @@ class $StudyCardItemsTable extends StudyCardItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _folderIdMeta = const VerificationMeta(
+    'folderId',
+  );
+  @override
+  late final GeneratedColumn<String> folderId = GeneratedColumn<String>(
+    'folder_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES study_folder_items (id)',
+    ),
+  );
   static const VerificationMeta _materialIdMeta = const VerificationMeta(
     'materialId',
   );
@@ -1594,9 +1608,9 @@ class $StudyCardItemsTable extends StudyCardItems
   late final GeneratedColumn<String> materialId = GeneratedColumn<String>(
     'material_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES study_material_items (id)',
     ),
@@ -1610,17 +1624,15 @@ class $StudyCardItemsTable extends StudyCardItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _citationJsonMeta = const VerificationMeta(
-    'citationJson',
-  );
   @override
-  late final GeneratedColumn<String> citationJson = GeneratedColumn<String>(
-    'citation_json',
+  late final GeneratedColumnWithTypeConverter<List<String>?, String>
+  citationIds = GeneratedColumn<String>(
+    'citation_ids',
     aliasedName,
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-  );
+  ).withConverter<List<String>?>($StudyCardItemsTable.$convertercitationIdsn);
   static const VerificationMeta _questionMeta = const VerificationMeta(
     'question',
   );
@@ -1675,9 +1687,10 @@ class $StudyCardItemsTable extends StudyCardItems
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    folderId,
     materialId,
     type,
-    citationJson,
+    citationIds,
     question,
     optionsListJson,
     answer,
@@ -1701,13 +1714,19 @@ class $StudyCardItemsTable extends StudyCardItems
     } else if (isInserting) {
       context.missing(_idMeta);
     }
+    if (data.containsKey('folder_id')) {
+      context.handle(
+        _folderIdMeta,
+        folderId.isAcceptableOrUnknown(data['folder_id']!, _folderIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_folderIdMeta);
+    }
     if (data.containsKey('material_id')) {
       context.handle(
         _materialIdMeta,
         materialId.isAcceptableOrUnknown(data['material_id']!, _materialIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_materialIdMeta);
     }
     if (data.containsKey('type')) {
       context.handle(
@@ -1716,15 +1735,6 @@ class $StudyCardItemsTable extends StudyCardItems
       );
     } else if (isInserting) {
       context.missing(_typeMeta);
-    }
-    if (data.containsKey('citation_json')) {
-      context.handle(
-        _citationJsonMeta,
-        citationJson.isAcceptableOrUnknown(
-          data['citation_json']!,
-          _citationJsonMeta,
-        ),
-      );
     }
     if (data.containsKey('question')) {
       context.handle(
@@ -1775,17 +1785,23 @@ class $StudyCardItemsTable extends StudyCardItems
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      folderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}folder_id'],
+      )!,
       materialId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}material_id'],
-      )!,
+      ),
       type: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}type'],
       )!,
-      citationJson: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}citation_json'],
+      citationIds: $StudyCardItemsTable.$convertercitationIdsn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}citation_ids'],
+        ),
       ),
       question: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -1814,13 +1830,19 @@ class $StudyCardItemsTable extends StudyCardItems
   $StudyCardItemsTable createAlias(String alias) {
     return $StudyCardItemsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<String>, String> $convertercitationIds =
+      const StringListConverter();
+  static TypeConverter<List<String>?, String?> $convertercitationIdsn =
+      NullAwareTypeConverter.wrap($convertercitationIds);
 }
 
 class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
   final String id;
-  final String materialId;
+  final String folderId;
+  final String? materialId;
   final String type;
-  final String? citationJson;
+  final List<String>? citationIds;
 
   /// Fields are nullable because not all types use the same properties.
   /// - Flashcard: question (front), answer (back)
@@ -1834,9 +1856,10 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
   final String? fsrsCardJson;
   const StudyCardItem({
     required this.id,
-    required this.materialId,
+    required this.folderId,
+    this.materialId,
     required this.type,
-    this.citationJson,
+    this.citationIds,
     this.question,
     this.optionsListJson,
     this.answer,
@@ -1847,10 +1870,15 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['material_id'] = Variable<String>(materialId);
+    map['folder_id'] = Variable<String>(folderId);
+    if (!nullToAbsent || materialId != null) {
+      map['material_id'] = Variable<String>(materialId);
+    }
     map['type'] = Variable<String>(type);
-    if (!nullToAbsent || citationJson != null) {
-      map['citation_json'] = Variable<String>(citationJson);
+    if (!nullToAbsent || citationIds != null) {
+      map['citation_ids'] = Variable<String>(
+        $StudyCardItemsTable.$convertercitationIdsn.toSql(citationIds),
+      );
     }
     if (!nullToAbsent || question != null) {
       map['question'] = Variable<String>(question);
@@ -1873,11 +1901,14 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
   StudyCardItemsCompanion toCompanion(bool nullToAbsent) {
     return StudyCardItemsCompanion(
       id: Value(id),
-      materialId: Value(materialId),
-      type: Value(type),
-      citationJson: citationJson == null && nullToAbsent
+      folderId: Value(folderId),
+      materialId: materialId == null && nullToAbsent
           ? const Value.absent()
-          : Value(citationJson),
+          : Value(materialId),
+      type: Value(type),
+      citationIds: citationIds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(citationIds),
       question: question == null && nullToAbsent
           ? const Value.absent()
           : Value(question),
@@ -1901,9 +1932,10 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return StudyCardItem(
       id: serializer.fromJson<String>(json['id']),
-      materialId: serializer.fromJson<String>(json['materialId']),
+      folderId: serializer.fromJson<String>(json['folderId']),
+      materialId: serializer.fromJson<String?>(json['materialId']),
       type: serializer.fromJson<String>(json['type']),
-      citationJson: serializer.fromJson<String?>(json['citationJson']),
+      citationIds: serializer.fromJson<List<String>?>(json['citationIds']),
       question: serializer.fromJson<String?>(json['question']),
       optionsListJson: serializer.fromJson<String?>(json['optionsListJson']),
       answer: serializer.fromJson<String?>(json['answer']),
@@ -1916,9 +1948,10 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'materialId': serializer.toJson<String>(materialId),
+      'folderId': serializer.toJson<String>(folderId),
+      'materialId': serializer.toJson<String?>(materialId),
       'type': serializer.toJson<String>(type),
-      'citationJson': serializer.toJson<String?>(citationJson),
+      'citationIds': serializer.toJson<List<String>?>(citationIds),
       'question': serializer.toJson<String?>(question),
       'optionsListJson': serializer.toJson<String?>(optionsListJson),
       'answer': serializer.toJson<String?>(answer),
@@ -1929,9 +1962,10 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
 
   StudyCardItem copyWith({
     String? id,
-    String? materialId,
+    String? folderId,
+    Value<String?> materialId = const Value.absent(),
     String? type,
-    Value<String?> citationJson = const Value.absent(),
+    Value<List<String>?> citationIds = const Value.absent(),
     Value<String?> question = const Value.absent(),
     Value<String?> optionsListJson = const Value.absent(),
     Value<String?> answer = const Value.absent(),
@@ -1939,9 +1973,10 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
     Value<String?> fsrsCardJson = const Value.absent(),
   }) => StudyCardItem(
     id: id ?? this.id,
-    materialId: materialId ?? this.materialId,
+    folderId: folderId ?? this.folderId,
+    materialId: materialId.present ? materialId.value : this.materialId,
     type: type ?? this.type,
-    citationJson: citationJson.present ? citationJson.value : this.citationJson,
+    citationIds: citationIds.present ? citationIds.value : this.citationIds,
     question: question.present ? question.value : this.question,
     optionsListJson: optionsListJson.present
         ? optionsListJson.value
@@ -1953,13 +1988,14 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
   StudyCardItem copyWithCompanion(StudyCardItemsCompanion data) {
     return StudyCardItem(
       id: data.id.present ? data.id.value : this.id,
+      folderId: data.folderId.present ? data.folderId.value : this.folderId,
       materialId: data.materialId.present
           ? data.materialId.value
           : this.materialId,
       type: data.type.present ? data.type.value : this.type,
-      citationJson: data.citationJson.present
-          ? data.citationJson.value
-          : this.citationJson,
+      citationIds: data.citationIds.present
+          ? data.citationIds.value
+          : this.citationIds,
       question: data.question.present ? data.question.value : this.question,
       optionsListJson: data.optionsListJson.present
           ? data.optionsListJson.value
@@ -1976,9 +2012,10 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
   String toString() {
     return (StringBuffer('StudyCardItem(')
           ..write('id: $id, ')
+          ..write('folderId: $folderId, ')
           ..write('materialId: $materialId, ')
           ..write('type: $type, ')
-          ..write('citationJson: $citationJson, ')
+          ..write('citationIds: $citationIds, ')
           ..write('question: $question, ')
           ..write('optionsListJson: $optionsListJson, ')
           ..write('answer: $answer, ')
@@ -1991,9 +2028,10 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
   @override
   int get hashCode => Object.hash(
     id,
+    folderId,
     materialId,
     type,
-    citationJson,
+    citationIds,
     question,
     optionsListJson,
     answer,
@@ -2005,9 +2043,10 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
       identical(this, other) ||
       (other is StudyCardItem &&
           other.id == this.id &&
+          other.folderId == this.folderId &&
           other.materialId == this.materialId &&
           other.type == this.type &&
-          other.citationJson == this.citationJson &&
+          other.citationIds == this.citationIds &&
           other.question == this.question &&
           other.optionsListJson == this.optionsListJson &&
           other.answer == this.answer &&
@@ -2017,9 +2056,10 @@ class StudyCardItem extends DataClass implements Insertable<StudyCardItem> {
 
 class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
   final Value<String> id;
-  final Value<String> materialId;
+  final Value<String> folderId;
+  final Value<String?> materialId;
   final Value<String> type;
-  final Value<String?> citationJson;
+  final Value<List<String>?> citationIds;
   final Value<String?> question;
   final Value<String?> optionsListJson;
   final Value<String?> answer;
@@ -2028,9 +2068,10 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
   final Value<int> rowid;
   const StudyCardItemsCompanion({
     this.id = const Value.absent(),
+    this.folderId = const Value.absent(),
     this.materialId = const Value.absent(),
     this.type = const Value.absent(),
-    this.citationJson = const Value.absent(),
+    this.citationIds = const Value.absent(),
     this.question = const Value.absent(),
     this.optionsListJson = const Value.absent(),
     this.answer = const Value.absent(),
@@ -2040,9 +2081,10 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
   });
   StudyCardItemsCompanion.insert({
     required String id,
-    required String materialId,
+    required String folderId,
+    this.materialId = const Value.absent(),
     required String type,
-    this.citationJson = const Value.absent(),
+    this.citationIds = const Value.absent(),
     this.question = const Value.absent(),
     this.optionsListJson = const Value.absent(),
     this.answer = const Value.absent(),
@@ -2050,13 +2092,14 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
     this.fsrsCardJson = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       materialId = Value(materialId),
+       folderId = Value(folderId),
        type = Value(type);
   static Insertable<StudyCardItem> custom({
     Expression<String>? id,
+    Expression<String>? folderId,
     Expression<String>? materialId,
     Expression<String>? type,
-    Expression<String>? citationJson,
+    Expression<String>? citationIds,
     Expression<String>? question,
     Expression<String>? optionsListJson,
     Expression<String>? answer,
@@ -2066,9 +2109,10 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (folderId != null) 'folder_id': folderId,
       if (materialId != null) 'material_id': materialId,
       if (type != null) 'type': type,
-      if (citationJson != null) 'citation_json': citationJson,
+      if (citationIds != null) 'citation_ids': citationIds,
       if (question != null) 'question': question,
       if (optionsListJson != null) 'options_list_json': optionsListJson,
       if (answer != null) 'answer': answer,
@@ -2080,9 +2124,10 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
 
   StudyCardItemsCompanion copyWith({
     Value<String>? id,
-    Value<String>? materialId,
+    Value<String>? folderId,
+    Value<String?>? materialId,
     Value<String>? type,
-    Value<String?>? citationJson,
+    Value<List<String>?>? citationIds,
     Value<String?>? question,
     Value<String?>? optionsListJson,
     Value<String?>? answer,
@@ -2092,9 +2137,10 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
   }) {
     return StudyCardItemsCompanion(
       id: id ?? this.id,
+      folderId: folderId ?? this.folderId,
       materialId: materialId ?? this.materialId,
       type: type ?? this.type,
-      citationJson: citationJson ?? this.citationJson,
+      citationIds: citationIds ?? this.citationIds,
       question: question ?? this.question,
       optionsListJson: optionsListJson ?? this.optionsListJson,
       answer: answer ?? this.answer,
@@ -2110,14 +2156,19 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
+    if (folderId.present) {
+      map['folder_id'] = Variable<String>(folderId.value);
+    }
     if (materialId.present) {
       map['material_id'] = Variable<String>(materialId.value);
     }
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
-    if (citationJson.present) {
-      map['citation_json'] = Variable<String>(citationJson.value);
+    if (citationIds.present) {
+      map['citation_ids'] = Variable<String>(
+        $StudyCardItemsTable.$convertercitationIdsn.toSql(citationIds.value),
+      );
     }
     if (question.present) {
       map['question'] = Variable<String>(question.value);
@@ -2144,9 +2195,10 @@ class StudyCardItemsCompanion extends UpdateCompanion<StudyCardItem> {
   String toString() {
     return (StringBuffer('StudyCardItemsCompanion(')
           ..write('id: $id, ')
+          ..write('folderId: $folderId, ')
           ..write('materialId: $materialId, ')
           ..write('type: $type, ')
-          ..write('citationJson: $citationJson, ')
+          ..write('citationIds: $citationIds, ')
           ..write('question: $question, ')
           ..write('optionsListJson: $optionsListJson, ')
           ..write('answer: $answer, ')
@@ -2189,9 +2241,9 @@ class $StudySessionEventsTable extends StudySessionEvents
   late final GeneratedColumn<String> materialId = GeneratedColumn<String>(
     'material_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _ratingMeta = const VerificationMeta('rating');
   @override
@@ -2263,8 +2315,6 @@ class $StudySessionEventsTable extends StudySessionEvents
         _materialIdMeta,
         materialId.isAcceptableOrUnknown(data['material_id']!, _materialIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_materialIdMeta);
     }
     if (data.containsKey('rating')) {
       context.handle(
@@ -2313,7 +2363,7 @@ class $StudySessionEventsTable extends StudySessionEvents
       materialId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}material_id'],
-      )!,
+      ),
       rating: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}rating'],
@@ -2339,14 +2389,14 @@ class StudySessionEvent extends DataClass
     implements Insertable<StudySessionEvent> {
   final String id;
   final String cardId;
-  final String materialId;
+  final String? materialId;
   final int rating;
   final String reviewedAt;
   final int scheduledDays;
   const StudySessionEvent({
     required this.id,
     required this.cardId,
-    required this.materialId,
+    this.materialId,
     required this.rating,
     required this.reviewedAt,
     required this.scheduledDays,
@@ -2356,7 +2406,9 @@ class StudySessionEvent extends DataClass
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['card_id'] = Variable<String>(cardId);
-    map['material_id'] = Variable<String>(materialId);
+    if (!nullToAbsent || materialId != null) {
+      map['material_id'] = Variable<String>(materialId);
+    }
     map['rating'] = Variable<int>(rating);
     map['reviewed_at'] = Variable<String>(reviewedAt);
     map['scheduled_days'] = Variable<int>(scheduledDays);
@@ -2367,7 +2419,9 @@ class StudySessionEvent extends DataClass
     return StudySessionEventsCompanion(
       id: Value(id),
       cardId: Value(cardId),
-      materialId: Value(materialId),
+      materialId: materialId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(materialId),
       rating: Value(rating),
       reviewedAt: Value(reviewedAt),
       scheduledDays: Value(scheduledDays),
@@ -2382,7 +2436,7 @@ class StudySessionEvent extends DataClass
     return StudySessionEvent(
       id: serializer.fromJson<String>(json['id']),
       cardId: serializer.fromJson<String>(json['cardId']),
-      materialId: serializer.fromJson<String>(json['materialId']),
+      materialId: serializer.fromJson<String?>(json['materialId']),
       rating: serializer.fromJson<int>(json['rating']),
       reviewedAt: serializer.fromJson<String>(json['reviewedAt']),
       scheduledDays: serializer.fromJson<int>(json['scheduledDays']),
@@ -2394,7 +2448,7 @@ class StudySessionEvent extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'cardId': serializer.toJson<String>(cardId),
-      'materialId': serializer.toJson<String>(materialId),
+      'materialId': serializer.toJson<String?>(materialId),
       'rating': serializer.toJson<int>(rating),
       'reviewedAt': serializer.toJson<String>(reviewedAt),
       'scheduledDays': serializer.toJson<int>(scheduledDays),
@@ -2404,14 +2458,14 @@ class StudySessionEvent extends DataClass
   StudySessionEvent copyWith({
     String? id,
     String? cardId,
-    String? materialId,
+    Value<String?> materialId = const Value.absent(),
     int? rating,
     String? reviewedAt,
     int? scheduledDays,
   }) => StudySessionEvent(
     id: id ?? this.id,
     cardId: cardId ?? this.cardId,
-    materialId: materialId ?? this.materialId,
+    materialId: materialId.present ? materialId.value : this.materialId,
     rating: rating ?? this.rating,
     reviewedAt: reviewedAt ?? this.reviewedAt,
     scheduledDays: scheduledDays ?? this.scheduledDays,
@@ -2464,7 +2518,7 @@ class StudySessionEvent extends DataClass
 class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
   final Value<String> id;
   final Value<String> cardId;
-  final Value<String> materialId;
+  final Value<String?> materialId;
   final Value<int> rating;
   final Value<String> reviewedAt;
   final Value<int> scheduledDays;
@@ -2481,14 +2535,13 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
   StudySessionEventsCompanion.insert({
     required String id,
     required String cardId,
-    required String materialId,
+    this.materialId = const Value.absent(),
     required int rating,
     required String reviewedAt,
     required int scheduledDays,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        cardId = Value(cardId),
-       materialId = Value(materialId),
        rating = Value(rating),
        reviewedAt = Value(reviewedAt),
        scheduledDays = Value(scheduledDays);
@@ -2515,7 +2568,7 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
   StudySessionEventsCompanion copyWith({
     Value<String>? id,
     Value<String>? cardId,
-    Value<String>? materialId,
+    Value<String?>? materialId,
     Value<int>? rating,
     Value<String>? reviewedAt,
     Value<int>? scheduledDays,
@@ -2574,6 +2627,1290 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
   }
 }
 
+class $CardCreationDraftsTable extends CardCreationDrafts
+    with TableInfo<$CardCreationDraftsTable, CardCreationDraft> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CardCreationDraftsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _folderIdMeta = const VerificationMeta(
+    'folderId',
+  );
+  @override
+  late final GeneratedColumn<String> folderId = GeneratedColumn<String>(
+    'folder_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES study_folder_items (id)',
+    ),
+  );
+  static const VerificationMeta _lastSourceIdMeta = const VerificationMeta(
+    'lastSourceId',
+  );
+  @override
+  late final GeneratedColumn<String> lastSourceId = GeneratedColumn<String>(
+    'last_source_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES source_items (id)',
+    ),
+  );
+  static const VerificationMeta _scrollXMeta = const VerificationMeta(
+    'scrollX',
+  );
+  @override
+  late final GeneratedColumn<double> scrollX = GeneratedColumn<double>(
+    'scroll_x',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _scrollYMeta = const VerificationMeta(
+    'scrollY',
+  );
+  @override
+  late final GeneratedColumn<double> scrollY = GeneratedColumn<double>(
+    'scroll_y',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _zoomMeta = const VerificationMeta('zoom');
+  @override
+  late final GeneratedColumn<double> zoom = GeneratedColumn<double>(
+    'zoom',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _frontTextMeta = const VerificationMeta(
+    'frontText',
+  );
+  @override
+  late final GeneratedColumn<String> frontText = GeneratedColumn<String>(
+    'front_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _backTextMeta = const VerificationMeta(
+    'backText',
+  );
+  @override
+  late final GeneratedColumn<String> backText = GeneratedColumn<String>(
+    'back_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _toolbarModeMeta = const VerificationMeta(
+    'toolbarMode',
+  );
+  @override
+  late final GeneratedColumn<String> toolbarMode = GeneratedColumn<String>(
+    'toolbar_mode',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _selectedTextMeta = const VerificationMeta(
+    'selectedText',
+  );
+  @override
+  late final GeneratedColumn<String> selectedText = GeneratedColumn<String>(
+    'selected_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _capturedImageBlobIdMeta =
+      const VerificationMeta('capturedImageBlobId');
+  @override
+  late final GeneratedColumn<String> capturedImageBlobId =
+      GeneratedColumn<String>(
+        'captured_image_blob_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    folderId,
+    lastSourceId,
+    scrollX,
+    scrollY,
+    zoom,
+    frontText,
+    backText,
+    toolbarMode,
+    selectedText,
+    capturedImageBlobId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'card_creation_drafts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CardCreationDraft> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('folder_id')) {
+      context.handle(
+        _folderIdMeta,
+        folderId.isAcceptableOrUnknown(data['folder_id']!, _folderIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_folderIdMeta);
+    }
+    if (data.containsKey('last_source_id')) {
+      context.handle(
+        _lastSourceIdMeta,
+        lastSourceId.isAcceptableOrUnknown(
+          data['last_source_id']!,
+          _lastSourceIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('scroll_x')) {
+      context.handle(
+        _scrollXMeta,
+        scrollX.isAcceptableOrUnknown(data['scroll_x']!, _scrollXMeta),
+      );
+    }
+    if (data.containsKey('scroll_y')) {
+      context.handle(
+        _scrollYMeta,
+        scrollY.isAcceptableOrUnknown(data['scroll_y']!, _scrollYMeta),
+      );
+    }
+    if (data.containsKey('zoom')) {
+      context.handle(
+        _zoomMeta,
+        zoom.isAcceptableOrUnknown(data['zoom']!, _zoomMeta),
+      );
+    }
+    if (data.containsKey('front_text')) {
+      context.handle(
+        _frontTextMeta,
+        frontText.isAcceptableOrUnknown(data['front_text']!, _frontTextMeta),
+      );
+    }
+    if (data.containsKey('back_text')) {
+      context.handle(
+        _backTextMeta,
+        backText.isAcceptableOrUnknown(data['back_text']!, _backTextMeta),
+      );
+    }
+    if (data.containsKey('toolbar_mode')) {
+      context.handle(
+        _toolbarModeMeta,
+        toolbarMode.isAcceptableOrUnknown(
+          data['toolbar_mode']!,
+          _toolbarModeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('selected_text')) {
+      context.handle(
+        _selectedTextMeta,
+        selectedText.isAcceptableOrUnknown(
+          data['selected_text']!,
+          _selectedTextMeta,
+        ),
+      );
+    }
+    if (data.containsKey('captured_image_blob_id')) {
+      context.handle(
+        _capturedImageBlobIdMeta,
+        capturedImageBlobId.isAcceptableOrUnknown(
+          data['captured_image_blob_id']!,
+          _capturedImageBlobIdMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {folderId};
+  @override
+  CardCreationDraft map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CardCreationDraft(
+      folderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}folder_id'],
+      )!,
+      lastSourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_source_id'],
+      ),
+      scrollX: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}scroll_x'],
+      ),
+      scrollY: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}scroll_y'],
+      ),
+      zoom: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}zoom'],
+      ),
+      frontText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}front_text'],
+      ),
+      backText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}back_text'],
+      ),
+      toolbarMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}toolbar_mode'],
+      ),
+      selectedText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}selected_text'],
+      ),
+      capturedImageBlobId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}captured_image_blob_id'],
+      ),
+    );
+  }
+
+  @override
+  $CardCreationDraftsTable createAlias(String alias) {
+    return $CardCreationDraftsTable(attachedDatabase, alias);
+  }
+}
+
+class CardCreationDraft extends DataClass
+    implements Insertable<CardCreationDraft> {
+  final String folderId;
+  final String? lastSourceId;
+  final double? scrollX;
+  final double? scrollY;
+  final double? zoom;
+  final String? frontText;
+  final String? backText;
+  final String? toolbarMode;
+  final String? selectedText;
+  final String? capturedImageBlobId;
+  const CardCreationDraft({
+    required this.folderId,
+    this.lastSourceId,
+    this.scrollX,
+    this.scrollY,
+    this.zoom,
+    this.frontText,
+    this.backText,
+    this.toolbarMode,
+    this.selectedText,
+    this.capturedImageBlobId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['folder_id'] = Variable<String>(folderId);
+    if (!nullToAbsent || lastSourceId != null) {
+      map['last_source_id'] = Variable<String>(lastSourceId);
+    }
+    if (!nullToAbsent || scrollX != null) {
+      map['scroll_x'] = Variable<double>(scrollX);
+    }
+    if (!nullToAbsent || scrollY != null) {
+      map['scroll_y'] = Variable<double>(scrollY);
+    }
+    if (!nullToAbsent || zoom != null) {
+      map['zoom'] = Variable<double>(zoom);
+    }
+    if (!nullToAbsent || frontText != null) {
+      map['front_text'] = Variable<String>(frontText);
+    }
+    if (!nullToAbsent || backText != null) {
+      map['back_text'] = Variable<String>(backText);
+    }
+    if (!nullToAbsent || toolbarMode != null) {
+      map['toolbar_mode'] = Variable<String>(toolbarMode);
+    }
+    if (!nullToAbsent || selectedText != null) {
+      map['selected_text'] = Variable<String>(selectedText);
+    }
+    if (!nullToAbsent || capturedImageBlobId != null) {
+      map['captured_image_blob_id'] = Variable<String>(capturedImageBlobId);
+    }
+    return map;
+  }
+
+  CardCreationDraftsCompanion toCompanion(bool nullToAbsent) {
+    return CardCreationDraftsCompanion(
+      folderId: Value(folderId),
+      lastSourceId: lastSourceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSourceId),
+      scrollX: scrollX == null && nullToAbsent
+          ? const Value.absent()
+          : Value(scrollX),
+      scrollY: scrollY == null && nullToAbsent
+          ? const Value.absent()
+          : Value(scrollY),
+      zoom: zoom == null && nullToAbsent ? const Value.absent() : Value(zoom),
+      frontText: frontText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(frontText),
+      backText: backText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(backText),
+      toolbarMode: toolbarMode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(toolbarMode),
+      selectedText: selectedText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(selectedText),
+      capturedImageBlobId: capturedImageBlobId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(capturedImageBlobId),
+    );
+  }
+
+  factory CardCreationDraft.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CardCreationDraft(
+      folderId: serializer.fromJson<String>(json['folderId']),
+      lastSourceId: serializer.fromJson<String?>(json['lastSourceId']),
+      scrollX: serializer.fromJson<double?>(json['scrollX']),
+      scrollY: serializer.fromJson<double?>(json['scrollY']),
+      zoom: serializer.fromJson<double?>(json['zoom']),
+      frontText: serializer.fromJson<String?>(json['frontText']),
+      backText: serializer.fromJson<String?>(json['backText']),
+      toolbarMode: serializer.fromJson<String?>(json['toolbarMode']),
+      selectedText: serializer.fromJson<String?>(json['selectedText']),
+      capturedImageBlobId: serializer.fromJson<String?>(
+        json['capturedImageBlobId'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'folderId': serializer.toJson<String>(folderId),
+      'lastSourceId': serializer.toJson<String?>(lastSourceId),
+      'scrollX': serializer.toJson<double?>(scrollX),
+      'scrollY': serializer.toJson<double?>(scrollY),
+      'zoom': serializer.toJson<double?>(zoom),
+      'frontText': serializer.toJson<String?>(frontText),
+      'backText': serializer.toJson<String?>(backText),
+      'toolbarMode': serializer.toJson<String?>(toolbarMode),
+      'selectedText': serializer.toJson<String?>(selectedText),
+      'capturedImageBlobId': serializer.toJson<String?>(capturedImageBlobId),
+    };
+  }
+
+  CardCreationDraft copyWith({
+    String? folderId,
+    Value<String?> lastSourceId = const Value.absent(),
+    Value<double?> scrollX = const Value.absent(),
+    Value<double?> scrollY = const Value.absent(),
+    Value<double?> zoom = const Value.absent(),
+    Value<String?> frontText = const Value.absent(),
+    Value<String?> backText = const Value.absent(),
+    Value<String?> toolbarMode = const Value.absent(),
+    Value<String?> selectedText = const Value.absent(),
+    Value<String?> capturedImageBlobId = const Value.absent(),
+  }) => CardCreationDraft(
+    folderId: folderId ?? this.folderId,
+    lastSourceId: lastSourceId.present ? lastSourceId.value : this.lastSourceId,
+    scrollX: scrollX.present ? scrollX.value : this.scrollX,
+    scrollY: scrollY.present ? scrollY.value : this.scrollY,
+    zoom: zoom.present ? zoom.value : this.zoom,
+    frontText: frontText.present ? frontText.value : this.frontText,
+    backText: backText.present ? backText.value : this.backText,
+    toolbarMode: toolbarMode.present ? toolbarMode.value : this.toolbarMode,
+    selectedText: selectedText.present ? selectedText.value : this.selectedText,
+    capturedImageBlobId: capturedImageBlobId.present
+        ? capturedImageBlobId.value
+        : this.capturedImageBlobId,
+  );
+  CardCreationDraft copyWithCompanion(CardCreationDraftsCompanion data) {
+    return CardCreationDraft(
+      folderId: data.folderId.present ? data.folderId.value : this.folderId,
+      lastSourceId: data.lastSourceId.present
+          ? data.lastSourceId.value
+          : this.lastSourceId,
+      scrollX: data.scrollX.present ? data.scrollX.value : this.scrollX,
+      scrollY: data.scrollY.present ? data.scrollY.value : this.scrollY,
+      zoom: data.zoom.present ? data.zoom.value : this.zoom,
+      frontText: data.frontText.present ? data.frontText.value : this.frontText,
+      backText: data.backText.present ? data.backText.value : this.backText,
+      toolbarMode: data.toolbarMode.present
+          ? data.toolbarMode.value
+          : this.toolbarMode,
+      selectedText: data.selectedText.present
+          ? data.selectedText.value
+          : this.selectedText,
+      capturedImageBlobId: data.capturedImageBlobId.present
+          ? data.capturedImageBlobId.value
+          : this.capturedImageBlobId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CardCreationDraft(')
+          ..write('folderId: $folderId, ')
+          ..write('lastSourceId: $lastSourceId, ')
+          ..write('scrollX: $scrollX, ')
+          ..write('scrollY: $scrollY, ')
+          ..write('zoom: $zoom, ')
+          ..write('frontText: $frontText, ')
+          ..write('backText: $backText, ')
+          ..write('toolbarMode: $toolbarMode, ')
+          ..write('selectedText: $selectedText, ')
+          ..write('capturedImageBlobId: $capturedImageBlobId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    folderId,
+    lastSourceId,
+    scrollX,
+    scrollY,
+    zoom,
+    frontText,
+    backText,
+    toolbarMode,
+    selectedText,
+    capturedImageBlobId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CardCreationDraft &&
+          other.folderId == this.folderId &&
+          other.lastSourceId == this.lastSourceId &&
+          other.scrollX == this.scrollX &&
+          other.scrollY == this.scrollY &&
+          other.zoom == this.zoom &&
+          other.frontText == this.frontText &&
+          other.backText == this.backText &&
+          other.toolbarMode == this.toolbarMode &&
+          other.selectedText == this.selectedText &&
+          other.capturedImageBlobId == this.capturedImageBlobId);
+}
+
+class CardCreationDraftsCompanion extends UpdateCompanion<CardCreationDraft> {
+  final Value<String> folderId;
+  final Value<String?> lastSourceId;
+  final Value<double?> scrollX;
+  final Value<double?> scrollY;
+  final Value<double?> zoom;
+  final Value<String?> frontText;
+  final Value<String?> backText;
+  final Value<String?> toolbarMode;
+  final Value<String?> selectedText;
+  final Value<String?> capturedImageBlobId;
+  final Value<int> rowid;
+  const CardCreationDraftsCompanion({
+    this.folderId = const Value.absent(),
+    this.lastSourceId = const Value.absent(),
+    this.scrollX = const Value.absent(),
+    this.scrollY = const Value.absent(),
+    this.zoom = const Value.absent(),
+    this.frontText = const Value.absent(),
+    this.backText = const Value.absent(),
+    this.toolbarMode = const Value.absent(),
+    this.selectedText = const Value.absent(),
+    this.capturedImageBlobId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CardCreationDraftsCompanion.insert({
+    required String folderId,
+    this.lastSourceId = const Value.absent(),
+    this.scrollX = const Value.absent(),
+    this.scrollY = const Value.absent(),
+    this.zoom = const Value.absent(),
+    this.frontText = const Value.absent(),
+    this.backText = const Value.absent(),
+    this.toolbarMode = const Value.absent(),
+    this.selectedText = const Value.absent(),
+    this.capturedImageBlobId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : folderId = Value(folderId);
+  static Insertable<CardCreationDraft> custom({
+    Expression<String>? folderId,
+    Expression<String>? lastSourceId,
+    Expression<double>? scrollX,
+    Expression<double>? scrollY,
+    Expression<double>? zoom,
+    Expression<String>? frontText,
+    Expression<String>? backText,
+    Expression<String>? toolbarMode,
+    Expression<String>? selectedText,
+    Expression<String>? capturedImageBlobId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (folderId != null) 'folder_id': folderId,
+      if (lastSourceId != null) 'last_source_id': lastSourceId,
+      if (scrollX != null) 'scroll_x': scrollX,
+      if (scrollY != null) 'scroll_y': scrollY,
+      if (zoom != null) 'zoom': zoom,
+      if (frontText != null) 'front_text': frontText,
+      if (backText != null) 'back_text': backText,
+      if (toolbarMode != null) 'toolbar_mode': toolbarMode,
+      if (selectedText != null) 'selected_text': selectedText,
+      if (capturedImageBlobId != null)
+        'captured_image_blob_id': capturedImageBlobId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CardCreationDraftsCompanion copyWith({
+    Value<String>? folderId,
+    Value<String?>? lastSourceId,
+    Value<double?>? scrollX,
+    Value<double?>? scrollY,
+    Value<double?>? zoom,
+    Value<String?>? frontText,
+    Value<String?>? backText,
+    Value<String?>? toolbarMode,
+    Value<String?>? selectedText,
+    Value<String?>? capturedImageBlobId,
+    Value<int>? rowid,
+  }) {
+    return CardCreationDraftsCompanion(
+      folderId: folderId ?? this.folderId,
+      lastSourceId: lastSourceId ?? this.lastSourceId,
+      scrollX: scrollX ?? this.scrollX,
+      scrollY: scrollY ?? this.scrollY,
+      zoom: zoom ?? this.zoom,
+      frontText: frontText ?? this.frontText,
+      backText: backText ?? this.backText,
+      toolbarMode: toolbarMode ?? this.toolbarMode,
+      selectedText: selectedText ?? this.selectedText,
+      capturedImageBlobId: capturedImageBlobId ?? this.capturedImageBlobId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (folderId.present) {
+      map['folder_id'] = Variable<String>(folderId.value);
+    }
+    if (lastSourceId.present) {
+      map['last_source_id'] = Variable<String>(lastSourceId.value);
+    }
+    if (scrollX.present) {
+      map['scroll_x'] = Variable<double>(scrollX.value);
+    }
+    if (scrollY.present) {
+      map['scroll_y'] = Variable<double>(scrollY.value);
+    }
+    if (zoom.present) {
+      map['zoom'] = Variable<double>(zoom.value);
+    }
+    if (frontText.present) {
+      map['front_text'] = Variable<String>(frontText.value);
+    }
+    if (backText.present) {
+      map['back_text'] = Variable<String>(backText.value);
+    }
+    if (toolbarMode.present) {
+      map['toolbar_mode'] = Variable<String>(toolbarMode.value);
+    }
+    if (selectedText.present) {
+      map['selected_text'] = Variable<String>(selectedText.value);
+    }
+    if (capturedImageBlobId.present) {
+      map['captured_image_blob_id'] = Variable<String>(
+        capturedImageBlobId.value,
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CardCreationDraftsCompanion(')
+          ..write('folderId: $folderId, ')
+          ..write('lastSourceId: $lastSourceId, ')
+          ..write('scrollX: $scrollX, ')
+          ..write('scrollY: $scrollY, ')
+          ..write('zoom: $zoom, ')
+          ..write('frontText: $frontText, ')
+          ..write('backText: $backText, ')
+          ..write('toolbarMode: $toolbarMode, ')
+          ..write('selectedText: $selectedText, ')
+          ..write('capturedImageBlobId: $capturedImageBlobId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CitationItemsTable extends CitationItems
+    with TableInfo<$CitationItemsTable, CitationItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CitationItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceIdMeta = const VerificationMeta(
+    'sourceId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceId = GeneratedColumn<String>(
+    'source_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES source_items (id)',
+    ),
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pageNumberMeta = const VerificationMeta(
+    'pageNumber',
+  );
+  @override
+  late final GeneratedColumn<int> pageNumber = GeneratedColumn<int>(
+    'page_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Citation, String> citation =
+      GeneratedColumn<String>(
+        'citation',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<Citation>($CitationItemsTable.$convertercitation);
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    sourceId,
+    type,
+    pageNumber,
+    citation,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'citation_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CitationItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('source_id')) {
+      context.handle(
+        _sourceIdMeta,
+        sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceIdMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('page_number')) {
+      context.handle(
+        _pageNumberMeta,
+        pageNumber.isAcceptableOrUnknown(data['page_number']!, _pageNumberMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CitationItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CitationItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      sourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_id'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      pageNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}page_number'],
+      ),
+      citation: $CitationItemsTable.$convertercitation.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}citation'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  $CitationItemsTable createAlias(String alias) {
+    return $CitationItemsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Citation, String> $convertercitation =
+      const CitationConverter();
+}
+
+class CitationItem extends DataClass implements Insertable<CitationItem> {
+  final String id;
+  final String sourceId;
+  final String type;
+  final int? pageNumber;
+  final Citation citation;
+  const CitationItem({
+    required this.id,
+    required this.sourceId,
+    required this.type,
+    this.pageNumber,
+    required this.citation,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['source_id'] = Variable<String>(sourceId);
+    map['type'] = Variable<String>(type);
+    if (!nullToAbsent || pageNumber != null) {
+      map['page_number'] = Variable<int>(pageNumber);
+    }
+    {
+      map['citation'] = Variable<String>(
+        $CitationItemsTable.$convertercitation.toSql(citation),
+      );
+    }
+    return map;
+  }
+
+  CitationItemsCompanion toCompanion(bool nullToAbsent) {
+    return CitationItemsCompanion(
+      id: Value(id),
+      sourceId: Value(sourceId),
+      type: Value(type),
+      pageNumber: pageNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pageNumber),
+      citation: Value(citation),
+    );
+  }
+
+  factory CitationItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CitationItem(
+      id: serializer.fromJson<String>(json['id']),
+      sourceId: serializer.fromJson<String>(json['sourceId']),
+      type: serializer.fromJson<String>(json['type']),
+      pageNumber: serializer.fromJson<int?>(json['pageNumber']),
+      citation: serializer.fromJson<Citation>(json['citation']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'sourceId': serializer.toJson<String>(sourceId),
+      'type': serializer.toJson<String>(type),
+      'pageNumber': serializer.toJson<int?>(pageNumber),
+      'citation': serializer.toJson<Citation>(citation),
+    };
+  }
+
+  CitationItem copyWith({
+    String? id,
+    String? sourceId,
+    String? type,
+    Value<int?> pageNumber = const Value.absent(),
+    Citation? citation,
+  }) => CitationItem(
+    id: id ?? this.id,
+    sourceId: sourceId ?? this.sourceId,
+    type: type ?? this.type,
+    pageNumber: pageNumber.present ? pageNumber.value : this.pageNumber,
+    citation: citation ?? this.citation,
+  );
+  CitationItem copyWithCompanion(CitationItemsCompanion data) {
+    return CitationItem(
+      id: data.id.present ? data.id.value : this.id,
+      sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
+      type: data.type.present ? data.type.value : this.type,
+      pageNumber: data.pageNumber.present
+          ? data.pageNumber.value
+          : this.pageNumber,
+      citation: data.citation.present ? data.citation.value : this.citation,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CitationItem(')
+          ..write('id: $id, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('type: $type, ')
+          ..write('pageNumber: $pageNumber, ')
+          ..write('citation: $citation')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, sourceId, type, pageNumber, citation);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CitationItem &&
+          other.id == this.id &&
+          other.sourceId == this.sourceId &&
+          other.type == this.type &&
+          other.pageNumber == this.pageNumber &&
+          other.citation == this.citation);
+}
+
+class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
+  final Value<String> id;
+  final Value<String> sourceId;
+  final Value<String> type;
+  final Value<int?> pageNumber;
+  final Value<Citation> citation;
+  final Value<int> rowid;
+  const CitationItemsCompanion({
+    this.id = const Value.absent(),
+    this.sourceId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.pageNumber = const Value.absent(),
+    this.citation = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CitationItemsCompanion.insert({
+    required String id,
+    required String sourceId,
+    required String type,
+    this.pageNumber = const Value.absent(),
+    required Citation citation,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       sourceId = Value(sourceId),
+       type = Value(type),
+       citation = Value(citation);
+  static Insertable<CitationItem> custom({
+    Expression<String>? id,
+    Expression<String>? sourceId,
+    Expression<String>? type,
+    Expression<int>? pageNumber,
+    Expression<String>? citation,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (sourceId != null) 'source_id': sourceId,
+      if (type != null) 'type': type,
+      if (pageNumber != null) 'page_number': pageNumber,
+      if (citation != null) 'citation': citation,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CitationItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? sourceId,
+    Value<String>? type,
+    Value<int?>? pageNumber,
+    Value<Citation>? citation,
+    Value<int>? rowid,
+  }) {
+    return CitationItemsCompanion(
+      id: id ?? this.id,
+      sourceId: sourceId ?? this.sourceId,
+      type: type ?? this.type,
+      pageNumber: pageNumber ?? this.pageNumber,
+      citation: citation ?? this.citation,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (sourceId.present) {
+      map['source_id'] = Variable<String>(sourceId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (pageNumber.present) {
+      map['page_number'] = Variable<int>(pageNumber.value);
+    }
+    if (citation.present) {
+      map['citation'] = Variable<String>(
+        $CitationItemsTable.$convertercitation.toSql(citation.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CitationItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('type: $type, ')
+          ..write('pageNumber: $pageNumber, ')
+          ..write('citation: $citation, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CitationBlobsTable extends CitationBlobs
+    with TableInfo<$CitationBlobsTable, CitationBlob> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CitationBlobsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _citationIdMeta = const VerificationMeta(
+    'citationId',
+  );
+  @override
+  late final GeneratedColumn<String> citationId = GeneratedColumn<String>(
+    'citation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES citation_items (id)',
+    ),
+  );
+  static const VerificationMeta _bytesMeta = const VerificationMeta('bytes');
+  @override
+  late final GeneratedColumn<Uint8List> bytes = GeneratedColumn<Uint8List>(
+    'bytes',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, citationId, bytes];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'citation_blobs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CitationBlob> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('citation_id')) {
+      context.handle(
+        _citationIdMeta,
+        citationId.isAcceptableOrUnknown(data['citation_id']!, _citationIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_citationIdMeta);
+    }
+    if (data.containsKey('bytes')) {
+      context.handle(
+        _bytesMeta,
+        bytes.isAcceptableOrUnknown(data['bytes']!, _bytesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bytesMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CitationBlob map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CitationBlob(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      citationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}citation_id'],
+      )!,
+      bytes: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}bytes'],
+      )!,
+    );
+  }
+
+  @override
+  $CitationBlobsTable createAlias(String alias) {
+    return $CitationBlobsTable(attachedDatabase, alias);
+  }
+}
+
+class CitationBlob extends DataClass implements Insertable<CitationBlob> {
+  final String id;
+  final String citationId;
+  final Uint8List bytes;
+  const CitationBlob({
+    required this.id,
+    required this.citationId,
+    required this.bytes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['citation_id'] = Variable<String>(citationId);
+    map['bytes'] = Variable<Uint8List>(bytes);
+    return map;
+  }
+
+  CitationBlobsCompanion toCompanion(bool nullToAbsent) {
+    return CitationBlobsCompanion(
+      id: Value(id),
+      citationId: Value(citationId),
+      bytes: Value(bytes),
+    );
+  }
+
+  factory CitationBlob.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CitationBlob(
+      id: serializer.fromJson<String>(json['id']),
+      citationId: serializer.fromJson<String>(json['citationId']),
+      bytes: serializer.fromJson<Uint8List>(json['bytes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'citationId': serializer.toJson<String>(citationId),
+      'bytes': serializer.toJson<Uint8List>(bytes),
+    };
+  }
+
+  CitationBlob copyWith({String? id, String? citationId, Uint8List? bytes}) =>
+      CitationBlob(
+        id: id ?? this.id,
+        citationId: citationId ?? this.citationId,
+        bytes: bytes ?? this.bytes,
+      );
+  CitationBlob copyWithCompanion(CitationBlobsCompanion data) {
+    return CitationBlob(
+      id: data.id.present ? data.id.value : this.id,
+      citationId: data.citationId.present
+          ? data.citationId.value
+          : this.citationId,
+      bytes: data.bytes.present ? data.bytes.value : this.bytes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CitationBlob(')
+          ..write('id: $id, ')
+          ..write('citationId: $citationId, ')
+          ..write('bytes: $bytes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, citationId, $driftBlobEquality.hash(bytes));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CitationBlob &&
+          other.id == this.id &&
+          other.citationId == this.citationId &&
+          $driftBlobEquality.equals(other.bytes, this.bytes));
+}
+
+class CitationBlobsCompanion extends UpdateCompanion<CitationBlob> {
+  final Value<String> id;
+  final Value<String> citationId;
+  final Value<Uint8List> bytes;
+  final Value<int> rowid;
+  const CitationBlobsCompanion({
+    this.id = const Value.absent(),
+    this.citationId = const Value.absent(),
+    this.bytes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CitationBlobsCompanion.insert({
+    required String id,
+    required String citationId,
+    required Uint8List bytes,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       citationId = Value(citationId),
+       bytes = Value(bytes);
+  static Insertable<CitationBlob> custom({
+    Expression<String>? id,
+    Expression<String>? citationId,
+    Expression<Uint8List>? bytes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (citationId != null) 'citation_id': citationId,
+      if (bytes != null) 'bytes': bytes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CitationBlobsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? citationId,
+    Value<Uint8List>? bytes,
+    Value<int>? rowid,
+  }) {
+    return CitationBlobsCompanion(
+      id: id ?? this.id,
+      citationId: citationId ?? this.citationId,
+      bytes: bytes ?? this.bytes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (citationId.present) {
+      map['citation_id'] = Variable<String>(citationId.value);
+    }
+    if (bytes.present) {
+      map['bytes'] = Variable<Uint8List>(bytes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CitationBlobsCompanion(')
+          ..write('id: $id, ')
+          ..write('citationId: $citationId, ')
+          ..write('bytes: $bytes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2589,6 +3926,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $StudyCardItemsTable studyCardItems = $StudyCardItemsTable(this);
   late final $StudySessionEventsTable studySessionEvents =
       $StudySessionEventsTable(this);
+  late final $CardCreationDraftsTable cardCreationDrafts =
+      $CardCreationDraftsTable(this);
+  late final $CitationItemsTable citationItems = $CitationItemsTable(this);
+  late final $CitationBlobsTable citationBlobs = $CitationBlobsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2600,6 +3941,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     sourceItemBlobs,
     studyCardItems,
     studySessionEvents,
+    cardCreationDrafts,
+    citationItems,
+    citationBlobs,
   ];
 }
 
@@ -2670,6 +4014,51 @@ final class $$StudyFolderItemsTableReferences
 
     final cache = $_typedResult.readTableOrNull(
       _studyMaterialItemsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$StudyCardItemsTable, List<StudyCardItem>>
+  _studyCardItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.studyCardItems,
+    aliasName: $_aliasNameGenerator(
+      db.studyFolderItems.id,
+      db.studyCardItems.folderId,
+    ),
+  );
+
+  $$StudyCardItemsTableProcessedTableManager get studyCardItemsRefs {
+    final manager = $$StudyCardItemsTableTableManager(
+      $_db,
+      $_db.studyCardItems,
+    ).filter((f) => f.folderId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_studyCardItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$CardCreationDraftsTable, List<CardCreationDraft>>
+  _cardCreationDraftsRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.cardCreationDrafts,
+        aliasName: $_aliasNameGenerator(
+          db.studyFolderItems.id,
+          db.cardCreationDrafts.folderId,
+        ),
+      );
+
+  $$CardCreationDraftsTableProcessedTableManager get cardCreationDraftsRefs {
+    final manager = $$CardCreationDraftsTableTableManager(
+      $_db,
+      $_db.cardCreationDrafts,
+    ).filter((f) => f.folderId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _cardCreationDraftsRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -2752,6 +4141,56 @@ class $$StudyFolderItemsTableFilterComposer
           }) => $$StudyMaterialItemsTableFilterComposer(
             $db: $db,
             $table: $db.studyMaterialItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> studyCardItemsRefs(
+    Expression<bool> Function($$StudyCardItemsTableFilterComposer f) f,
+  ) {
+    final $$StudyCardItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.studyCardItems,
+      getReferencedColumn: (t) => t.folderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StudyCardItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.studyCardItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> cardCreationDraftsRefs(
+    Expression<bool> Function($$CardCreationDraftsTableFilterComposer f) f,
+  ) {
+    final $$CardCreationDraftsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cardCreationDrafts,
+      getReferencedColumn: (t) => t.folderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CardCreationDraftsTableFilterComposer(
+            $db: $db,
+            $table: $db.cardCreationDrafts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2871,6 +4310,57 @@ class $$StudyFolderItemsTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> studyCardItemsRefs<T extends Object>(
+    Expression<T> Function($$StudyCardItemsTableAnnotationComposer a) f,
+  ) {
+    final $$StudyCardItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.studyCardItems,
+      getReferencedColumn: (t) => t.folderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StudyCardItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.studyCardItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> cardCreationDraftsRefs<T extends Object>(
+    Expression<T> Function($$CardCreationDraftsTableAnnotationComposer a) f,
+  ) {
+    final $$CardCreationDraftsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.cardCreationDrafts,
+          getReferencedColumn: (t) => t.folderId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CardCreationDraftsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.cardCreationDrafts,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$StudyFolderItemsTableTableManager
@@ -2889,6 +4379,8 @@ class $$StudyFolderItemsTableTableManager
           PrefetchHooks Function({
             bool sourceItemsRefs,
             bool studyMaterialItemsRefs,
+            bool studyCardItemsRefs,
+            bool cardCreationDraftsRefs,
           })
         > {
   $$StudyFolderItemsTableTableManager(
@@ -2945,12 +4437,19 @@ class $$StudyFolderItemsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({sourceItemsRefs = false, studyMaterialItemsRefs = false}) {
+              ({
+                sourceItemsRefs = false,
+                studyMaterialItemsRefs = false,
+                studyCardItemsRefs = false,
+                cardCreationDraftsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (sourceItemsRefs) db.sourceItems,
                     if (studyMaterialItemsRefs) db.studyMaterialItems,
+                    if (studyCardItemsRefs) db.studyCardItems,
+                    if (cardCreationDraftsRefs) db.cardCreationDrafts,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -2997,6 +4496,48 @@ class $$StudyFolderItemsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (studyCardItemsRefs)
+                        await $_getPrefetchedData<
+                          StudyFolderItem,
+                          $StudyFolderItemsTable,
+                          StudyCardItem
+                        >(
+                          currentTable: table,
+                          referencedTable: $$StudyFolderItemsTableReferences
+                              ._studyCardItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$StudyFolderItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).studyCardItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.folderId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (cardCreationDraftsRefs)
+                        await $_getPrefetchedData<
+                          StudyFolderItem,
+                          $StudyFolderItemsTable,
+                          CardCreationDraft
+                        >(
+                          currentTable: table,
+                          referencedTable: $$StudyFolderItemsTableReferences
+                              ._cardCreationDraftsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$StudyFolderItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).cardCreationDraftsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.folderId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -3020,6 +4561,8 @@ typedef $$StudyFolderItemsTableProcessedTableManager =
       PrefetchHooks Function({
         bool sourceItemsRefs,
         bool studyMaterialItemsRefs,
+        bool studyCardItemsRefs,
+        bool cardCreationDraftsRefs,
       })
     >;
 typedef $$SourceItemsTableCreateCompanionBuilder =
@@ -3065,6 +4608,51 @@ final class $$SourceItemsTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$CardCreationDraftsTable, List<CardCreationDraft>>
+  _cardCreationDraftsRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.cardCreationDrafts,
+        aliasName: $_aliasNameGenerator(
+          db.sourceItems.id,
+          db.cardCreationDrafts.lastSourceId,
+        ),
+      );
+
+  $$CardCreationDraftsTableProcessedTableManager get cardCreationDraftsRefs {
+    final manager = $$CardCreationDraftsTableTableManager(
+      $_db,
+      $_db.cardCreationDrafts,
+    ).filter((f) => f.lastSourceId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _cardCreationDraftsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$CitationItemsTable, List<CitationItem>>
+  _citationItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.citationItems,
+    aliasName: $_aliasNameGenerator(
+      db.sourceItems.id,
+      db.citationItems.sourceId,
+    ),
+  );
+
+  $$CitationItemsTableProcessedTableManager get citationItemsRefs {
+    final manager = $$CitationItemsTableTableManager(
+      $_db,
+      $_db.citationItems,
+    ).filter((f) => f.sourceId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_citationItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -3129,6 +4717,56 @@ class $$SourceItemsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> cardCreationDraftsRefs(
+    Expression<bool> Function($$CardCreationDraftsTableFilterComposer f) f,
+  ) {
+    final $$CardCreationDraftsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cardCreationDrafts,
+      getReferencedColumn: (t) => t.lastSourceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CardCreationDraftsTableFilterComposer(
+            $db: $db,
+            $table: $db.cardCreationDrafts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> citationItemsRefs(
+    Expression<bool> Function($$CitationItemsTableFilterComposer f) f,
+  ) {
+    final $$CitationItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.citationItems,
+      getReferencedColumn: (t) => t.sourceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -3246,6 +4884,57 @@ class $$SourceItemsTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> cardCreationDraftsRefs<T extends Object>(
+    Expression<T> Function($$CardCreationDraftsTableAnnotationComposer a) f,
+  ) {
+    final $$CardCreationDraftsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.cardCreationDrafts,
+          getReferencedColumn: (t) => t.lastSourceId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CardCreationDraftsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.cardCreationDrafts,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> citationItemsRefs<T extends Object>(
+    Expression<T> Function($$CitationItemsTableAnnotationComposer a) f,
+  ) {
+    final $$CitationItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.citationItems,
+      getReferencedColumn: (t) => t.sourceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$SourceItemsTableTableManager
@@ -3261,7 +4950,11 @@ class $$SourceItemsTableTableManager
           $$SourceItemsTableUpdateCompanionBuilder,
           (SourceItem, $$SourceItemsTableReferences),
           SourceItem,
-          PrefetchHooks Function({bool folderId})
+          PrefetchHooks Function({
+            bool folderId,
+            bool cardCreationDraftsRefs,
+            bool citationItemsRefs,
+          })
         > {
   $$SourceItemsTableTableManager(_$AppDatabase db, $SourceItemsTable table)
     : super(
@@ -3322,47 +5015,100 @@ class $$SourceItemsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({folderId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (folderId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.folderId,
-                                referencedTable: $$SourceItemsTableReferences
-                                    ._folderIdTable(db),
-                                referencedColumn: $$SourceItemsTableReferences
-                                    ._folderIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({
+                folderId = false,
+                cardCreationDraftsRefs = false,
+                citationItemsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (cardCreationDraftsRefs) db.cardCreationDrafts,
+                    if (citationItemsRefs) db.citationItems,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (folderId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.folderId,
+                                    referencedTable:
+                                        $$SourceItemsTableReferences
+                                            ._folderIdTable(db),
+                                    referencedColumn:
+                                        $$SourceItemsTableReferences
+                                            ._folderIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (cardCreationDraftsRefs)
+                        await $_getPrefetchedData<
+                          SourceItem,
+                          $SourceItemsTable,
+                          CardCreationDraft
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SourceItemsTableReferences
+                              ._cardCreationDraftsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SourceItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).cardCreationDraftsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.lastSourceId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (citationItemsRefs)
+                        await $_getPrefetchedData<
+                          SourceItem,
+                          $SourceItemsTable,
+                          CitationItem
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SourceItemsTableReferences
+                              ._citationItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SourceItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).citationItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.sourceId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -3379,7 +5125,11 @@ typedef $$SourceItemsTableProcessedTableManager =
       $$SourceItemsTableUpdateCompanionBuilder,
       (SourceItem, $$SourceItemsTableReferences),
       SourceItem,
-      PrefetchHooks Function({bool folderId})
+      PrefetchHooks Function({
+        bool folderId,
+        bool cardCreationDraftsRefs,
+        bool citationItemsRefs,
+      })
     >;
 typedef $$StudyMaterialItemsTableCreateCompanionBuilder =
     StudyMaterialItemsCompanion Function({
@@ -4030,9 +5780,10 @@ typedef $$SourceItemBlobsTableProcessedTableManager =
 typedef $$StudyCardItemsTableCreateCompanionBuilder =
     StudyCardItemsCompanion Function({
       required String id,
-      required String materialId,
+      required String folderId,
+      Value<String?> materialId,
       required String type,
-      Value<String?> citationJson,
+      Value<List<String>?> citationIds,
       Value<String?> question,
       Value<String?> optionsListJson,
       Value<String?> answer,
@@ -4043,9 +5794,10 @@ typedef $$StudyCardItemsTableCreateCompanionBuilder =
 typedef $$StudyCardItemsTableUpdateCompanionBuilder =
     StudyCardItemsCompanion Function({
       Value<String> id,
-      Value<String> materialId,
+      Value<String> folderId,
+      Value<String?> materialId,
       Value<String> type,
-      Value<String?> citationJson,
+      Value<List<String>?> citationIds,
       Value<String?> question,
       Value<String?> optionsListJson,
       Value<String?> answer,
@@ -4062,6 +5814,28 @@ final class $$StudyCardItemsTableReferences
     super.$_typedResult,
   );
 
+  static $StudyFolderItemsTable _folderIdTable(_$AppDatabase db) =>
+      db.studyFolderItems.createAlias(
+        $_aliasNameGenerator(
+          db.studyCardItems.folderId,
+          db.studyFolderItems.id,
+        ),
+      );
+
+  $$StudyFolderItemsTableProcessedTableManager get folderId {
+    final $_column = $_itemColumn<String>('folder_id')!;
+
+    final manager = $$StudyFolderItemsTableTableManager(
+      $_db,
+      $_db.studyFolderItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_folderIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
   static $StudyMaterialItemsTable _materialIdTable(_$AppDatabase db) =>
       db.studyMaterialItems.createAlias(
         $_aliasNameGenerator(
@@ -4070,9 +5844,9 @@ final class $$StudyCardItemsTableReferences
         ),
       );
 
-  $$StudyMaterialItemsTableProcessedTableManager get materialId {
-    final $_column = $_itemColumn<String>('material_id')!;
-
+  $$StudyMaterialItemsTableProcessedTableManager? get materialId {
+    final $_column = $_itemColumn<String>('material_id');
+    if ($_column == null) return null;
     final manager = $$StudyMaterialItemsTableTableManager(
       $_db,
       $_db.studyMaterialItems,
@@ -4104,9 +5878,10 @@ class $$StudyCardItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get citationJson => $composableBuilder(
-    column: $table.citationJson,
-    builder: (column) => ColumnFilters(column),
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+  get citationIds => $composableBuilder(
+    column: $table.citationIds,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<String> get question => $composableBuilder(
@@ -4133,6 +5908,29 @@ class $$StudyCardItemsTableFilterComposer
     column: $table.fsrsCardJson,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$StudyFolderItemsTableFilterComposer get folderId {
+    final $$StudyFolderItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.folderId,
+      referencedTable: $db.studyFolderItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StudyFolderItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.studyFolderItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   $$StudyMaterialItemsTableFilterComposer get materialId {
     final $$StudyMaterialItemsTableFilterComposer composer = $composerBuilder(
@@ -4177,8 +5975,8 @@ class $$StudyCardItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get citationJson => $composableBuilder(
-    column: $table.citationJson,
+  ColumnOrderings<String> get citationIds => $composableBuilder(
+    column: $table.citationIds,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -4206,6 +6004,29 @@ class $$StudyCardItemsTableOrderingComposer
     column: $table.fsrsCardJson,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$StudyFolderItemsTableOrderingComposer get folderId {
+    final $$StudyFolderItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.folderId,
+      referencedTable: $db.studyFolderItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StudyFolderItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.studyFolderItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   $$StudyMaterialItemsTableOrderingComposer get materialId {
     final $$StudyMaterialItemsTableOrderingComposer composer = $composerBuilder(
@@ -4246,10 +6067,11 @@ class $$StudyCardItemsTableAnnotationComposer
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<String> get citationJson => $composableBuilder(
-    column: $table.citationJson,
-    builder: (column) => column,
-  );
+  GeneratedColumnWithTypeConverter<List<String>?, String> get citationIds =>
+      $composableBuilder(
+        column: $table.citationIds,
+        builder: (column) => column,
+      );
 
   GeneratedColumn<String> get question =>
       $composableBuilder(column: $table.question, builder: (column) => column);
@@ -4269,6 +6091,29 @@ class $$StudyCardItemsTableAnnotationComposer
     column: $table.fsrsCardJson,
     builder: (column) => column,
   );
+
+  $$StudyFolderItemsTableAnnotationComposer get folderId {
+    final $$StudyFolderItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.folderId,
+      referencedTable: $db.studyFolderItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StudyFolderItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.studyFolderItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   $$StudyMaterialItemsTableAnnotationComposer get materialId {
     final $$StudyMaterialItemsTableAnnotationComposer composer =
@@ -4308,7 +6153,7 @@ class $$StudyCardItemsTableTableManager
           $$StudyCardItemsTableUpdateCompanionBuilder,
           (StudyCardItem, $$StudyCardItemsTableReferences),
           StudyCardItem,
-          PrefetchHooks Function({bool materialId})
+          PrefetchHooks Function({bool folderId, bool materialId})
         > {
   $$StudyCardItemsTableTableManager(
     _$AppDatabase db,
@@ -4326,9 +6171,10 @@ class $$StudyCardItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> materialId = const Value.absent(),
+                Value<String> folderId = const Value.absent(),
+                Value<String?> materialId = const Value.absent(),
                 Value<String> type = const Value.absent(),
-                Value<String?> citationJson = const Value.absent(),
+                Value<List<String>?> citationIds = const Value.absent(),
                 Value<String?> question = const Value.absent(),
                 Value<String?> optionsListJson = const Value.absent(),
                 Value<String?> answer = const Value.absent(),
@@ -4337,9 +6183,10 @@ class $$StudyCardItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => StudyCardItemsCompanion(
                 id: id,
+                folderId: folderId,
                 materialId: materialId,
                 type: type,
-                citationJson: citationJson,
+                citationIds: citationIds,
                 question: question,
                 optionsListJson: optionsListJson,
                 answer: answer,
@@ -4350,9 +6197,10 @@ class $$StudyCardItemsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String materialId,
+                required String folderId,
+                Value<String?> materialId = const Value.absent(),
                 required String type,
-                Value<String?> citationJson = const Value.absent(),
+                Value<List<String>?> citationIds = const Value.absent(),
                 Value<String?> question = const Value.absent(),
                 Value<String?> optionsListJson = const Value.absent(),
                 Value<String?> answer = const Value.absent(),
@@ -4361,9 +6209,10 @@ class $$StudyCardItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => StudyCardItemsCompanion.insert(
                 id: id,
+                folderId: folderId,
                 materialId: materialId,
                 type: type,
-                citationJson: citationJson,
+                citationIds: citationIds,
                 question: question,
                 optionsListJson: optionsListJson,
                 answer: answer,
@@ -4379,7 +6228,7 @@ class $$StudyCardItemsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({materialId = false}) {
+          prefetchHooksCallback: ({folderId = false, materialId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -4399,6 +6248,20 @@ class $$StudyCardItemsTableTableManager
                       dynamic
                     >
                   >(state) {
+                    if (folderId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.folderId,
+                                referencedTable: $$StudyCardItemsTableReferences
+                                    ._folderIdTable(db),
+                                referencedColumn:
+                                    $$StudyCardItemsTableReferences
+                                        ._folderIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
                     if (materialId) {
                       state =
                           state.withJoin(
@@ -4437,13 +6300,13 @@ typedef $$StudyCardItemsTableProcessedTableManager =
       $$StudyCardItemsTableUpdateCompanionBuilder,
       (StudyCardItem, $$StudyCardItemsTableReferences),
       StudyCardItem,
-      PrefetchHooks Function({bool materialId})
+      PrefetchHooks Function({bool folderId, bool materialId})
     >;
 typedef $$StudySessionEventsTableCreateCompanionBuilder =
     StudySessionEventsCompanion Function({
       required String id,
       required String cardId,
-      required String materialId,
+      Value<String?> materialId,
       required int rating,
       required String reviewedAt,
       required int scheduledDays,
@@ -4453,7 +6316,7 @@ typedef $$StudySessionEventsTableUpdateCompanionBuilder =
     StudySessionEventsCompanion Function({
       Value<String> id,
       Value<String> cardId,
-      Value<String> materialId,
+      Value<String?> materialId,
       Value<int> rating,
       Value<String> reviewedAt,
       Value<int> scheduledDays,
@@ -4616,7 +6479,7 @@ class $$StudySessionEventsTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> cardId = const Value.absent(),
-                Value<String> materialId = const Value.absent(),
+                Value<String?> materialId = const Value.absent(),
                 Value<int> rating = const Value.absent(),
                 Value<String> reviewedAt = const Value.absent(),
                 Value<int> scheduledDays = const Value.absent(),
@@ -4634,7 +6497,7 @@ class $$StudySessionEventsTableTableManager
               ({
                 required String id,
                 required String cardId,
-                required String materialId,
+                Value<String?> materialId = const Value.absent(),
                 required int rating,
                 required String reviewedAt,
                 required int scheduledDays,
@@ -4677,6 +6540,1247 @@ typedef $$StudySessionEventsTableProcessedTableManager =
       StudySessionEvent,
       PrefetchHooks Function()
     >;
+typedef $$CardCreationDraftsTableCreateCompanionBuilder =
+    CardCreationDraftsCompanion Function({
+      required String folderId,
+      Value<String?> lastSourceId,
+      Value<double?> scrollX,
+      Value<double?> scrollY,
+      Value<double?> zoom,
+      Value<String?> frontText,
+      Value<String?> backText,
+      Value<String?> toolbarMode,
+      Value<String?> selectedText,
+      Value<String?> capturedImageBlobId,
+      Value<int> rowid,
+    });
+typedef $$CardCreationDraftsTableUpdateCompanionBuilder =
+    CardCreationDraftsCompanion Function({
+      Value<String> folderId,
+      Value<String?> lastSourceId,
+      Value<double?> scrollX,
+      Value<double?> scrollY,
+      Value<double?> zoom,
+      Value<String?> frontText,
+      Value<String?> backText,
+      Value<String?> toolbarMode,
+      Value<String?> selectedText,
+      Value<String?> capturedImageBlobId,
+      Value<int> rowid,
+    });
+
+final class $$CardCreationDraftsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CardCreationDraftsTable,
+          CardCreationDraft
+        > {
+  $$CardCreationDraftsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $StudyFolderItemsTable _folderIdTable(_$AppDatabase db) =>
+      db.studyFolderItems.createAlias(
+        $_aliasNameGenerator(
+          db.cardCreationDrafts.folderId,
+          db.studyFolderItems.id,
+        ),
+      );
+
+  $$StudyFolderItemsTableProcessedTableManager get folderId {
+    final $_column = $_itemColumn<String>('folder_id')!;
+
+    final manager = $$StudyFolderItemsTableTableManager(
+      $_db,
+      $_db.studyFolderItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_folderIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $SourceItemsTable _lastSourceIdTable(_$AppDatabase db) =>
+      db.sourceItems.createAlias(
+        $_aliasNameGenerator(
+          db.cardCreationDrafts.lastSourceId,
+          db.sourceItems.id,
+        ),
+      );
+
+  $$SourceItemsTableProcessedTableManager? get lastSourceId {
+    final $_column = $_itemColumn<String>('last_source_id');
+    if ($_column == null) return null;
+    final manager = $$SourceItemsTableTableManager(
+      $_db,
+      $_db.sourceItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_lastSourceIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CardCreationDraftsTableFilterComposer
+    extends Composer<_$AppDatabase, $CardCreationDraftsTable> {
+  $$CardCreationDraftsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<double> get scrollX => $composableBuilder(
+    column: $table.scrollX,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get scrollY => $composableBuilder(
+    column: $table.scrollY,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get zoom => $composableBuilder(
+    column: $table.zoom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get frontText => $composableBuilder(
+    column: $table.frontText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get backText => $composableBuilder(
+    column: $table.backText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get toolbarMode => $composableBuilder(
+    column: $table.toolbarMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get selectedText => $composableBuilder(
+    column: $table.selectedText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get capturedImageBlobId => $composableBuilder(
+    column: $table.capturedImageBlobId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$StudyFolderItemsTableFilterComposer get folderId {
+    final $$StudyFolderItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.folderId,
+      referencedTable: $db.studyFolderItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StudyFolderItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.studyFolderItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SourceItemsTableFilterComposer get lastSourceId {
+    final $$SourceItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.lastSourceId,
+      referencedTable: $db.sourceItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SourceItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.sourceItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CardCreationDraftsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CardCreationDraftsTable> {
+  $$CardCreationDraftsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<double> get scrollX => $composableBuilder(
+    column: $table.scrollX,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get scrollY => $composableBuilder(
+    column: $table.scrollY,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get zoom => $composableBuilder(
+    column: $table.zoom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get frontText => $composableBuilder(
+    column: $table.frontText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get backText => $composableBuilder(
+    column: $table.backText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get toolbarMode => $composableBuilder(
+    column: $table.toolbarMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get selectedText => $composableBuilder(
+    column: $table.selectedText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get capturedImageBlobId => $composableBuilder(
+    column: $table.capturedImageBlobId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$StudyFolderItemsTableOrderingComposer get folderId {
+    final $$StudyFolderItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.folderId,
+      referencedTable: $db.studyFolderItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StudyFolderItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.studyFolderItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SourceItemsTableOrderingComposer get lastSourceId {
+    final $$SourceItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.lastSourceId,
+      referencedTable: $db.sourceItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SourceItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.sourceItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CardCreationDraftsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CardCreationDraftsTable> {
+  $$CardCreationDraftsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<double> get scrollX =>
+      $composableBuilder(column: $table.scrollX, builder: (column) => column);
+
+  GeneratedColumn<double> get scrollY =>
+      $composableBuilder(column: $table.scrollY, builder: (column) => column);
+
+  GeneratedColumn<double> get zoom =>
+      $composableBuilder(column: $table.zoom, builder: (column) => column);
+
+  GeneratedColumn<String> get frontText =>
+      $composableBuilder(column: $table.frontText, builder: (column) => column);
+
+  GeneratedColumn<String> get backText =>
+      $composableBuilder(column: $table.backText, builder: (column) => column);
+
+  GeneratedColumn<String> get toolbarMode => $composableBuilder(
+    column: $table.toolbarMode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get selectedText => $composableBuilder(
+    column: $table.selectedText,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get capturedImageBlobId => $composableBuilder(
+    column: $table.capturedImageBlobId,
+    builder: (column) => column,
+  );
+
+  $$StudyFolderItemsTableAnnotationComposer get folderId {
+    final $$StudyFolderItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.folderId,
+      referencedTable: $db.studyFolderItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StudyFolderItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.studyFolderItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SourceItemsTableAnnotationComposer get lastSourceId {
+    final $$SourceItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.lastSourceId,
+      referencedTable: $db.sourceItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SourceItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sourceItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CardCreationDraftsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CardCreationDraftsTable,
+          CardCreationDraft,
+          $$CardCreationDraftsTableFilterComposer,
+          $$CardCreationDraftsTableOrderingComposer,
+          $$CardCreationDraftsTableAnnotationComposer,
+          $$CardCreationDraftsTableCreateCompanionBuilder,
+          $$CardCreationDraftsTableUpdateCompanionBuilder,
+          (CardCreationDraft, $$CardCreationDraftsTableReferences),
+          CardCreationDraft,
+          PrefetchHooks Function({bool folderId, bool lastSourceId})
+        > {
+  $$CardCreationDraftsTableTableManager(
+    _$AppDatabase db,
+    $CardCreationDraftsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CardCreationDraftsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CardCreationDraftsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CardCreationDraftsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> folderId = const Value.absent(),
+                Value<String?> lastSourceId = const Value.absent(),
+                Value<double?> scrollX = const Value.absent(),
+                Value<double?> scrollY = const Value.absent(),
+                Value<double?> zoom = const Value.absent(),
+                Value<String?> frontText = const Value.absent(),
+                Value<String?> backText = const Value.absent(),
+                Value<String?> toolbarMode = const Value.absent(),
+                Value<String?> selectedText = const Value.absent(),
+                Value<String?> capturedImageBlobId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CardCreationDraftsCompanion(
+                folderId: folderId,
+                lastSourceId: lastSourceId,
+                scrollX: scrollX,
+                scrollY: scrollY,
+                zoom: zoom,
+                frontText: frontText,
+                backText: backText,
+                toolbarMode: toolbarMode,
+                selectedText: selectedText,
+                capturedImageBlobId: capturedImageBlobId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String folderId,
+                Value<String?> lastSourceId = const Value.absent(),
+                Value<double?> scrollX = const Value.absent(),
+                Value<double?> scrollY = const Value.absent(),
+                Value<double?> zoom = const Value.absent(),
+                Value<String?> frontText = const Value.absent(),
+                Value<String?> backText = const Value.absent(),
+                Value<String?> toolbarMode = const Value.absent(),
+                Value<String?> selectedText = const Value.absent(),
+                Value<String?> capturedImageBlobId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CardCreationDraftsCompanion.insert(
+                folderId: folderId,
+                lastSourceId: lastSourceId,
+                scrollX: scrollX,
+                scrollY: scrollY,
+                zoom: zoom,
+                frontText: frontText,
+                backText: backText,
+                toolbarMode: toolbarMode,
+                selectedText: selectedText,
+                capturedImageBlobId: capturedImageBlobId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CardCreationDraftsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({folderId = false, lastSourceId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (folderId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.folderId,
+                                referencedTable:
+                                    $$CardCreationDraftsTableReferences
+                                        ._folderIdTable(db),
+                                referencedColumn:
+                                    $$CardCreationDraftsTableReferences
+                                        ._folderIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (lastSourceId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.lastSourceId,
+                                referencedTable:
+                                    $$CardCreationDraftsTableReferences
+                                        ._lastSourceIdTable(db),
+                                referencedColumn:
+                                    $$CardCreationDraftsTableReferences
+                                        ._lastSourceIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CardCreationDraftsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CardCreationDraftsTable,
+      CardCreationDraft,
+      $$CardCreationDraftsTableFilterComposer,
+      $$CardCreationDraftsTableOrderingComposer,
+      $$CardCreationDraftsTableAnnotationComposer,
+      $$CardCreationDraftsTableCreateCompanionBuilder,
+      $$CardCreationDraftsTableUpdateCompanionBuilder,
+      (CardCreationDraft, $$CardCreationDraftsTableReferences),
+      CardCreationDraft,
+      PrefetchHooks Function({bool folderId, bool lastSourceId})
+    >;
+typedef $$CitationItemsTableCreateCompanionBuilder =
+    CitationItemsCompanion Function({
+      required String id,
+      required String sourceId,
+      required String type,
+      Value<int?> pageNumber,
+      required Citation citation,
+      Value<int> rowid,
+    });
+typedef $$CitationItemsTableUpdateCompanionBuilder =
+    CitationItemsCompanion Function({
+      Value<String> id,
+      Value<String> sourceId,
+      Value<String> type,
+      Value<int?> pageNumber,
+      Value<Citation> citation,
+      Value<int> rowid,
+    });
+
+final class $$CitationItemsTableReferences
+    extends BaseReferences<_$AppDatabase, $CitationItemsTable, CitationItem> {
+  $$CitationItemsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $SourceItemsTable _sourceIdTable(_$AppDatabase db) =>
+      db.sourceItems.createAlias(
+        $_aliasNameGenerator(db.citationItems.sourceId, db.sourceItems.id),
+      );
+
+  $$SourceItemsTableProcessedTableManager get sourceId {
+    final $_column = $_itemColumn<String>('source_id')!;
+
+    final manager = $$SourceItemsTableTableManager(
+      $_db,
+      $_db.sourceItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sourceIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$CitationBlobsTable, List<CitationBlob>>
+  _citationBlobsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.citationBlobs,
+    aliasName: $_aliasNameGenerator(
+      db.citationItems.id,
+      db.citationBlobs.citationId,
+    ),
+  );
+
+  $$CitationBlobsTableProcessedTableManager get citationBlobsRefs {
+    final manager = $$CitationBlobsTableTableManager(
+      $_db,
+      $_db.citationBlobs,
+    ).filter((f) => f.citationId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_citationBlobsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$CitationItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $CitationItemsTable> {
+  $$CitationItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get pageNumber => $composableBuilder(
+    column: $table.pageNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Citation, Citation, String> get citation =>
+      $composableBuilder(
+        column: $table.citation,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  $$SourceItemsTableFilterComposer get sourceId {
+    final $$SourceItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sourceId,
+      referencedTable: $db.sourceItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SourceItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.sourceItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> citationBlobsRefs(
+    Expression<bool> Function($$CitationBlobsTableFilterComposer f) f,
+  ) {
+    final $$CitationBlobsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.citationBlobs,
+      getReferencedColumn: (t) => t.citationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationBlobsTableFilterComposer(
+            $db: $db,
+            $table: $db.citationBlobs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$CitationItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CitationItemsTable> {
+  $$CitationItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get pageNumber => $composableBuilder(
+    column: $table.pageNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get citation => $composableBuilder(
+    column: $table.citation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$SourceItemsTableOrderingComposer get sourceId {
+    final $$SourceItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sourceId,
+      referencedTable: $db.sourceItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SourceItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.sourceItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CitationItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CitationItemsTable> {
+  $$CitationItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<int> get pageNumber => $composableBuilder(
+    column: $table.pageNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<Citation, String> get citation =>
+      $composableBuilder(column: $table.citation, builder: (column) => column);
+
+  $$SourceItemsTableAnnotationComposer get sourceId {
+    final $$SourceItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sourceId,
+      referencedTable: $db.sourceItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SourceItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sourceItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> citationBlobsRefs<T extends Object>(
+    Expression<T> Function($$CitationBlobsTableAnnotationComposer a) f,
+  ) {
+    final $$CitationBlobsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.citationBlobs,
+      getReferencedColumn: (t) => t.citationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationBlobsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.citationBlobs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$CitationItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CitationItemsTable,
+          CitationItem,
+          $$CitationItemsTableFilterComposer,
+          $$CitationItemsTableOrderingComposer,
+          $$CitationItemsTableAnnotationComposer,
+          $$CitationItemsTableCreateCompanionBuilder,
+          $$CitationItemsTableUpdateCompanionBuilder,
+          (CitationItem, $$CitationItemsTableReferences),
+          CitationItem,
+          PrefetchHooks Function({bool sourceId, bool citationBlobsRefs})
+        > {
+  $$CitationItemsTableTableManager(_$AppDatabase db, $CitationItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CitationItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CitationItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CitationItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> sourceId = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<int?> pageNumber = const Value.absent(),
+                Value<Citation> citation = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CitationItemsCompanion(
+                id: id,
+                sourceId: sourceId,
+                type: type,
+                pageNumber: pageNumber,
+                citation: citation,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String sourceId,
+                required String type,
+                Value<int?> pageNumber = const Value.absent(),
+                required Citation citation,
+                Value<int> rowid = const Value.absent(),
+              }) => CitationItemsCompanion.insert(
+                id: id,
+                sourceId: sourceId,
+                type: type,
+                pageNumber: pageNumber,
+                citation: citation,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CitationItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({sourceId = false, citationBlobsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (citationBlobsRefs) db.citationBlobs,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (sourceId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.sourceId,
+                                    referencedTable:
+                                        $$CitationItemsTableReferences
+                                            ._sourceIdTable(db),
+                                    referencedColumn:
+                                        $$CitationItemsTableReferences
+                                            ._sourceIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (citationBlobsRefs)
+                        await $_getPrefetchedData<
+                          CitationItem,
+                          $CitationItemsTable,
+                          CitationBlob
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CitationItemsTableReferences
+                              ._citationBlobsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CitationItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).citationBlobsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.citationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$CitationItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CitationItemsTable,
+      CitationItem,
+      $$CitationItemsTableFilterComposer,
+      $$CitationItemsTableOrderingComposer,
+      $$CitationItemsTableAnnotationComposer,
+      $$CitationItemsTableCreateCompanionBuilder,
+      $$CitationItemsTableUpdateCompanionBuilder,
+      (CitationItem, $$CitationItemsTableReferences),
+      CitationItem,
+      PrefetchHooks Function({bool sourceId, bool citationBlobsRefs})
+    >;
+typedef $$CitationBlobsTableCreateCompanionBuilder =
+    CitationBlobsCompanion Function({
+      required String id,
+      required String citationId,
+      required Uint8List bytes,
+      Value<int> rowid,
+    });
+typedef $$CitationBlobsTableUpdateCompanionBuilder =
+    CitationBlobsCompanion Function({
+      Value<String> id,
+      Value<String> citationId,
+      Value<Uint8List> bytes,
+      Value<int> rowid,
+    });
+
+final class $$CitationBlobsTableReferences
+    extends BaseReferences<_$AppDatabase, $CitationBlobsTable, CitationBlob> {
+  $$CitationBlobsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CitationItemsTable _citationIdTable(_$AppDatabase db) =>
+      db.citationItems.createAlias(
+        $_aliasNameGenerator(db.citationBlobs.citationId, db.citationItems.id),
+      );
+
+  $$CitationItemsTableProcessedTableManager get citationId {
+    final $_column = $_itemColumn<String>('citation_id')!;
+
+    final manager = $$CitationItemsTableTableManager(
+      $_db,
+      $_db.citationItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_citationIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CitationBlobsTableFilterComposer
+    extends Composer<_$AppDatabase, $CitationBlobsTable> {
+  $$CitationBlobsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get bytes => $composableBuilder(
+    column: $table.bytes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CitationItemsTableFilterComposer get citationId {
+    final $$CitationItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.citationId,
+      referencedTable: $db.citationItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CitationBlobsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CitationBlobsTable> {
+  $$CitationBlobsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get bytes => $composableBuilder(
+    column: $table.bytes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CitationItemsTableOrderingComposer get citationId {
+    final $$CitationItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.citationId,
+      referencedTable: $db.citationItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CitationBlobsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CitationBlobsTable> {
+  $$CitationBlobsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get bytes =>
+      $composableBuilder(column: $table.bytes, builder: (column) => column);
+
+  $$CitationItemsTableAnnotationComposer get citationId {
+    final $$CitationItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.citationId,
+      referencedTable: $db.citationItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CitationBlobsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CitationBlobsTable,
+          CitationBlob,
+          $$CitationBlobsTableFilterComposer,
+          $$CitationBlobsTableOrderingComposer,
+          $$CitationBlobsTableAnnotationComposer,
+          $$CitationBlobsTableCreateCompanionBuilder,
+          $$CitationBlobsTableUpdateCompanionBuilder,
+          (CitationBlob, $$CitationBlobsTableReferences),
+          CitationBlob,
+          PrefetchHooks Function({bool citationId})
+        > {
+  $$CitationBlobsTableTableManager(_$AppDatabase db, $CitationBlobsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CitationBlobsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CitationBlobsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CitationBlobsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> citationId = const Value.absent(),
+                Value<Uint8List> bytes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CitationBlobsCompanion(
+                id: id,
+                citationId: citationId,
+                bytes: bytes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String citationId,
+                required Uint8List bytes,
+                Value<int> rowid = const Value.absent(),
+              }) => CitationBlobsCompanion.insert(
+                id: id,
+                citationId: citationId,
+                bytes: bytes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CitationBlobsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({citationId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (citationId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.citationId,
+                                referencedTable: $$CitationBlobsTableReferences
+                                    ._citationIdTable(db),
+                                referencedColumn: $$CitationBlobsTableReferences
+                                    ._citationIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CitationBlobsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CitationBlobsTable,
+      CitationBlob,
+      $$CitationBlobsTableFilterComposer,
+      $$CitationBlobsTableOrderingComposer,
+      $$CitationBlobsTableAnnotationComposer,
+      $$CitationBlobsTableCreateCompanionBuilder,
+      $$CitationBlobsTableUpdateCompanionBuilder,
+      (CitationBlob, $$CitationBlobsTableReferences),
+      CitationBlob,
+      PrefetchHooks Function({bool citationId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4693,4 +7797,10 @@ class $AppDatabaseManager {
       $$StudyCardItemsTableTableManager(_db, _db.studyCardItems);
   $$StudySessionEventsTableTableManager get studySessionEvents =>
       $$StudySessionEventsTableTableManager(_db, _db.studySessionEvents);
+  $$CardCreationDraftsTableTableManager get cardCreationDrafts =>
+      $$CardCreationDraftsTableTableManager(_db, _db.cardCreationDrafts);
+  $$CitationItemsTableTableManager get citationItems =>
+      $$CitationItemsTableTableManager(_db, _db.citationItems);
+  $$CitationBlobsTableTableManager get citationBlobs =>
+      $$CitationBlobsTableTableManager(_db, _db.citationBlobs);
 }

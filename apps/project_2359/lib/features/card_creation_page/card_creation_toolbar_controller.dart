@@ -21,6 +21,7 @@ class CardCreationToolbarController extends ChangeNotifier {
   final Set<String> _selectedItemIds = {};
   String? _requestedSourceId;
   String? _requestedCardId;
+  String? _editingCardId;
 
   CardCreationToolbarMode get mode => _mode;
   String? get selectedText => _selectedText;
@@ -36,6 +37,8 @@ class CardCreationToolbarController extends ChangeNotifier {
   Set<String> get selectedItemIds => _selectedItemIds;
   String? get requestedSourceId => _requestedSourceId;
   String? get requestedCardId => _requestedCardId;
+  String? get editingCardId => _editingCardId;
+  bool get isEditing => _editingCardId != null;
 
   void updateOcclusionRect(Rect? rect) {
     _occlusionRect = rect;
@@ -100,10 +103,24 @@ class CardCreationToolbarController extends ChangeNotifier {
     _requestedSourceId = null;
   }
 
-  void requestCard(String id) {
+  void requestCard(String id, {bool forEditing = false}) {
     _requestedCardId = id;
+    if (forEditing) _editingCardId = id;
     notifyListeners();
     _requestedCardId = null;
+  }
+
+  void stopEditing() {
+    _editingCardId = null;
+    resetCardFields();
+    notifyListeners();
+  }
+
+  Future<void> deleteSelectedCards() async {
+    // This will be handled by the UI/Service usually, but we can emit a request
+    // Or we can just have a callback or a flag.
+    // For now, let's keep it as is and let the UI call the service directly.
+    notifyListeners();
   }
 
   @override

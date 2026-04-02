@@ -233,8 +233,9 @@ class _CardCreationPageState extends State<CardCreationPage> {
             context: context,
             containerController: controller,
             toolbarController: _toolbarController,
-            selectionNotifier: _selectionNotifier,
             selectedTextNotifier: _selectedTextNotifier,
+            folderId: widget.folderId,
+            sourceId: _currentSourceId,
           ),
           child: Scaffold(
             backgroundColor: Colors.black,
@@ -359,6 +360,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
                 PdfOcclusionOverlay(
                   controller: _controller,
                   toolbarController: _toolbarController,
+                  folderId: widget.folderId,
                 ),
             ],
           );

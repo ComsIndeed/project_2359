@@ -25,62 +25,26 @@ class StudyMaterialService {
 
   Stream<List<(StudyFolderItem, int)>> watchPinnedFoldersWithStats() {
     AppLogger.debug('Watching pinned folders with stats', tag: _tag);
-    final count = _db.studyCardItems.id.count();
-    final query =
-        _db.select(_db.studyFolderItems).join([
-            leftOuterJoin(
-              _db.studyMaterialItems,
-              _db.studyMaterialItems.folderId.equalsExp(
-                _db.studyFolderItems.id,
-              ),
-            ),
-            leftOuterJoin(
-              _db.studyCardItems,
-              _db.studyCardItems.materialId.equalsExp(
-                _db.studyMaterialItems.id,
-              ),
-            ),
-          ])
-          ..where(_db.studyFolderItems.isPinned.equals(true))
-          ..addColumns([count])
-          ..groupBy([_db.studyFolderItems.id])
-          ..orderBy([OrderingTerm.desc(_db.studyFolderItems.updatedAt)]);
-
-    return query.watch().map((rows) {
-      return rows.map((row) {
-        return (row.readTable(_db.studyFolderItems), row.read(count) ?? 0);
-      }).toList();
-    });
+    // Simplified to rule out join errors
+    return _db
+        .select(_db.studyFolderItems)
+        .watch()
+        .map(
+          (folders) =>
+              folders.where((f) => f.isPinned).map((f) => (f, 0)).toList(),
+        );
   }
 
   Stream<List<(StudyFolderItem, int)>> watchUnpinnedFoldersWithStats() {
     AppLogger.debug('Watching unpinned folders with stats', tag: _tag);
-    final count = _db.studyCardItems.id.count();
-    final query =
-        _db.select(_db.studyFolderItems).join([
-            leftOuterJoin(
-              _db.studyMaterialItems,
-              _db.studyMaterialItems.folderId.equalsExp(
-                _db.studyFolderItems.id,
-              ),
-            ),
-            leftOuterJoin(
-              _db.studyCardItems,
-              _db.studyCardItems.materialId.equalsExp(
-                _db.studyMaterialItems.id,
-              ),
-            ),
-          ])
-          ..where(_db.studyFolderItems.isPinned.equals(false))
-          ..addColumns([count])
-          ..groupBy([_db.studyFolderItems.id])
-          ..orderBy([OrderingTerm.desc(_db.studyFolderItems.updatedAt)]);
-
-    return query.watch().map((rows) {
-      return rows.map((row) {
-        return (row.readTable(_db.studyFolderItems), row.read(count) ?? 0);
-      }).toList();
-    });
+    // Simplified to rule out join errors
+    return _db
+        .select(_db.studyFolderItems)
+        .watch()
+        .map(
+          (folders) =>
+              folders.where((f) => !f.isPinned).map((f) => (f, 0)).toList(),
+        );
   }
 
   Future<StudyFolderItem?> getFolderById(String id) async {
@@ -92,7 +56,16 @@ class StudyMaterialService {
 
   Future<void> insertFolder(StudyFolderItemsCompanion folder) async {
     AppLogger.info('Inserting new folder: ${folder.name.value}', tag: _tag);
-    await _db.into(_db.studyFolderItems).insert(folder);
+    try {
+      await _db.into(_db.studyFolderItems).insert(folder);
+      AppLogger.info(
+        'Successfully inserted folder: ${folder.id.value}',
+        tag: _tag,
+      );
+    } catch (e) {
+      AppLogger.error('Failed to insert folder: $e', tag: _tag);
+      rethrow;
+    }
   }
 
   Future<void> updateFolder(StudyFolderItemsCompanion folder) async {
@@ -233,6 +206,20 @@ class StudyMaterialService {
     )..where((t) => t.materialId.equals(materialId))).watch();
   }
 
+  Future<List<StudyCardItem>> getCardsByFolderId(String folderId) async {
+    AppLogger.debug('Fetching cards for folder: $folderId', tag: _tag);
+    return await (_db.select(
+      _db.studyCardItems,
+    )..where((t) => t.folderId.equals(folderId))).get();
+  }
+
+  Stream<List<StudyCardItem>> watchCardsByFolderId(String folderId) {
+    AppLogger.debug('Watching cards for folder: $folderId', tag: _tag);
+    return (_db.select(
+      _db.studyCardItems,
+    )..where((t) => t.folderId.equals(folderId))).watch();
+  }
+
   Future<void> insertCard(StudyCardItemsCompanion card) async {
     AppLogger.info('Inserting new card', tag: _tag);
     await _db.into(_db.studyCardItems).insert(card);
@@ -251,9 +238,21 @@ class StudyMaterialService {
     // This will update the 'due' and 'fsrsCardJson' fields in study_card_items
   }
 
+  Future<void> updateCard(StudyCardItemsCompanion card) async {
+    AppLogger.info('Updating card: ${card.id.value}', tag: _tag);
+    await (_db.update(
+      _db.studyCardItems,
+    )..where((t) => t.id.equals(card.id.value))).write(card);
+  }
+
   Future<void> deleteCard(String id) async {
     AppLogger.warning('Deleting card: $id', tag: _tag);
     await (_db.delete(_db.studyCardItems)..where((t) => t.id.equals(id))).go();
+  }
+
+  Future<void> deleteCards(List<String> ids) async {
+    AppLogger.warning('Deleting batch of ${ids.length} cards', tag: _tag);
+    await (_db.delete(_db.studyCardItems)..where((t) => t.id.isIn(ids))).go();
   }
 
   // --- Combined Operations ---

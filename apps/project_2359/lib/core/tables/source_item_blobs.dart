@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 
 /// The type of source content.
-enum SourceFileType { pdf, docx, xlsx, txt, unknown }
+enum SourceFileType { pdf, docx, xlsx, txt, png, jpg, unknown }
 
 class SourceItemBlobs extends Table {
   TextColumn get id => text()();

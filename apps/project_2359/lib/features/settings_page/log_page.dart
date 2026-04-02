@@ -270,8 +270,9 @@ class _LatencySeparator extends StatelessWidget {
     if (d.inDays > 0) return '+${d.inDays}d';
     if (d.inHours > 0) return '+${d.inHours}h';
     if (d.inMinutes > 0) return '+${d.inMinutes}m';
-    if (d.inSeconds > 0)
+    if (d.inSeconds > 0) {
       return '+${d.inSeconds}.${(d.inMilliseconds % 1000).toString().padLeft(3, '0')}s';
+    }
     return '+${d.inMilliseconds}ms';
   }
 }

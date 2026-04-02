@@ -8,11 +8,13 @@ import 'package:flutter_animate/flutter_animate.dart';
 class PdfOcclusionOverlay extends StatefulWidget {
   final PdfViewerController controller;
   final CardCreationToolbarController toolbarController;
+  final String folderId;
 
   const PdfOcclusionOverlay({
     super.key,
     required this.controller,
     required this.toolbarController,
+    required this.folderId,
   });
 
   @override

@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
+import 'package:project_2359/core/tables/study_folder_items.dart';
 import 'package:project_2359/core/tables/study_material_items.dart';
+import 'package:project_2359/core/models/citation.dart';
 
 /// The type of study material.
 enum StudyCardType {
@@ -7,13 +9,18 @@ enum StudyCardType {
   multipleChoiceQuestion,
   freeTextQuestion,
   imageOcclusion,
+  image,
 }
 
 class StudyCardItems extends Table {
   TextColumn get id => text()();
-  TextColumn get materialId => text().references(StudyMaterialItems, #id)();
+  TextColumn get folderId => text().references(StudyFolderItems, #id)();
+  TextColumn get materialId =>
+      text().nullable().references(StudyMaterialItems, #id)();
   TextColumn get type => text()(); // Store as StudyCardType.name
-  TextColumn get citationJson => text().nullable()();
+  TextColumn get citationIds => text()
+      .map(const StringListConverter())
+      .nullable()(); // JSON list of citation IDs
 
   /// Fields are nullable because not all types use the same properties.
   /// - Flashcard: question (front), answer (back)

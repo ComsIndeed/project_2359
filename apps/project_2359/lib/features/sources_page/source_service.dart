@@ -95,4 +95,33 @@ class SourceService {
       _db.sourceItemBlobs,
     )..where((t) => t.sourceItemId.equals(sourceItemId))).go();
   }
+
+  // --- Citations ---
+
+  Future<void> insertCitation(CitationItemsCompanion citation) async {
+    AppLogger.info('Inserting citation: ${citation.id.value}', tag: _tag);
+    await _db.into(_db.citationItems).insert(citation);
+  }
+
+  Future<void> insertCitationBlob(CitationBlobsCompanion blob) async {
+    AppLogger.info('Inserting citation blob', tag: _tag);
+    await _db.into(_db.citationBlobs).insert(blob);
+  }
+
+  Future<List<CitationItem>> getCitationsByIds(List<String> ids) async {
+    AppLogger.debug('Fetching ${ids.length} citations', tag: _tag);
+    return await (_db.select(
+      _db.citationItems,
+    )..where((t) => t.id.isIn(ids))).get();
+  }
+
+  Future<CitationBlob?> getCitationBlobByCitationId(String citationId) async {
+    AppLogger.debug(
+      'Fetching citation blob for citation: $citationId',
+      tag: _tag,
+    );
+    return await (_db.select(
+      _db.citationBlobs,
+    )..where((t) => t.citationId.equals(citationId))).getSingleOrNull();
+  }
 }

@@ -143,6 +143,7 @@ class _FolderPageState extends State<FolderPage> {
       );
 
       if (result == null || result.files.isEmpty) return;
+      if (!mounted) return;
 
       final sourceService = SourceService(context.read<AppDatabase>());
       final uuid = const Uuid();

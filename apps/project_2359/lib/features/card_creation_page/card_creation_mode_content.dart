@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:project_2359/core/models/citation.dart';
+import 'package:project_2359/core/study_material_service.dart';
+import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/app_database.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
 import 'package:project_2359/features/card_creation_page/expandable_card_creation_toolbar.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/shortcut_widgets.dart';
-import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
+import 'package:drift/drift.dart' as drift;
 
 class CardCreationModeContent extends StatefulWidget {
   final CardCreationToolbarController controller;
-  const CardCreationModeContent({super.key, required this.controller});
+  final String folderId;
+  final String? sourceId;
+
+  const CardCreationModeContent({
+    super.key,
+    required this.controller,
+    required this.folderId,
+    this.sourceId,
+  });
 
   @override
   State<CardCreationModeContent> createState() =>
@@ -72,12 +87,101 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
     );
   }
 
-  void _saveCard() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Card Saved! (Simulated)")));
-    widget.controller.resetCardFields();
-    widget.controller.setMode(CardCreationToolbarMode.collapsed);
+  Future<void> _saveCard() async {
+    final front = _frontController.text.trim();
+    final back = _backController.text.trim();
+
+    if (front.isEmpty || back.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Front and back cannot be empty")),
+      );
+      return;
+    }
+
+    final cardService = context.read<StudyMaterialService>();
+    final sourceService = context.read<SourceService>();
+    final uuid = const Uuid();
+
+    try {
+      String? citationId;
+      if (widget.controller.selectedText != null && widget.sourceId != null) {
+        citationId = uuid.v4();
+        final citation = TextCitation(
+          sourceItemId: widget.sourceId!,
+          text: widget.controller.selectedText!,
+        );
+        await sourceService.insertCitation(
+          CitationItemsCompanion(
+            id: drift.Value(citationId),
+            sourceId: drift.Value(widget.sourceId!),
+            type: const drift.Value("text"),
+            citation: drift.Value(citation),
+          ),
+        );
+      } else if (widget.controller.capturedOcclusionImage != null &&
+          widget.sourceId != null) {
+        // Handle image occlusion or just image citation
+        citationId = uuid.v4();
+        // For now, let's assume it's an image citation
+        // We'll need pageNumber from the controller eventually
+        final citation = ImageCitation(
+          sourceItemId: widget.sourceId!,
+          rect: widget.controller.occlusionRect ?? Rect.zero,
+          pageNumber: 1, // Defaulting to 1 for now
+        );
+        await sourceService.insertCitation(
+          CitationItemsCompanion(
+            id: drift.Value(citationId),
+            sourceId: drift.Value(widget.sourceId!),
+            type: const drift.Value("image"),
+            citation: drift.Value(citation),
+          ),
+        );
+
+        await sourceService.insertCitationBlob(
+          CitationBlobsCompanion(
+            id: drift.Value(uuid.v4()),
+            citationId: drift.Value(citationId),
+            bytes: drift.Value(widget.controller.capturedOcclusionImage!),
+          ),
+        );
+      }
+
+      final cardId = widget.controller.editingCardId ?? uuid.v4();
+      final card = StudyCardItemsCompanion(
+        id: drift.Value(cardId),
+        folderId: drift.Value(widget.folderId),
+        type: const drift.Value("flashcard"),
+        question: drift.Value(front),
+        answer: drift.Value(back),
+        citationIds: drift.Value(citationId != null ? [citationId] : null),
+      );
+
+      if (widget.controller.isEditing) {
+        await cardService.updateCard(card);
+      } else {
+        await cardService.insertCard(card);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              widget.controller.isEditing ? "Card Updated!" : "Card Added!",
+            ),
+          ),
+        );
+        widget.controller.resetCardFields();
+        widget.controller.setMode(CardCreationToolbarMode.collapsed);
+        if (widget.controller.isEditing) widget.controller.stopEditing();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Failed to save card: $e")));
+      }
+    }
   }
 
   void _cancel() {
@@ -255,7 +359,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
                 onPressed: _cancel,
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedSuperellipseBorder(
+                  shape: ContinuousRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                   foregroundColor: cs.onSurfaceVariant.withValues(alpha: 0.8),

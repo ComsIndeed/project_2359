@@ -295,7 +295,7 @@ class _SpecialBackgroundGeneratorState extends State<SpecialBackgroundGenerator>
       duration: const Duration(seconds: 30),
     )..repeat();
 
-    _sensorSubscription = accelerometerEvents.listen((event) {
+    _sensorSubscription = accelerometerEventStream().listen((event) {
       if (mounted) {
         setState(() {
           // Low-pass filter for smoothness
