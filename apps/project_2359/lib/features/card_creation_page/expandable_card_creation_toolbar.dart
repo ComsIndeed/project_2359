@@ -14,7 +14,7 @@ class ExpandableCardCreationToolbar extends StatefulWidget {
   const ExpandableCardCreationToolbar({
     super.key,
     required this.context,
-    required this.controller,
+    required this.containerController,
     required this.toolbarController,
     required this.useVerticalToolbar,
     required this.selectionNotifier,
@@ -22,7 +22,7 @@ class ExpandableCardCreationToolbar extends StatefulWidget {
   });
 
   final BuildContext context;
-  final ExpandableContainerController controller;
+  final ExpandableContainerController containerController;
   final bool useVerticalToolbar;
   final ValueNotifier<dynamic> selectionNotifier;
   final ValueNotifier<String?> selectedTextNotifier;
@@ -113,53 +113,10 @@ class _ExpandableCardCreationToolbarState
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Expanded(
-            child: ValueListenableBuilder<String?>(
-              valueListenable: widget.selectedTextNotifier,
-              builder: (context, text, _) {
-                return AnimatedSwitcher(
-                  duration: 400.ms,
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
-                  transitionBuilder: (child, animation) {
-                    final key = child.key;
-                    final isEntering =
-                        (text != null && key is ValueKey && key.value == text);
-
-                    final slideAnimation =
-                        Tween<Offset>(
-                          begin: isEntering
-                              ? const Offset(0, 0.45)
-                              : const Offset(0, -0.45),
-                          end: Offset.zero,
-                        ).animate(
-                          CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          ),
-                        );
-
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: slideAnimation,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: (text == null || text.isEmpty)
-                      ? const SizedBox.shrink(key: ValueKey('empty_text'))
-                      : SelectedTextButton(
-                          key: ValueKey(text),
-                          text: text,
-                          onTap: () => widget.toolbarController.setMode(
-                            CardCreationToolbarMode.cardCreation,
-                          ),
-                        ),
-                );
-              },
-            ),
-          ),
+          if (widget.useVerticalToolbar)
+            _buildTextButtonContent()
+          else
+            Expanded(child: _buildTextButtonContent()),
           IconButton(
             onPressed: () => widget.toolbarController.setMode(
               CardCreationToolbarMode.imageOcclusion,
@@ -173,6 +130,62 @@ class _ExpandableCardCreationToolbarState
           ).animate().fadeIn().scale(delay: 200.ms),
         ],
       ),
+    );
+  }
+
+  Widget _buildTextButtonContent() {
+    return ValueListenableBuilder<String?>(
+      valueListenable: widget.selectedTextNotifier,
+      builder: (context, text, _) {
+        return AnimatedSwitcher(
+          duration: 400.ms,
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (child, animation) {
+            final key = child.key;
+            final isEntering =
+                (text != null && key is ValueKey && key.value == text);
+
+            final slideAnimation =
+                Tween<Offset>(
+                  begin: isEntering
+                      ? const Offset(0, 0.45)
+                      : const Offset(0, -0.45),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  ),
+                );
+
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(position: slideAnimation, child: child),
+            );
+          },
+          child: (text == null || text.isEmpty)
+              ? const SizedBox.shrink(key: ValueKey('empty_text'))
+              : Theme(
+                  // Ensure the button is constrained on desktop
+                  data: Theme.of(context),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: widget.useVerticalToolbar
+                          ? 280
+                          : double.infinity,
+                    ),
+                    child: SelectedTextButton(
+                      key: ValueKey(text),
+                      text: text,
+                      onTap: () => widget.toolbarController.setMode(
+                        CardCreationToolbarMode.cardCreation,
+                      ),
+                    ),
+                  ),
+                ),
+        );
+      },
     );
   }
 }

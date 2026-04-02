@@ -134,7 +134,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
           ),
           builder: (context, controller) => ExpandableCardCreationToolbar(
             context: context,
-            controller: controller,
+            containerController: controller,
             toolbarController: _toolbarController,
             useVerticalToolbar: useVerticalToolbar,
             selectionNotifier: _selectionNotifier,
@@ -226,6 +226,12 @@ class _CardCreationPageState extends State<CardCreationPage> {
                 controller: _controller,
                 useProgressiveLoading: true,
                 params: PdfViewerParams(
+                  boundaryMargin: EdgeInsets.only(
+                    left: 256,
+                    right: ResponsiveBreakpoints.of(context).isMobile
+                        ? 256
+                        : 800,
+                  ),
                   margin: 8,
                   onViewerReady: (doc, controller) {
                     if (mounted) {
