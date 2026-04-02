@@ -372,6 +372,16 @@ class SettingsPage extends StatelessWidget {
                           onChanged: (value) =>
                               labsSettings.setSmartSelectionEnabled(value),
                         ),
+                        _divider(theme),
+                        _SettingsToggleTile(
+                          icon: FontAwesomeIcons.mobileScreenButton,
+                          title: 'Mobile Emulation',
+                          subtitle:
+                              'Force disable shortcuts even on desktop devices using smaller screens',
+                          value: labsSettings.mobileEmulationEnabled,
+                          onChanged: (value) =>
+                              labsSettings.setMobileEmulationEnabled(value),
+                        ),
                       ],
                     ),
 

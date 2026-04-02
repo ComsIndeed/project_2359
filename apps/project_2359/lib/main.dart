@@ -15,6 +15,8 @@ import 'package:project_2359/core/utils/logger.dart';
 import 'package:project_2359/core/settings/labs_settings.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:project_2359/core/utils/shortcut_system.dart';
+import 'package:flutter/services.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,10 +70,55 @@ Future<void> main() async {
   );
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   final SourceService sourceService;
 
   const MainApp({super.key, required this.sourceService});
+
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  @override
+  void initState() {
+    super.initState();
+    HardwareKeyboard.instance.addHandler(_handleGlobalKey);
+  }
+
+  @override
+  void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleGlobalKey);
+    super.dispose();
+  }
+
+  bool _handleGlobalKey(KeyEvent event) {
+    if (event is! KeyDownEvent) return false;
+
+    // TODO: UNDERSTAND THIS
+    // Handle Esc bubbling logic specifically
+    if (event.logicalKey == LogicalKeyboardKey.escape) {
+      final focus = FocusManager.instance.primaryFocus;
+
+      // 1. Unfocus if in a TextField
+      if (focus != null && focus.context != null) {
+        final editable = focus.context!
+            .findAncestorWidgetOfExactType<EditableText>();
+        if (focus.hasPrimaryFocus &&
+            focus.canRequestFocus &&
+            (focus.debugLabel?.contains('EditableText') == true ||
+                editable != null)) {
+          focus.unfocus();
+          return true;
+        }
+      }
+
+      // Let it bubble up to ShortcutManager or Navigator if not handled
+    }
+
+    // Try ProjectShortcutManager
+    return ProjectShortcutManager.handleKeyEvent(event);
+  }
 
   @override
   Widget build(BuildContext context) {

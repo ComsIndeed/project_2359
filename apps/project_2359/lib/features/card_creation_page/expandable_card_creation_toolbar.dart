@@ -8,6 +8,9 @@ import 'package:project_2359/features/card_creation_page/card_creation_toolbar_c
 import 'package:project_2359/features/card_creation_page/selected_text_button.dart';
 import 'package:project_2359/core/widgets/icon_widgets/image_occlusion_icon.dart';
 import 'package:project_2359/features/card_creation_page/widgets/image_occlusion_editor.dart';
+import 'package:project_2359/core/utils/shortcut_system.dart';
+import 'package:project_2359/core/widgets/shortcut_widgets.dart';
+import 'package:flutter/services.dart';
 
 enum CardCreationToolbarMode { collapsed, menu, cardCreation, imageOcclusion }
 
@@ -40,6 +43,39 @@ class _ExpandableCardCreationToolbarState
     widget.selectedTextNotifier.addListener(_onSelectedTextChanged);
     // Sync initial value
     _onSelectedTextChanged();
+    _registerShortcuts();
+  }
+
+  void _registerShortcuts() {
+    ProjectShortcutManager.registerShortcut(
+      const ShortcutInfo(
+        label: 'Create Card',
+        key: LogicalKeyboardKey.enter,
+        modifiers: [ShortcutModifier.alt],
+      ),
+      () {
+        if (widget.selectedTextNotifier.value?.isNotEmpty == true &&
+            widget.toolbarController.mode ==
+                CardCreationToolbarMode.collapsed) {
+          widget.toolbarController.setMode(
+            CardCreationToolbarMode.cardCreation,
+          );
+        }
+      },
+    );
+    ProjectShortcutManager.registerShortcut(
+      const ShortcutInfo(
+        label: 'Close Toolbar',
+        key: LogicalKeyboardKey.keyX,
+        modifiers: [ShortcutModifier.alt],
+      ),
+      () {
+        if (widget.toolbarController.mode !=
+            CardCreationToolbarMode.collapsed) {
+          widget.toolbarController.setMode(CardCreationToolbarMode.collapsed);
+        }
+      },
+    );
   }
 
   @override
@@ -74,11 +110,19 @@ class _ExpandableCardCreationToolbarState
                       CardCreationToolbarMode.collapsed)
                     Align(
                       alignment: Alignment.topRight,
-                      child: IconButton(
-                        onPressed: () => widget.toolbarController.setMode(
-                          CardCreationToolbarMode.collapsed,
+                      child: ShortcutDisplay(
+                        hoverOnly: true,
+                        info: const ShortcutInfo(
+                          label: 'Close',
+                          key: LogicalKeyboardKey.keyX,
+                          modifiers: [ShortcutModifier.alt],
                         ),
-                        icon: const Icon(Icons.close),
+                        child: IconButton(
+                          onPressed: () => widget.toolbarController.setMode(
+                            CardCreationToolbarMode.collapsed,
+                          ),
+                          icon: const Icon(Icons.close),
+                        ),
                       ).animate().scale().fadeIn(),
                     ),
                   Padding(
@@ -175,11 +219,18 @@ class _ExpandableCardCreationToolbarState
                     constraints: const BoxConstraints(
                       maxWidth: double.infinity,
                     ),
-                    child: SelectedTextButton(
-                      key: ValueKey(text),
-                      text: text,
-                      onTap: () => widget.toolbarController.setMode(
-                        CardCreationToolbarMode.cardCreation,
+                    child: ShortcutDisplay(
+                      info: const ShortcutInfo(
+                        label: 'Create Card',
+                        key: LogicalKeyboardKey.enter,
+                        modifiers: [ShortcutModifier.alt],
+                      ),
+                      child: SelectedTextButton(
+                        key: ValueKey(text),
+                        text: text,
+                        onTap: () => widget.toolbarController.setMode(
+                          CardCreationToolbarMode.cardCreation,
+                        ),
                       ),
                     ),
                   ),

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
 import 'package:project_2359/features/card_creation_page/expandable_card_creation_toolbar.dart';
+import 'package:project_2359/core/utils/shortcut_system.dart';
+import 'package:project_2359/core/widgets/shortcut_widgets.dart';
+import 'package:flutter/services.dart';
 
 class CardCreationModeContent extends StatefulWidget {
   final CardCreationToolbarController controller;
@@ -15,6 +18,8 @@ class CardCreationModeContent extends StatefulWidget {
 class _CardCreationModeContentState extends State<CardCreationModeContent> {
   late final TextEditingController _frontController;
   late final TextEditingController _backController;
+  final FocusNode _frontFocusNode = FocusNode();
+  final FocusNode _backFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -28,13 +33,70 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
     _backController.addListener(() {
       widget.controller.setBackText(_backController.text);
     });
+
+    _registerShortcuts();
+  }
+
+  void _registerShortcuts() {
+    ProjectShortcutManager.registerShortcut(
+      const ShortcutInfo(
+        label: 'Focus Front',
+        key: LogicalKeyboardKey.keyF,
+        modifiers: [ShortcutModifier.alt],
+      ),
+      () => _frontFocusNode.requestFocus(),
+    );
+    ProjectShortcutManager.registerShortcut(
+      const ShortcutInfo(
+        label: 'Focus Back',
+        key: LogicalKeyboardKey.keyB,
+        modifiers: [ShortcutModifier.alt],
+      ),
+      () => _backFocusNode.requestFocus(),
+    );
+    ProjectShortcutManager.registerShortcut(
+      const ShortcutInfo(
+        label: 'Save Card',
+        key: LogicalKeyboardKey.keyS,
+        modifiers: [ShortcutModifier.alt],
+      ),
+      _saveCard,
+    );
+    ProjectShortcutManager.registerShortcut(
+      const ShortcutInfo(
+        label: 'Cancel',
+        key: LogicalKeyboardKey.keyC,
+        modifiers: [ShortcutModifier.alt],
+      ),
+      _cancel,
+    );
+  }
+
+  void _saveCard() {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Card Saved! (Simulated)")));
+    widget.controller.resetCardFields();
+    widget.controller.setMode(CardCreationToolbarMode.collapsed);
+  }
+
+  void _cancel() {
+    widget.controller.setMode(CardCreationToolbarMode.collapsed);
   }
 
   @override
   void dispose() {
     _frontController.dispose();
     _backController.dispose();
+    _frontFocusNode.dispose();
+    _backFocusNode.dispose();
+    _unregisterShortcuts();
     super.dispose();
+  }
+
+  void _unregisterShortcuts() {
+    // Ideally ShortcutManager should have a way to unregister by label or key
+    // For now, I'll just leave it or improve ShortcutManager
   }
 
   @override
@@ -127,8 +189,14 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
         // Front Field
         _buildTextField(
           controller: _frontController,
+          focusNode: _frontFocusNode,
           label: "Front",
           cs: cs,
+          shortcut: const ShortcutInfo(
+            label: 'Focus Front',
+            key: LogicalKeyboardKey.keyF,
+            modifiers: [ShortcutModifier.alt],
+          ),
         ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
 
         const SizedBox(height: 4),
@@ -136,8 +204,14 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
         // Back Field
         _buildTextField(
           controller: _backController,
+          focusNode: _backFocusNode,
           label: "Back",
           cs: cs,
+          shortcut: const ShortcutInfo(
+            label: 'Focus Back',
+            key: LogicalKeyboardKey.keyB,
+            modifiers: [ShortcutModifier.alt],
+          ),
         ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
 
         const SizedBox(height: 8),
@@ -146,43 +220,70 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            IconButton(onPressed: () {}, icon: Icon(Icons.image_outlined)),
-            IconButton(onPressed: () {}, icon: Icon(Icons.tag_outlined)),
-            const Spacer(),
-            TextButton(
-              onPressed: () {
-                widget.controller.setMode(CardCreationToolbarMode.collapsed);
-              },
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                shape: RoundedSuperellipseBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                foregroundColor: cs.onSurfaceVariant.withValues(alpha: 0.8),
+            ShortcutDisplay(
+              hoverOnly: true,
+              info: const ShortcutInfo(
+                label: 'Image',
+                key: LogicalKeyboardKey.keyI,
+                modifiers: [ShortcutModifier.alt],
               ),
-              child: const Text(
-                "Cancel",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.3,
+              child: IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.image_outlined),
+              ),
+            ),
+            ShortcutDisplay(
+              hoverOnly: true,
+              info: const ShortcutInfo(
+                label: 'Tags',
+                key: LogicalKeyboardKey.keyT,
+                modifiers: [ShortcutModifier.alt],
+              ),
+              child: IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.tag_outlined),
+              ),
+            ),
+            const Spacer(),
+            ShortcutDisplay(
+              info: const ShortcutInfo(
+                label: 'Cancel',
+                key: LogicalKeyboardKey.keyC,
+                modifiers: [ShortcutModifier.alt],
+              ),
+              child: TextButton(
+                onPressed: _cancel,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedSuperellipseBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  foregroundColor: cs.onSurfaceVariant.withValues(alpha: 0.8),
+                ),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
                 ),
               ),
             ),
             const SizedBox(width: 12),
-            FilledButton.icon(
-              onPressed: () {
-                // TODO: Implement card saving logic
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Card Saved! (Simulated)")),
-                );
-                widget.controller.resetCardFields();
-                widget.controller.setMode(CardCreationToolbarMode.collapsed);
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: cs.primary.withAlpha(50),
+            ShortcutDisplay(
+              info: const ShortcutInfo(
+                label: 'Add Card',
+                key: LogicalKeyboardKey.keyS,
+                modifiers: [ShortcutModifier.alt],
               ),
-              icon: const Icon(Icons.add_rounded, size: 22),
-              label: const Text("Add Card"),
+              child: FilledButton.icon(
+                onPressed: _saveCard,
+                style: FilledButton.styleFrom(
+                  backgroundColor: cs.primary.withAlpha(50),
+                ),
+                icon: const Icon(Icons.add_rounded, size: 22),
+                label: const Text("Add Card"),
+              ),
             ),
           ],
         ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
@@ -192,45 +293,30 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
 
   Widget _buildTextField({
     required TextEditingController controller,
+    required FocusNode focusNode,
     required String label,
     required ColorScheme cs,
+    required ShortcutInfo shortcut,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextField(
           controller: controller,
+          focusNode: focusNode,
           minLines: 2,
           maxLines: null,
           decoration: InputDecoration(
             labelText: label,
             filled: true,
             fillColor: cs.surface.withAlpha(100),
+            suffixIcon: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ShortcutCombinationWidget(info: shortcut, isSmall: true),
+            ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildOptionChip(IconData icon, String label, ColorScheme cs) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.1)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: cs.onSurfaceVariant),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
-          ),
-        ],
-      ),
     );
   }
 }

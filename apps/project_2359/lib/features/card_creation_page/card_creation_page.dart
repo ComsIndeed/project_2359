@@ -17,7 +17,10 @@ import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
 import 'package:project_2359/features/card_creation_page/widgets/pdf_occlusion_overlay.dart';
+import 'package:project_2359/core/utils/shortcut_system.dart';
+import 'package:project_2359/core/widgets/shortcut_widgets.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
+import 'package:flutter/services.dart';
 
 class CardCreationPage extends StatefulWidget {
   final String folderId;
@@ -53,15 +56,6 @@ class _CardCreationPageState extends State<CardCreationPage> {
     _initSources();
   }
 
-  @override
-  void dispose() {
-    _sourcesSub?.cancel();
-    _selectionNotifier.dispose();
-    _selectedTextNotifier.dispose();
-    _toolbarController.dispose();
-    super.dispose();
-  }
-
   void _initSources() {
     final service = context.read<SourceService>();
     _sourcesSub = service.watchSourcesByFolderId(widget.folderId).listen((
@@ -73,6 +67,74 @@ class _CardCreationPageState extends State<CardCreationPage> {
         });
       }
     });
+
+    _registerNumericShortcuts();
+  }
+
+  void _registerNumericShortcuts() {
+    final keys = [
+      LogicalKeyboardKey.digit1,
+      LogicalKeyboardKey.digit2,
+      LogicalKeyboardKey.digit3,
+      LogicalKeyboardKey.digit4,
+      LogicalKeyboardKey.digit5,
+      LogicalKeyboardKey.digit6,
+      LogicalKeyboardKey.digit7,
+      LogicalKeyboardKey.digit8,
+      LogicalKeyboardKey.digit9,
+      LogicalKeyboardKey.digit0,
+    ];
+
+    for (int i = 0; i < 10; i++) {
+      ProjectShortcutManager.registerShortcut(
+        ShortcutInfo(
+          label: 'Select Source ${i + 1}',
+          key: keys[i],
+          modifiers: [ShortcutModifier.alt],
+        ),
+        () {
+          if (_pdfBytes == null &&
+              _availableSources != null &&
+              _availableSources!.length > i) {
+            _loadSource(_availableSources![i]);
+          }
+        },
+      );
+    }
+  }
+
+  void _unregisterNumericShortcuts() {
+    final keys = [
+      LogicalKeyboardKey.digit1,
+      LogicalKeyboardKey.digit2,
+      LogicalKeyboardKey.digit3,
+      LogicalKeyboardKey.digit4,
+      LogicalKeyboardKey.digit5,
+      LogicalKeyboardKey.digit6,
+      LogicalKeyboardKey.digit7,
+      LogicalKeyboardKey.digit8,
+      LogicalKeyboardKey.digit9,
+      LogicalKeyboardKey.digit0,
+    ];
+    for (int i = 0; i < 10; i++) {
+      ProjectShortcutManager.unregisterShortcut(
+        ShortcutInfo(
+          label: 'Select Source ${i + 1}',
+          key: keys[i],
+          modifiers: [ShortcutModifier.alt],
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _sourcesSub?.cancel();
+    _unregisterNumericShortcuts();
+    _selectionNotifier.dispose();
+    _selectedTextNotifier.dispose();
+    _toolbarController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadSource(SourceItem source) async {
@@ -171,7 +233,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
                   ),
                 ),
               ),
-              leadingWidth: 100, // accommodate 'Back' text
+              leadingWidth: 120, // accommodate 'Back' text + shortcut
               leading: ProjectBackButton(
                 color: Colors.white,
                 onPressed: () {
@@ -287,22 +349,44 @@ class _CardCreationPageState extends State<CardCreationPage> {
             )
           else
             Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // TODO: Make this use a list view
                 for (var i = 0; i < _availableSources!.length; i++)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child:
-                        ProjectCardTile(
-                              backgroundColor: cs.surfaceContainerHighest
-                                  .withValues(alpha: 0.5),
-                              minHeight: 100,
-                              title: Text(_availableSources![i].label),
-                              subtitle: Text(
-                                "${_availableSources![i].type.toUpperCase()} | ${_availableSources![i].extractedContent?.length ?? 0} chars",
+                        ShortcutDisplay(
+                              showInline: true,
+                              info: i < 10
+                                  ? ShortcutInfo(
+                                      label: 'Select',
+                                      key: [
+                                        LogicalKeyboardKey.digit1,
+                                        LogicalKeyboardKey.digit2,
+                                        LogicalKeyboardKey.digit3,
+                                        LogicalKeyboardKey.digit4,
+                                        LogicalKeyboardKey.digit5,
+                                        LogicalKeyboardKey.digit6,
+                                        LogicalKeyboardKey.digit7,
+                                        LogicalKeyboardKey.digit8,
+                                        LogicalKeyboardKey.digit9,
+                                        LogicalKeyboardKey.digit0,
+                                      ][i],
+                                      modifiers: [ShortcutModifier.alt],
+                                    )
+                                  : null,
+                              child: ProjectCardTile(
+                                backgroundColor: cs.surfaceContainerHighest
+                                    .withValues(alpha: 0.5),
+                                minHeight: 100,
+                                title: Text(_availableSources![i].label),
+                                subtitle: Text(
+                                  "${_availableSources![i].type.toUpperCase()} | ${_availableSources![i].extractedContent?.length ?? 0} chars",
+                                ),
+                                leading: const WizardSourcePagePreview(),
+                                onTap: () => _loadSource(_availableSources![i]),
                               ),
-                              leading: const WizardSourcePagePreview(),
-                              onTap: () => _loadSource(_availableSources![i]),
                             )
                             .animate()
                             .fadeIn(delay: (i * 100).ms)
