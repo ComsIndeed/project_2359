@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/widgets/expandable_container.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_mode_content.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
 import 'package:project_2359/features/card_creation_page/selected_text_button.dart';
@@ -16,14 +17,12 @@ class ExpandableCardCreationToolbar extends StatefulWidget {
     required this.context,
     required this.containerController,
     required this.toolbarController,
-    required this.useVerticalToolbar,
     required this.selectionNotifier,
     required this.selectedTextNotifier,
   });
 
   final BuildContext context;
   final ExpandableContainerController containerController;
-  final bool useVerticalToolbar;
   final ValueNotifier<dynamic> selectionNotifier;
   final ValueNotifier<String?> selectedTextNotifier;
   final CardCreationToolbarController toolbarController;
@@ -60,34 +59,40 @@ class _ExpandableCardCreationToolbarState
     return ListenableBuilder(
       listenable: widget.toolbarController,
       builder: (context, _) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Stack(
-              children: [
-                if (widget.toolbarController.mode !=
-                    CardCreationToolbarMode.collapsed)
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      onPressed: () => widget.toolbarController.setMode(
-                        CardCreationToolbarMode.collapsed,
-                      ),
-                      icon: const Icon(Icons.close),
-                    ).animate().scale().fadeIn(),
+        final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: isMobile ? double.infinity : 720,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Stack(
+                children: [
+                  if (widget.toolbarController.mode !=
+                      CardCreationToolbarMode.collapsed)
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                        onPressed: () => widget.toolbarController.setMode(
+                          CardCreationToolbarMode.collapsed,
+                        ),
+                        icon: const Icon(Icons.close),
+                      ).animate().scale().fadeIn(),
+                    ),
+                  Padding(
+                    padding:
+                        widget.toolbarController.mode !=
+                            CardCreationToolbarMode.collapsed
+                        ? const EdgeInsets.only(top: 32.0)
+                        : EdgeInsets.zero,
+                    child: _buildContent(context),
                   ),
-                Padding(
-                  padding:
-                      widget.toolbarController.mode !=
-                          CardCreationToolbarMode.collapsed
-                      ? const EdgeInsets.only(top: 32.0)
-                      : EdgeInsets.zero,
-                  child: _buildContent(context),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         );
       },
     );
@@ -109,14 +114,11 @@ class _ExpandableCardCreationToolbarState
 
     return ClipRect(
       child: Flex(
-        direction: widget.useVerticalToolbar ? Axis.vertical : Axis.horizontal,
+        direction: Axis.horizontal,
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          if (widget.useVerticalToolbar)
-            _buildTextButtonContent()
-          else
-            Expanded(child: _buildTextButtonContent()),
+          Expanded(child: _buildTextButtonContent()),
           IconButton(
             onPressed: () => widget.toolbarController.setMode(
               CardCreationToolbarMode.imageOcclusion,
@@ -170,10 +172,8 @@ class _ExpandableCardCreationToolbarState
                   // Ensure the button is constrained on desktop
                   data: Theme.of(context),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: widget.useVerticalToolbar
-                          ? 280
-                          : double.infinity,
+                    constraints: const BoxConstraints(
+                      maxWidth: double.infinity,
                     ),
                     child: SelectedTextButton(
                       key: ValueKey(text),

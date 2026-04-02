@@ -8,8 +8,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:project_2359/features/card_creation_page/expandable_card_creation_toolbar.dart';
 import 'package:provider/provider.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/settings/labs_settings.dart';
 import 'package:project_2359/core/widgets/expandable_container.dart';
@@ -110,18 +108,11 @@ class _CardCreationPageState extends State<CardCreationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveBreakpoints.of(context).isDesktop;
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
     return ListenableBuilder(
       listenable: labsSettings,
       builder: (context, _) {
-        final useVerticalToolbar = isDesktop || isLandscape;
-
         return ExpandableContainer(
-          initialAlignment: useVerticalToolbar
-              ? Alignment.centerRight
-              : Alignment.bottomCenter,
+          initialAlignment: Alignment.bottomCenter,
           boundaryMargins: const EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 2,
@@ -136,7 +127,6 @@ class _CardCreationPageState extends State<CardCreationPage> {
             context: context,
             containerController: controller,
             toolbarController: _toolbarController,
-            useVerticalToolbar: useVerticalToolbar,
             selectionNotifier: _selectionNotifier,
             selectedTextNotifier: _selectedTextNotifier,
           ),
@@ -226,12 +216,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
                 controller: _controller,
                 useProgressiveLoading: true,
                 params: PdfViewerParams(
-                  boundaryMargin: EdgeInsets.only(
-                    left: 256,
-                    right: ResponsiveBreakpoints.of(context).isMobile
-                        ? 256
-                        : 800,
-                  ),
+                  boundaryMargin: const EdgeInsets.symmetric(horizontal: 256),
                   margin: 8,
                   onViewerReady: (doc, controller) {
                     if (mounted) {
