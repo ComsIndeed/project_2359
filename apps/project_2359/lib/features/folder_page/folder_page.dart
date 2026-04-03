@@ -38,7 +38,7 @@ class FolderPage extends StatefulWidget {
 class _FolderPageState extends State<FolderPage> {
   late String folderName;
   final Set<String> _selectedMaterialIds = {};
-  List<StudyMaterialItem> _allMaterials = [];
+  List<DeckItem> _allMaterials = [];
   StreamSubscription? _materialSub;
   List<SourceItem>? _currentSources;
   StreamSubscription? _sourcesSub;
@@ -130,7 +130,7 @@ class _FolderPageState extends State<FolderPage> {
         false;
   }
 
-  late Stream<List<StudyMaterialItem>> _materialsStream;
+  late Stream<List<DeckItem>> _materialsStream;
 
   Future<void> _importSources() async {
     try {
@@ -796,7 +796,7 @@ class _CompactIconButton extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _CardsPage extends StatelessWidget {
-  final List<StudyMaterialItem> materials;
+  final List<DeckItem> materials;
   final String folderId;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
@@ -1066,7 +1066,7 @@ class _SettingsPage extends StatelessWidget {
 // DELETED _ActionButtonChip
 
 class _StudyMaterialsList extends StatelessWidget {
-  final List<StudyMaterialItem> materials;
+  final List<DeckItem> materials;
   final String folderId;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;

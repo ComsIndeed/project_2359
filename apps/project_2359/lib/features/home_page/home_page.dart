@@ -1,25 +1,26 @@
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:responsive_framework/responsive_framework.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+
+import 'package:project_2359/app_database.dart';
+import 'package:project_2359/core/study_database_service.dart';
+import 'package:project_2359/core/utils/logger.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/core/widgets/special_search_bar.dart';
-import 'package:project_2359/features/sources_page/source_service.dart';
-import 'package:project_2359/app_database.dart';
-import 'package:project_2359/features/folder_page/folder_page.dart';
-import 'package:project_2359/features/settings_page/settings_page.dart';
-import 'package:project_2359/core/study_database_service.dart';
-import 'package:project_2359/core/utils/logger.dart';
-import 'package:provider/provider.dart';
-import 'package:project_2359/features/source_page/source_page.dart';
-import 'package:project_2359/layouts/landscape/home_page_landscape_layout.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_page.dart';
+import 'package:project_2359/features/folder_page/folder_page.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
+import 'package:project_2359/features/settings_page/settings_page.dart';
+import 'package:project_2359/features/source_page/source_page.dart';
+import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/layouts/landscape/home_page_landscape_layout.dart';
 
 enum MainContentType { empty, study, sourceDetail, settings }
 
@@ -34,14 +35,14 @@ class _HomePageState extends State<HomePage> {
   final Set<String> _selectedFolderIds = {};
   final Set<String> _selectedMaterialIds = {};
   List<StudyFolderItem> _allFolders = [];
-  List<StudyMaterialItem> _allMaterials = [];
+  List<DeckItem> _allMaterials = [];
   StreamSubscription? _folderSub;
   StreamSubscription? _materialSub;
 
   // New state for responsive desktop layout
   String? _selectedFolderId;
-  String? _selectedMaterialId;
-  String? _selectedMaterialName;
+  String? _selectedDeckId;
+  String? _selectedDeckName;
   String? _selectedSourceId;
   Uint8List? _selectedSourceBlob;
   MainContentType _mainContentType = MainContentType.empty;
@@ -78,8 +79,8 @@ class _HomePageState extends State<HomePage> {
   }) {
     setState(() {
       _mainContentType = type;
-      _selectedMaterialId = materialId;
-      _selectedMaterialName = materialName;
+      _selectedDeckId = materialId;
+      _selectedDeckName = materialName;
       _selectedSourceId = sourceId;
       _selectedSourceBlob = sourceBlob;
     });
@@ -219,14 +220,14 @@ class _HomePageState extends State<HomePage> {
                 allSelected.isNotEmpty &&
                 allSelected.every((i) {
                   if (i is StudyFolderItem) return i.isPinned;
-                  if (i is StudyMaterialItem) return i.isPinned;
+                  if (i is DeckItem) return i.isPinned;
                   return false;
                 });
             final allUnpinned =
                 allSelected.isNotEmpty &&
                 allSelected.every((i) {
                   if (i is StudyFolderItem) return !i.isPinned;
-                  if (i is StudyMaterialItem) return !i.isPinned;
+                  if (i is DeckItem) return !i.isPinned;
                   return false;
                 });
             final isMixed = !allPinned && !allUnpinned;
@@ -381,7 +382,7 @@ class _HomePageState extends State<HomePage> {
           onSelect: (id) => setState(() {
             _selectedFolderId = id;
             _mainContentType = MainContentType.empty;
-            _selectedMaterialId = null;
+            _selectedDeckId = null;
           }),
           isSelecting: _isSelecting,
           isLandscape: true,
@@ -397,7 +398,7 @@ class _HomePageState extends State<HomePage> {
           onSelect: (id) => setState(() {
             _selectedFolderId = id;
             _mainContentType = MainContentType.empty;
-            _selectedMaterialId = null;
+            _selectedDeckId = null;
           }),
           isSelecting: _isSelecting,
           isLandscape: true,
@@ -470,7 +471,7 @@ class _HomePageState extends State<HomePage> {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                StreamBuilder<List<StudyMaterialItem>>(
+                StreamBuilder<List<DeckItem>>(
                   stream: materialsStream,
                   builder: (context, snapshot) {
                     final materials = snapshot.data ?? [];
@@ -499,7 +500,7 @@ class _HomePageState extends State<HomePage> {
                                         subtitle: Text(
                                           m.description ?? "Card Pack",
                                         ),
-                                        isSelected: _selectedMaterialId == m.id,
+                                        isSelected: _selectedDeckId == m.id,
                                         isCompact: true,
                                         leading: const WizardFlashcardPreview(),
                                         onTap: () {
@@ -596,7 +597,7 @@ class _HomePageState extends State<HomePage> {
 
     switch (_mainContentType) {
       case MainContentType.study:
-        if (_selectedMaterialId != null) {
+        if (_selectedDeckId != null) {
           return Center(child: Text("Study Page"));
         }
         break;

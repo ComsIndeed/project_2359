@@ -25,20 +25,16 @@ class StudyDatabaseService {
 
   Stream<List<(StudyFolderItem, int)>> watchPinnedFoldersWithStats() {
     AppLogger.debug('Watching pinned folders with stats', tag: _tag);
-    final count = _db.studyCardItems.id.count();
+    final count = _db.cardItems.id.count();
     final query =
         _db.select(_db.studyFolderItems).join([
             leftOuterJoin(
-              _db.studyMaterialItems,
-              _db.studyMaterialItems.folderId.equalsExp(
-                _db.studyFolderItems.id,
-              ),
+              _db.deckItems,
+              _db.deckItems.folderId.equalsExp(_db.studyFolderItems.id),
             ),
             leftOuterJoin(
-              _db.studyCardItems,
-              _db.studyCardItems.materialId.equalsExp(
-                _db.studyMaterialItems.id,
-              ),
+              _db.cardItems,
+              _db.cardItems.deckId.equalsExp(_db.deckItems.id),
             ),
           ])
           ..where(_db.studyFolderItems.isPinned.equals(true))
@@ -55,20 +51,16 @@ class StudyDatabaseService {
 
   Stream<List<(StudyFolderItem, int)>> watchUnpinnedFoldersWithStats() {
     AppLogger.debug('Watching unpinned folders with stats', tag: _tag);
-    final count = _db.studyCardItems.id.count();
+    final count = _db.cardItems.id.count();
     final query =
         _db.select(_db.studyFolderItems).join([
             leftOuterJoin(
-              _db.studyMaterialItems,
-              _db.studyMaterialItems.folderId.equalsExp(
-                _db.studyFolderItems.id,
-              ),
+              _db.deckItems,
+              _db.deckItems.folderId.equalsExp(_db.studyFolderItems.id),
             ),
             leftOuterJoin(
-              _db.studyCardItems,
-              _db.studyCardItems.materialId.equalsExp(
-                _db.studyMaterialItems.id,
-              ),
+              _db.cardItems,
+              _db.cardItems.deckId.equalsExp(_db.deckItems.id),
             ),
           ])
           ..where(_db.studyFolderItems.isPinned.equals(false))
@@ -116,19 +108,19 @@ class StudyDatabaseService {
     await _db.transaction(() async {
       // 1. Get all materials (packs) in this folder
       final materials = await (_db.select(
-        _db.studyMaterialItems,
+        _db.deckItems,
       )..where((t) => t.folderId.equals(id))).get();
 
       // 2. For each material, delete its cards
       for (final material in materials) {
         await (_db.delete(
-          _db.studyCardItems,
-        )..where((t) => t.materialId.equals(material.id))).go();
+          _db.cardItems,
+        )..where((t) => t.deckId.equals(material.id))).go();
       }
 
       // 3. Delete materials
       await (_db.delete(
-        _db.studyMaterialItems,
+        _db.deckItems,
       )..where((t) => t.folderId.equals(id))).go();
 
       // 4. Delete sources (if they also belong to folders)
@@ -161,32 +153,30 @@ class StudyDatabaseService {
 
   // --- Materials (Packs) ---
 
-  Future<List<StudyMaterialItem>> getMaterialsByFolderId(
-    String folderId,
-  ) async {
+  Future<List<DeckItem>> getMaterialsByFolderId(String folderId) async {
     AppLogger.debug('Fetching materials for folder: $folderId', tag: _tag);
     return await (_db.select(
-      _db.studyMaterialItems,
+      _db.deckItems,
     )..where((t) => t.folderId.equals(folderId))).get();
   }
 
-  Stream<List<StudyMaterialItem>> watchMaterialsByFolderId(String folderId) {
+  Stream<List<DeckItem>> watchMaterialsByFolderId(String folderId) {
     AppLogger.debug('Watching materials for folder: $folderId', tag: _tag);
     return (_db.select(
-      _db.studyMaterialItems,
+      _db.deckItems,
     )..where((t) => t.folderId.equals(folderId))).watch();
   }
 
-  Stream<List<StudyMaterialItem>> watchPinnedMaterials() {
+  Stream<List<DeckItem>> watchPinnedMaterials() {
     AppLogger.debug('Watching pinned materials', tag: _tag);
     return (_db.select(
-      _db.studyMaterialItems,
+      _db.deckItems,
     )..where((t) => t.isPinned.equals(true))).watch();
   }
 
-  Stream<List<StudyMaterialItem>> watchAllMaterials() {
+  Stream<List<DeckItem>> watchAllMaterials() {
     AppLogger.debug('Watching all materials', tag: _tag);
-    return _db.select(_db.studyMaterialItems).watch();
+    return _db.select(_db.deckItems).watch();
   }
 
   Future<void> toggleMaterialPin(String id, bool isPinned) async {
@@ -194,54 +184,51 @@ class StudyDatabaseService {
       '${isPinned ? 'Pinning' : 'Unpinning'} material: $id',
       tag: _tag,
     );
-    await (_db.update(_db.studyMaterialItems)..where((t) => t.id.equals(id)))
-        .write(StudyMaterialItemsCompanion(isPinned: Value(isPinned)));
+    await (_db.update(_db.deckItems)..where((t) => t.id.equals(id))).write(
+      DeckItemsCompanion(isPinned: Value(isPinned)),
+    );
   }
 
-  Future<void> insertMaterial(StudyMaterialItemsCompanion material) async {
+  Future<void> insertMaterial(DeckItemsCompanion material) async {
     AppLogger.info('Inserting material: ${material.name.value}', tag: _tag);
-    await _db.into(_db.studyMaterialItems).insert(material);
+    await _db.into(_db.deckItems).insert(material);
   }
 
   Future<void> deleteMaterial(String id) async {
     AppLogger.warning('Deleting material and its cards: $id', tag: _tag);
     await _db.transaction(() async {
       // Delete cards first
-      await (_db.delete(
-        _db.studyCardItems,
-      )..where((t) => t.materialId.equals(id))).go();
+      await (_db.delete(_db.cardItems)..where((t) => t.deckId.equals(id))).go();
       // Then delete material
-      await (_db.delete(
-        _db.studyMaterialItems,
-      )..where((t) => t.id.equals(id))).go();
+      await (_db.delete(_db.deckItems)..where((t) => t.id.equals(id))).go();
     });
   }
 
   // --- Cards ---
 
-  Future<List<StudyCardItem>> getCardsByMaterialId(String materialId) async {
+  Future<List<CardItem>> getCardsByMaterialId(String materialId) async {
     AppLogger.debug('Fetching cards for material: $materialId', tag: _tag);
     return await (_db.select(
-      _db.studyCardItems,
-    )..where((t) => t.materialId.equals(materialId))).get();
+      _db.cardItems,
+    )..where((t) => t.deckId.equals(materialId))).get();
   }
 
-  Stream<List<StudyCardItem>> watchCardsByMaterialId(String materialId) {
+  Stream<List<CardItem>> watchCardsByMaterialId(String materialId) {
     AppLogger.debug('Watching cards for material: $materialId', tag: _tag);
     return (_db.select(
-      _db.studyCardItems,
-    )..where((t) => t.materialId.equals(materialId))).watch();
+      _db.cardItems,
+    )..where((t) => t.deckId.equals(materialId))).watch();
   }
 
-  Future<void> insertCard(StudyCardItemsCompanion card) async {
+  Future<void> insertCard(CardItemsCompanion card) async {
     AppLogger.info('Inserting new card', tag: _tag);
-    await _db.into(_db.studyCardItems).insert(card);
+    await _db.into(_db.cardItems).insert(card);
   }
 
-  Future<void> insertCards(List<StudyCardItemsCompanion> cards) async {
+  Future<void> insertCards(List<CardItemsCompanion> cards) async {
     AppLogger.info('Inserting batch of ${cards.length} cards', tag: _tag);
     await _db.batch((batch) {
-      batch.insertAll(_db.studyCardItems, cards);
+      batch.insertAll(_db.cardItems, cards);
     });
   }
 
@@ -253,24 +240,24 @@ class StudyDatabaseService {
 
   Future<void> deleteCard(String id) async {
     AppLogger.warning('Deleting card: $id', tag: _tag);
-    await (_db.delete(_db.studyCardItems)..where((t) => t.id.equals(id))).go();
+    await (_db.delete(_db.cardItems)..where((t) => t.id.equals(id))).go();
   }
 
   // --- Combined Operations ---
 
   /// Creates a material (pack) and all its cards in a single transaction.
   Future<void> createMaterialWithCards({
-    required StudyMaterialItemsCompanion material,
-    required List<StudyCardItemsCompanion> cards,
+    required DeckItemsCompanion material,
+    required List<CardItemsCompanion> cards,
   }) async {
     AppLogger.info(
       'Creating material "${material.name.value}" with ${cards.length} cards',
       tag: _tag,
     );
     await _db.transaction(() async {
-      await _db.into(_db.studyMaterialItems).insert(material);
+      await _db.into(_db.deckItems).insert(material);
       await _db.batch((batch) {
-        batch.insertAll(_db.studyCardItems, cards);
+        batch.insertAll(_db.cardItems, cards);
       });
     });
   }

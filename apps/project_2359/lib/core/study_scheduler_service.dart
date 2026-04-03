@@ -15,11 +15,11 @@ class StudySchedulerService {
   StudySchedulerService(this._db);
 
   /// Cards are due if `due` is null (never reviewed) or <= now.
-  Future<List<StudyCardItem>> getCardsDue(String materialId) async {
+  Future<List<CardItem>> getCardsDue(String deckId) async {
     final now = DateTime.now().toUtc().toIso8601String();
-    return await (_db.select(_db.studyCardItems)..where(
+    return await (_db.select(_db.cardItems)..where(
           (t) =>
-              t.materialId.equals(materialId) &
+              t.deckId.equals(deckId) &
               (t.due.isNull() | t.due.isSmallerOrEqualValue(now)),
         ))
         .get();
@@ -30,11 +30,11 @@ class StudySchedulerService {
     return cards.length;
   }
 
-  Stream<int> watchDueCount(String materialId) {
+  Stream<int> watchDueCount(String deckId) {
     final now = DateTime.now().toUtc().toIso8601String();
-    return (_db.select(_db.studyCardItems)..where(
+    return (_db.select(_db.cardItems)..where(
           (t) =>
-              t.materialId.equals(materialId) &
+              t.deckId.equals(deckId) &
               (t.due.isNull() | t.due.isSmallerOrEqualValue(now)),
         ))
         .watch()
@@ -44,7 +44,7 @@ class StudySchedulerService {
   Future<void> recordReview(String cardId, Rating rating) async {
     // 1. Fetch the row
     final row = await (_db.select(
-      _db.studyCardItems,
+      _db.cardItems,
     )..where((t) => t.id.equals(cardId))).getSingle();
 
     // 2. Reconstruct the fsrs Card from stored JSON, or create a fresh one
@@ -63,10 +63,8 @@ class StudySchedulerService {
     final (:card, :reviewLog) = _scheduler.reviewCard(fsrsCard, rating);
 
     // 4. Serialize and write back
-    await (_db.update(
-      _db.studyCardItems,
-    )..where((t) => t.id.equals(cardId))).write(
-      StudyCardItemsCompanion(
+    await (_db.update(_db.cardItems)..where((t) => t.id.equals(cardId))).write(
+      CardItemsCompanion(
         due: Value(card.due.toUtc().toIso8601String()),
         fsrsCardJson: Value(jsonEncode(card.toMap())),
       ),
@@ -95,7 +93,7 @@ class StudySchedulerService {
           StudySessionEventsCompanion.insert(
             id: const Uuid().v4(),
             cardId: cardId,
-            materialId: row.materialId,
+            deckId: row.deckId,
             rating: rating.index,
             reviewedAt: reviewLog.reviewDateTime.toUtc().toIso8601String(),
             scheduledDays: scheduledDays,
@@ -106,7 +104,7 @@ class StudySchedulerService {
 
   /// Retrievability: probability (0–1) the user still remembers this card right now.
   /// Useful for a "health" indicator on the material detail page later.
-  double? getRetrievability(StudyCardItem row) {
+  double? getRetrievability(CardItem row) {
     if (row.fsrsCardJson == null) return null;
     final fsrsCard = Card.fromMap(
       Map<String, dynamic>.from(jsonDecode(row.fsrsCardJson!)),
