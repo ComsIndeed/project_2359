@@ -3,10 +3,11 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart' as path;
 import 'package:project_2359/core/tables/source_item_blobs.dart';
 import 'package:project_2359/core/tables/source_items.dart';
-import 'package:project_2359/core/tables/study_material_items.dart';
+import 'package:project_2359/core/tables/deck_items.dart';
 import 'package:project_2359/core/tables/study_folder_items.dart';
-import 'package:project_2359/core/tables/study_card_items.dart';
+import 'package:project_2359/core/tables/card_items.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
+import 'package:project_2359/core/tables/citation_items.dart';
 import 'package:project_2359/core/utils/logger.dart';
 
 part 'app_database.g.dart';
@@ -14,11 +15,12 @@ part 'app_database.g.dart';
 @DriftDatabase(
   tables: [
     SourceItems,
-    StudyMaterialItems,
+    DeckItems,
     StudyFolderItems,
     SourceItemBlobs,
-    StudyCardItems,
+    CardItems,
     StudySessionEvents,
+    CitationItems,
   ],
 )
 class AppDatabase extends _$AppDatabase {

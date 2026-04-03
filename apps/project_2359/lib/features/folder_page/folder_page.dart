@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import 'package:project_2359/app_database.dart';
-import 'package:project_2359/core/study_material_service.dart';
+import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/core/widgets/card_button.dart';
 import 'package:project_2359/core/widgets/special_background_generator.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
@@ -10,7 +10,6 @@ import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
-import 'package:project_2359/features/study/study_page.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
@@ -81,7 +80,7 @@ class _FolderPageState extends State<FolderPage> {
   }
 
   Future<void> _handlePinSelected({required bool pin}) async {
-    final service = context.read<StudyMaterialService>();
+    final service = context.read<StudyDatabaseService>();
     for (final id in _selectedMaterialIds) {
       await service.toggleMaterialPin(id, pin);
     }
@@ -95,7 +94,7 @@ class _FolderPageState extends State<FolderPage> {
     final confirmed = await _showMultiDeleteConfirmation(context, count: count);
     if (!confirmed || !mounted) return;
 
-    final service = context.read<StudyMaterialService>();
+    final service = context.read<StudyDatabaseService>();
     for (final id in _selectedMaterialIds) {
       await service.deleteMaterial(id);
     }
@@ -196,7 +195,7 @@ class _FolderPageState extends State<FolderPage> {
   void initState() {
     super.initState();
     folderName = widget.initialFolderName;
-    final service = context.read<StudyMaterialService>();
+    final service = context.read<StudyDatabaseService>();
     _materialsStream = service.watchMaterialsByFolderId(widget.folderId);
     _materialSub = _materialsStream.listen((materials) {
       if (mounted) setState(() => _allMaterials = materials);
@@ -218,7 +217,7 @@ class _FolderPageState extends State<FolderPage> {
       _materialSub?.cancel();
       _sourcesSub?.cancel();
 
-      final service = context.read<StudyMaterialService>();
+      final service = context.read<StudyDatabaseService>();
       _materialsStream = service.watchMaterialsByFolderId(widget.folderId);
       _materialSub = _materialsStream.listen((materials) {
         if (mounted) setState(() => _allMaterials = materials);
@@ -1017,7 +1016,7 @@ class _SettingsPage extends StatelessWidget {
                 icon: FontAwesomeIcons.trashCan,
                 isAlert: true,
                 onTap: () async {
-                  final service = context.read<StudyMaterialService>();
+                  final service = context.read<StudyDatabaseService>();
                   final confirmed =
                       await showDialog<bool>(
                         context: context,
@@ -1146,10 +1145,8 @@ class _StudyMaterialsList extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => StudyPage(
-                                    materialId: materials[i].id,
-                                    materialName: materials[i].name,
-                                  ),
+                                  builder: (context) =>
+                                      Center(child: Text("Study Page")),
                                 ),
                               );
                             },

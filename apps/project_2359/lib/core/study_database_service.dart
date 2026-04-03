@@ -3,11 +3,11 @@ import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/utils/logger.dart';
 
 /// Service for CRUD operations on study folders, materials (packs), and cards.
-class StudyMaterialService {
+class StudyDatabaseService {
   final AppDatabase _db;
-  static const String _tag = 'StudyMaterialService';
+  static const String _tag = 'StudyDatabaseService';
 
-  StudyMaterialService(this._db);
+  StudyDatabaseService(this._db);
 
   // --- Folders ---
 

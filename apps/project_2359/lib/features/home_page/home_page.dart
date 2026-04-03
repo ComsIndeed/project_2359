@@ -13,10 +13,9 @@ import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/features/folder_page/folder_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
-import 'package:project_2359/core/study_material_service.dart';
+import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/core/utils/logger.dart';
 import 'package:provider/provider.dart';
-import 'package:project_2359/features/study/study_page.dart';
 import 'package:project_2359/features/source_page/source_page.dart';
 import 'package:project_2359/layouts/landscape/home_page_landscape_layout.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_page.dart';
@@ -108,7 +107,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _handlePinSelected({required bool pin}) async {
-    final service = context.read<StudyMaterialService>();
+    final service = context.read<StudyDatabaseService>();
     for (final id in _selectedFolderIds) {
       await service.toggleFolderPin(id, pin);
     }
@@ -125,7 +124,7 @@ class _HomePageState extends State<HomePage> {
     final confirmed = await _showDeleteConfirmation(context, count: count);
     if (!confirmed || !mounted) return;
 
-    final service = context.read<StudyMaterialService>();
+    final service = context.read<StudyDatabaseService>();
     for (final id in _selectedFolderIds) {
       await service.deleteFolder(id);
     }
@@ -172,7 +171,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     AppLogger.info('Initializing HomePage...', tag: 'HomePage');
-    final service = context.read<StudyMaterialService>();
+    final service = context.read<StudyDatabaseService>();
     _foldersStream = service.watchUnpinnedFoldersWithStats();
     _pinnedFoldersStream = service.watchPinnedFoldersWithStats();
 
@@ -411,7 +410,7 @@ class _HomePageState extends State<HomePage> {
     final theme = Theme.of(context);
     if (_selectedFolderId == null) return const SizedBox.shrink();
 
-    final service = context.read<StudyMaterialService>();
+    final service = context.read<StudyDatabaseService>();
     final materialsStream = service.watchMaterialsByFolderId(
       _selectedFolderId!,
     );
@@ -598,12 +597,7 @@ class _HomePageState extends State<HomePage> {
     switch (_mainContentType) {
       case MainContentType.study:
         if (_selectedMaterialId != null) {
-          return StudyPage(
-            key: ValueKey('study_$_selectedMaterialId'),
-            materialId: _selectedMaterialId!,
-            materialName: _selectedMaterialName ?? "Material",
-            showBackButton: !isLandscape,
-          );
+          return Center(child: Text("Study Page"));
         }
         break;
       case MainContentType.sourceDetail:
@@ -1244,7 +1238,7 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
 
     setState(() => isCreatingFolder = true);
     try {
-      final service = context.read<StudyMaterialService>();
+      final service = context.read<StudyDatabaseService>();
       final id = DateTime.now().millisecondsSinceEpoch.toString();
       await service.insertFolder(
         StudyFolderItemsCompanion.insert(

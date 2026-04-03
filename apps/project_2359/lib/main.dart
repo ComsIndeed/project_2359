@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:project_2359/app_database.dart';
-import 'package:project_2359/core/study_material_service.dart';
+import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/core/study_scheduler_service.dart';
 import 'package:project_2359/features/home_page/home_page.dart';
 import 'package:project_2359/app_theme.dart';
@@ -44,7 +44,7 @@ Future<void> main() async {
   AppLogger.info('Initializing services...', tag: 'Main');
   final database = AppDatabase();
   final sourceService = SourceService(database);
-  final studyMaterialService = StudyMaterialService(database);
+  final studyMaterialService = StudyDatabaseService(database);
   final studySchedulerService = StudySchedulerService(database);
 
   runApp(
@@ -52,7 +52,7 @@ Future<void> main() async {
       providers: [
         RepositoryProvider<AppDatabase>.value(value: database),
         RepositoryProvider<SourceService>.value(value: sourceService),
-        RepositoryProvider<StudyMaterialService>.value(
+        RepositoryProvider<StudyDatabaseService>.value(
           value: studyMaterialService,
         ),
         RepositoryProvider.value(value: studySchedulerService),

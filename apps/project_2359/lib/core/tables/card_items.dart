@@ -1,19 +1,18 @@
 import 'package:drift/drift.dart';
-import 'package:project_2359/core/tables/study_material_items.dart';
+import 'package:project_2359/core/tables/deck_items.dart';
 
 /// The type of study material.
-enum StudyCardType {
+enum CardType {
   flashcard,
   multipleChoiceQuestion,
   freeTextQuestion,
   imageOcclusion,
 }
 
-class StudyCardItems extends Table {
+class CardItems extends Table {
   TextColumn get id => text()();
-  TextColumn get materialId => text().references(StudyMaterialItems, #id)();
-  TextColumn get type => text()(); // Store as StudyCardType.name
-  TextColumn get citationJson => text().nullable()();
+  TextColumn get deckId => text().references(DeckItems, #id)();
+  TextColumn get type => text()(); // Store as CardType.name
 
   /// Fields are nullable because not all types use the same properties.
   /// - Flashcard: question (front), answer (back)
