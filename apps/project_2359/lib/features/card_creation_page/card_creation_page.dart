@@ -213,100 +213,102 @@ class _CardCreationPageState extends State<CardCreationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: labsSettings,
-      builder: (context, _) {
-        return ExpandableContainer(
-          initialAlignment: Alignment.bottomCenter,
-          boundaryMargins: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 2,
-          ),
-          initialBorder: BorderSide(
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurface.withValues(alpha: 0.5),
-            width: 1,
-          ),
-          controller: _containerController,
-          builder: (context, controller) => ExpandableCardCreationToolbar(
-            context: context,
-            containerController: controller,
-            toolbarController: _toolbarController,
-            selectionNotifier: _selectionNotifier,
-            selectedTextNotifier: _selectedTextNotifier,
-          ),
-          child: Scaffold(
-            backgroundColor: Colors.black,
-            extendBodyBehindAppBar: true,
-            appBar: AppBar(
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              centerTitle: true,
-              title: Text(
-                _pdfTitle ?? 'Create Card',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Colors.white,
+    return Scaffold(
+      body: ListenableBuilder(
+        listenable: labsSettings,
+        builder: (context, _) {
+          return ExpandableContainer(
+            initialAlignment: Alignment.bottomCenter,
+            boundaryMargins: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 2,
+            ),
+            initialBorder: BorderSide(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
+              width: 1,
+            ),
+            controller: _containerController,
+            builder: (context, controller) => ExpandableCardCreationToolbar(
+              context: context,
+              containerController: controller,
+              toolbarController: _toolbarController,
+              selectionNotifier: _selectionNotifier,
+              selectedTextNotifier: _selectedTextNotifier,
+            ),
+            child: Scaffold(
+              backgroundColor: Colors.black,
+              extendBodyBehindAppBar: true,
+              appBar: AppBar(
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                centerTitle: true,
+                title: Text(
+                  _pdfTitle ?? 'Create Card',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              flexibleSpace: ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.25),
-                          width: 1,
+                flexibleSpace: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.25),
+                            width: 1,
+                          ),
                         ),
-                      ),
-                      color: Colors.black.withValues(alpha: 0.6),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withValues(alpha: 0.7),
-                          Colors.black.withValues(alpha: 0.7),
-                        ],
+                        color: Colors.black.withValues(alpha: 0.6),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.7),
+                            Colors.black.withValues(alpha: 0.7),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
+                leadingWidth: 120, // accommodate 'Back' text + shortcut
+                leading: ProjectBackButton(
+                  color: Colors.white,
+                  onPressed: () {
+                    if (_pdfBytes != null) {
+                      setState(() {
+                        _controller = PdfViewerController();
+                        _pdfBytes = null;
+                        _pdfTitle = null;
+                        _document = null;
+                        _currentSourceId = null;
+                        _selectionNotifier.value = null;
+                        _selectedTextNotifier.value = null;
+                        _containerController.setVisible(
+                          true,
+                        ); // Don't hide, stay in list mode
+                        _toolbarController.setMode(
+                          CardCreationToolbarMode.sourcesList,
+                        );
+                      });
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
               ),
-              leadingWidth: 120, // accommodate 'Back' text + shortcut
-              leading: ProjectBackButton(
-                color: Colors.white,
-                onPressed: () {
-                  if (_pdfBytes != null) {
-                    setState(() {
-                      _controller = PdfViewerController();
-                      _pdfBytes = null;
-                      _pdfTitle = null;
-                      _document = null;
-                      _currentSourceId = null;
-                      _selectionNotifier.value = null;
-                      _selectedTextNotifier.value = null;
-                      _containerController.setVisible(
-                        true,
-                      ); // Don't hide, stay in list mode
-                      _toolbarController.setMode(
-                        CardCreationToolbarMode.sourcesList,
-                      );
-                    });
-                  } else {
-                    Navigator.pop(context);
-                  }
-                },
-              ),
+              body: _buildPdfView(),
             ),
-            body: _buildPdfView(),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 

@@ -1586,14 +1586,25 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _folderIdMeta = const VerificationMeta(
+    'folderId',
+  );
+  @override
+  late final GeneratedColumn<String> folderId = GeneratedColumn<String>(
+    'folder_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _deckIdMeta = const VerificationMeta('deckId');
   @override
   late final GeneratedColumn<String> deckId = GeneratedColumn<String>(
     'deck_id',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -1642,6 +1653,7 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    folderId,
     deckId,
     createdAt,
     updatedAt,
@@ -1665,11 +1677,21 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
     } else if (isInserting) {
       context.missing(_idMeta);
     }
+    if (data.containsKey('folder_id')) {
+      context.handle(
+        _folderIdMeta,
+        folderId.isAcceptableOrUnknown(data['folder_id']!, _folderIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_folderIdMeta);
+    }
     if (data.containsKey('deck_id')) {
       context.handle(
         _deckIdMeta,
         deckId.isAcceptableOrUnknown(data['deck_id']!, _deckIdMeta),
       );
+    } else if (isInserting) {
+      context.missing(_deckIdMeta);
     }
     if (data.containsKey('created_at')) {
       context.handle(
@@ -1718,10 +1740,14 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      folderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}folder_id'],
+      )!,
       deckId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}deck_id'],
-      ),
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}created_at'],
@@ -1750,14 +1776,16 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
 class CardCreationDraftItem extends DataClass
     implements Insertable<CardCreationDraftItem> {
   final String id;
-  final String? deckId;
+  final String folderId;
+  final String deckId;
   final String createdAt;
   final String updatedAt;
   final String? lastOpenedSourceId;
   final String? lastOpenedPage;
   const CardCreationDraftItem({
     required this.id,
-    this.deckId,
+    required this.folderId,
+    required this.deckId,
     required this.createdAt,
     required this.updatedAt,
     this.lastOpenedSourceId,
@@ -1767,9 +1795,8 @@ class CardCreationDraftItem extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    if (!nullToAbsent || deckId != null) {
-      map['deck_id'] = Variable<String>(deckId);
-    }
+    map['folder_id'] = Variable<String>(folderId);
+    map['deck_id'] = Variable<String>(deckId);
     map['created_at'] = Variable<String>(createdAt);
     map['updated_at'] = Variable<String>(updatedAt);
     if (!nullToAbsent || lastOpenedSourceId != null) {
@@ -1784,9 +1811,8 @@ class CardCreationDraftItem extends DataClass
   CardCreationDraftItemsCompanion toCompanion(bool nullToAbsent) {
     return CardCreationDraftItemsCompanion(
       id: Value(id),
-      deckId: deckId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(deckId),
+      folderId: Value(folderId),
+      deckId: Value(deckId),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       lastOpenedSourceId: lastOpenedSourceId == null && nullToAbsent
@@ -1805,7 +1831,8 @@ class CardCreationDraftItem extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return CardCreationDraftItem(
       id: serializer.fromJson<String>(json['id']),
-      deckId: serializer.fromJson<String?>(json['deckId']),
+      folderId: serializer.fromJson<String>(json['folderId']),
+      deckId: serializer.fromJson<String>(json['deckId']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
       updatedAt: serializer.fromJson<String>(json['updatedAt']),
       lastOpenedSourceId: serializer.fromJson<String?>(
@@ -1819,7 +1846,8 @@ class CardCreationDraftItem extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'deckId': serializer.toJson<String?>(deckId),
+      'folderId': serializer.toJson<String>(folderId),
+      'deckId': serializer.toJson<String>(deckId),
       'createdAt': serializer.toJson<String>(createdAt),
       'updatedAt': serializer.toJson<String>(updatedAt),
       'lastOpenedSourceId': serializer.toJson<String?>(lastOpenedSourceId),
@@ -1829,14 +1857,16 @@ class CardCreationDraftItem extends DataClass
 
   CardCreationDraftItem copyWith({
     String? id,
-    Value<String?> deckId = const Value.absent(),
+    String? folderId,
+    String? deckId,
     String? createdAt,
     String? updatedAt,
     Value<String?> lastOpenedSourceId = const Value.absent(),
     Value<String?> lastOpenedPage = const Value.absent(),
   }) => CardCreationDraftItem(
     id: id ?? this.id,
-    deckId: deckId.present ? deckId.value : this.deckId,
+    folderId: folderId ?? this.folderId,
+    deckId: deckId ?? this.deckId,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     lastOpenedSourceId: lastOpenedSourceId.present
@@ -1851,6 +1881,7 @@ class CardCreationDraftItem extends DataClass
   ) {
     return CardCreationDraftItem(
       id: data.id.present ? data.id.value : this.id,
+      folderId: data.folderId.present ? data.folderId.value : this.folderId,
       deckId: data.deckId.present ? data.deckId.value : this.deckId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -1867,6 +1898,7 @@ class CardCreationDraftItem extends DataClass
   String toString() {
     return (StringBuffer('CardCreationDraftItem(')
           ..write('id: $id, ')
+          ..write('folderId: $folderId, ')
           ..write('deckId: $deckId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1879,6 +1911,7 @@ class CardCreationDraftItem extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    folderId,
     deckId,
     createdAt,
     updatedAt,
@@ -1890,6 +1923,7 @@ class CardCreationDraftItem extends DataClass
       identical(this, other) ||
       (other is CardCreationDraftItem &&
           other.id == this.id &&
+          other.folderId == this.folderId &&
           other.deckId == this.deckId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -1900,7 +1934,8 @@ class CardCreationDraftItem extends DataClass
 class CardCreationDraftItemsCompanion
     extends UpdateCompanion<CardCreationDraftItem> {
   final Value<String> id;
-  final Value<String?> deckId;
+  final Value<String> folderId;
+  final Value<String> deckId;
   final Value<String> createdAt;
   final Value<String> updatedAt;
   final Value<String?> lastOpenedSourceId;
@@ -1908,6 +1943,7 @@ class CardCreationDraftItemsCompanion
   final Value<int> rowid;
   const CardCreationDraftItemsCompanion({
     this.id = const Value.absent(),
+    this.folderId = const Value.absent(),
     this.deckId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1917,17 +1953,21 @@ class CardCreationDraftItemsCompanion
   });
   CardCreationDraftItemsCompanion.insert({
     required String id,
-    this.deckId = const Value.absent(),
+    required String folderId,
+    required String deckId,
     required String createdAt,
     required String updatedAt,
     this.lastOpenedSourceId = const Value.absent(),
     this.lastOpenedPage = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
+       folderId = Value(folderId),
+       deckId = Value(deckId),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
   static Insertable<CardCreationDraftItem> custom({
     Expression<String>? id,
+    Expression<String>? folderId,
     Expression<String>? deckId,
     Expression<String>? createdAt,
     Expression<String>? updatedAt,
@@ -1937,6 +1977,7 @@ class CardCreationDraftItemsCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (folderId != null) 'folder_id': folderId,
       if (deckId != null) 'deck_id': deckId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1949,7 +1990,8 @@ class CardCreationDraftItemsCompanion
 
   CardCreationDraftItemsCompanion copyWith({
     Value<String>? id,
-    Value<String?>? deckId,
+    Value<String>? folderId,
+    Value<String>? deckId,
     Value<String>? createdAt,
     Value<String>? updatedAt,
     Value<String?>? lastOpenedSourceId,
@@ -1958,6 +2000,7 @@ class CardCreationDraftItemsCompanion
   }) {
     return CardCreationDraftItemsCompanion(
       id: id ?? this.id,
+      folderId: folderId ?? this.folderId,
       deckId: deckId ?? this.deckId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1972,6 +2015,9 @@ class CardCreationDraftItemsCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (folderId.present) {
+      map['folder_id'] = Variable<String>(folderId.value);
     }
     if (deckId.present) {
       map['deck_id'] = Variable<String>(deckId.value);
@@ -1998,6 +2044,7 @@ class CardCreationDraftItemsCompanion
   String toString() {
     return (StringBuffer('CardCreationDraftItemsCompanion(')
           ..write('id: $id, ')
+          ..write('folderId: $folderId, ')
           ..write('deckId: $deckId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -4868,7 +4915,8 @@ typedef $$SourceItemBlobsTableProcessedTableManager =
 typedef $$CardCreationDraftItemsTableCreateCompanionBuilder =
     CardCreationDraftItemsCompanion Function({
       required String id,
-      Value<String?> deckId,
+      required String folderId,
+      required String deckId,
       required String createdAt,
       required String updatedAt,
       Value<String?> lastOpenedSourceId,
@@ -4878,7 +4926,8 @@ typedef $$CardCreationDraftItemsTableCreateCompanionBuilder =
 typedef $$CardCreationDraftItemsTableUpdateCompanionBuilder =
     CardCreationDraftItemsCompanion Function({
       Value<String> id,
-      Value<String?> deckId,
+      Value<String> folderId,
+      Value<String> deckId,
       Value<String> createdAt,
       Value<String> updatedAt,
       Value<String?> lastOpenedSourceId,
@@ -4932,6 +4981,11 @@ class $$CardCreationDraftItemsTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get folderId => $composableBuilder(
+    column: $table.folderId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5000,6 +5054,11 @@ class $$CardCreationDraftItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get folderId => $composableBuilder(
+    column: $table.folderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get deckId => $composableBuilder(
     column: $table.deckId,
     builder: (column) => ColumnOrderings(column),
@@ -5037,6 +5096,9 @@ class $$CardCreationDraftItemsTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get folderId =>
+      $composableBuilder(column: $table.folderId, builder: (column) => column);
 
   GeneratedColumn<String> get deckId =>
       $composableBuilder(column: $table.deckId, builder: (column) => column);
@@ -5123,7 +5185,8 @@ class $$CardCreationDraftItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String?> deckId = const Value.absent(),
+                Value<String> folderId = const Value.absent(),
+                Value<String> deckId = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
                 Value<String> updatedAt = const Value.absent(),
                 Value<String?> lastOpenedSourceId = const Value.absent(),
@@ -5131,6 +5194,7 @@ class $$CardCreationDraftItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => CardCreationDraftItemsCompanion(
                 id: id,
+                folderId: folderId,
                 deckId: deckId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -5141,7 +5205,8 @@ class $$CardCreationDraftItemsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                Value<String?> deckId = const Value.absent(),
+                required String folderId,
+                required String deckId,
                 required String createdAt,
                 required String updatedAt,
                 Value<String?> lastOpenedSourceId = const Value.absent(),
@@ -5149,6 +5214,7 @@ class $$CardCreationDraftItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => CardCreationDraftItemsCompanion.insert(
                 id: id,
+                folderId: folderId,
                 deckId: deckId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

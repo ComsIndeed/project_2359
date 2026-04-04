@@ -6,6 +6,7 @@ import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/core/study_scheduler_service.dart';
 import 'package:project_2359/features/home_page/home_page.dart';
+import 'package:project_2359/core/app_controller.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
@@ -13,6 +14,7 @@ import 'package:project_2359/theme_notifier.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/core/utils/logger.dart';
 import 'package:project_2359/core/settings/labs_settings.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
@@ -46,6 +48,7 @@ Future<void> main() async {
   final sourceService = SourceService(database);
   final studyDatabaseService = StudyDatabaseService(database);
   final studySchedulerService = StudySchedulerService(database);
+  final appController = AppController();
 
   runApp(
     MultiRepositoryProvider(
@@ -56,6 +59,7 @@ Future<void> main() async {
           value: studyDatabaseService,
         ),
         RepositoryProvider.value(value: studySchedulerService),
+        ChangeNotifierProvider.value(value: appController),
       ],
       child: MultiBlocProvider(
         providers: [

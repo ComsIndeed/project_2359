@@ -181,9 +181,9 @@ class _ShortcutDisplayState extends State<ShortcutDisplay> {
 
         if (widget.showInline) {
           return Row(
-            mainAxisSize: MainAxisSize.max,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(child: widget.child),
+              widget.child,
               const SizedBox(width: 8),
               ShortcutCombinationWidget(info: widget.info!, isSmall: true),
             ],
