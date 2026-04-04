@@ -13,6 +13,7 @@ import 'package:project_2359/core/tables/study_folder_items.dart';
 import 'package:project_2359/core/tables/card_items.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
 import 'package:project_2359/core/tables/citation_items.dart';
+import 'package:project_2359/core/tables/card_creation_draft_items.dart';
 import 'package:project_2359/core/utils/logger.dart';
 
 part 'app_database.g.dart';
@@ -26,6 +27,7 @@ part 'app_database.g.dart';
     CardItems,
     StudySessionEvents,
     CitationItems,
+    CardCreationDraftItems,
   ],
 )
 class AppDatabase extends _$AppDatabase {

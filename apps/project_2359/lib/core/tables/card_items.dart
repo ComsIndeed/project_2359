@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:project_2359/core/tables/deck_items.dart';
+import 'package:project_2359/core/tables/card_creation_draft_items.dart';
 
 /// The type of study material.
 enum CardType {
@@ -11,7 +12,9 @@ enum CardType {
 
 class CardItems extends Table {
   TextColumn get id => text()();
-  TextColumn get deckId => text().references(DeckItems, #id)();
+  TextColumn get deckId => text().nullable().references(DeckItems, #id)();
+  TextColumn get draftId =>
+      text().nullable().references(CardCreationDraftItems, #id)();
   TextColumn get type => text()(); // Store as CardType.name
 
   /// Fields are nullable because not all types use the same properties.
