@@ -2556,7 +2556,7 @@ class $CitationItemsTable extends CitationItems
         requiredDuringInsert: false,
       ).withConverter<List<int>?>($CitationItemsTable.$converterpageNumbersn);
   @override
-  late final GeneratedColumnWithTypeConverter<List<CitationTimeRange>?, String>
+  late final GeneratedColumnWithTypeConverter<List<ProjectTimeRange>?, String>
   timeRanges =
       GeneratedColumn<String>(
         'time_ranges',
@@ -2564,18 +2564,18 @@ class $CitationItemsTable extends CitationItems
         true,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-      ).withConverter<List<CitationTimeRange>?>(
+      ).withConverter<List<ProjectTimeRange>?>(
         $CitationItemsTable.$convertertimeRangesn,
       );
   @override
-  late final GeneratedColumnWithTypeConverter<List<CitationRect>?, String>
+  late final GeneratedColumnWithTypeConverter<List<ProjectRect>?, String>
   rects = GeneratedColumn<String>(
     'rects',
     aliasedName,
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-  ).withConverter<List<CitationRect>?>($CitationItemsTable.$converterrectsn);
+  ).withConverter<List<ProjectRect>?>($CitationItemsTable.$converterrectsn);
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2665,13 +2665,13 @@ class $CitationItemsTable extends CitationItems
       const JsonListConverter<int>();
   static TypeConverter<List<int>?, String?> $converterpageNumbersn =
       NullAwareTypeConverter.wrap($converterpageNumbers);
-  static TypeConverter<List<CitationTimeRange>, String> $convertertimeRanges =
-      const CitationTimeRangeListConverter();
-  static TypeConverter<List<CitationTimeRange>?, String?>
-  $convertertimeRangesn = NullAwareTypeConverter.wrap($convertertimeRanges);
-  static TypeConverter<List<CitationRect>, String> $converterrects =
-      const CitationRectListConverter();
-  static TypeConverter<List<CitationRect>?, String?> $converterrectsn =
+  static TypeConverter<List<ProjectTimeRange>, String> $convertertimeRanges =
+      const ProjectTimeRangeListConverter();
+  static TypeConverter<List<ProjectTimeRange>?, String?> $convertertimeRangesn =
+      NullAwareTypeConverter.wrap($convertertimeRanges);
+  static TypeConverter<List<ProjectRect>, String> $converterrects =
+      const ProjectRectListConverter();
+  static TypeConverter<List<ProjectRect>?, String?> $converterrectsn =
       NullAwareTypeConverter.wrap($converterrects);
 }
 
@@ -2688,10 +2688,10 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
   final List<int>? pageNumbers;
 
   /// One or more time segments (e.g. for video timestamps).
-  final List<CitationTimeRange>? timeRanges;
+  final List<ProjectTimeRange>? timeRanges;
 
   /// One or more bounding boxes (e.g. for multi-line text selections in a PDF).
-  final List<CitationRect>? rects;
+  final List<ProjectRect>? rects;
   const CitationItem({
     required this.id,
     this.citedText,
@@ -2761,10 +2761,10 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
       citedText: serializer.fromJson<String?>(json['citedText']),
       sourceIds: serializer.fromJson<List<String>?>(json['sourceIds']),
       pageNumbers: serializer.fromJson<List<int>?>(json['pageNumbers']),
-      timeRanges: serializer.fromJson<List<CitationTimeRange>?>(
+      timeRanges: serializer.fromJson<List<ProjectTimeRange>?>(
         json['timeRanges'],
       ),
-      rects: serializer.fromJson<List<CitationRect>?>(json['rects']),
+      rects: serializer.fromJson<List<ProjectRect>?>(json['rects']),
     );
   }
   @override
@@ -2775,8 +2775,8 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
       'citedText': serializer.toJson<String?>(citedText),
       'sourceIds': serializer.toJson<List<String>?>(sourceIds),
       'pageNumbers': serializer.toJson<List<int>?>(pageNumbers),
-      'timeRanges': serializer.toJson<List<CitationTimeRange>?>(timeRanges),
-      'rects': serializer.toJson<List<CitationRect>?>(rects),
+      'timeRanges': serializer.toJson<List<ProjectTimeRange>?>(timeRanges),
+      'rects': serializer.toJson<List<ProjectRect>?>(rects),
     };
   }
 
@@ -2785,8 +2785,8 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
     Value<String?> citedText = const Value.absent(),
     Value<List<String>?> sourceIds = const Value.absent(),
     Value<List<int>?> pageNumbers = const Value.absent(),
-    Value<List<CitationTimeRange>?> timeRanges = const Value.absent(),
-    Value<List<CitationRect>?> rects = const Value.absent(),
+    Value<List<ProjectTimeRange>?> timeRanges = const Value.absent(),
+    Value<List<ProjectRect>?> rects = const Value.absent(),
   }) => CitationItem(
     id: id ?? this.id,
     citedText: citedText.present ? citedText.value : this.citedText,
@@ -2843,8 +2843,8 @@ class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
   final Value<String?> citedText;
   final Value<List<String>?> sourceIds;
   final Value<List<int>?> pageNumbers;
-  final Value<List<CitationTimeRange>?> timeRanges;
-  final Value<List<CitationRect>?> rects;
+  final Value<List<ProjectTimeRange>?> timeRanges;
+  final Value<List<ProjectRect>?> rects;
   final Value<int> rowid;
   const CitationItemsCompanion({
     this.id = const Value.absent(),
@@ -2889,8 +2889,8 @@ class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
     Value<String?>? citedText,
     Value<List<String>?>? sourceIds,
     Value<List<int>?>? pageNumbers,
-    Value<List<CitationTimeRange>?>? timeRanges,
-    Value<List<CitationRect>?>? rects,
+    Value<List<ProjectTimeRange>?>? timeRanges,
+    Value<List<ProjectRect>?>? rects,
     Value<int>? rowid,
   }) {
     return CitationItemsCompanion(
@@ -4991,8 +4991,8 @@ typedef $$CitationItemsTableCreateCompanionBuilder =
       Value<String?> citedText,
       Value<List<String>?> sourceIds,
       Value<List<int>?> pageNumbers,
-      Value<List<CitationTimeRange>?> timeRanges,
-      Value<List<CitationRect>?> rects,
+      Value<List<ProjectTimeRange>?> timeRanges,
+      Value<List<ProjectRect>?> rects,
       Value<int> rowid,
     });
 typedef $$CitationItemsTableUpdateCompanionBuilder =
@@ -5001,8 +5001,8 @@ typedef $$CitationItemsTableUpdateCompanionBuilder =
       Value<String?> citedText,
       Value<List<String>?> sourceIds,
       Value<List<int>?> pageNumbers,
-      Value<List<CitationTimeRange>?> timeRanges,
-      Value<List<CitationRect>?> rects,
+      Value<List<ProjectTimeRange>?> timeRanges,
+      Value<List<ProjectRect>?> rects,
       Value<int> rowid,
     });
 
@@ -5038,8 +5038,8 @@ class $$CitationItemsTableFilterComposer
   );
 
   ColumnWithTypeConverterFilters<
-    List<CitationTimeRange>?,
-    List<CitationTimeRange>,
+    List<ProjectTimeRange>?,
+    List<ProjectTimeRange>,
     String
   >
   get timeRanges => $composableBuilder(
@@ -5047,11 +5047,7 @@ class $$CitationItemsTableFilterComposer
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    List<CitationRect>?,
-    List<CitationRect>,
-    String
-  >
+  ColumnWithTypeConverterFilters<List<ProjectRect>?, List<ProjectRect>, String>
   get rects => $composableBuilder(
     column: $table.rects,
     builder: (column) => ColumnWithTypeConverterFilters(column),
@@ -5122,13 +5118,13 @@ class $$CitationItemsTableAnnotationComposer
         builder: (column) => column,
       );
 
-  GeneratedColumnWithTypeConverter<List<CitationTimeRange>?, String>
+  GeneratedColumnWithTypeConverter<List<ProjectTimeRange>?, String>
   get timeRanges => $composableBuilder(
     column: $table.timeRanges,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<List<CitationRect>?, String> get rects =>
+  GeneratedColumnWithTypeConverter<List<ProjectRect>?, String> get rects =>
       $composableBuilder(column: $table.rects, builder: (column) => column);
 }
 
@@ -5167,9 +5163,9 @@ class $$CitationItemsTableTableManager
                 Value<String?> citedText = const Value.absent(),
                 Value<List<String>?> sourceIds = const Value.absent(),
                 Value<List<int>?> pageNumbers = const Value.absent(),
-                Value<List<CitationTimeRange>?> timeRanges =
+                Value<List<ProjectTimeRange>?> timeRanges =
                     const Value.absent(),
-                Value<List<CitationRect>?> rects = const Value.absent(),
+                Value<List<ProjectRect>?> rects = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CitationItemsCompanion(
                 id: id,
@@ -5186,9 +5182,9 @@ class $$CitationItemsTableTableManager
                 Value<String?> citedText = const Value.absent(),
                 Value<List<String>?> sourceIds = const Value.absent(),
                 Value<List<int>?> pageNumbers = const Value.absent(),
-                Value<List<CitationTimeRange>?> timeRanges =
+                Value<List<ProjectTimeRange>?> timeRanges =
                     const Value.absent(),
-                Value<List<CitationRect>?> rects = const Value.absent(),
+                Value<List<ProjectRect>?> rects = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CitationItemsCompanion.insert(
                 id: id,
