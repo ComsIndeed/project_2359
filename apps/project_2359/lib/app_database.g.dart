@@ -2526,18 +2526,6 @@ class $CitationItemsTable extends CitationItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _cardIdMeta = const VerificationMeta('cardId');
-  @override
-  late final GeneratedColumn<String> cardId = GeneratedColumn<String>(
-    'card_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES card_items (id)',
-    ),
-  );
   static const VerificationMeta _citedTextMeta = const VerificationMeta(
     'citedText',
   );
@@ -2591,7 +2579,6 @@ class $CitationItemsTable extends CitationItems
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    cardId,
     citedText,
     sourceIds,
     pageNumbers,
@@ -2615,12 +2602,6 @@ class $CitationItemsTable extends CitationItems
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('card_id')) {
-      context.handle(
-        _cardIdMeta,
-        cardId.isAcceptableOrUnknown(data['card_id']!, _cardIdMeta),
-      );
-    }
     if (data.containsKey('cited_text')) {
       context.handle(
         _citedTextMeta,
@@ -2640,10 +2621,6 @@ class $CitationItemsTable extends CitationItems
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
-      cardId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}card_id'],
-      ),
       citedText: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}cited_text'],
@@ -2701,9 +2678,6 @@ class $CitationItemsTable extends CitationItems
 class CitationItem extends DataClass implements Insertable<CitationItem> {
   final String id;
 
-  /// The card this citation belongs to.
-  final String? cardId;
-
   /// The actual cited text or content summary.
   final String? citedText;
 
@@ -2720,7 +2694,6 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
   final List<CitationRect>? rects;
   const CitationItem({
     required this.id,
-    this.cardId,
     this.citedText,
     this.sourceIds,
     this.pageNumbers,
@@ -2731,9 +2704,6 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    if (!nullToAbsent || cardId != null) {
-      map['card_id'] = Variable<String>(cardId);
-    }
     if (!nullToAbsent || citedText != null) {
       map['cited_text'] = Variable<String>(citedText);
     }
@@ -2763,9 +2733,6 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
   CitationItemsCompanion toCompanion(bool nullToAbsent) {
     return CitationItemsCompanion(
       id: Value(id),
-      cardId: cardId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(cardId),
       citedText: citedText == null && nullToAbsent
           ? const Value.absent()
           : Value(citedText),
@@ -2791,7 +2758,6 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return CitationItem(
       id: serializer.fromJson<String>(json['id']),
-      cardId: serializer.fromJson<String?>(json['cardId']),
       citedText: serializer.fromJson<String?>(json['citedText']),
       sourceIds: serializer.fromJson<List<String>?>(json['sourceIds']),
       pageNumbers: serializer.fromJson<List<int>?>(json['pageNumbers']),
@@ -2806,7 +2772,6 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'cardId': serializer.toJson<String?>(cardId),
       'citedText': serializer.toJson<String?>(citedText),
       'sourceIds': serializer.toJson<List<String>?>(sourceIds),
       'pageNumbers': serializer.toJson<List<int>?>(pageNumbers),
@@ -2817,7 +2782,6 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
 
   CitationItem copyWith({
     String? id,
-    Value<String?> cardId = const Value.absent(),
     Value<String?> citedText = const Value.absent(),
     Value<List<String>?> sourceIds = const Value.absent(),
     Value<List<int>?> pageNumbers = const Value.absent(),
@@ -2825,7 +2789,6 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
     Value<List<CitationRect>?> rects = const Value.absent(),
   }) => CitationItem(
     id: id ?? this.id,
-    cardId: cardId.present ? cardId.value : this.cardId,
     citedText: citedText.present ? citedText.value : this.citedText,
     sourceIds: sourceIds.present ? sourceIds.value : this.sourceIds,
     pageNumbers: pageNumbers.present ? pageNumbers.value : this.pageNumbers,
@@ -2835,7 +2798,6 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
   CitationItem copyWithCompanion(CitationItemsCompanion data) {
     return CitationItem(
       id: data.id.present ? data.id.value : this.id,
-      cardId: data.cardId.present ? data.cardId.value : this.cardId,
       citedText: data.citedText.present ? data.citedText.value : this.citedText,
       sourceIds: data.sourceIds.present ? data.sourceIds.value : this.sourceIds,
       pageNumbers: data.pageNumbers.present
@@ -2852,7 +2814,6 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
   String toString() {
     return (StringBuffer('CitationItem(')
           ..write('id: $id, ')
-          ..write('cardId: $cardId, ')
           ..write('citedText: $citedText, ')
           ..write('sourceIds: $sourceIds, ')
           ..write('pageNumbers: $pageNumbers, ')
@@ -2863,21 +2824,13 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
   }
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    cardId,
-    citedText,
-    sourceIds,
-    pageNumbers,
-    timeRanges,
-    rects,
-  );
+  int get hashCode =>
+      Object.hash(id, citedText, sourceIds, pageNumbers, timeRanges, rects);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is CitationItem &&
           other.id == this.id &&
-          other.cardId == this.cardId &&
           other.citedText == this.citedText &&
           other.sourceIds == this.sourceIds &&
           other.pageNumbers == this.pageNumbers &&
@@ -2887,7 +2840,6 @@ class CitationItem extends DataClass implements Insertable<CitationItem> {
 
 class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
   final Value<String> id;
-  final Value<String?> cardId;
   final Value<String?> citedText;
   final Value<List<String>?> sourceIds;
   final Value<List<int>?> pageNumbers;
@@ -2896,7 +2848,6 @@ class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
   final Value<int> rowid;
   const CitationItemsCompanion({
     this.id = const Value.absent(),
-    this.cardId = const Value.absent(),
     this.citedText = const Value.absent(),
     this.sourceIds = const Value.absent(),
     this.pageNumbers = const Value.absent(),
@@ -2906,7 +2857,6 @@ class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
   });
   CitationItemsCompanion.insert({
     required String id,
-    this.cardId = const Value.absent(),
     this.citedText = const Value.absent(),
     this.sourceIds = const Value.absent(),
     this.pageNumbers = const Value.absent(),
@@ -2916,7 +2866,6 @@ class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
   }) : id = Value(id);
   static Insertable<CitationItem> custom({
     Expression<String>? id,
-    Expression<String>? cardId,
     Expression<String>? citedText,
     Expression<String>? sourceIds,
     Expression<String>? pageNumbers,
@@ -2926,7 +2875,6 @@ class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (cardId != null) 'card_id': cardId,
       if (citedText != null) 'cited_text': citedText,
       if (sourceIds != null) 'source_ids': sourceIds,
       if (pageNumbers != null) 'page_numbers': pageNumbers,
@@ -2938,7 +2886,6 @@ class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
 
   CitationItemsCompanion copyWith({
     Value<String>? id,
-    Value<String?>? cardId,
     Value<String?>? citedText,
     Value<List<String>?>? sourceIds,
     Value<List<int>?>? pageNumbers,
@@ -2948,7 +2895,6 @@ class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
   }) {
     return CitationItemsCompanion(
       id: id ?? this.id,
-      cardId: cardId ?? this.cardId,
       citedText: citedText ?? this.citedText,
       sourceIds: sourceIds ?? this.sourceIds,
       pageNumbers: pageNumbers ?? this.pageNumbers,
@@ -2963,9 +2909,6 @@ class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
-    }
-    if (cardId.present) {
-      map['card_id'] = Variable<String>(cardId.value);
     }
     if (citedText.present) {
       map['cited_text'] = Variable<String>(citedText.value);
@@ -3000,7 +2943,6 @@ class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
   String toString() {
     return (StringBuffer('CitationItemsCompanion(')
           ..write('id: $id, ')
-          ..write('cardId: $cardId, ')
           ..write('citedText: $citedText, ')
           ..write('sourceIds: $sourceIds, ')
           ..write('pageNumbers: $pageNumbers, ')
@@ -4474,24 +4416,6 @@ final class $$CardItemsTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
-
-  static MultiTypedResultKey<$CitationItemsTable, List<CitationItem>>
-  _citationItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.citationItems,
-    aliasName: $_aliasNameGenerator(db.cardItems.id, db.citationItems.cardId),
-  );
-
-  $$CitationItemsTableProcessedTableManager get citationItemsRefs {
-    final manager = $$CitationItemsTableTableManager(
-      $_db,
-      $_db.citationItems,
-    ).filter((f) => f.cardId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_citationItemsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
 }
 
 class $$CardItemsTableFilterComposer
@@ -4559,31 +4483,6 @@ class $$CardItemsTableFilterComposer
           ),
     );
     return composer;
-  }
-
-  Expression<bool> citationItemsRefs(
-    Expression<bool> Function($$CitationItemsTableFilterComposer f) f,
-  ) {
-    final $$CitationItemsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.citationItems,
-      getReferencedColumn: (t) => t.cardId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CitationItemsTableFilterComposer(
-            $db: $db,
-            $table: $db.citationItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
   }
 }
 
@@ -4711,31 +4610,6 @@ class $$CardItemsTableAnnotationComposer
     );
     return composer;
   }
-
-  Expression<T> citationItemsRefs<T extends Object>(
-    Expression<T> Function($$CitationItemsTableAnnotationComposer a) f,
-  ) {
-    final $$CitationItemsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.citationItems,
-      getReferencedColumn: (t) => t.cardId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CitationItemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.citationItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$CardItemsTableTableManager
@@ -4751,7 +4625,7 @@ class $$CardItemsTableTableManager
           $$CardItemsTableUpdateCompanionBuilder,
           (CardItem, $$CardItemsTableReferences),
           CardItem,
-          PrefetchHooks Function({bool deckId, bool citationItemsRefs})
+          PrefetchHooks Function({bool deckId})
         > {
   $$CardItemsTableTableManager(_$AppDatabase db, $CardItemsTable table)
     : super(
@@ -4816,12 +4690,10 @@ class $$CardItemsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({deckId = false, citationItemsRefs = false}) {
+          prefetchHooksCallback: ({deckId = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [
-                if (citationItemsRefs) db.citationItems,
-              ],
+              explicitlyWatchedTables: [],
               addJoins:
                   <
                     T extends TableManagerState<
@@ -4855,27 +4727,7 @@ class $$CardItemsTableTableManager
                     return state;
                   },
               getPrefetchedDataCallback: (items) async {
-                return [
-                  if (citationItemsRefs)
-                    await $_getPrefetchedData<
-                      CardItem,
-                      $CardItemsTable,
-                      CitationItem
-                    >(
-                      currentTable: table,
-                      referencedTable: $$CardItemsTableReferences
-                          ._citationItemsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$CardItemsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).citationItemsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.cardId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+                return [];
               },
             );
           },
@@ -4895,7 +4747,7 @@ typedef $$CardItemsTableProcessedTableManager =
       $$CardItemsTableUpdateCompanionBuilder,
       (CardItem, $$CardItemsTableReferences),
       CardItem,
-      PrefetchHooks Function({bool deckId, bool citationItemsRefs})
+      PrefetchHooks Function({bool deckId})
     >;
 typedef $$StudySessionEventsTableCreateCompanionBuilder =
     StudySessionEventsCompanion Function({
@@ -5136,7 +4988,6 @@ typedef $$StudySessionEventsTableProcessedTableManager =
 typedef $$CitationItemsTableCreateCompanionBuilder =
     CitationItemsCompanion Function({
       required String id,
-      Value<String?> cardId,
       Value<String?> citedText,
       Value<List<String>?> sourceIds,
       Value<List<int>?> pageNumbers,
@@ -5147,7 +4998,6 @@ typedef $$CitationItemsTableCreateCompanionBuilder =
 typedef $$CitationItemsTableUpdateCompanionBuilder =
     CitationItemsCompanion Function({
       Value<String> id,
-      Value<String?> cardId,
       Value<String?> citedText,
       Value<List<String>?> sourceIds,
       Value<List<int>?> pageNumbers,
@@ -5155,34 +5005,6 @@ typedef $$CitationItemsTableUpdateCompanionBuilder =
       Value<List<CitationRect>?> rects,
       Value<int> rowid,
     });
-
-final class $$CitationItemsTableReferences
-    extends BaseReferences<_$AppDatabase, $CitationItemsTable, CitationItem> {
-  $$CitationItemsTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static $CardItemsTable _cardIdTable(_$AppDatabase db) =>
-      db.cardItems.createAlias(
-        $_aliasNameGenerator(db.citationItems.cardId, db.cardItems.id),
-      );
-
-  $$CardItemsTableProcessedTableManager? get cardId {
-    final $_column = $_itemColumn<String>('card_id');
-    if ($_column == null) return null;
-    final manager = $$CardItemsTableTableManager(
-      $_db,
-      $_db.cardItems,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_cardIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
 
 class $$CitationItemsTableFilterComposer
     extends Composer<_$AppDatabase, $CitationItemsTable> {
@@ -5234,29 +5056,6 @@ class $$CitationItemsTableFilterComposer
     column: $table.rects,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
-
-  $$CardItemsTableFilterComposer get cardId {
-    final $$CardItemsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.cardId,
-      referencedTable: $db.cardItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CardItemsTableFilterComposer(
-            $db: $db,
-            $table: $db.cardItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$CitationItemsTableOrderingComposer
@@ -5297,29 +5096,6 @@ class $$CitationItemsTableOrderingComposer
     column: $table.rects,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$CardItemsTableOrderingComposer get cardId {
-    final $$CardItemsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.cardId,
-      referencedTable: $db.cardItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CardItemsTableOrderingComposer(
-            $db: $db,
-            $table: $db.cardItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$CitationItemsTableAnnotationComposer
@@ -5354,29 +5130,6 @@ class $$CitationItemsTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<List<CitationRect>?, String> get rects =>
       $composableBuilder(column: $table.rects, builder: (column) => column);
-
-  $$CardItemsTableAnnotationComposer get cardId {
-    final $$CardItemsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.cardId,
-      referencedTable: $db.cardItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CardItemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.cardItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$CitationItemsTableTableManager
@@ -5390,9 +5143,12 @@ class $$CitationItemsTableTableManager
           $$CitationItemsTableAnnotationComposer,
           $$CitationItemsTableCreateCompanionBuilder,
           $$CitationItemsTableUpdateCompanionBuilder,
-          (CitationItem, $$CitationItemsTableReferences),
+          (
+            CitationItem,
+            BaseReferences<_$AppDatabase, $CitationItemsTable, CitationItem>,
+          ),
           CitationItem,
-          PrefetchHooks Function({bool cardId})
+          PrefetchHooks Function()
         > {
   $$CitationItemsTableTableManager(_$AppDatabase db, $CitationItemsTable table)
     : super(
@@ -5408,7 +5164,6 @@ class $$CitationItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String?> cardId = const Value.absent(),
                 Value<String?> citedText = const Value.absent(),
                 Value<List<String>?> sourceIds = const Value.absent(),
                 Value<List<int>?> pageNumbers = const Value.absent(),
@@ -5418,7 +5173,6 @@ class $$CitationItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => CitationItemsCompanion(
                 id: id,
-                cardId: cardId,
                 citedText: citedText,
                 sourceIds: sourceIds,
                 pageNumbers: pageNumbers,
@@ -5429,7 +5183,6 @@ class $$CitationItemsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                Value<String?> cardId = const Value.absent(),
                 Value<String?> citedText = const Value.absent(),
                 Value<List<String>?> sourceIds = const Value.absent(),
                 Value<List<int>?> pageNumbers = const Value.absent(),
@@ -5439,7 +5192,6 @@ class $$CitationItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => CitationItemsCompanion.insert(
                 id: id,
-                cardId: cardId,
                 citedText: citedText,
                 sourceIds: sourceIds,
                 pageNumbers: pageNumbers,
@@ -5448,54 +5200,9 @@ class $$CitationItemsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$CitationItemsTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({cardId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (cardId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.cardId,
-                                referencedTable: $$CitationItemsTableReferences
-                                    ._cardIdTable(db),
-                                referencedColumn: $$CitationItemsTableReferences
-                                    ._cardIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -5510,9 +5217,12 @@ typedef $$CitationItemsTableProcessedTableManager =
       $$CitationItemsTableAnnotationComposer,
       $$CitationItemsTableCreateCompanionBuilder,
       $$CitationItemsTableUpdateCompanionBuilder,
-      (CitationItem, $$CitationItemsTableReferences),
+      (
+        CitationItem,
+        BaseReferences<_$AppDatabase, $CitationItemsTable, CitationItem>,
+      ),
       CitationItem,
-      PrefetchHooks Function({bool cardId})
+      PrefetchHooks Function()
     >;
 
 class $AppDatabaseManager {

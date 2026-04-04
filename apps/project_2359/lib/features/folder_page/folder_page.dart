@@ -37,9 +37,9 @@ class FolderPage extends StatefulWidget {
 
 class _FolderPageState extends State<FolderPage> {
   late String folderName;
-  final Set<String> _selectedMaterialIds = {};
-  List<DeckItem> _allMaterials = [];
-  StreamSubscription? _materialSub;
+  final Set<String> _selectedDeckIds = {};
+  List<DeckItem> _allDecks = [];
+  StreamSubscription? _deckSub;
   List<SourceItem>? _currentSources;
   StreamSubscription? _sourcesSub;
   final PageController _pageController = PageController();
@@ -61,42 +61,42 @@ class _FolderPageState extends State<FolderPage> {
     );
   }
 
-  bool get _isSelecting => _selectedMaterialIds.isNotEmpty;
+  bool get _isSelecting => _selectedDeckIds.isNotEmpty;
 
-  void _toggleMaterialSelection(String id) {
+  void _toggleDeckSelection(String id) {
     setState(() {
-      if (_selectedMaterialIds.contains(id)) {
-        _selectedMaterialIds.remove(id);
+      if (_selectedDeckIds.contains(id)) {
+        _selectedDeckIds.remove(id);
       } else {
-        _selectedMaterialIds.add(id);
+        _selectedDeckIds.add(id);
       }
     });
   }
 
   void _clearSelection() {
     setState(() {
-      _selectedMaterialIds.clear();
+      _selectedDeckIds.clear();
     });
   }
 
   Future<void> _handlePinSelected({required bool pin}) async {
     final service = context.read<StudyDatabaseService>();
-    for (final id in _selectedMaterialIds) {
-      await service.toggleMaterialPin(id, pin);
+    for (final id in _selectedDeckIds) {
+      await service.toggleDeckPin(id, pin);
     }
     _clearSelection();
   }
 
   Future<void> _handleDeleteSelected() async {
-    final count = _selectedMaterialIds.length;
+    final count = _selectedDeckIds.length;
     if (count == 0) return;
 
     final confirmed = await _showMultiDeleteConfirmation(context, count: count);
     if (!confirmed || !mounted) return;
 
     final service = context.read<StudyDatabaseService>();
-    for (final id in _selectedMaterialIds) {
-      await service.deleteMaterial(id);
+    for (final id in _selectedDeckIds) {
+      await service.deleteDeck(id);
     }
     _clearSelection();
   }
@@ -130,7 +130,7 @@ class _FolderPageState extends State<FolderPage> {
         false;
   }
 
-  late Stream<List<DeckItem>> _materialsStream;
+  late Stream<List<DeckItem>> _decksStream;
 
   Future<void> _importSources() async {
     try {
@@ -196,9 +196,9 @@ class _FolderPageState extends State<FolderPage> {
     super.initState();
     folderName = widget.initialFolderName;
     final service = context.read<StudyDatabaseService>();
-    _materialsStream = service.watchMaterialsByFolderId(widget.folderId);
-    _materialSub = _materialsStream.listen((materials) {
-      if (mounted) setState(() => _allMaterials = materials);
+    _decksStream = service.watchDecksByFolderId(widget.folderId);
+    _deckSub = _decksStream.listen((decks) {
+      if (mounted) setState(() => _allDecks = decks);
     });
 
     // Also watch sources to provide initialData to FAB for smooth animation
@@ -214,13 +214,13 @@ class _FolderPageState extends State<FolderPage> {
   void didUpdateWidget(FolderPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.folderId != widget.folderId) {
-      _materialSub?.cancel();
+      _deckSub?.cancel();
       _sourcesSub?.cancel();
 
       final service = context.read<StudyDatabaseService>();
-      _materialsStream = service.watchMaterialsByFolderId(widget.folderId);
-      _materialSub = _materialsStream.listen((materials) {
-        if (mounted) setState(() => _allMaterials = materials);
+      _decksStream = service.watchDecksByFolderId(widget.folderId);
+      _deckSub = _decksStream.listen((decks) {
+        if (mounted) setState(() => _allDecks = decks);
       });
 
       final sourceService = context.read<SourceService>();
@@ -234,7 +234,7 @@ class _FolderPageState extends State<FolderPage> {
 
   @override
   void dispose() {
-    _materialSub?.cancel();
+    _deckSub?.cancel();
     _sourcesSub?.cancel();
     _pageController.dispose();
     super.dispose();
@@ -254,20 +254,20 @@ class _FolderPageState extends State<FolderPage> {
         isVisible: _currentPageIndex != 2,
         collapsedBuilder: (context, isOpen, expand, close) {
           if (_isSelecting) {
-            final selectedMaterials = _allMaterials
-                .where((m) => _selectedMaterialIds.contains(m.id))
+            final selectedDecks = _allDecks
+                .where((m) => _selectedDeckIds.contains(m.id))
                 .toList();
 
             final allPinned =
-                selectedMaterials.isNotEmpty &&
-                selectedMaterials.every((m) => m.isPinned);
+                selectedDecks.isNotEmpty &&
+                selectedDecks.every((m) => m.isPinned);
             final allUnpinned =
-                selectedMaterials.isNotEmpty &&
-                selectedMaterials.every((m) => !m.isPinned);
+                selectedDecks.isNotEmpty &&
+                selectedDecks.every((m) => !m.isPinned);
             final isMixed = !allPinned && !allUnpinned;
 
             return SelectionActionBar(
-              selectedCount: _selectedMaterialIds.length,
+              selectedCount: _selectedDeckIds.length,
               onClose: _clearSelection,
               onPin: () => _handlePinSelected(pin: true),
               onUnpin: () => _handlePinSelected(pin: false),
@@ -454,12 +454,12 @@ class _FolderPageState extends State<FolderPage> {
                 controller: _pageController,
                 onPageChanged: _onPageChanged,
                 children: [
-                  // PAGE 0: CARDS
+                  // PAGE 0: DECKS
                   _CardsPage(
-                    materials: _allMaterials,
+                    decks: _allDecks,
                     folderId: widget.folderId,
-                    selectedIds: _selectedMaterialIds,
-                    onToggleSelection: _toggleMaterialSelection,
+                    selectedIds: _selectedDeckIds,
+                    onToggleSelection: _toggleDeckSelection,
                     isSelecting: _isSelecting,
                   ),
                   // PAGE 1: SOURCES
@@ -796,14 +796,14 @@ class _CompactIconButton extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _CardsPage extends StatelessWidget {
-  final List<DeckItem> materials;
+  final List<DeckItem> decks;
   final String folderId;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
   final bool isSelecting;
 
   const _CardsPage({
-    required this.materials,
+    required this.decks,
     required this.folderId,
     required this.selectedIds,
     required this.onToggleSelection,
@@ -818,10 +818,10 @@ class _CardsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SectionLabel(title: "Card Packs"),
+          const _SectionLabel(title: "Study Decks"),
           const SizedBox(height: 12),
-          _StudyMaterialsList(
-            materials: materials,
+          _DecksList(
+            decks: decks,
             folderId: folderId,
             selectedIds: selectedIds,
             onToggleSelection: onToggleSelection,
@@ -1065,15 +1065,15 @@ class _SettingsPage extends StatelessWidget {
 
 // DELETED _ActionButtonChip
 
-class _StudyMaterialsList extends StatelessWidget {
-  final List<DeckItem> materials;
+class _DecksList extends StatelessWidget {
+  final List<DeckItem> decks;
   final String folderId;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
   final bool isSelecting;
 
-  const _StudyMaterialsList({
-    required this.materials,
+  const _DecksList({
+    required this.decks,
     required this.folderId,
     required this.selectedIds,
     required this.onToggleSelection,
@@ -1084,7 +1084,7 @@ class _StudyMaterialsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    if (materials.isEmpty) {
+    if (decks.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 60),
         child: Center(
@@ -1113,7 +1113,7 @@ class _StudyMaterialsList extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                "Create your first study material\nto get started with this project.",
+                "Create your first study deck\nto get started with this project.",
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
@@ -1128,7 +1128,7 @@ class _StudyMaterialsList extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        for (var i = 0; i < materials.length; i++)
+        for (var i = 0; i < decks.length; i++)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child:
@@ -1136,11 +1136,11 @@ class _StudyMaterialsList extends StatelessWidget {
                       backgroundColor: theme.colorScheme.surfaceContainerHighest
                           .withValues(alpha: 0.5),
                       leading: const WizardFlashcardPreview(),
-                      title: Text(materials[i].name),
-                      subtitle: Text(materials[i].description ?? "Card Pack"),
-                      isSelected: selectedIds.contains(materials[i].id),
+                      title: Text(decks[i].name),
+                      subtitle: Text(decks[i].description ?? "Card Pack"),
+                      isSelected: selectedIds.contains(decks[i].id),
                       onTap: isSelecting
-                          ? () => onToggleSelection(materials[i].id)
+                          ? () => onToggleSelection(decks[i].id)
                           : () {
                               Navigator.push(
                                 context,
@@ -1150,7 +1150,7 @@ class _StudyMaterialsList extends StatelessWidget {
                                 ),
                               );
                             },
-                      onLongTap: () => onToggleSelection(materials[i].id),
+                      onLongTap: () => onToggleSelection(decks[i].id),
                     )
                     .animate()
                     .fadeIn(delay: (i * 50).ms)

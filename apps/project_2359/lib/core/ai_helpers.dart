@@ -5,20 +5,20 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ── Data classes ─────────────────────────────────────────────────────────────
 
-/// Metadata returned by the generate-material function after streaming completes.
-class GenerateMaterialMetadata {
+/// Metadata returned by the generate-deck function after streaming completes.
+class GenerateDeckMetadata {
   final int inputTokens;
   final int outputTokens;
   final int totalTokens;
 
-  const GenerateMaterialMetadata({
+  const GenerateDeckMetadata({
     required this.inputTokens,
     required this.outputTokens,
     required this.totalTokens,
   });
 
-  factory GenerateMaterialMetadata.fromJson(Map<String, dynamic> json) {
-    return GenerateMaterialMetadata(
+  factory GenerateDeckMetadata.fromJson(Map<String, dynamic> json) {
+    return GenerateDeckMetadata(
       inputTokens: (json['inputTokens'] as num).toInt(),
       outputTokens: (json['outputTokens'] as num).toInt(),
       totalTokens: (json['totalTokens'] as num).toInt(),
@@ -27,14 +27,14 @@ class GenerateMaterialMetadata {
 
   @override
   String toString() =>
-      'GenerateMaterialMetadata(in=$inputTokens, out=$outputTokens, total=$totalTokens)';
+      'GenerateDeckMetadata(in=$inputTokens, out=$outputTokens, total=$totalTokens)';
 }
 
-/// A single study material item parsed from the LLM JSON stream.
+/// A single card item parsed from the LLM JSON stream.
 ///
 /// Fields are mutable because they are populated progressively as the
 /// streaming parser yields chunks.
-class StreamedStudyCard {
+class StreamedCard {
   String? sourceId;
   String? type;
 
@@ -64,19 +64,19 @@ class StreamedStudyCard {
   }
 }
 
-/// A single event emitted by [AiHelpers.generateMaterial].
+/// A single event emitted by [AiHelpers.generateDeck].
 ///
 /// Either a text [chunk] from the LLM or the final [metadata] summary.
-sealed class GenerateMaterialEvent {}
+sealed class GenerateDeckEvent {}
 
-class GenerateMaterialChunk extends GenerateMaterialEvent {
+class GenerateDeckChunk extends GenerateDeckEvent {
   final String text;
-  GenerateMaterialChunk(this.text);
+  GenerateDeckChunk(this.text);
 }
 
-class GenerateMaterialMeta extends GenerateMaterialEvent {
-  final GenerateMaterialMetadata metadata;
-  GenerateMaterialMeta(this.metadata);
+class GenerateDeckMeta extends GenerateDeckEvent {
+  final GenerateDeckMetadata metadata;
+  GenerateDeckMeta(this.metadata);
 }
 
 // ── Helper class ─────────────────────────────────────────────────────────────
@@ -169,21 +169,21 @@ class AiHelpers {
   }
 
   /// Invokes the `generate-material` edge function and returns a stream of
-  /// [GenerateMaterialEvent]s.
+  /// [GenerateDeckEvent]s.
   ///
-  /// Each [GenerateMaterialChunk] carries a text fragment from the LLM.
-  /// The final [GenerateMaterialMeta] carries usage metadata (token counts).
+  /// Each [GenerateDeckChunk] carries a text fragment from the LLM.
+  /// The final [GenerateDeckMeta] carries usage metadata (token counts).
   ///
   /// Example:
   /// ```dart
-  /// await for (final event in AiHelpers.generateMaterial(texts, prefs)) {
+  /// await for (final event in AiHelpers.generateDeck(texts, prefs)) {
   ///   switch (event) {
-  ///     case GenerateMaterialChunk(:final text) => buffer.write(text);
-  ///     case GenerateMaterialMeta(:final metadata) => print(metadata);
+  ///     case GenerateDeckChunk(:final text) => buffer.write(text);
+  ///     case GenerateDeckMeta(:final metadata) => print(metadata);
   ///   }
   /// }
   /// ```
-  static Stream<GenerateMaterialEvent> generateMaterial({
+  static Stream<GenerateDeckEvent> generateDeck({
     required List<Map<String, String>> extractedTexts,
     required Map<String, String> preferences,
   }) async* {
@@ -217,11 +217,11 @@ class AiHelpers {
     yield* _parseSseEvents(linesStream);
   }
 
-  /// Parses SSE lines and yields [GenerateMaterialEvent]s.
+  /// Parses SSE lines and yields [GenerateDeckEvent]s.
   ///
-  /// Text chunks are wrapped in [GenerateMaterialChunk].
-  /// The optional trailing `[METADATA]:` line is parsed into [GenerateMaterialMeta].
-  static Stream<GenerateMaterialEvent> _parseSseEvents(
+  /// Text chunks are wrapped in [GenerateDeckChunk].
+  /// The optional trailing `[METADATA]:` line is parsed into [GenerateDeckMeta].
+  static Stream<GenerateDeckEvent> _parseSseEvents(
     Stream<String> lines,
   ) async* {
     await for (final line in lines) {
@@ -237,19 +237,19 @@ class AiHelpers {
           // Check for the metadata trailer embedded in the text chunk
           if (decoded.startsWith('\n[METADATA]:')) {
             final jsonPart = decoded.substring('\n[METADATA]:'.length);
-            final meta = GenerateMaterialMetadata.fromJson(
+            final meta = GenerateDeckMetadata.fromJson(
               jsonDecode(jsonPart) as Map<String, dynamic>,
             );
-            yield GenerateMaterialMeta(meta);
+            yield GenerateDeckMeta(meta);
           } else {
-            yield GenerateMaterialChunk(decoded);
+            yield GenerateDeckChunk(decoded);
           }
         } else if (decoded is Map && decoded.containsKey('error')) {
           throw Exception(decoded['error']);
         }
       } catch (e) {
         if (e is FormatException) {
-          yield GenerateMaterialChunk(payload);
+          yield GenerateDeckChunk(payload);
         } else {
           rethrow;
         }

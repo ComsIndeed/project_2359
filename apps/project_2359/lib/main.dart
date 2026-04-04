@@ -44,7 +44,7 @@ Future<void> main() async {
   AppLogger.info('Initializing services...', tag: 'Main');
   final database = AppDatabase();
   final sourceService = SourceService(database);
-  final studyMaterialService = StudyDatabaseService(database);
+  final studyDatabaseService = StudyDatabaseService(database);
   final studySchedulerService = StudySchedulerService(database);
 
   runApp(
@@ -53,7 +53,7 @@ Future<void> main() async {
         RepositoryProvider<AppDatabase>.value(value: database),
         RepositoryProvider<SourceService>.value(value: sourceService),
         RepositoryProvider<StudyDatabaseService>.value(
-          value: studyMaterialService,
+          value: studyDatabaseService,
         ),
         RepositoryProvider.value(value: studySchedulerService),
       ],

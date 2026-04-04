@@ -106,19 +106,19 @@ class StudyDatabaseService {
   Future<void> deleteFolder(String id) async {
     AppLogger.warning('Deleting folder and all its contents: $id', tag: _tag);
     await _db.transaction(() async {
-      // 1. Get all materials (packs) in this folder
+      // 1. Get all decks in this folder
       final materials = await (_db.select(
         _db.deckItems,
       )..where((t) => t.folderId.equals(id))).get();
 
-      // 2. For each material, delete its cards
+      // 2. For each deck, delete its cards
       for (final material in materials) {
         await (_db.delete(
           _db.cardItems,
         )..where((t) => t.deckId.equals(material.id))).go();
       }
 
-      // 3. Delete materials
+      // 3. Delete decks
       await (_db.delete(
         _db.deckItems,
       )..where((t) => t.folderId.equals(id))).go();
@@ -151,37 +151,37 @@ class StudyDatabaseService {
     return result;
   }
 
-  // --- Materials (Packs) ---
+  // --- Decks ---
 
-  Future<List<DeckItem>> getMaterialsByFolderId(String folderId) async {
-    AppLogger.debug('Fetching materials for folder: $folderId', tag: _tag);
+  Future<List<DeckItem>> getDecksByFolderId(String folderId) async {
+    AppLogger.debug('Fetching decks for folder: $folderId', tag: _tag);
     return await (_db.select(
       _db.deckItems,
     )..where((t) => t.folderId.equals(folderId))).get();
   }
 
-  Stream<List<DeckItem>> watchMaterialsByFolderId(String folderId) {
-    AppLogger.debug('Watching materials for folder: $folderId', tag: _tag);
+  Stream<List<DeckItem>> watchDecksByFolderId(String folderId) {
+    AppLogger.debug('Watching decks for folder: $folderId', tag: _tag);
     return (_db.select(
       _db.deckItems,
     )..where((t) => t.folderId.equals(folderId))).watch();
   }
 
-  Stream<List<DeckItem>> watchPinnedMaterials() {
-    AppLogger.debug('Watching pinned materials', tag: _tag);
+  Stream<List<DeckItem>> watchPinnedDecks() {
+    AppLogger.debug('Watching pinned decks', tag: _tag);
     return (_db.select(
       _db.deckItems,
     )..where((t) => t.isPinned.equals(true))).watch();
   }
 
-  Stream<List<DeckItem>> watchAllMaterials() {
-    AppLogger.debug('Watching all materials', tag: _tag);
+  Stream<List<DeckItem>> watchAllDecks() {
+    AppLogger.debug('Watching all decks', tag: _tag);
     return _db.select(_db.deckItems).watch();
   }
 
-  Future<void> toggleMaterialPin(String id, bool isPinned) async {
+  Future<void> toggleDeckPin(String id, bool isPinned) async {
     AppLogger.info(
-      '${isPinned ? 'Pinning' : 'Unpinning'} material: $id',
+      '${isPinned ? 'Pinning' : 'Unpinning'} deck: $id',
       tag: _tag,
     );
     await (_db.update(_db.deckItems)..where((t) => t.id.equals(id))).write(
@@ -189,35 +189,35 @@ class StudyDatabaseService {
     );
   }
 
-  Future<void> insertMaterial(DeckItemsCompanion material) async {
-    AppLogger.info('Inserting material: ${material.name.value}', tag: _tag);
-    await _db.into(_db.deckItems).insert(material);
+  Future<void> insertDeck(DeckItemsCompanion deck) async {
+    AppLogger.info('Inserting deck: ${deck.name.value}', tag: _tag);
+    await _db.into(_db.deckItems).insert(deck);
   }
 
-  Future<void> deleteMaterial(String id) async {
-    AppLogger.warning('Deleting material and its cards: $id', tag: _tag);
+  Future<void> deleteDeck(String id) async {
+    AppLogger.warning('Deleting deck and its cards: $id', tag: _tag);
     await _db.transaction(() async {
       // Delete cards first
       await (_db.delete(_db.cardItems)..where((t) => t.deckId.equals(id))).go();
-      // Then delete material
+      // Then delete deck
       await (_db.delete(_db.deckItems)..where((t) => t.id.equals(id))).go();
     });
   }
 
   // --- Cards ---
 
-  Future<List<CardItem>> getCardsByMaterialId(String materialId) async {
-    AppLogger.debug('Fetching cards for material: $materialId', tag: _tag);
+  Future<List<CardItem>> getCardsByDeckId(String deckId) async {
+    AppLogger.debug('Fetching cards for deck: $deckId', tag: _tag);
     return await (_db.select(
       _db.cardItems,
-    )..where((t) => t.deckId.equals(materialId))).get();
+    )..where((t) => t.deckId.equals(deckId))).get();
   }
 
-  Stream<List<CardItem>> watchCardsByMaterialId(String materialId) {
-    AppLogger.debug('Watching cards for material: $materialId', tag: _tag);
+  Stream<List<CardItem>> watchCardsByDeckId(String deckId) {
+    AppLogger.debug('Watching cards for deck: $deckId', tag: _tag);
     return (_db.select(
       _db.cardItems,
-    )..where((t) => t.deckId.equals(materialId))).watch();
+    )..where((t) => t.deckId.equals(deckId))).watch();
   }
 
   Future<void> insertCard(CardItemsCompanion card) async {
@@ -235,7 +235,7 @@ class StudyDatabaseService {
   Future<void> reviewCard(String id, int rating) async {
     AppLogger.info('Reviewing card $id with rating $rating', tag: _tag);
     // TODO: Implement FSRS scheduling logic here
-    // This will update the 'due' and 'fsrsCardJson' fields in study_card_items
+    // This will update the 'due' and 'fsrsCardJson' fields in card_items
   }
 
   Future<void> deleteCard(String id) async {
@@ -245,17 +245,17 @@ class StudyDatabaseService {
 
   // --- Combined Operations ---
 
-  /// Creates a material (pack) and all its cards in a single transaction.
-  Future<void> createMaterialWithCards({
-    required DeckItemsCompanion material,
+  /// Creates a deck and all its cards in a single transaction.
+  Future<void> createDeckWithCards({
+    required DeckItemsCompanion deck,
     required List<CardItemsCompanion> cards,
   }) async {
     AppLogger.info(
-      'Creating material "${material.name.value}" with ${cards.length} cards',
+      'Creating deck "${deck.name.value}" with ${cards.length} cards',
       tag: _tag,
     );
     await _db.transaction(() async {
-      await _db.into(_db.deckItems).insert(material);
+      await _db.into(_db.deckItems).insert(deck);
       await _db.batch((batch) {
         batch.insertAll(_db.cardItems, cards);
       });

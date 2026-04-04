@@ -25,8 +25,8 @@ class StudySchedulerService {
         .get();
   }
 
-  Future<int> getDueCount(String materialId) async {
-    final cards = await getCardsDue(materialId);
+  Future<int> getDueCount(String deckId) async {
+    final cards = await getCardsDue(deckId);
     return cards.length;
   }
 
@@ -97,13 +97,12 @@ class StudySchedulerService {
             rating: rating.index,
             reviewedAt: reviewLog.reviewDateTime.toUtc().toIso8601String(),
             scheduledDays: scheduledDays,
-            // elapsedDays: card.elapsedDays,
           ),
         );
   }
 
   /// Retrievability: probability (0–1) the user still remembers this card right now.
-  /// Useful for a "health" indicator on the material detail page later.
+  /// Useful for a "health" indicator on the deck detail page later.
   double? getRetrievability(CardItem row) {
     if (row.fsrsCardJson == null) return null;
     final fsrsCard = Card.fromMap(

@@ -33,11 +33,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final Set<String> _selectedFolderIds = {};
-  final Set<String> _selectedMaterialIds = {};
+  final Set<String> _selectedDeckIds = {};
   List<StudyFolderItem> _allFolders = [];
-  List<DeckItem> _allMaterials = [];
+  List<DeckItem> _allDecks = [];
   StreamSubscription? _folderSub;
-  StreamSubscription? _materialSub;
+  StreamSubscription? _deckSub;
 
   // New state for responsive desktop layout
   String? _selectedFolderId;
@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
   String _searchQuery = "";
 
   bool get _isSelecting =>
-      _selectedFolderIds.isNotEmpty || _selectedMaterialIds.isNotEmpty;
+      _selectedFolderIds.isNotEmpty || _selectedDeckIds.isNotEmpty;
 
   void _toggleFolderSelection(String id) {
     setState(() {
@@ -66,21 +66,21 @@ class _HomePageState extends State<HomePage> {
   void _clearSelection() {
     setState(() {
       _selectedFolderIds.clear();
-      _selectedMaterialIds.clear();
+      _selectedDeckIds.clear();
     });
   }
 
   void _navigateToMain(
     MainContentType type, {
-    String? materialId,
-    String? materialName,
+    String? deckId,
+    String? deckName,
     String? sourceId,
     Uint8List? sourceBlob,
   }) {
     setState(() {
       _mainContentType = type;
-      _selectedDeckId = materialId;
-      _selectedDeckName = materialName;
+      _selectedDeckId = deckId;
+      _selectedDeckName = deckName;
       _selectedSourceId = sourceId;
       _selectedSourceBlob = sourceBlob;
     });
@@ -112,14 +112,14 @@ class _HomePageState extends State<HomePage> {
     for (final id in _selectedFolderIds) {
       await service.toggleFolderPin(id, pin);
     }
-    for (final id in _selectedMaterialIds) {
-      await service.toggleMaterialPin(id, pin);
+    for (final id in _selectedDeckIds) {
+      await service.toggleDeckPin(id, pin);
     }
     _clearSelection();
   }
 
   Future<void> _handleDeleteSelected() async {
-    final count = _selectedFolderIds.length + _selectedMaterialIds.length;
+    final count = _selectedFolderIds.length + _selectedDeckIds.length;
     if (count == 0) return;
 
     final confirmed = await _showDeleteConfirmation(context, count: count);
@@ -129,9 +129,9 @@ class _HomePageState extends State<HomePage> {
     for (final id in _selectedFolderIds) {
       await service.deleteFolder(id);
     }
-    // TODO: handle materials if we ever allow multiselecting them on home
-    for (final id in _selectedMaterialIds) {
-      await service.deleteMaterial(id);
+    // TODO: handle decks if we ever allow multiselecting them on home
+    for (final id in _selectedDeckIds) {
+      await service.deleteDeck(id);
     }
     _clearSelection();
   }
@@ -179,15 +179,15 @@ class _HomePageState extends State<HomePage> {
     _folderSub = service.watchAllFolders().listen((folders) {
       if (mounted) setState(() => _allFolders = folders);
     });
-    _materialSub = service.watchAllMaterials().listen((materials) {
-      if (mounted) setState(() => _allMaterials = materials);
+    _deckSub = service.watchAllDecks().listen((decks) {
+      if (mounted) setState(() => _allDecks = decks);
     });
   }
 
   @override
   void dispose() {
     _folderSub?.cancel();
-    _materialSub?.cancel();
+    _deckSub?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -211,11 +211,11 @@ class _HomePageState extends State<HomePage> {
             final selectedFolders = _allFolders
                 .where((f) => _selectedFolderIds.contains(f.id))
                 .toList();
-            final selectedMaterials = _allMaterials
-                .where((m) => _selectedMaterialIds.contains(m.id))
+            final selectedDecks = _allDecks
+                .where((m) => _selectedDeckIds.contains(m.id))
                 .toList();
 
-            final allSelected = [...selectedFolders, ...selectedMaterials];
+            final allSelected = [...selectedFolders, ...selectedDecks];
             final allPinned =
                 allSelected.isNotEmpty &&
                 allSelected.every((i) {
@@ -234,7 +234,7 @@ class _HomePageState extends State<HomePage> {
 
             return _SelectionActionBar(
               selectedCount:
-                  _selectedFolderIds.length + _selectedMaterialIds.length,
+                  _selectedFolderIds.length + _selectedDeckIds.length,
               onClose: _clearSelection,
               onPin: () => _handlePinSelected(pin: true),
               onUnpin: () => _handlePinSelected(pin: false),
@@ -412,9 +412,7 @@ class _HomePageState extends State<HomePage> {
     if (_selectedFolderId == null) return const SizedBox.shrink();
 
     final service = context.read<StudyDatabaseService>();
-    final materialsStream = service.watchMaterialsByFolderId(
-      _selectedFolderId!,
-    );
+    final decksStream = service.watchDecksByFolderId(_selectedFolderId!);
 
     final folderName = _allFolders.any((f) => f.id == _selectedFolderId)
         ? _allFolders.firstWhere((f) => f.id == _selectedFolderId).name
@@ -472,15 +470,15 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
                 StreamBuilder<List<DeckItem>>(
-                  stream: materialsStream,
+                  stream: decksStream,
                   builder: (context, snapshot) {
-                    final materials = snapshot.data ?? [];
-                    if (materials.isEmpty) return const SizedBox.shrink();
+                    final decks = snapshot.data ?? [];
+                    if (decks.isEmpty) return const SizedBox.shrink();
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const _SectionHeader(title: "Materials"),
-                        for (var m in materials)
+                        const _SectionHeader(title: "Decks"),
+                        for (var m in decks)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child:
@@ -506,8 +504,8 @@ class _HomePageState extends State<HomePage> {
                                         onTap: () {
                                           _navigateToMain(
                                             MainContentType.study,
-                                            materialId: m.id,
-                                            materialName: m.name,
+                                            deckId: m.id,
+                                            deckName: m.name,
                                           );
                                         },
                                       ),
@@ -700,10 +698,10 @@ class _HomePageState extends State<HomePage> {
                                 _toggleFolderSelection(id);
                               } else {
                                 setState(() {
-                                  if (_selectedMaterialIds.contains(id)) {
-                                    _selectedMaterialIds.remove(id);
+                                  if (_selectedDeckIds.contains(id)) {
+                                    _selectedDeckIds.remove(id);
                                   } else {
-                                    _selectedMaterialIds.add(id);
+                                    _selectedDeckIds.add(id);
                                   }
                                 });
                               }
