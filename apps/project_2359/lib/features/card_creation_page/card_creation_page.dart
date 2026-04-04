@@ -13,7 +13,7 @@ import 'package:project_2359/core/widgets/expandable_container.dart';
 import 'package:project_2359/features/card_creation_page/smart_text_selection_handler.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
-import 'package:project_2359/features/card_creation_page/widgets/pdf_occlusion_overlay.dart';
+import 'package:project_2359/features/card_creation_page/widgets/card_creation_pdf_view.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:flutter/services.dart';
@@ -29,7 +29,6 @@ class CardCreationPage extends StatefulWidget {
 class _CardCreationPageState extends State<CardCreationPage> {
   Uint8List? _pdfBytes;
   String? _pdfTitle;
-  PdfDocument? _document;
   List<SourceItem>? _availableSources;
   StreamSubscription? _sourcesSub;
   PdfViewerController _controller = PdfViewerController();
@@ -174,7 +173,6 @@ class _CardCreationPageState extends State<CardCreationPage> {
         // _controller.dispose(); // Does not exist apparently
         _controller = PdfViewerController();
         _pdfKey++;
-        _document = null;
       });
     }
   }
@@ -191,7 +189,6 @@ class _CardCreationPageState extends State<CardCreationPage> {
           // Create a fresh controller so the new PdfViewer has clean state.
           _controller = PdfViewerController();
           _pdfKey++;
-          _document = null;
           _selectionNotifier.value = null;
           _selectedTextNotifier.value = null;
           _pdfBytes = blob.bytes;
@@ -287,7 +284,6 @@ class _CardCreationPageState extends State<CardCreationPage> {
                         _controller = PdfViewerController();
                         _pdfBytes = null;
                         _pdfTitle = null;
-                        _document = null;
                         _currentSourceId = null;
                         _selectionNotifier.value = null;
                         _selectedTextNotifier.value = null;
@@ -304,65 +300,17 @@ class _CardCreationPageState extends State<CardCreationPage> {
                   },
                 ),
               ),
-              body: _buildPdfView(),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildPdfView() {
-    if (_pdfBytes == null) {
-      return Container(color: Colors.black);
-    }
-
-    return KeyedSubtree(
-      key: ValueKey(_pdfKey),
-      child: ListenableBuilder(
-        listenable: _toolbarController,
-        builder: (context, _) {
-          return Stack(
-            children: [
-              PdfViewer.data(
-                _pdfBytes!,
-                sourceName: 'pdf_$_currentSourceId',
+              body: CardCreationPdfView(
+                pdfBytes: _pdfBytes,
+                pdfKey: _pdfKey,
+                currentSourceId: _currentSourceId,
                 controller: _controller,
-                useProgressiveLoading: true,
-                params: PdfViewerParams(
-                  boundaryMargin: const EdgeInsets.symmetric(horizontal: 256),
-                  margin: 8,
-                  onViewerReady: (doc, controller) {
-                    if (mounted) {
-                      setState(() {
-                        _document = doc;
-                      });
-                    }
-                  },
-                  backgroundColor: Colors.black,
-                  textSelectionParams: PdfTextSelectionParams(
-                    enabled: true,
-                    onTextSelectionChange: (pdfTextSelection) {
-                      _selectionNotifier.value = pdfTextSelection;
-                      pdfTextSelection.getSelectedText().then((text) {
-                        if (_selectionNotifier.value == pdfTextSelection) {
-                          _selectedTextNotifier.value = text;
-                        }
-                      });
-                    },
-                  ),
-                  onGeneralTap: labsSettings.smartSelectionEnabled
-                      ? _smartSelection.handleTap
-                      : null,
-                ),
+                toolbarController: _toolbarController,
+                selectionNotifier: _selectionNotifier,
+                selectedTextNotifier: _selectedTextNotifier,
+                smartSelection: _smartSelection,
               ),
-              if (_toolbarController.mode ==
-                  CardCreationToolbarMode.imageOcclusion)
-                PdfOcclusionOverlay(
-                  controller: _controller,
-                  toolbarController: _toolbarController,
-                ),
-            ],
+            ),
           );
         },
       ),
