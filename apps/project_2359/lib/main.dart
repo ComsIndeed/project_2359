@@ -48,7 +48,7 @@ Future<void> main() async {
   final sourceService = SourceService(database);
   final studyDatabaseService = StudyDatabaseService(database);
   final studySchedulerService = StudySchedulerService(database);
-  final appController = AppController();
+  final appController = AppController(appDatabase: database);
 
   runApp(
     MultiRepositoryProvider(

@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
+import 'package:project_2359/core/app_controller.dart';
 import 'package:project_2359/features/card_creation_page/expandable_card_creation_toolbar.dart';
 import 'package:provider/provider.dart';
 import 'package:project_2359/app_database.dart';
@@ -17,16 +18,29 @@ import 'package:project_2359/features/card_creation_page/widgets/card_creation_p
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:flutter/services.dart';
+import 'package:uuid/uuid.dart';
 
 class CardCreationPage extends StatefulWidget {
   final String folderId;
-  const CardCreationPage({super.key, required this.folderId});
+  final String? deckId;
+
+  /// Leave null for new
+  final String? draftId;
+
+  const CardCreationPage({
+    super.key,
+    required this.folderId,
+    this.deckId,
+    this.draftId,
+  });
 
   @override
   State<CardCreationPage> createState() => _CardCreationPageState();
 }
 
 class _CardCreationPageState extends State<CardCreationPage> {
+  late final String _targetDeckId;
+  late final String _currentDraftId;
   Uint8List? _pdfBytes;
   String? _pdfTitle;
   List<SourceItem>? _availableSources;
@@ -49,6 +63,10 @@ class _CardCreationPageState extends State<CardCreationPage> {
   @override
   void initState() {
     super.initState();
+    final uuid = const Uuid();
+    _targetDeckId = widget.deckId ?? uuid.v4();
+    _currentDraftId = widget.draftId ?? uuid.v4();
+
     _containerController = ExpandableContainerController(
       isVisible: true, // Always visible to show the toolbar initially
     );
@@ -72,6 +90,11 @@ class _CardCreationPageState extends State<CardCreationPage> {
     });
 
     _registerNumericShortcuts();
+  }
+
+  void _loadDraft() {
+    final controller = context.read<AppController>();
+    controller.draftService.getDraftById(_currentDraftId);
   }
 
   void _registerNumericShortcuts() {
