@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:project_2359/core/app_controller.dart';
+import 'package:project_2359/core/utils/logger.dart';
 import 'package:project_2359/features/card_creation_page/expandable_card_creation_toolbar.dart';
 import 'package:provider/provider.dart';
 import 'package:project_2359/app_database.dart';
@@ -75,6 +76,15 @@ class _CardCreationPageState extends State<CardCreationPage> {
 
     // Set initial mode to pdfList
     _toolbarController.setMode(CardCreationToolbarMode.sourcesList);
+
+    // If we're resuming a draft, load the session data
+    if (widget.draftId != null) {
+      _loadDraft();
+    }
+
+    AppLogger.info(
+      'CardCreationPage: opened draft $_currentDraftId of deck $_targetDeckId as ${widget.draftId != null ? 'RESUMING' : 'NEW'}',
+    );
   }
 
   void _initSources() {
@@ -92,9 +102,26 @@ class _CardCreationPageState extends State<CardCreationPage> {
     _registerNumericShortcuts();
   }
 
-  void _loadDraft() {
+  Future<void> _loadDraft() async {
     final controller = context.read<AppController>();
-    controller.draftService.getDraftById(_currentDraftId);
+    final draft = await controller.draftService.getDraftById(_currentDraftId);
+
+    if (draft != null) {
+      if (mounted) {
+        setState(() {
+          _targetDeckId = draft.deckId;
+          // If there was a source opened, try to reload it
+          if (draft.lastOpenedSourceId != null) {
+            final source = _availableSources?.firstWhere(
+              (s) => s.id == draft.lastOpenedSourceId,
+            );
+            if (source != null) {
+              _loadSource(source);
+            }
+          }
+        });
+      }
+    }
   }
 
   void _registerNumericShortcuts() {

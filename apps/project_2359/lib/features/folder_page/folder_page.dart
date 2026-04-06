@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_2359/core/app_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import 'package:project_2359/app_database.dart';
@@ -39,7 +40,9 @@ class _FolderPageState extends State<FolderPage> {
   late String folderName;
   final Set<String> _selectedDeckIds = {};
   List<DeckItem> _allDecks = [];
+  List<CardCreationDraftItem> _allDrafts = [];
   StreamSubscription? _deckSub;
+  StreamSubscription? _draftSub;
   List<SourceItem>? _currentSources;
   StreamSubscription? _sourcesSub;
   final PageController _pageController = PageController();
@@ -201,6 +204,14 @@ class _FolderPageState extends State<FolderPage> {
       if (mounted) setState(() => _allDecks = decks);
     });
 
+    // Watch drafts for this folder
+    final draftService = context.read<AppController>().draftService;
+    _draftSub = draftService.watchDraftsByFolderId(widget.folderId).listen((
+      drafts,
+    ) {
+      if (mounted) setState(() => _allDrafts = drafts);
+    });
+
     // Also watch sources to provide initialData to FAB for smooth animation
     final sourceService = context.read<SourceService>();
     _sourcesSub = sourceService.watchSourcesByFolderId(widget.folderId).listen((
@@ -223,6 +234,14 @@ class _FolderPageState extends State<FolderPage> {
         if (mounted) setState(() => _allDecks = decks);
       });
 
+      _draftSub?.cancel();
+      final draftService = context.read<AppController>().draftService;
+      _draftSub = draftService.watchDraftsByFolderId(widget.folderId).listen((
+        drafts,
+      ) {
+        if (mounted) setState(() => _allDrafts = drafts);
+      });
+
       final sourceService = context.read<SourceService>();
       _sourcesSub = sourceService
           .watchSourcesByFolderId(widget.folderId)
@@ -235,6 +254,7 @@ class _FolderPageState extends State<FolderPage> {
   @override
   void dispose() {
     _deckSub?.cancel();
+    _draftSub?.cancel();
     _sourcesSub?.cancel();
     _pageController.dispose();
     super.dispose();
@@ -457,6 +477,7 @@ class _FolderPageState extends State<FolderPage> {
                   // PAGE 0: DECKS
                   _CardsPage(
                     decks: _allDecks,
+                    drafts: _allDrafts,
                     folderId: widget.folderId,
                     selectedIds: _selectedDeckIds,
                     onToggleSelection: _toggleDeckSelection,
@@ -797,6 +818,7 @@ class _CompactIconButton extends StatelessWidget {
 
 class _CardsPage extends StatelessWidget {
   final List<DeckItem> decks;
+  final List<CardCreationDraftItem> drafts;
   final String folderId;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
@@ -804,6 +826,7 @@ class _CardsPage extends StatelessWidget {
 
   const _CardsPage({
     required this.decks,
+    required this.drafts,
     required this.folderId,
     required this.selectedIds,
     required this.onToggleSelection,
@@ -818,6 +841,60 @@ class _CardsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (drafts.isNotEmpty) ...[
+            const _SectionLabel(title: "Resume Projects"),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 100,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: drafts.length,
+                itemBuilder: (context, index) {
+                  final draft = drafts[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: SizedBox(
+                      width: 240,
+                      child: ProjectCardTile(
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
+                        title: Text(
+                          "New Draft ${draft.createdAt.split('T')[0]}",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Text(
+                          "Last updated ${draft.updatedAt.split('T')[0]}",
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                        leading: const FaIcon(
+                          FontAwesomeIcons.penToSquare,
+                          size: 16,
+                          color: Colors.white38,
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CardCreationPage(
+                                folderId: folderId,
+                                deckId: draft.deckId,
+                                draftId: draft.id,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
           const _SectionLabel(title: "Study Decks"),
           const SizedBox(height: 12),
           _DecksList(

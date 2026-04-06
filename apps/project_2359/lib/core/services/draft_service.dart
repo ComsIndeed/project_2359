@@ -173,7 +173,12 @@ class DraftService {
     });
   }
 
-  // --- Queries ---
+  /// Retrieves all cards currently associated with a draft session.
+  Future<List<CardItem>> getCardsByDraftId(String draftId) async {
+    return await (_db.select(
+      _db.cardItems,
+    )..where((t) => t.draftId.equals(draftId))).get();
+  }
 
   /// Retrieves a specific draft session.
   Future<CardCreationDraftItem?> getDraftById(String id) async {
@@ -187,5 +192,13 @@ class DraftService {
     return (_db.select(
       _db.cardCreationDraftItems,
     )..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])).watch();
+  }
+
+  /// Watches all active draft sessions for a specific folder.
+  Stream<List<CardCreationDraftItem>> watchDraftsByFolderId(String folderId) {
+    return (_db.select(_db.cardCreationDraftItems)
+          ..where((t) => t.folderId.equals(folderId))
+          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
+        .watch();
   }
 }
