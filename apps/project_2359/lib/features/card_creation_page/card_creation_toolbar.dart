@@ -8,7 +8,7 @@ import 'package:project_2359/features/card_creation_page/card_creation_mode_cont
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
 import 'package:project_2359/features/card_creation_page/selected_text_button.dart';
 import 'package:project_2359/core/widgets/icon_widgets/image_occlusion_icon.dart';
-import 'package:project_2359/features/card_creation_page/widgets/image_occlusion_editor.dart';
+import 'package:project_2359/features/card_creation_page/image_occlusion_editor.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/shortcut_widgets.dart';
 import 'package:flutter/services.dart';

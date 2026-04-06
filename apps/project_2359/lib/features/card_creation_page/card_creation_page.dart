@@ -14,7 +14,7 @@ import 'package:project_2359/core/widgets/expandable_container.dart';
 import 'package:project_2359/features/card_creation_page/smart_text_selection_handler.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
-import 'package:project_2359/features/card_creation_page/widgets/card_creation_pdf_view.dart';
+import 'package:project_2359/features/card_creation_page/card_creation_pdf_view.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:flutter/services.dart';
