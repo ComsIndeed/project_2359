@@ -161,7 +161,9 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
     }
 
     if (widget.toolbarController.mode == CardCreationToolbarMode.cardCreation) {
-      return CardCreationModeContent(controller: widget.toolbarController);
+      return CardCreationModeContent(
+        toolbarController: widget.toolbarController,
+      );
     }
 
     final hasSelection =

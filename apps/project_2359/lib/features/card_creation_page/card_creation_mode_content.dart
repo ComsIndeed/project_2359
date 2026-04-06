@@ -1,14 +1,18 @@
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:project_2359/app_database.dart';
+import 'package:project_2359/core/tables/card_items.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/shortcut_widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:uuid/uuid.dart';
 
 class CardCreationModeContent extends StatefulWidget {
-  final CardCreationToolbarController controller;
-  const CardCreationModeContent({super.key, required this.controller});
+  final CardCreationToolbarController toolbarController;
+  const CardCreationModeContent({super.key, required this.toolbarController});
 
   @override
   State<CardCreationModeContent> createState() =>
@@ -24,14 +28,18 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
   @override
   void initState() {
     super.initState();
-    _frontController = TextEditingController(text: widget.controller.frontText);
-    _backController = TextEditingController(text: widget.controller.backText);
+    _frontController = TextEditingController(
+      text: widget.toolbarController.frontText,
+    );
+    _backController = TextEditingController(
+      text: widget.toolbarController.backText,
+    );
 
     _frontController.addListener(() {
-      widget.controller.setFrontText(_frontController.text);
+      widget.toolbarController.setFrontText(_frontController.text);
     });
     _backController.addListener(() {
-      widget.controller.setBackText(_backController.text);
+      widget.toolbarController.setBackText(_backController.text);
     });
 
     _registerShortcuts();
@@ -73,15 +81,22 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
   }
 
   void _saveCard() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Card Saved! (Simulated)")));
-    widget.controller.resetCardFields();
-    widget.controller.setMode(CardCreationToolbarMode.collapsed);
+    final frontText = _frontController.text;
+    final backText = _backController.text;
+
+    if (frontText.isEmpty || backText.isEmpty) return;
+
+    widget.toolbarController.addCard(
+      CardItemsCompanion.insert(
+        id: const Uuid().v4(),
+        question: Value(frontText),
+        answer: Value(backText),
+      ),
+    );
   }
 
   void _cancel() {
-    widget.controller.setMode(CardCreationToolbarMode.collapsed);
+    widget.toolbarController.setMode(CardCreationToolbarMode.collapsed);
   }
 
   @override
@@ -129,7 +144,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
         // Source Container
         Builder(
               builder: (context) {
-                final selection = widget.controller.selectedText;
+                final selection = widget.toolbarController.selectedText;
                 final isPlaceholder = selection == null || selection.isEmpty;
                 final text = isPlaceholder ? "No text selected" : selection;
 

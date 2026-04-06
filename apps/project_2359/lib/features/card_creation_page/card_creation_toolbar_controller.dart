@@ -17,6 +17,7 @@ class CardCreationToolbarController extends ChangeNotifier {
   String? _draftId;
   String? _targetDeckId;
   String? _folderId;
+  final List<CardItemsCompanion> _cards = [];
 
   String? _selectedText;
   String _frontText = '';
@@ -38,6 +39,7 @@ class CardCreationToolbarController extends ChangeNotifier {
   String? get draftId => _draftId;
   String? get targetDeckId => _targetDeckId;
   String? get folderId => _folderId;
+  List<CardItemsCompanion> get cards => List.unmodifiable(_cards);
 
   CardCreationToolbarMode get mode => _mode;
   String? get selectedText => _selectedText;
@@ -64,6 +66,20 @@ class CardCreationToolbarController extends ChangeNotifier {
     _targetDeckId = targetDeckId;
     _folderId = folderId;
     notifyListeners();
+  }
+
+  /// Sets the initial list of cards for a resumed draft.
+  void setInitialCards(List<CardItemsCompanion> initialCards) {
+    _cards.clear();
+    _cards.addAll(initialCards);
+    notifyListeners();
+  }
+
+  /// Adds a new card to the draft and triggers an automatic sync.
+  Future<void> addCard(CardItemsCompanion card) async {
+    _cards.add(card);
+    notifyListeners();
+    await syncDraft(_cards);
   }
 
   /// Synchronizes the current card list with the database draft.

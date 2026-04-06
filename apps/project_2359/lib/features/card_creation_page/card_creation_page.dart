@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:project_2359/core/app_controller.dart';
+import 'package:project_2359/core/services/draft_service.dart';
 import 'package:project_2359/core/utils/logger.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
 import 'package:provider/provider.dart';
@@ -52,8 +53,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
   bool _isLoading = false;
   final ValueNotifier<dynamic> _selectionNotifier = ValueNotifier(null);
   final ValueNotifier<String?> _selectedTextNotifier = ValueNotifier(null);
-  final CardCreationToolbarController _toolbarController =
-      CardCreationToolbarController();
+  late final CardCreationToolbarController _toolbarController;
   late final ExpandableContainerController _containerController;
 
   /// Incremented on each document load to force a full PdfViewer remount,
@@ -64,13 +64,28 @@ class _CardCreationPageState extends State<CardCreationPage> {
   @override
   void initState() {
     super.initState();
+
+    // IDs
     final uuid = const Uuid();
     _targetDeckId = widget.deckId ?? uuid.v4();
     _currentDraftId = widget.draftId ?? uuid.v4();
 
+    // Toolbar Controller
+    _toolbarController =
+        CardCreationToolbarController(
+          draftService: context.read<AppController>().draftService,
+        )..setDraftDetails(
+          draftId: _currentDraftId,
+          targetDeckId: _targetDeckId,
+          folderId: widget.folderId,
+        );
+
+    // Container Controller
     _containerController = ExpandableContainerController(
       isVisible: true, // Always visible to show the toolbar initially
     );
+
+    // Sources
     _initSources();
     _toolbarController.addListener(_onToolbarChanged);
 
