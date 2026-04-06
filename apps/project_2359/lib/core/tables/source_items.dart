@@ -1,8 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:project_2359/core/tables/study_folder_items.dart';
-
-/// The type of source content.
-enum SourceType { document, video, audio, image, text }
+import 'package:project_2359/core/enums/media_type.dart';
 
 class SourceItems extends Table {
   TextColumn get id => text()();
@@ -10,7 +8,7 @@ class SourceItems extends Table {
       text().nullable().references(StudyFolderItems, #id)();
   TextColumn get label => text()();
   TextColumn get path => text().nullable()();
-  TextColumn get type => text()(); // Use SourceType.name to store as string
+  TextColumn get type => textEnum<MediaType>()();
   TextColumn get extractedContent => text().nullable()();
   BoolColumn get isPinned => boolean().withDefault(const Constant(false))();
 

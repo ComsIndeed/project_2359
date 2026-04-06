@@ -258,7 +258,8 @@ class _StoragePageState extends State<StoragePage> {
                         final fileSize = blob != null
                             ? _formatBytes(blob.bytes.length)
                             : 'Unknown';
-                        final fileType = blob?.type.toUpperCase() ?? 'FILE';
+                        final fileType =
+                            blob?.type.name.toUpperCase() ?? 'FILE';
 
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 8),

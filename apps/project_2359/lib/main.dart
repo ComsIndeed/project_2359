@@ -4,7 +4,6 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/study_database_service.dart';
-import 'package:project_2359/core/study_scheduler_service.dart';
 import 'package:project_2359/features/home_page/home_page.dart';
 import 'package:project_2359/core/app_controller.dart';
 import 'package:project_2359/app_theme.dart';
@@ -47,7 +46,6 @@ Future<void> main() async {
   final database = AppDatabase();
   final sourceService = SourceService(database);
   final studyDatabaseService = StudyDatabaseService(database);
-  final studySchedulerService = StudySchedulerService(database);
   final appController = AppController(appDatabase: database);
 
   runApp(
@@ -58,7 +56,6 @@ Future<void> main() async {
         RepositoryProvider<StudyDatabaseService>.value(
           value: studyDatabaseService,
         ),
-        RepositoryProvider.value(value: studySchedulerService),
         ChangeNotifierProvider.value(value: appController),
       ],
       child: MultiBlocProvider(

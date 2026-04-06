@@ -1,11 +1,14 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:uuid/uuid.dart';
+
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/utils/logger.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_state.dart';
-import 'package:uuid/uuid.dart';
+import 'package:project_2359/core/enums/media_type.dart';
+import 'package:project_2359/core/tables/source_item_blobs.dart';
 
 class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
   final SourceService sourceService;
@@ -52,13 +55,21 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
       final blobId = uuid.v4();
       final extension = file.extension ?? 'unknown';
 
+      final sourceFileType = switch (extension.toLowerCase()) {
+        'pdf' => SourceFileType.pdf,
+        'docx' => SourceFileType.docx,
+        'xlsx' => SourceFileType.xlsx,
+        'txt' => SourceFileType.txt,
+        _ => SourceFileType.unknown,
+      };
+
       await sourceService.insertSource(
         SourceItemsCompanion.insert(
           id: sourceId,
           folderId: Value(effectiveFolderId),
           label: file.name,
           path: Value(file.path),
-          type: 'document',
+          type: MediaType.document,
         ),
       );
 
@@ -67,7 +78,7 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
           id: blobId,
           sourceItemId: sourceId,
           sourceItemName: file.name,
-          type: extension,
+          type: sourceFileType,
           bytes: file.bytes!,
         ),
       );

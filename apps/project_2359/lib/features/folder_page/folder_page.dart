@@ -18,7 +18,7 @@ import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' as drift;
-import 'package:project_2359/core/tables/source_items.dart'; // For SourceType
+import 'package:project_2359/core/enums/media_type.dart'; // For MediaType
 import 'package:project_2359/core/tables/source_item_blobs.dart'; // For SourceFileType
 import 'package:project_2359/features/card_creation_page/card_creation_page.dart';
 
@@ -160,7 +160,7 @@ class _FolderPageState extends State<FolderPage> {
             id: drift.Value(sourceId),
             folderId: drift.Value(widget.folderId),
             label: drift.Value(file.name),
-            type: drift.Value(SourceType.document.name),
+            type: const drift.Value(MediaType.document),
             isPinned: const drift.Value(false),
           ),
         );
@@ -170,7 +170,7 @@ class _FolderPageState extends State<FolderPage> {
             id: drift.Value(blobId),
             sourceItemId: drift.Value(sourceId),
             sourceItemName: drift.Value(file.name),
-            type: drift.Value(SourceFileType.pdf.name),
+            type: const drift.Value(SourceFileType.pdf),
             bytes: drift.Value(file.bytes!),
           ),
         );
@@ -917,14 +917,18 @@ class _SourcesPage extends StatelessWidget {
 
   const _SourcesPage({required this.folderId, required this.sources});
 
-  IconData _getSourceIcon(String type) {
-    switch (type.toLowerCase()) {
-      case 'pdf':
+  IconData _getSourceIcon(MediaType type) {
+    switch (type) {
+      case MediaType.document:
         return FontAwesomeIcons.filePdf;
-      case 'text':
+      case MediaType.text:
         return FontAwesomeIcons.fileLines;
-      default:
-        return FontAwesomeIcons.fileLines;
+      case MediaType.video:
+        return FontAwesomeIcons.youtube;
+      case MediaType.audio:
+        return FontAwesomeIcons.fileAudio;
+      case MediaType.image:
+        return FontAwesomeIcons.fileImage;
     }
   }
 
@@ -986,7 +990,7 @@ class _SourcesPage extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    "${sources[i].type.toUpperCase()} | ${sources[i].extractedContent?.length ?? 0} chars",
+                                    "${sources[i].type.name.toUpperCase()} | ${sources[i].extractedContent?.length ?? 0} chars",
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: cs.onSurface.withValues(

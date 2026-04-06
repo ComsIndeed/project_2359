@@ -1,14 +1,15 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:uuid/uuid.dart';
+
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/tables/card_items.dart';
-import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
-import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/shortcut_widgets.dart';
-import 'package:flutter/services.dart';
-import 'package:uuid/uuid.dart';
+import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
+import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
 
 class CardCreationModeContent extends StatefulWidget {
   final CardCreationToolbarController toolbarController;
@@ -89,8 +90,8 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
     widget.toolbarController.addCard(
       CardItemsCompanion.insert(
         id: const Uuid().v4(),
-        question: drift.Value(frontText),
-        answer: drift.Value(backText),
+        frontText: drift.Value(frontText),
+        backText: drift.Value(backText),
       ),
     );
   }

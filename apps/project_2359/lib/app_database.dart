@@ -1,4 +1,6 @@
 import 'package:drift/drift.dart';
+import 'package:project_2359/core/enums/media_type.dart';
+import 'package:project_2359/core/models/card_occlusion.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart' as path;
 import 'package:project_2359/core/converters/json_list_converter.dart';
@@ -6,6 +8,7 @@ import 'package:project_2359/core/converters/project_rect_list_converter.dart';
 import 'package:project_2359/core/converters/project_time_range_list_converter.dart';
 import 'package:project_2359/core/models/project_rect.dart';
 import 'package:project_2359/core/models/project_time_range.dart';
+import 'package:project_2359/core/tables/asset_items.dart';
 import 'package:project_2359/core/tables/source_item_blobs.dart';
 import 'package:project_2359/core/tables/source_items.dart';
 import 'package:project_2359/core/tables/deck_items.dart';
@@ -28,6 +31,7 @@ part 'app_database.g.dart';
     StudySessionEvents,
     CitationItems,
     CardCreationDraftItems,
+    AssetItems,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -64,7 +68,7 @@ class AppDatabase extends _$AppDatabase {
 
   static QueryExecutor _openConnection() {
     return driftDatabase(
-      name: 'project_2359_database_v4_20260404_2305',
+      name: 'project_2359_database_v5_20260406_1418',
       web: DriftWebOptions(
         sqlite3Wasm: Uri.parse('sqlite3.wasm'),
         driftWorker: Uri.parse('drift_worker.js'),

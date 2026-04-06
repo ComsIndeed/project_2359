@@ -7,7 +7,7 @@ class SourceItemBlobs extends Table {
   TextColumn get id => text()();
   TextColumn get sourceItemId => text()();
   TextColumn get sourceItemName => text()();
-  TextColumn get type => text()();
+  TextColumn get type => textEnum<SourceFileType>()();
   BlobColumn get bytes => blob()();
 
   @override

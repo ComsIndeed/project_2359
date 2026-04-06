@@ -555,7 +555,7 @@ class _HomePageState extends State<HomePage> {
                                         .withValues(alpha: 0.5),
                                     title: Text(s.label),
                                     subtitle: Text(
-                                      "${s.type.toUpperCase()} | ${s.extractedContent?.length ?? 0} chars",
+                                      "${s.type.name.toUpperCase()} | ${s.extractedContent?.length ?? 0} chars",
                                     ),
                                     isSelected: false,
                                     isCompact: true,

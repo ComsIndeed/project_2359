@@ -411,15 +411,15 @@ class $SourceItemsTable extends SourceItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<String> type = GeneratedColumn<String>(
-    'type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumnWithTypeConverter<MediaType, String> type =
+      GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<MediaType>($SourceItemsTable.$convertertype);
   static const VerificationMeta _extractedContentMeta = const VerificationMeta(
     'extractedContent',
   );
@@ -493,14 +493,6 @@ class $SourceItemsTable extends SourceItems
         path.isAcceptableOrUnknown(data['path']!, _pathMeta),
       );
     }
-    if (data.containsKey('type')) {
-      context.handle(
-        _typeMeta,
-        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_typeMeta);
-    }
     if (data.containsKey('extracted_content')) {
       context.handle(
         _extractedContentMeta,
@@ -541,10 +533,12 @@ class $SourceItemsTable extends SourceItems
         DriftSqlType.string,
         data['${effectivePrefix}path'],
       ),
-      type: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}type'],
-      )!,
+      type: $SourceItemsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
       extractedContent: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}extracted_content'],
@@ -560,6 +554,9 @@ class $SourceItemsTable extends SourceItems
   $SourceItemsTable createAlias(String alias) {
     return $SourceItemsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<MediaType, String, String> $convertertype =
+      const EnumNameConverter<MediaType>(MediaType.values);
 }
 
 class SourceItem extends DataClass implements Insertable<SourceItem> {
@@ -567,7 +564,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
   final String? folderId;
   final String label;
   final String? path;
-  final String type;
+  final MediaType type;
   final String? extractedContent;
   final bool isPinned;
   const SourceItem({
@@ -590,7 +587,11 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
     if (!nullToAbsent || path != null) {
       map['path'] = Variable<String>(path);
     }
-    map['type'] = Variable<String>(type);
+    {
+      map['type'] = Variable<String>(
+        $SourceItemsTable.$convertertype.toSql(type),
+      );
+    }
     if (!nullToAbsent || extractedContent != null) {
       map['extracted_content'] = Variable<String>(extractedContent);
     }
@@ -624,7 +625,9 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
       folderId: serializer.fromJson<String?>(json['folderId']),
       label: serializer.fromJson<String>(json['label']),
       path: serializer.fromJson<String?>(json['path']),
-      type: serializer.fromJson<String>(json['type']),
+      type: $SourceItemsTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
       extractedContent: serializer.fromJson<String?>(json['extractedContent']),
       isPinned: serializer.fromJson<bool>(json['isPinned']),
     );
@@ -637,7 +640,9 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
       'folderId': serializer.toJson<String?>(folderId),
       'label': serializer.toJson<String>(label),
       'path': serializer.toJson<String?>(path),
-      'type': serializer.toJson<String>(type),
+      'type': serializer.toJson<String>(
+        $SourceItemsTable.$convertertype.toJson(type),
+      ),
       'extractedContent': serializer.toJson<String?>(extractedContent),
       'isPinned': serializer.toJson<bool>(isPinned),
     };
@@ -648,7 +653,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
     Value<String?> folderId = const Value.absent(),
     String? label,
     Value<String?> path = const Value.absent(),
-    String? type,
+    MediaType? type,
     Value<String?> extractedContent = const Value.absent(),
     bool? isPinned,
   }) => SourceItem(
@@ -711,7 +716,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
   final Value<String?> folderId;
   final Value<String> label;
   final Value<String?> path;
-  final Value<String> type;
+  final Value<MediaType> type;
   final Value<String?> extractedContent;
   final Value<bool> isPinned;
   final Value<int> rowid;
@@ -730,7 +735,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
     this.folderId = const Value.absent(),
     required String label,
     this.path = const Value.absent(),
-    required String type,
+    required MediaType type,
     this.extractedContent = const Value.absent(),
     this.isPinned = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -764,7 +769,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
     Value<String?>? folderId,
     Value<String>? label,
     Value<String?>? path,
-    Value<String>? type,
+    Value<MediaType>? type,
     Value<String?>? extractedContent,
     Value<bool>? isPinned,
     Value<int>? rowid,
@@ -797,7 +802,9 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
       map['path'] = Variable<String>(path.value);
     }
     if (type.present) {
-      map['type'] = Variable<String>(type.value);
+      map['type'] = Variable<String>(
+        $SourceItemsTable.$convertertype.toSql(type.value),
+      );
     }
     if (extractedContent.present) {
       map['extracted_content'] = Variable<String>(extractedContent.value);
@@ -1234,15 +1241,15 @@ class $SourceItemBlobsTable extends SourceItemBlobs
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<String> type = GeneratedColumn<String>(
-    'type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumnWithTypeConverter<SourceFileType, String> type =
+      GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<SourceFileType>($SourceItemBlobsTable.$convertertype);
   static const VerificationMeta _bytesMeta = const VerificationMeta('bytes');
   @override
   late final GeneratedColumn<Uint8List> bytes = GeneratedColumn<Uint8List>(
@@ -1299,14 +1306,6 @@ class $SourceItemBlobsTable extends SourceItemBlobs
     } else if (isInserting) {
       context.missing(_sourceItemNameMeta);
     }
-    if (data.containsKey('type')) {
-      context.handle(
-        _typeMeta,
-        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_typeMeta);
-    }
     if (data.containsKey('bytes')) {
       context.handle(
         _bytesMeta,
@@ -1336,10 +1335,12 @@ class $SourceItemBlobsTable extends SourceItemBlobs
         DriftSqlType.string,
         data['${effectivePrefix}source_item_name'],
       )!,
-      type: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}type'],
-      )!,
+      type: $SourceItemBlobsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
       bytes: attachedDatabase.typeMapping.read(
         DriftSqlType.blob,
         data['${effectivePrefix}bytes'],
@@ -1351,13 +1352,16 @@ class $SourceItemBlobsTable extends SourceItemBlobs
   $SourceItemBlobsTable createAlias(String alias) {
     return $SourceItemBlobsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<SourceFileType, String, String> $convertertype =
+      const EnumNameConverter<SourceFileType>(SourceFileType.values);
 }
 
 class SourceItemBlob extends DataClass implements Insertable<SourceItemBlob> {
   final String id;
   final String sourceItemId;
   final String sourceItemName;
-  final String type;
+  final SourceFileType type;
   final Uint8List bytes;
   const SourceItemBlob({
     required this.id,
@@ -1372,7 +1376,11 @@ class SourceItemBlob extends DataClass implements Insertable<SourceItemBlob> {
     map['id'] = Variable<String>(id);
     map['source_item_id'] = Variable<String>(sourceItemId);
     map['source_item_name'] = Variable<String>(sourceItemName);
-    map['type'] = Variable<String>(type);
+    {
+      map['type'] = Variable<String>(
+        $SourceItemBlobsTable.$convertertype.toSql(type),
+      );
+    }
     map['bytes'] = Variable<Uint8List>(bytes);
     return map;
   }
@@ -1396,7 +1404,9 @@ class SourceItemBlob extends DataClass implements Insertable<SourceItemBlob> {
       id: serializer.fromJson<String>(json['id']),
       sourceItemId: serializer.fromJson<String>(json['sourceItemId']),
       sourceItemName: serializer.fromJson<String>(json['sourceItemName']),
-      type: serializer.fromJson<String>(json['type']),
+      type: $SourceItemBlobsTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
       bytes: serializer.fromJson<Uint8List>(json['bytes']),
     );
   }
@@ -1407,7 +1417,9 @@ class SourceItemBlob extends DataClass implements Insertable<SourceItemBlob> {
       'id': serializer.toJson<String>(id),
       'sourceItemId': serializer.toJson<String>(sourceItemId),
       'sourceItemName': serializer.toJson<String>(sourceItemName),
-      'type': serializer.toJson<String>(type),
+      'type': serializer.toJson<String>(
+        $SourceItemBlobsTable.$convertertype.toJson(type),
+      ),
       'bytes': serializer.toJson<Uint8List>(bytes),
     };
   }
@@ -1416,7 +1428,7 @@ class SourceItemBlob extends DataClass implements Insertable<SourceItemBlob> {
     String? id,
     String? sourceItemId,
     String? sourceItemName,
-    String? type,
+    SourceFileType? type,
     Uint8List? bytes,
   }) => SourceItemBlob(
     id: id ?? this.id,
@@ -1474,7 +1486,7 @@ class SourceItemBlobsCompanion extends UpdateCompanion<SourceItemBlob> {
   final Value<String> id;
   final Value<String> sourceItemId;
   final Value<String> sourceItemName;
-  final Value<String> type;
+  final Value<SourceFileType> type;
   final Value<Uint8List> bytes;
   final Value<int> rowid;
   const SourceItemBlobsCompanion({
@@ -1489,7 +1501,7 @@ class SourceItemBlobsCompanion extends UpdateCompanion<SourceItemBlob> {
     required String id,
     required String sourceItemId,
     required String sourceItemName,
-    required String type,
+    required SourceFileType type,
     required Uint8List bytes,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1519,7 +1531,7 @@ class SourceItemBlobsCompanion extends UpdateCompanion<SourceItemBlob> {
     Value<String>? id,
     Value<String>? sourceItemId,
     Value<String>? sourceItemName,
-    Value<String>? type,
+    Value<SourceFileType>? type,
     Value<Uint8List>? bytes,
     Value<int>? rowid,
   }) {
@@ -1546,7 +1558,9 @@ class SourceItemBlobsCompanion extends UpdateCompanion<SourceItemBlob> {
       map['source_item_name'] = Variable<String>(sourceItemName.value);
     }
     if (type.present) {
-      map['type'] = Variable<String>(type.value);
+      map['type'] = Variable<String>(
+        $SourceItemBlobsTable.$convertertype.toSql(type.value),
+      );
     }
     if (bytes.present) {
       map['bytes'] = Variable<Uint8List>(bytes.value);
@@ -2071,6 +2085,69 @@ class $CardItemsTable extends CardItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _frontTextMeta = const VerificationMeta(
+    'frontText',
+  );
+  @override
+  late final GeneratedColumn<String> frontText = GeneratedColumn<String>(
+    'front_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _backTextMeta = const VerificationMeta(
+    'backText',
+  );
+  @override
+  late final GeneratedColumn<String> backText = GeneratedColumn<String>(
+    'back_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _frontImageIdMeta = const VerificationMeta(
+    'frontImageId',
+  );
+  @override
+  late final GeneratedColumn<String> frontImageId = GeneratedColumn<String>(
+    'front_image_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _backImageIdMeta = const VerificationMeta(
+    'backImageId',
+  );
+  @override
+  late final GeneratedColumn<String> backImageId = GeneratedColumn<String>(
+    'back_image_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<CardOcclusion?, String>
+  occlusionData = GeneratedColumn<String>(
+    'occlusion_data',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<CardOcclusion?>($CardItemsTable.$converterocclusionDatan);
+  static const VerificationMeta _dueMeta = const VerificationMeta('due');
+  @override
+  late final GeneratedColumn<DateTime> due = GeneratedColumn<DateTime>(
+    'due',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
   static const VerificationMeta _deckIdMeta = const VerificationMeta('deckId');
   @override
   late final GeneratedColumn<String> deckId = GeneratedColumn<String>(
@@ -2097,67 +2174,43 @@ class $CardItemsTable extends CardItems
       'REFERENCES card_creation_draft_items (id)',
     ),
   );
-  static const VerificationMeta _questionMeta = const VerificationMeta(
-    'question',
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
   );
   @override
-  late final GeneratedColumn<String> question = GeneratedColumn<String>(
-    'question',
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
     aliasedName,
-    true,
-    type: DriftSqlType.string,
+    false,
+    type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
-  static const VerificationMeta _optionsListJsonMeta = const VerificationMeta(
-    'optionsListJson',
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
   );
   @override
-  late final GeneratedColumn<String> optionsListJson = GeneratedColumn<String>(
-    'options_list_json',
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
     aliasedName,
-    true,
-    type: DriftSqlType.string,
+    false,
+    type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-  );
-  static const VerificationMeta _answerMeta = const VerificationMeta('answer');
-  @override
-  late final GeneratedColumn<String> answer = GeneratedColumn<String>(
-    'answer',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _dueMeta = const VerificationMeta('due');
-  @override
-  late final GeneratedColumn<String> due = GeneratedColumn<String>(
-    'due',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _fsrsCardJsonMeta = const VerificationMeta(
-    'fsrsCardJson',
-  );
-  @override
-  late final GeneratedColumn<String> fsrsCardJson = GeneratedColumn<String>(
-    'fsrs_card_json',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    frontText,
+    backText,
+    frontImageId,
+    backImageId,
+    occlusionData,
+    due,
     deckId,
     draftId,
-    question,
-    optionsListJson,
-    answer,
-    due,
-    fsrsCardJson,
+    createdAt,
+    updatedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2176,6 +2229,42 @@ class $CardItemsTable extends CardItems
     } else if (isInserting) {
       context.missing(_idMeta);
     }
+    if (data.containsKey('front_text')) {
+      context.handle(
+        _frontTextMeta,
+        frontText.isAcceptableOrUnknown(data['front_text']!, _frontTextMeta),
+      );
+    }
+    if (data.containsKey('back_text')) {
+      context.handle(
+        _backTextMeta,
+        backText.isAcceptableOrUnknown(data['back_text']!, _backTextMeta),
+      );
+    }
+    if (data.containsKey('front_image_id')) {
+      context.handle(
+        _frontImageIdMeta,
+        frontImageId.isAcceptableOrUnknown(
+          data['front_image_id']!,
+          _frontImageIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('back_image_id')) {
+      context.handle(
+        _backImageIdMeta,
+        backImageId.isAcceptableOrUnknown(
+          data['back_image_id']!,
+          _backImageIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('due')) {
+      context.handle(
+        _dueMeta,
+        due.isAcceptableOrUnknown(data['due']!, _dueMeta),
+      );
+    }
     if (data.containsKey('deck_id')) {
       context.handle(
         _deckIdMeta,
@@ -2188,40 +2277,16 @@ class $CardItemsTable extends CardItems
         draftId.isAcceptableOrUnknown(data['draft_id']!, _draftIdMeta),
       );
     }
-    if (data.containsKey('question')) {
+    if (data.containsKey('created_at')) {
       context.handle(
-        _questionMeta,
-        question.isAcceptableOrUnknown(data['question']!, _questionMeta),
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
-    if (data.containsKey('options_list_json')) {
+    if (data.containsKey('updated_at')) {
       context.handle(
-        _optionsListJsonMeta,
-        optionsListJson.isAcceptableOrUnknown(
-          data['options_list_json']!,
-          _optionsListJsonMeta,
-        ),
-      );
-    }
-    if (data.containsKey('answer')) {
-      context.handle(
-        _answerMeta,
-        answer.isAcceptableOrUnknown(data['answer']!, _answerMeta),
-      );
-    }
-    if (data.containsKey('due')) {
-      context.handle(
-        _dueMeta,
-        due.isAcceptableOrUnknown(data['due']!, _dueMeta),
-      );
-    }
-    if (data.containsKey('fsrs_card_json')) {
-      context.handle(
-        _fsrsCardJsonMeta,
-        fsrsCardJson.isAcceptableOrUnknown(
-          data['fsrs_card_json']!,
-          _fsrsCardJsonMeta,
-        ),
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
     return context;
@@ -2237,6 +2302,32 @@ class $CardItemsTable extends CardItems
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      frontText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}front_text'],
+      ),
+      backText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}back_text'],
+      ),
+      frontImageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}front_image_id'],
+      ),
+      backImageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}back_image_id'],
+      ),
+      occlusionData: $CardItemsTable.$converterocclusionDatan.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}occlusion_data'],
+        ),
+      ),
+      due: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}due'],
+      )!,
       deckId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}deck_id'],
@@ -2245,26 +2336,14 @@ class $CardItemsTable extends CardItems
         DriftSqlType.string,
         data['${effectivePrefix}draft_id'],
       ),
-      question: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}question'],
-      ),
-      optionsListJson: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}options_list_json'],
-      ),
-      answer: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}answer'],
-      ),
-      due: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}due'],
-      ),
-      fsrsCardJson: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}fsrs_card_json'],
-      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
     );
   }
 
@@ -2272,83 +2351,98 @@ class $CardItemsTable extends CardItems
   $CardItemsTable createAlias(String alias) {
     return $CardItemsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<CardOcclusion, String> $converterocclusionData =
+      const CardOcclusionConverter();
+  static TypeConverter<CardOcclusion?, String?> $converterocclusionDatan =
+      NullAwareTypeConverter.wrap($converterocclusionData);
 }
 
 class CardItem extends DataClass implements Insertable<CardItem> {
   final String id;
+  final String? frontText;
+  final String? backText;
+  final String? frontImageId;
+  final String? backImageId;
+  final CardOcclusion? occlusionData;
+  final DateTime due;
   final String? deckId;
   final String? draftId;
-
-  /// Fields are nullable because not all types use the same properties.
-  /// - Flashcard: question (front), answer (back)
-  /// - MCQ: question, optionsListJson, answer
-  /// - Free-Text: question, answer
-  /// - Image Occlusion: (not yet implemented)
-  final String? question;
-  final String? optionsListJson;
-  final String? answer;
-  final String? due;
-  final String? fsrsCardJson;
+  final DateTime createdAt;
+  final DateTime updatedAt;
   const CardItem({
     required this.id,
+    this.frontText,
+    this.backText,
+    this.frontImageId,
+    this.backImageId,
+    this.occlusionData,
+    required this.due,
     this.deckId,
     this.draftId,
-    this.question,
-    this.optionsListJson,
-    this.answer,
-    this.due,
-    this.fsrsCardJson,
+    required this.createdAt,
+    required this.updatedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    if (!nullToAbsent || frontText != null) {
+      map['front_text'] = Variable<String>(frontText);
+    }
+    if (!nullToAbsent || backText != null) {
+      map['back_text'] = Variable<String>(backText);
+    }
+    if (!nullToAbsent || frontImageId != null) {
+      map['front_image_id'] = Variable<String>(frontImageId);
+    }
+    if (!nullToAbsent || backImageId != null) {
+      map['back_image_id'] = Variable<String>(backImageId);
+    }
+    if (!nullToAbsent || occlusionData != null) {
+      map['occlusion_data'] = Variable<String>(
+        $CardItemsTable.$converterocclusionDatan.toSql(occlusionData),
+      );
+    }
+    map['due'] = Variable<DateTime>(due);
     if (!nullToAbsent || deckId != null) {
       map['deck_id'] = Variable<String>(deckId);
     }
     if (!nullToAbsent || draftId != null) {
       map['draft_id'] = Variable<String>(draftId);
     }
-    if (!nullToAbsent || question != null) {
-      map['question'] = Variable<String>(question);
-    }
-    if (!nullToAbsent || optionsListJson != null) {
-      map['options_list_json'] = Variable<String>(optionsListJson);
-    }
-    if (!nullToAbsent || answer != null) {
-      map['answer'] = Variable<String>(answer);
-    }
-    if (!nullToAbsent || due != null) {
-      map['due'] = Variable<String>(due);
-    }
-    if (!nullToAbsent || fsrsCardJson != null) {
-      map['fsrs_card_json'] = Variable<String>(fsrsCardJson);
-    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
 
   CardItemsCompanion toCompanion(bool nullToAbsent) {
     return CardItemsCompanion(
       id: Value(id),
+      frontText: frontText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(frontText),
+      backText: backText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(backText),
+      frontImageId: frontImageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(frontImageId),
+      backImageId: backImageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(backImageId),
+      occlusionData: occlusionData == null && nullToAbsent
+          ? const Value.absent()
+          : Value(occlusionData),
+      due: Value(due),
       deckId: deckId == null && nullToAbsent
           ? const Value.absent()
           : Value(deckId),
       draftId: draftId == null && nullToAbsent
           ? const Value.absent()
           : Value(draftId),
-      question: question == null && nullToAbsent
-          ? const Value.absent()
-          : Value(question),
-      optionsListJson: optionsListJson == null && nullToAbsent
-          ? const Value.absent()
-          : Value(optionsListJson),
-      answer: answer == null && nullToAbsent
-          ? const Value.absent()
-          : Value(answer),
-      due: due == null && nullToAbsent ? const Value.absent() : Value(due),
-      fsrsCardJson: fsrsCardJson == null && nullToAbsent
-          ? const Value.absent()
-          : Value(fsrsCardJson),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
     );
   }
 
@@ -2359,13 +2453,16 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return CardItem(
       id: serializer.fromJson<String>(json['id']),
+      frontText: serializer.fromJson<String?>(json['frontText']),
+      backText: serializer.fromJson<String?>(json['backText']),
+      frontImageId: serializer.fromJson<String?>(json['frontImageId']),
+      backImageId: serializer.fromJson<String?>(json['backImageId']),
+      occlusionData: serializer.fromJson<CardOcclusion?>(json['occlusionData']),
+      due: serializer.fromJson<DateTime>(json['due']),
       deckId: serializer.fromJson<String?>(json['deckId']),
       draftId: serializer.fromJson<String?>(json['draftId']),
-      question: serializer.fromJson<String?>(json['question']),
-      optionsListJson: serializer.fromJson<String?>(json['optionsListJson']),
-      answer: serializer.fromJson<String?>(json['answer']),
-      due: serializer.fromJson<String?>(json['due']),
-      fsrsCardJson: serializer.fromJson<String?>(json['fsrsCardJson']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
   @override
@@ -2373,51 +2470,65 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'frontText': serializer.toJson<String?>(frontText),
+      'backText': serializer.toJson<String?>(backText),
+      'frontImageId': serializer.toJson<String?>(frontImageId),
+      'backImageId': serializer.toJson<String?>(backImageId),
+      'occlusionData': serializer.toJson<CardOcclusion?>(occlusionData),
+      'due': serializer.toJson<DateTime>(due),
       'deckId': serializer.toJson<String?>(deckId),
       'draftId': serializer.toJson<String?>(draftId),
-      'question': serializer.toJson<String?>(question),
-      'optionsListJson': serializer.toJson<String?>(optionsListJson),
-      'answer': serializer.toJson<String?>(answer),
-      'due': serializer.toJson<String?>(due),
-      'fsrsCardJson': serializer.toJson<String?>(fsrsCardJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
 
   CardItem copyWith({
     String? id,
+    Value<String?> frontText = const Value.absent(),
+    Value<String?> backText = const Value.absent(),
+    Value<String?> frontImageId = const Value.absent(),
+    Value<String?> backImageId = const Value.absent(),
+    Value<CardOcclusion?> occlusionData = const Value.absent(),
+    DateTime? due,
     Value<String?> deckId = const Value.absent(),
     Value<String?> draftId = const Value.absent(),
-    Value<String?> question = const Value.absent(),
-    Value<String?> optionsListJson = const Value.absent(),
-    Value<String?> answer = const Value.absent(),
-    Value<String?> due = const Value.absent(),
-    Value<String?> fsrsCardJson = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) => CardItem(
     id: id ?? this.id,
+    frontText: frontText.present ? frontText.value : this.frontText,
+    backText: backText.present ? backText.value : this.backText,
+    frontImageId: frontImageId.present ? frontImageId.value : this.frontImageId,
+    backImageId: backImageId.present ? backImageId.value : this.backImageId,
+    occlusionData: occlusionData.present
+        ? occlusionData.value
+        : this.occlusionData,
+    due: due ?? this.due,
     deckId: deckId.present ? deckId.value : this.deckId,
     draftId: draftId.present ? draftId.value : this.draftId,
-    question: question.present ? question.value : this.question,
-    optionsListJson: optionsListJson.present
-        ? optionsListJson.value
-        : this.optionsListJson,
-    answer: answer.present ? answer.value : this.answer,
-    due: due.present ? due.value : this.due,
-    fsrsCardJson: fsrsCardJson.present ? fsrsCardJson.value : this.fsrsCardJson,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
   );
   CardItem copyWithCompanion(CardItemsCompanion data) {
     return CardItem(
       id: data.id.present ? data.id.value : this.id,
+      frontText: data.frontText.present ? data.frontText.value : this.frontText,
+      backText: data.backText.present ? data.backText.value : this.backText,
+      frontImageId: data.frontImageId.present
+          ? data.frontImageId.value
+          : this.frontImageId,
+      backImageId: data.backImageId.present
+          ? data.backImageId.value
+          : this.backImageId,
+      occlusionData: data.occlusionData.present
+          ? data.occlusionData.value
+          : this.occlusionData,
+      due: data.due.present ? data.due.value : this.due,
       deckId: data.deckId.present ? data.deckId.value : this.deckId,
       draftId: data.draftId.present ? data.draftId.value : this.draftId,
-      question: data.question.present ? data.question.value : this.question,
-      optionsListJson: data.optionsListJson.present
-          ? data.optionsListJson.value
-          : this.optionsListJson,
-      answer: data.answer.present ? data.answer.value : this.answer,
-      due: data.due.present ? data.due.value : this.due,
-      fsrsCardJson: data.fsrsCardJson.present
-          ? data.fsrsCardJson.value
-          : this.fsrsCardJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
 
@@ -2425,13 +2536,16 @@ class CardItem extends DataClass implements Insertable<CardItem> {
   String toString() {
     return (StringBuffer('CardItem(')
           ..write('id: $id, ')
+          ..write('frontText: $frontText, ')
+          ..write('backText: $backText, ')
+          ..write('frontImageId: $frontImageId, ')
+          ..write('backImageId: $backImageId, ')
+          ..write('occlusionData: $occlusionData, ')
+          ..write('due: $due, ')
           ..write('deckId: $deckId, ')
           ..write('draftId: $draftId, ')
-          ..write('question: $question, ')
-          ..write('optionsListJson: $optionsListJson, ')
-          ..write('answer: $answer, ')
-          ..write('due: $due, ')
-          ..write('fsrsCardJson: $fsrsCardJson')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
@@ -2439,104 +2553,131 @@ class CardItem extends DataClass implements Insertable<CardItem> {
   @override
   int get hashCode => Object.hash(
     id,
+    frontText,
+    backText,
+    frontImageId,
+    backImageId,
+    occlusionData,
+    due,
     deckId,
     draftId,
-    question,
-    optionsListJson,
-    answer,
-    due,
-    fsrsCardJson,
+    createdAt,
+    updatedAt,
   );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is CardItem &&
           other.id == this.id &&
+          other.frontText == this.frontText &&
+          other.backText == this.backText &&
+          other.frontImageId == this.frontImageId &&
+          other.backImageId == this.backImageId &&
+          other.occlusionData == this.occlusionData &&
+          other.due == this.due &&
           other.deckId == this.deckId &&
           other.draftId == this.draftId &&
-          other.question == this.question &&
-          other.optionsListJson == this.optionsListJson &&
-          other.answer == this.answer &&
-          other.due == this.due &&
-          other.fsrsCardJson == this.fsrsCardJson);
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
 }
 
 class CardItemsCompanion extends UpdateCompanion<CardItem> {
   final Value<String> id;
+  final Value<String?> frontText;
+  final Value<String?> backText;
+  final Value<String?> frontImageId;
+  final Value<String?> backImageId;
+  final Value<CardOcclusion?> occlusionData;
+  final Value<DateTime> due;
   final Value<String?> deckId;
   final Value<String?> draftId;
-  final Value<String?> question;
-  final Value<String?> optionsListJson;
-  final Value<String?> answer;
-  final Value<String?> due;
-  final Value<String?> fsrsCardJson;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
   final Value<int> rowid;
   const CardItemsCompanion({
     this.id = const Value.absent(),
+    this.frontText = const Value.absent(),
+    this.backText = const Value.absent(),
+    this.frontImageId = const Value.absent(),
+    this.backImageId = const Value.absent(),
+    this.occlusionData = const Value.absent(),
+    this.due = const Value.absent(),
     this.deckId = const Value.absent(),
     this.draftId = const Value.absent(),
-    this.question = const Value.absent(),
-    this.optionsListJson = const Value.absent(),
-    this.answer = const Value.absent(),
-    this.due = const Value.absent(),
-    this.fsrsCardJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CardItemsCompanion.insert({
     required String id,
+    this.frontText = const Value.absent(),
+    this.backText = const Value.absent(),
+    this.frontImageId = const Value.absent(),
+    this.backImageId = const Value.absent(),
+    this.occlusionData = const Value.absent(),
+    this.due = const Value.absent(),
     this.deckId = const Value.absent(),
     this.draftId = const Value.absent(),
-    this.question = const Value.absent(),
-    this.optionsListJson = const Value.absent(),
-    this.answer = const Value.absent(),
-    this.due = const Value.absent(),
-    this.fsrsCardJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id);
   static Insertable<CardItem> custom({
     Expression<String>? id,
+    Expression<String>? frontText,
+    Expression<String>? backText,
+    Expression<String>? frontImageId,
+    Expression<String>? backImageId,
+    Expression<String>? occlusionData,
+    Expression<DateTime>? due,
     Expression<String>? deckId,
     Expression<String>? draftId,
-    Expression<String>? question,
-    Expression<String>? optionsListJson,
-    Expression<String>? answer,
-    Expression<String>? due,
-    Expression<String>? fsrsCardJson,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (frontText != null) 'front_text': frontText,
+      if (backText != null) 'back_text': backText,
+      if (frontImageId != null) 'front_image_id': frontImageId,
+      if (backImageId != null) 'back_image_id': backImageId,
+      if (occlusionData != null) 'occlusion_data': occlusionData,
+      if (due != null) 'due': due,
       if (deckId != null) 'deck_id': deckId,
       if (draftId != null) 'draft_id': draftId,
-      if (question != null) 'question': question,
-      if (optionsListJson != null) 'options_list_json': optionsListJson,
-      if (answer != null) 'answer': answer,
-      if (due != null) 'due': due,
-      if (fsrsCardJson != null) 'fsrs_card_json': fsrsCardJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   CardItemsCompanion copyWith({
     Value<String>? id,
+    Value<String?>? frontText,
+    Value<String?>? backText,
+    Value<String?>? frontImageId,
+    Value<String?>? backImageId,
+    Value<CardOcclusion?>? occlusionData,
+    Value<DateTime>? due,
     Value<String?>? deckId,
     Value<String?>? draftId,
-    Value<String?>? question,
-    Value<String?>? optionsListJson,
-    Value<String?>? answer,
-    Value<String?>? due,
-    Value<String?>? fsrsCardJson,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
     Value<int>? rowid,
   }) {
     return CardItemsCompanion(
       id: id ?? this.id,
+      frontText: frontText ?? this.frontText,
+      backText: backText ?? this.backText,
+      frontImageId: frontImageId ?? this.frontImageId,
+      backImageId: backImageId ?? this.backImageId,
+      occlusionData: occlusionData ?? this.occlusionData,
+      due: due ?? this.due,
       deckId: deckId ?? this.deckId,
       draftId: draftId ?? this.draftId,
-      question: question ?? this.question,
-      optionsListJson: optionsListJson ?? this.optionsListJson,
-      answer: answer ?? this.answer,
-      due: due ?? this.due,
-      fsrsCardJson: fsrsCardJson ?? this.fsrsCardJson,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2547,26 +2688,37 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
+    if (frontText.present) {
+      map['front_text'] = Variable<String>(frontText.value);
+    }
+    if (backText.present) {
+      map['back_text'] = Variable<String>(backText.value);
+    }
+    if (frontImageId.present) {
+      map['front_image_id'] = Variable<String>(frontImageId.value);
+    }
+    if (backImageId.present) {
+      map['back_image_id'] = Variable<String>(backImageId.value);
+    }
+    if (occlusionData.present) {
+      map['occlusion_data'] = Variable<String>(
+        $CardItemsTable.$converterocclusionDatan.toSql(occlusionData.value),
+      );
+    }
+    if (due.present) {
+      map['due'] = Variable<DateTime>(due.value);
+    }
     if (deckId.present) {
       map['deck_id'] = Variable<String>(deckId.value);
     }
     if (draftId.present) {
       map['draft_id'] = Variable<String>(draftId.value);
     }
-    if (question.present) {
-      map['question'] = Variable<String>(question.value);
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
-    if (optionsListJson.present) {
-      map['options_list_json'] = Variable<String>(optionsListJson.value);
-    }
-    if (answer.present) {
-      map['answer'] = Variable<String>(answer.value);
-    }
-    if (due.present) {
-      map['due'] = Variable<String>(due.value);
-    }
-    if (fsrsCardJson.present) {
-      map['fsrs_card_json'] = Variable<String>(fsrsCardJson.value);
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -2578,13 +2730,16 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
   String toString() {
     return (StringBuffer('CardItemsCompanion(')
           ..write('id: $id, ')
+          ..write('frontText: $frontText, ')
+          ..write('backText: $backText, ')
+          ..write('frontImageId: $frontImageId, ')
+          ..write('backImageId: $backImageId, ')
+          ..write('occlusionData: $occlusionData, ')
+          ..write('due: $due, ')
           ..write('deckId: $deckId, ')
           ..write('draftId: $draftId, ')
-          ..write('question: $question, ')
-          ..write('optionsListJson: $optionsListJson, ')
-          ..write('answer: $answer, ')
-          ..write('due: $due, ')
-          ..write('fsrsCardJson: $fsrsCardJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3446,6 +3601,467 @@ class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
   }
 }
 
+class $AssetItemsTable extends AssetItems
+    with TableInfo<$AssetItemsTable, AssetItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AssetItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  @override
+  late final GeneratedColumn<Uint8List> data = GeneratedColumn<Uint8List>(
+    'data',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<MediaType, String> type =
+      GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<MediaType>($AssetItemsTable.$convertertype);
+  static const VerificationMeta _sourceIdMeta = const VerificationMeta(
+    'sourceId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceId = GeneratedColumn<String>(
+    'source_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    data,
+    name,
+    type,
+    sourceId,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'asset_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AssetItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+        _dataMeta,
+        this.data.isAcceptableOrUnknown(data['data']!, _dataMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    }
+    if (data.containsKey('source_id')) {
+      context.handle(
+        _sourceIdMeta,
+        sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AssetItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AssetItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      data: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}data'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      ),
+      type: $AssetItemsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
+      sourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AssetItemsTable createAlias(String alias) {
+    return $AssetItemsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<MediaType, String, String> $convertertype =
+      const EnumNameConverter<MediaType>(MediaType.values);
+}
+
+class AssetItem extends DataClass implements Insertable<AssetItem> {
+  final String id;
+  final Uint8List data;
+  final String? name;
+  final MediaType type;
+  final String? sourceId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const AssetItem({
+    required this.id,
+    required this.data,
+    this.name,
+    required this.type,
+    this.sourceId,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['data'] = Variable<Uint8List>(data);
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    {
+      map['type'] = Variable<String>(
+        $AssetItemsTable.$convertertype.toSql(type),
+      );
+    }
+    if (!nullToAbsent || sourceId != null) {
+      map['source_id'] = Variable<String>(sourceId);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  AssetItemsCompanion toCompanion(bool nullToAbsent) {
+    return AssetItemsCompanion(
+      id: Value(id),
+      data: Value(data),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      type: Value(type),
+      sourceId: sourceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory AssetItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AssetItem(
+      id: serializer.fromJson<String>(json['id']),
+      data: serializer.fromJson<Uint8List>(json['data']),
+      name: serializer.fromJson<String?>(json['name']),
+      type: $AssetItemsTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
+      sourceId: serializer.fromJson<String?>(json['sourceId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'data': serializer.toJson<Uint8List>(data),
+      'name': serializer.toJson<String?>(name),
+      'type': serializer.toJson<String>(
+        $AssetItemsTable.$convertertype.toJson(type),
+      ),
+      'sourceId': serializer.toJson<String?>(sourceId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  AssetItem copyWith({
+    String? id,
+    Uint8List? data,
+    Value<String?> name = const Value.absent(),
+    MediaType? type,
+    Value<String?> sourceId = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => AssetItem(
+    id: id ?? this.id,
+    data: data ?? this.data,
+    name: name.present ? name.value : this.name,
+    type: type ?? this.type,
+    sourceId: sourceId.present ? sourceId.value : this.sourceId,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  AssetItem copyWithCompanion(AssetItemsCompanion data) {
+    return AssetItem(
+      id: data.id.present ? data.id.value : this.id,
+      data: data.data.present ? data.data.value : this.data,
+      name: data.name.present ? data.name.value : this.name,
+      type: data.type.present ? data.type.value : this.type,
+      sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssetItem(')
+          ..write('id: $id, ')
+          ..write('data: $data, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    $driftBlobEquality.hash(data),
+    name,
+    type,
+    sourceId,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AssetItem &&
+          other.id == this.id &&
+          $driftBlobEquality.equals(other.data, this.data) &&
+          other.name == this.name &&
+          other.type == this.type &&
+          other.sourceId == this.sourceId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AssetItemsCompanion extends UpdateCompanion<AssetItem> {
+  final Value<String> id;
+  final Value<Uint8List> data;
+  final Value<String?> name;
+  final Value<MediaType> type;
+  final Value<String?> sourceId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const AssetItemsCompanion({
+    this.id = const Value.absent(),
+    this.data = const Value.absent(),
+    this.name = const Value.absent(),
+    this.type = const Value.absent(),
+    this.sourceId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AssetItemsCompanion.insert({
+    required String id,
+    required Uint8List data,
+    this.name = const Value.absent(),
+    required MediaType type,
+    this.sourceId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       data = Value(data),
+       type = Value(type);
+  static Insertable<AssetItem> custom({
+    Expression<String>? id,
+    Expression<Uint8List>? data,
+    Expression<String>? name,
+    Expression<String>? type,
+    Expression<String>? sourceId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (data != null) 'data': data,
+      if (name != null) 'name': name,
+      if (type != null) 'type': type,
+      if (sourceId != null) 'source_id': sourceId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AssetItemsCompanion copyWith({
+    Value<String>? id,
+    Value<Uint8List>? data,
+    Value<String?>? name,
+    Value<MediaType>? type,
+    Value<String?>? sourceId,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return AssetItemsCompanion(
+      id: id ?? this.id,
+      data: data ?? this.data,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      sourceId: sourceId ?? this.sourceId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<Uint8List>(data.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(
+        $AssetItemsTable.$convertertype.toSql(type.value),
+      );
+    }
+    if (sourceId.present) {
+      map['source_id'] = Variable<String>(sourceId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssetItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('data: $data, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3463,6 +4079,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $StudySessionEventsTable studySessionEvents =
       $StudySessionEventsTable(this);
   late final $CitationItemsTable citationItems = $CitationItemsTable(this);
+  late final $AssetItemsTable assetItems = $AssetItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3476,6 +4093,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     cardItems,
     studySessionEvents,
     citationItems,
+    assetItems,
   ];
 }
 
@@ -3894,7 +4512,7 @@ typedef $$SourceItemsTableCreateCompanionBuilder =
       Value<String?> folderId,
       required String label,
       Value<String?> path,
-      required String type,
+      required MediaType type,
       Value<String?> extractedContent,
       Value<bool> isPinned,
       Value<int> rowid,
@@ -3905,7 +4523,7 @@ typedef $$SourceItemsTableUpdateCompanionBuilder =
       Value<String?> folderId,
       Value<String> label,
       Value<String?> path,
-      Value<String> type,
+      Value<MediaType> type,
       Value<String?> extractedContent,
       Value<bool> isPinned,
       Value<int> rowid,
@@ -3959,10 +4577,11 @@ class $$SourceItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get type => $composableBuilder(
-    column: $table.type,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnWithTypeConverterFilters<MediaType, MediaType, String> get type =>
+      $composableBuilder(
+        column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<String> get extractedContent => $composableBuilder(
     column: $table.extractedContent,
@@ -4079,7 +4698,7 @@ class $$SourceItemsTableAnnotationComposer
   GeneratedColumn<String> get path =>
       $composableBuilder(column: $table.path, builder: (column) => column);
 
-  GeneratedColumn<String> get type =>
+  GeneratedColumnWithTypeConverter<MediaType, String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumn<String> get extractedContent => $composableBuilder(
@@ -4146,7 +4765,7 @@ class $$SourceItemsTableTableManager
                 Value<String?> folderId = const Value.absent(),
                 Value<String> label = const Value.absent(),
                 Value<String?> path = const Value.absent(),
-                Value<String> type = const Value.absent(),
+                Value<MediaType> type = const Value.absent(),
                 Value<String?> extractedContent = const Value.absent(),
                 Value<bool> isPinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -4166,7 +4785,7 @@ class $$SourceItemsTableTableManager
                 Value<String?> folderId = const Value.absent(),
                 required String label,
                 Value<String?> path = const Value.absent(),
-                required String type,
+                required MediaType type,
                 Value<String?> extractedContent = const Value.absent(),
                 Value<bool> isPinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -4661,7 +5280,7 @@ typedef $$SourceItemBlobsTableCreateCompanionBuilder =
       required String id,
       required String sourceItemId,
       required String sourceItemName,
-      required String type,
+      required SourceFileType type,
       required Uint8List bytes,
       Value<int> rowid,
     });
@@ -4670,7 +5289,7 @@ typedef $$SourceItemBlobsTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> sourceItemId,
       Value<String> sourceItemName,
-      Value<String> type,
+      Value<SourceFileType> type,
       Value<Uint8List> bytes,
       Value<int> rowid,
     });
@@ -4699,9 +5318,10 @@ class $$SourceItemBlobsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get type => $composableBuilder(
+  ColumnWithTypeConverterFilters<SourceFileType, SourceFileType, String>
+  get type => $composableBuilder(
     column: $table.type,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<Uint8List> get bytes => $composableBuilder(
@@ -4767,7 +5387,7 @@ class $$SourceItemBlobsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get type =>
+  GeneratedColumnWithTypeConverter<SourceFileType, String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumn<Uint8List> get bytes =>
@@ -4814,7 +5434,7 @@ class $$SourceItemBlobsTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> sourceItemId = const Value.absent(),
                 Value<String> sourceItemName = const Value.absent(),
-                Value<String> type = const Value.absent(),
+                Value<SourceFileType> type = const Value.absent(),
                 Value<Uint8List> bytes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SourceItemBlobsCompanion(
@@ -4830,7 +5450,7 @@ class $$SourceItemBlobsTableTableManager
                 required String id,
                 required String sourceItemId,
                 required String sourceItemName,
-                required String type,
+                required SourceFileType type,
                 required Uint8List bytes,
                 Value<int> rowid = const Value.absent(),
               }) => SourceItemBlobsCompanion.insert(
@@ -5235,25 +5855,31 @@ typedef $$CardCreationDraftItemsTableProcessedTableManager =
 typedef $$CardItemsTableCreateCompanionBuilder =
     CardItemsCompanion Function({
       required String id,
+      Value<String?> frontText,
+      Value<String?> backText,
+      Value<String?> frontImageId,
+      Value<String?> backImageId,
+      Value<CardOcclusion?> occlusionData,
+      Value<DateTime> due,
       Value<String?> deckId,
       Value<String?> draftId,
-      Value<String?> question,
-      Value<String?> optionsListJson,
-      Value<String?> answer,
-      Value<String?> due,
-      Value<String?> fsrsCardJson,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
       Value<int> rowid,
     });
 typedef $$CardItemsTableUpdateCompanionBuilder =
     CardItemsCompanion Function({
       Value<String> id,
+      Value<String?> frontText,
+      Value<String?> backText,
+      Value<String?> frontImageId,
+      Value<String?> backImageId,
+      Value<CardOcclusion?> occlusionData,
+      Value<DateTime> due,
       Value<String?> deckId,
       Value<String?> draftId,
-      Value<String?> question,
-      Value<String?> optionsListJson,
-      Value<String?> answer,
-      Value<String?> due,
-      Value<String?> fsrsCardJson,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
       Value<int> rowid,
     });
 
@@ -5315,28 +5941,44 @@ class $$CardItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get question => $composableBuilder(
-    column: $table.question,
+  ColumnFilters<String> get frontText => $composableBuilder(
+    column: $table.frontText,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get optionsListJson => $composableBuilder(
-    column: $table.optionsListJson,
+  ColumnFilters<String> get backText => $composableBuilder(
+    column: $table.backText,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get answer => $composableBuilder(
-    column: $table.answer,
+  ColumnFilters<String> get frontImageId => $composableBuilder(
+    column: $table.frontImageId,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get due => $composableBuilder(
+  ColumnFilters<String> get backImageId => $composableBuilder(
+    column: $table.backImageId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<CardOcclusion?, CardOcclusion, String>
+  get occlusionData => $composableBuilder(
+    column: $table.occlusionData,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<DateTime> get due => $composableBuilder(
     column: $table.due,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get fsrsCardJson => $composableBuilder(
-    column: $table.fsrsCardJson,
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5402,28 +6044,43 @@ class $$CardItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get question => $composableBuilder(
-    column: $table.question,
+  ColumnOrderings<String> get frontText => $composableBuilder(
+    column: $table.frontText,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get optionsListJson => $composableBuilder(
-    column: $table.optionsListJson,
+  ColumnOrderings<String> get backText => $composableBuilder(
+    column: $table.backText,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get answer => $composableBuilder(
-    column: $table.answer,
+  ColumnOrderings<String> get frontImageId => $composableBuilder(
+    column: $table.frontImageId,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get due => $composableBuilder(
+  ColumnOrderings<String> get backImageId => $composableBuilder(
+    column: $table.backImageId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get occlusionData => $composableBuilder(
+    column: $table.occlusionData,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get due => $composableBuilder(
     column: $table.due,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get fsrsCardJson => $composableBuilder(
-    column: $table.fsrsCardJson,
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5487,24 +6144,36 @@ class $$CardItemsTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get question =>
-      $composableBuilder(column: $table.question, builder: (column) => column);
+  GeneratedColumn<String> get frontText =>
+      $composableBuilder(column: $table.frontText, builder: (column) => column);
 
-  GeneratedColumn<String> get optionsListJson => $composableBuilder(
-    column: $table.optionsListJson,
+  GeneratedColumn<String> get backText =>
+      $composableBuilder(column: $table.backText, builder: (column) => column);
+
+  GeneratedColumn<String> get frontImageId => $composableBuilder(
+    column: $table.frontImageId,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get answer =>
-      $composableBuilder(column: $table.answer, builder: (column) => column);
+  GeneratedColumn<String> get backImageId => $composableBuilder(
+    column: $table.backImageId,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<String> get due =>
+  GeneratedColumnWithTypeConverter<CardOcclusion?, String> get occlusionData =>
+      $composableBuilder(
+        column: $table.occlusionData,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<DateTime> get due =>
       $composableBuilder(column: $table.due, builder: (column) => column);
 
-  GeneratedColumn<String> get fsrsCardJson => $composableBuilder(
-    column: $table.fsrsCardJson,
-    builder: (column) => column,
-  );
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   $$DeckItemsTableAnnotationComposer get deckId {
     final $$DeckItemsTableAnnotationComposer composer = $composerBuilder(
@@ -5583,45 +6252,57 @@ class $$CardItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<String?> frontText = const Value.absent(),
+                Value<String?> backText = const Value.absent(),
+                Value<String?> frontImageId = const Value.absent(),
+                Value<String?> backImageId = const Value.absent(),
+                Value<CardOcclusion?> occlusionData = const Value.absent(),
+                Value<DateTime> due = const Value.absent(),
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
-                Value<String?> question = const Value.absent(),
-                Value<String?> optionsListJson = const Value.absent(),
-                Value<String?> answer = const Value.absent(),
-                Value<String?> due = const Value.absent(),
-                Value<String?> fsrsCardJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CardItemsCompanion(
                 id: id,
+                frontText: frontText,
+                backText: backText,
+                frontImageId: frontImageId,
+                backImageId: backImageId,
+                occlusionData: occlusionData,
+                due: due,
                 deckId: deckId,
                 draftId: draftId,
-                question: question,
-                optionsListJson: optionsListJson,
-                answer: answer,
-                due: due,
-                fsrsCardJson: fsrsCardJson,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
                 required String id,
+                Value<String?> frontText = const Value.absent(),
+                Value<String?> backText = const Value.absent(),
+                Value<String?> frontImageId = const Value.absent(),
+                Value<String?> backImageId = const Value.absent(),
+                Value<CardOcclusion?> occlusionData = const Value.absent(),
+                Value<DateTime> due = const Value.absent(),
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
-                Value<String?> question = const Value.absent(),
-                Value<String?> optionsListJson = const Value.absent(),
-                Value<String?> answer = const Value.absent(),
-                Value<String?> due = const Value.absent(),
-                Value<String?> fsrsCardJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CardItemsCompanion.insert(
                 id: id,
+                frontText: frontText,
+                backText: backText,
+                frontImageId: frontImageId,
+                backImageId: backImageId,
+                occlusionData: occlusionData,
+                due: due,
                 deckId: deckId,
                 draftId: draftId,
-                question: question,
-                optionsListJson: optionsListJson,
-                answer: answer,
-                due: due,
-                fsrsCardJson: fsrsCardJson,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -6175,6 +6856,242 @@ typedef $$CitationItemsTableProcessedTableManager =
       CitationItem,
       PrefetchHooks Function()
     >;
+typedef $$AssetItemsTableCreateCompanionBuilder =
+    AssetItemsCompanion Function({
+      required String id,
+      required Uint8List data,
+      Value<String?> name,
+      required MediaType type,
+      Value<String?> sourceId,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$AssetItemsTableUpdateCompanionBuilder =
+    AssetItemsCompanion Function({
+      Value<String> id,
+      Value<Uint8List> data,
+      Value<String?> name,
+      Value<MediaType> type,
+      Value<String?> sourceId,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$AssetItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $AssetItemsTable> {
+  $$AssetItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<MediaType, MediaType, String> get type =>
+      $composableBuilder(
+        column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AssetItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $AssetItemsTable> {
+  $$AssetItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AssetItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AssetItemsTable> {
+  $$AssetItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get data =>
+      $composableBuilder(column: $table.data, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<MediaType, String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceId =>
+      $composableBuilder(column: $table.sourceId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$AssetItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AssetItemsTable,
+          AssetItem,
+          $$AssetItemsTableFilterComposer,
+          $$AssetItemsTableOrderingComposer,
+          $$AssetItemsTableAnnotationComposer,
+          $$AssetItemsTableCreateCompanionBuilder,
+          $$AssetItemsTableUpdateCompanionBuilder,
+          (
+            AssetItem,
+            BaseReferences<_$AppDatabase, $AssetItemsTable, AssetItem>,
+          ),
+          AssetItem,
+          PrefetchHooks Function()
+        > {
+  $$AssetItemsTableTableManager(_$AppDatabase db, $AssetItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AssetItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AssetItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AssetItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<Uint8List> data = const Value.absent(),
+                Value<String?> name = const Value.absent(),
+                Value<MediaType> type = const Value.absent(),
+                Value<String?> sourceId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AssetItemsCompanion(
+                id: id,
+                data: data,
+                name: name,
+                type: type,
+                sourceId: sourceId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required Uint8List data,
+                Value<String?> name = const Value.absent(),
+                required MediaType type,
+                Value<String?> sourceId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AssetItemsCompanion.insert(
+                id: id,
+                data: data,
+                name: name,
+                type: type,
+                sourceId: sourceId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AssetItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AssetItemsTable,
+      AssetItem,
+      $$AssetItemsTableFilterComposer,
+      $$AssetItemsTableOrderingComposer,
+      $$AssetItemsTableAnnotationComposer,
+      $$AssetItemsTableCreateCompanionBuilder,
+      $$AssetItemsTableUpdateCompanionBuilder,
+      (AssetItem, BaseReferences<_$AppDatabase, $AssetItemsTable, AssetItem>),
+      AssetItem,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6198,4 +7115,6 @@ class $AppDatabaseManager {
       $$StudySessionEventsTableTableManager(_db, _db.studySessionEvents);
   $$CitationItemsTableTableManager get citationItems =>
       $$CitationItemsTableTableManager(_db, _db.citationItems);
+  $$AssetItemsTableTableManager get assetItems =>
+      $$AssetItemsTableTableManager(_db, _db.assetItems);
 }

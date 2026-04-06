@@ -196,7 +196,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
               padding: const EdgeInsets.only(bottom: 10),
               child: ProjectCardTile(
                 title: Text(item.label),
-                subtitle: Text(item.type.toUpperCase()),
+                subtitle: Text(item.type.name.toUpperCase()),
                 leading: const WizardSourcePagePreview(),
                 backgroundColor: cs.surface.withValues(alpha: 0.4),
                 isSelected: isSelected,
