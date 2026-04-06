@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import 'package:project_2359/app_database.dart';
@@ -20,6 +21,9 @@ import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
 import 'package:project_2359/features/source_page/source_page.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
+import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:project_2359/layouts/landscape/home_page_landscape_layout.dart';
 
 enum MainContentType { empty, study, sourceDetail, settings }
@@ -163,6 +167,21 @@ class _HomePageState extends State<HomePage> {
           ),
         ) ??
         false;
+  }
+
+  Future<void> _importDocument(BuildContext context, String folderId) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: true,
+      withData: true,
+      allowedExtensions: ["pdf", "docx", "pptx", "txt"],
+    );
+
+    if (result == null || !context.mounted) return;
+
+    context.read<SourcesPageBloc>().add(
+      ImportDocumentsEvent(result.files, folderId: folderId),
+    );
   }
 
   late Stream<List<(StudyFolderItem, int)>> _foldersStream;
@@ -445,6 +464,17 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
+                IconButton(
+                  onPressed: () => _importDocument(context, _selectedFolderId!),
+                  icon: const FaIcon(FontAwesomeIcons.fileImport, size: 18),
+                  tooltip: 'Import Source',
+                  style: IconButton.styleFrom(
+                    backgroundColor: theme.colorScheme.onSurface.withValues(
+                      alpha: 0.05,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 IconButton(
                   onPressed: () {
                     Navigator.push(
@@ -1456,10 +1486,34 @@ class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
                 showChevron: false,
               ),
               ProjectListTile.simple(
-                label: "Upload Media",
-                icon: FontAwesomeIcons.photoFilm,
+                label: "Import Source",
+                icon: FontAwesomeIcons.fileImport,
                 showDivider: false,
-                onTap: () {},
+                onTap: () async {
+                  final result = await FilePicker.platform.pickFiles(
+                    type: FileType.custom,
+                    allowMultiple: true,
+                    withData: true,
+                    allowedExtensions: ["pdf", "docx", "pptx", "txt"],
+                  );
+
+                  if (result == null || !context.mounted) return;
+
+                  context.read<SourcesPageBloc>().add(
+                    ImportDocumentsEvent(
+                      result.files,
+                      folderId: widget.activeFolderId,
+                    ),
+                  );
+
+                  if (widget.onActionCompleted != null) {
+                    widget.onActionCompleted!();
+                  } else {
+                    try {
+                      ExpandableFab.of(context).close();
+                    } catch (_) {}
+                  }
+                },
                 showChevron: false,
               ),
             ],
