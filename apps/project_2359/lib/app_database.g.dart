@@ -2097,15 +2097,6 @@ class $CardItemsTable extends CardItems
       'REFERENCES card_creation_draft_items (id)',
     ),
   );
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
-  @override
-  late final GeneratedColumn<String> type = GeneratedColumn<String>(
-    'type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _questionMeta = const VerificationMeta(
     'question',
   );
@@ -2162,7 +2153,6 @@ class $CardItemsTable extends CardItems
     id,
     deckId,
     draftId,
-    type,
     question,
     optionsListJson,
     answer,
@@ -2197,14 +2187,6 @@ class $CardItemsTable extends CardItems
         _draftIdMeta,
         draftId.isAcceptableOrUnknown(data['draft_id']!, _draftIdMeta),
       );
-    }
-    if (data.containsKey('type')) {
-      context.handle(
-        _typeMeta,
-        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_typeMeta);
     }
     if (data.containsKey('question')) {
       context.handle(
@@ -2263,10 +2245,6 @@ class $CardItemsTable extends CardItems
         DriftSqlType.string,
         data['${effectivePrefix}draft_id'],
       ),
-      type: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}type'],
-      )!,
       question: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}question'],
@@ -2300,7 +2278,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
   final String id;
   final String? deckId;
   final String? draftId;
-  final String type;
 
   /// Fields are nullable because not all types use the same properties.
   /// - Flashcard: question (front), answer (back)
@@ -2316,7 +2293,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     required this.id,
     this.deckId,
     this.draftId,
-    required this.type,
     this.question,
     this.optionsListJson,
     this.answer,
@@ -2333,7 +2309,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     if (!nullToAbsent || draftId != null) {
       map['draft_id'] = Variable<String>(draftId);
     }
-    map['type'] = Variable<String>(type);
     if (!nullToAbsent || question != null) {
       map['question'] = Variable<String>(question);
     }
@@ -2361,7 +2336,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       draftId: draftId == null && nullToAbsent
           ? const Value.absent()
           : Value(draftId),
-      type: Value(type),
       question: question == null && nullToAbsent
           ? const Value.absent()
           : Value(question),
@@ -2387,7 +2361,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       id: serializer.fromJson<String>(json['id']),
       deckId: serializer.fromJson<String?>(json['deckId']),
       draftId: serializer.fromJson<String?>(json['draftId']),
-      type: serializer.fromJson<String>(json['type']),
       question: serializer.fromJson<String?>(json['question']),
       optionsListJson: serializer.fromJson<String?>(json['optionsListJson']),
       answer: serializer.fromJson<String?>(json['answer']),
@@ -2402,7 +2375,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       'id': serializer.toJson<String>(id),
       'deckId': serializer.toJson<String?>(deckId),
       'draftId': serializer.toJson<String?>(draftId),
-      'type': serializer.toJson<String>(type),
       'question': serializer.toJson<String?>(question),
       'optionsListJson': serializer.toJson<String?>(optionsListJson),
       'answer': serializer.toJson<String?>(answer),
@@ -2415,7 +2387,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     String? id,
     Value<String?> deckId = const Value.absent(),
     Value<String?> draftId = const Value.absent(),
-    String? type,
     Value<String?> question = const Value.absent(),
     Value<String?> optionsListJson = const Value.absent(),
     Value<String?> answer = const Value.absent(),
@@ -2425,7 +2396,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     id: id ?? this.id,
     deckId: deckId.present ? deckId.value : this.deckId,
     draftId: draftId.present ? draftId.value : this.draftId,
-    type: type ?? this.type,
     question: question.present ? question.value : this.question,
     optionsListJson: optionsListJson.present
         ? optionsListJson.value
@@ -2439,7 +2409,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       id: data.id.present ? data.id.value : this.id,
       deckId: data.deckId.present ? data.deckId.value : this.deckId,
       draftId: data.draftId.present ? data.draftId.value : this.draftId,
-      type: data.type.present ? data.type.value : this.type,
       question: data.question.present ? data.question.value : this.question,
       optionsListJson: data.optionsListJson.present
           ? data.optionsListJson.value
@@ -2458,7 +2427,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           ..write('id: $id, ')
           ..write('deckId: $deckId, ')
           ..write('draftId: $draftId, ')
-          ..write('type: $type, ')
           ..write('question: $question, ')
           ..write('optionsListJson: $optionsListJson, ')
           ..write('answer: $answer, ')
@@ -2473,7 +2441,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     id,
     deckId,
     draftId,
-    type,
     question,
     optionsListJson,
     answer,
@@ -2487,7 +2454,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           other.id == this.id &&
           other.deckId == this.deckId &&
           other.draftId == this.draftId &&
-          other.type == this.type &&
           other.question == this.question &&
           other.optionsListJson == this.optionsListJson &&
           other.answer == this.answer &&
@@ -2499,7 +2465,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
   final Value<String> id;
   final Value<String?> deckId;
   final Value<String?> draftId;
-  final Value<String> type;
   final Value<String?> question;
   final Value<String?> optionsListJson;
   final Value<String?> answer;
@@ -2510,7 +2475,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     this.id = const Value.absent(),
     this.deckId = const Value.absent(),
     this.draftId = const Value.absent(),
-    this.type = const Value.absent(),
     this.question = const Value.absent(),
     this.optionsListJson = const Value.absent(),
     this.answer = const Value.absent(),
@@ -2522,20 +2486,17 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     required String id,
     this.deckId = const Value.absent(),
     this.draftId = const Value.absent(),
-    required String type,
     this.question = const Value.absent(),
     this.optionsListJson = const Value.absent(),
     this.answer = const Value.absent(),
     this.due = const Value.absent(),
     this.fsrsCardJson = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       type = Value(type);
+  }) : id = Value(id);
   static Insertable<CardItem> custom({
     Expression<String>? id,
     Expression<String>? deckId,
     Expression<String>? draftId,
-    Expression<String>? type,
     Expression<String>? question,
     Expression<String>? optionsListJson,
     Expression<String>? answer,
@@ -2547,7 +2508,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
       if (id != null) 'id': id,
       if (deckId != null) 'deck_id': deckId,
       if (draftId != null) 'draft_id': draftId,
-      if (type != null) 'type': type,
       if (question != null) 'question': question,
       if (optionsListJson != null) 'options_list_json': optionsListJson,
       if (answer != null) 'answer': answer,
@@ -2561,7 +2521,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Value<String>? id,
     Value<String?>? deckId,
     Value<String?>? draftId,
-    Value<String>? type,
     Value<String?>? question,
     Value<String?>? optionsListJson,
     Value<String?>? answer,
@@ -2573,7 +2532,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
       id: id ?? this.id,
       deckId: deckId ?? this.deckId,
       draftId: draftId ?? this.draftId,
-      type: type ?? this.type,
       question: question ?? this.question,
       optionsListJson: optionsListJson ?? this.optionsListJson,
       answer: answer ?? this.answer,
@@ -2594,9 +2552,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     }
     if (draftId.present) {
       map['draft_id'] = Variable<String>(draftId.value);
-    }
-    if (type.present) {
-      map['type'] = Variable<String>(type.value);
     }
     if (question.present) {
       map['question'] = Variable<String>(question.value);
@@ -2625,7 +2580,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
           ..write('id: $id, ')
           ..write('deckId: $deckId, ')
           ..write('draftId: $draftId, ')
-          ..write('type: $type, ')
           ..write('question: $question, ')
           ..write('optionsListJson: $optionsListJson, ')
           ..write('answer: $answer, ')
@@ -5283,7 +5237,6 @@ typedef $$CardItemsTableCreateCompanionBuilder =
       required String id,
       Value<String?> deckId,
       Value<String?> draftId,
-      required String type,
       Value<String?> question,
       Value<String?> optionsListJson,
       Value<String?> answer,
@@ -5296,7 +5249,6 @@ typedef $$CardItemsTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String?> deckId,
       Value<String?> draftId,
-      Value<String> type,
       Value<String?> question,
       Value<String?> optionsListJson,
       Value<String?> answer,
@@ -5360,11 +5312,6 @@ class $$CardItemsTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get type => $composableBuilder(
-    column: $table.type,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5455,11 +5402,6 @@ class $$CardItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get type => $composableBuilder(
-    column: $table.type,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get question => $composableBuilder(
     column: $table.question,
     builder: (column) => ColumnOrderings(column),
@@ -5544,9 +5486,6 @@ class $$CardItemsTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumn<String> get question =>
       $composableBuilder(column: $table.question, builder: (column) => column);
@@ -5646,7 +5585,6 @@ class $$CardItemsTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
-                Value<String> type = const Value.absent(),
                 Value<String?> question = const Value.absent(),
                 Value<String?> optionsListJson = const Value.absent(),
                 Value<String?> answer = const Value.absent(),
@@ -5657,7 +5595,6 @@ class $$CardItemsTableTableManager
                 id: id,
                 deckId: deckId,
                 draftId: draftId,
-                type: type,
                 question: question,
                 optionsListJson: optionsListJson,
                 answer: answer,
@@ -5670,7 +5607,6 @@ class $$CardItemsTableTableManager
                 required String id,
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
-                required String type,
                 Value<String?> question = const Value.absent(),
                 Value<String?> optionsListJson = const Value.absent(),
                 Value<String?> answer = const Value.absent(),
@@ -5681,7 +5617,6 @@ class $$CardItemsTableTableManager
                 id: id,
                 deckId: deckId,
                 draftId: draftId,
-                type: type,
                 question: question,
                 optionsListJson: optionsListJson,
                 answer: answer,

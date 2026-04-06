@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:project_2359/app_database.dart';
@@ -89,8 +89,8 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
     widget.toolbarController.addCard(
       CardItemsCompanion.insert(
         id: const Uuid().v4(),
-        question: Value(frontText),
-        answer: Value(backText),
+        question: drift.Value(frontText),
+        answer: drift.Value(backText),
       ),
     );
   }
