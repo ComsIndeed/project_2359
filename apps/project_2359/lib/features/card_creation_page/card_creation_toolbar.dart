@@ -22,8 +22,8 @@ enum CardCreationToolbarMode {
   sourcesList,
 }
 
-class ExpandableCardCreationToolbar extends StatefulWidget {
-  const ExpandableCardCreationToolbar({
+class CardCreationToolbar extends StatefulWidget {
+  const CardCreationToolbar({
     super.key,
     required this.context,
     required this.containerController,
@@ -39,12 +39,10 @@ class ExpandableCardCreationToolbar extends StatefulWidget {
   final CardCreationToolbarController toolbarController;
 
   @override
-  State<ExpandableCardCreationToolbar> createState() =>
-      _ExpandableCardCreationToolbarState();
+  State<CardCreationToolbar> createState() => _CardCreationToolbarState();
 }
 
-class _ExpandableCardCreationToolbarState
-    extends State<ExpandableCardCreationToolbar> {
+class _CardCreationToolbarState extends State<CardCreationToolbar> {
   @override
   void initState() {
     super.initState();

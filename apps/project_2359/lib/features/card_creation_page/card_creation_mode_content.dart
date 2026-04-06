@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
-import 'package:project_2359/features/card_creation_page/expandable_card_creation_toolbar.dart';
+import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/shortcut_widgets.dart';
 import 'package:flutter/services.dart';

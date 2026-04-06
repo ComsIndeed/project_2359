@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:project_2359/core/app_controller.dart';
 import 'package:project_2359/core/utils/logger.dart';
-import 'package:project_2359/features/card_creation_page/expandable_card_creation_toolbar.dart';
+import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
 import 'package:provider/provider.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/settings/labs_settings.dart';
@@ -277,7 +277,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
               width: 1,
             ),
             controller: _containerController,
-            builder: (context, controller) => ExpandableCardCreationToolbar(
+            builder: (context, controller) => CardCreationToolbar(
               context: context,
               containerController: controller,
               toolbarController: _toolbarController,
