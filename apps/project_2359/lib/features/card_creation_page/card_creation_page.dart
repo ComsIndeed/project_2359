@@ -39,8 +39,8 @@ class CardCreationPage extends StatefulWidget {
 }
 
 class _CardCreationPageState extends State<CardCreationPage> {
-  late final String _targetDeckId;
-  late final String _currentDraftId;
+  late String _targetDeckId;
+  late String _currentDraftId;
   Uint8List? _pdfBytes;
   String? _pdfTitle;
   List<SourceItem>? _availableSources;
@@ -82,6 +82,19 @@ class _CardCreationPageState extends State<CardCreationPage> {
     _containerController = ExpandableContainerController(
       isVisible: true, // Always visible to show the toolbar initially
     );
+
+    // Initial Deck Name
+    if (widget.deckId != null) {
+      context
+          .read<AppController>()
+          .studyDatabaseService
+          .getDeckById(widget.deckId!)
+          .then((deck) {
+            if (deck != null && mounted) {
+              _toolbarController.deckNameController.text = deck.name;
+            }
+          });
+    }
 
     // Sources
     _initSources();
@@ -132,6 +145,15 @@ class _CardCreationPageState extends State<CardCreationPage> {
               _loadSource(source);
             }
           }
+
+          // Also reload deck name if possible
+          controller.studyDatabaseService.getDeckById(draft.deckId).then((
+            deck,
+          ) {
+            if (deck != null && mounted) {
+              _toolbarController.deckNameController.text = deck.name;
+            }
+          });
         });
       }
     }

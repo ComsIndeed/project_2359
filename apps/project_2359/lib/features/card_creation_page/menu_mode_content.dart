@@ -121,7 +121,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
       shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () {},
+        onTap: () => widget.toolbarController.saveAsDeck(),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(

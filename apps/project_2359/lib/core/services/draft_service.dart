@@ -76,51 +76,61 @@ class DraftService {
 
   /// Commits a draft to a real deck.
   ///
-  /// If the draft's associated [deckId] is not yet in the permanent deck table,
-  /// a new deck record is created. Otherwise, cards are simply moved from
-  /// the draft to the existing deck.
+  /// The cards are moved to the provided [deckId]. If the deck does not exist,
+  /// it is created with the [deckName] and [folderId] Fallbacks to draft values.
   Future<void> saveDraft({
     required String draftId,
+    required String deckId,
     String? deckName,
     String? folderId,
   }) async {
-    AppLogger.info('Promoting draft $draftId to a real deck', tag: _tag);
+    AppLogger.info('Promoting draft $draftId to deck $deckId', tag: _tag);
 
     final draft = await getDraftById(draftId);
-
     if (draft == null) {
       AppLogger.error('Draft $draftId not found', tag: _tag);
       return;
     }
 
     await _db.transaction(() async {
-      final targetDeckId = draft.deckId;
+      // 1. Move all cards associated with this draft to the target deckId
+      // and clear the draft association.
+      await (_db.update(
+        _db.cardItems,
+      )..where((t) => t.draftId.equals(draftId))).write(
+        CardItemsCompanion(deckId: Value(deckId), draftId: const Value(null)),
+      );
 
-      // 1. Check if the deck already exists in the permanent table
+      // 2. Fetch existing deck to see if we need to create it
       final existingDeck = await (_db.select(
         _db.deckItems,
-      )..where((t) => t.id.equals(targetDeckId))).getSingleOrNull();
+      )..where((t) => t.id.equals(deckId))).getSingleOrNull();
 
+      // 3. Create deck if absent, otherwise update metadata if explicitly provided
       if (existingDeck == null) {
-        // Create the new deck record using the stable ID from the draft
         await _db
             .into(_db.deckItems)
             .insert(
               DeckItemsCompanion.insert(
-                id: targetDeckId,
+                id: deckId,
                 folderId: folderId ?? draft.folderId,
                 name:
                     deckName ??
                     'New Deck ${DateTime.now().toIso8601String().substring(0, 10)}',
               ),
             );
+      } else if (deckName != null || folderId != null) {
+        await (_db.update(
+          _db.deckItems,
+        )..where((t) => t.id.equals(deckId))).write(
+          DeckItemsCompanion(
+            name: deckName != null ? Value(deckName) : const Value.absent(),
+            folderId: folderId != null ? Value(folderId) : const Value.absent(),
+          ),
+        );
       }
 
-      // 2. Clear the draft association (cards are already linked to deckId)
-      await (_db.update(_db.cardItems)..where((t) => t.draftId.equals(draftId)))
-          .write(const CardItemsCompanion(draftId: Value(null)));
-
-      // 3. Remove the draft session record
+      // 4. Remove the draft session record
       await (_db.delete(
         _db.cardCreationDraftItems,
       )..where((t) => t.id.equals(draftId))).go();

@@ -5,6 +5,7 @@ import 'package:project_2359/features/card_creation_page/card_creation_toolbar.d
 import 'package:project_2359/core/services/draft_service.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 class CardCreationToolbarController extends ChangeNotifier {
   final DraftService? _draftService;
@@ -35,6 +36,13 @@ class CardCreationToolbarController extends ChangeNotifier {
 
   CardCreationToolbarController({DraftService? draftService})
     : _draftService = draftService;
+
+  /// Controller for targeting a specific deck name.
+  ///
+  /// Kept here so the UI can bind it directly without manual debouncing logic.
+  final TextEditingController deckNameController = TextEditingController(
+    text: 'New Deck',
+  );
 
   String? get draftId => _draftId;
   String? get targetDeckId => _targetDeckId;
@@ -97,6 +105,26 @@ class CardCreationToolbarController extends ChangeNotifier {
       folderId: _folderId!,
       cards: cards,
     );
+  }
+
+  /// Promotes the current draft and its cards into a real deck.
+  ///
+  /// If [asNewDeck] is true, a fresh UUID is generated and passed to the service,
+  /// causing the cards to be moved to a new deck record instead of the original target.
+  Future<void> saveAsDeck() async {
+    if (_draftId == null || _draftService == null) return;
+
+    // We delegate the movement of cards and draft updating to the service's logic.
+    await _draftService.saveDraft(
+      draftId: _draftId!,
+      deckName: deckNameController.text,
+      folderId: _folderId,
+      deckId: _targetDeckId!,
+    );
+
+    // 4. Clear the draft identity after a successful commit
+    _draftId = null;
+    notifyListeners();
   }
 
   void updateOcclusionRect(Rect? rect) {
@@ -171,6 +199,7 @@ class CardCreationToolbarController extends ChangeNotifier {
   @override
   void dispose() {
     _selectedTextController.close();
+    deckNameController.dispose();
     super.dispose();
   }
 }
