@@ -153,6 +153,13 @@ class StudyDatabaseService {
 
   // --- Decks ---
 
+  Future<DeckItem?> getDeckById(String id) async {
+    AppLogger.debug('Fetching deck by ID: $id', tag: _tag);
+    return await (_db.select(
+      _db.deckItems,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
+  }
+
   Future<List<DeckItem>> getDecksByFolderId(String folderId) async {
     AppLogger.debug('Fetching decks for folder: $folderId', tag: _tag);
     return await (_db.select(

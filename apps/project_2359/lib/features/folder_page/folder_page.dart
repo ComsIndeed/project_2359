@@ -21,6 +21,7 @@ import 'package:drift/drift.dart' as drift;
 import 'package:project_2359/core/enums/media_type.dart'; // For MediaType
 import 'package:project_2359/core/tables/source_item_blobs.dart'; // For SourceFileType
 import 'package:project_2359/features/card_creation_page/card_creation_page.dart';
+import 'package:project_2359/features/study_page/study_page.dart';
 
 class FolderPage extends StatefulWidget {
   final String folderId;
@@ -1226,8 +1227,10 @@ class _DecksList extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      Center(child: Text("Study Page")),
+                                  builder: (context) => StudyPage(
+                                    deckId: decks[i].id,
+                                    deckName: decks[i].name,
+                                  ),
                                 ),
                               );
                             },
