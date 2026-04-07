@@ -10,6 +10,7 @@ import 'package:project_2359/features/card_creation_page/card_creation_toolbar.d
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/core/widgets/widget_stage.dart';
 
 class MenuModeContent extends StatefulWidget {
   final CardCreationToolbarController toolbarController;
@@ -96,7 +97,12 @@ class _MenuModeContentState extends State<MenuModeContent> {
                 const SizedBox(width: 12),
                 _buildModeToggleButton(cs),
                 const SizedBox(width: 8),
-                _buildSaveChangesButton(cs),
+                WidgetStageSlot(
+                  controller: widget.toolbarController.stageController,
+                  id: 'save_status',
+                  alternate: _buildSavedStatusIndicator(cs),
+                  child: _buildSaveChangesButton(cs),
+                ),
               ],
             ).animate().fadeIn().slideY(begin: -0.2),
 
@@ -105,9 +111,24 @@ class _MenuModeContentState extends State<MenuModeContent> {
             // List Content
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 540),
-              child: isPdfMode
-                  ? _buildPdfList(cs, textTheme)
-                  : _buildCardList(cs, textTheme),
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: isPdfMode
+                      ? _buildPdfList(
+                          cs,
+                          textTheme,
+                          key: const ValueKey('pdf_list'),
+                        )
+                      : _buildCardList(
+                          cs,
+                          textTheme,
+                          key: const ValueKey('card_list'),
+                        ),
+                ),
+              ),
             ),
           ],
         );
@@ -140,6 +161,31 @@ class _MenuModeContentState extends State<MenuModeContent> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSavedStatusIndicator(ColorScheme cs) {
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.primaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.done_all_rounded, size: 18, color: cs.onPrimaryContainer),
+          const SizedBox(width: 8),
+          Text(
+            "Saved!",
+            style: TextStyle(
+              color: cs.onPrimaryContainer,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -200,8 +246,9 @@ class _MenuModeContentState extends State<MenuModeContent> {
     );
   }
 
-  Widget _buildPdfList(ColorScheme cs, TextTheme textTheme) {
+  Widget _buildPdfList(ColorScheme cs, TextTheme textTheme, {Key? key}) {
     return FutureBuilder<List<SourceItem>>(
+      key: key,
       future: context.read<SourceService>().getAllSources(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
@@ -259,8 +306,9 @@ class _MenuModeContentState extends State<MenuModeContent> {
     );
   }
 
-  Widget _buildCardList(ColorScheme cs, TextTheme textTheme) {
+  Widget _buildCardList(ColorScheme cs, TextTheme textTheme, {Key? key}) {
     return FutureBuilder(
+      key: key,
       future: context.read<AppController>().draftService.getCardsByDraftId(
         widget.toolbarController.draftId,
       ),

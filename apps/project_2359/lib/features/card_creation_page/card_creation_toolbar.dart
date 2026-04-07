@@ -12,6 +12,7 @@ import 'package:project_2359/features/card_creation_page/image_occlusion_editor.
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/shortcut_widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:project_2359/core/widgets/widget_stage.dart';
 
 enum CardCreationToolbarMode {
   collapsed,
@@ -182,7 +183,8 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
               ),
               icon: const ImageOcclusionIcon(),
             ).animate().fadeIn().scale(delay: 100.ms),
-          if (hasSelection)
+          if (hasSelection ||
+              widget.toolbarController.stageController.isActive('card_action'))
             Expanded(child: _buildTextButtonContent())
           else
             const Spacer(),
@@ -211,46 +213,78 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
 
   Widget _buildTextButtonContent() {
     final text = widget.toolbarController.selectedText;
-    return AnimatedSwitcher(
-      duration: 400.ms,
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.easeInCubic,
-      transitionBuilder: (child, animation) {
-        final key = child.key;
-        final isEntering =
-            (text != null && key is ValueKey && key.value == text);
+    final cs = Theme.of(context).colorScheme;
 
-        final slideAnimation =
-            Tween<Offset>(
-              begin: isEntering
-                  ? const Offset(0, 0.45)
-                  : const Offset(0, -0.45),
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-            );
+    return WidgetStageSlot(
+      controller: widget.toolbarController.stageController,
+      id: 'card_action',
+      alternate: _buildFeedbackWidget(cs),
+      child: AnimatedSwitcher(
+        duration: 400.ms,
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (child, animation) {
+          final key = child.key;
+          final isEntering =
+              (text != null && key is ValueKey && key.value == text);
 
-        return FadeTransition(
-          opacity: animation,
-          child: SlideTransition(position: slideAnimation, child: child),
-        );
-      },
-      child: (text == null || text.isEmpty)
-          ? const SizedBox.shrink(key: ValueKey('empty_text'))
-          : Theme(
-              // Ensure the button is constrained on desktop
-              data: Theme.of(context),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: double.infinity),
-                child: SelectedTextButton(
-                  key: ValueKey(text),
-                  text: text,
-                  onTap: () => widget.toolbarController.setMode(
-                    CardCreationToolbarMode.cardCreation,
+          final slideAnimation =
+              Tween<Offset>(
+                begin: isEntering
+                    ? const Offset(0, 0.45)
+                    : const Offset(0, -0.45),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
+
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(position: slideAnimation, child: child),
+          );
+        },
+        child: (text == null || text.isEmpty)
+            ? const SizedBox.shrink(key: ValueKey('empty_text'))
+            : Theme(
+                data: Theme.of(context),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: double.infinity),
+                  child: SelectedTextButton(
+                    key: ValueKey(text),
+                    text: text,
+                    onTap: () => widget.toolbarController.setMode(
+                      CardCreationToolbarMode.cardCreation,
+                    ),
                   ),
                 ),
               ),
+      ),
+    );
+  }
+
+  Widget _buildFeedbackWidget(ColorScheme cs) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: cs.primaryContainer.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.primary.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.auto_awesome_rounded, size: 16, color: cs.primary),
+          const SizedBox(width: 8),
+          Text(
+            widget.toolbarController.feedbackText ?? "Processing...",
+            style: TextStyle(
+              color: cs.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
             ),
+          ),
+        ],
+      ),
     );
   }
 }

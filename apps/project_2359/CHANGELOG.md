@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.1.8 - 2026-04-07
+
+### 🚀 Alpha Version — MVP 1 (Create & View Basic Text Cards)
+
+**Goal:** Enable core card creation flow, persistence to decks, and simple
+reviewing.
+
+#### Added
+
+- **Card Creation Persistence:** Wired up `_saveCard` in the creation mode to
+  persist cards to the database.
+- **Draft to Deck Promotion:** Added mechanisms to promote draft cards into real
+  deck cards using `DraftService.saveDraft`.
+- **Basic Study Page:** Implemented a simple study/flip view with PageView and
+  front-to-back state toggle (FSRS logic pending).
+- **Deck Navigation:** FolderPage navigation now correctly opens the actual
+  study page with the specified `deckId`.
+- **Draft Connectivity:** Wired the card list in `MenuModeContent` to fetch real
+  data from `DraftService.getCardsByDraftId`.
+
 ## 0.1.7 - 2026-04-07
 
 ### Added

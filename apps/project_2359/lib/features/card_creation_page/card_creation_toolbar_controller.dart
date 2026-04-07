@@ -5,10 +5,11 @@ import 'package:project_2359/features/card_creation_page/card_creation_toolbar.d
 import 'package:project_2359/core/services/draft_service.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:drift/drift.dart';
-import 'package:uuid/uuid.dart';
+import 'package:project_2359/core/widgets/widget_stage.dart';
 
 class CardCreationToolbarController extends ChangeNotifier {
   final DraftService? _draftService;
+  final WidgetStageController stageController = WidgetStageController();
 
   CardCreationToolbarMode _mode = CardCreationToolbarMode.collapsed;
   final StreamController<String?> _selectedTextController =
@@ -21,6 +22,7 @@ class CardCreationToolbarController extends ChangeNotifier {
   final List<CardItemsCompanion> _cards = [];
 
   String? _selectedText;
+  String? _feedbackText;
   String _frontText = '';
   String _backText = '';
 
@@ -51,6 +53,7 @@ class CardCreationToolbarController extends ChangeNotifier {
 
   CardCreationToolbarMode get mode => _mode;
   String? get selectedText => _selectedText;
+  String? get feedbackText => _feedbackText;
   Stream<String?> get selectedTextStream => _selectedTextController.stream;
 
   String get frontText => _frontText;
@@ -87,6 +90,11 @@ class CardCreationToolbarController extends ChangeNotifier {
   Future<void> addCard(CardItemsCompanion card) async {
     _cards.add(card);
     notifyListeners();
+    _feedbackText = "Saved Card!";
+    stageController.flash(
+      'card_action',
+      duration: const Duration(milliseconds: 800),
+    );
     await syncDraft(_cards);
   }
 
@@ -124,6 +132,7 @@ class CardCreationToolbarController extends ChangeNotifier {
 
     // 4. Clear the draft identity after a successful commit
     _draftId = null;
+    stageController.flash('save_status', duration: const Duration(seconds: 2));
     notifyListeners();
   }
 
@@ -186,6 +195,8 @@ class CardCreationToolbarController extends ChangeNotifier {
   void requestSource(String id) {
     _requestedSourceId = id;
     notifyListeners();
+    _feedbackText = "Opening Source...";
+    stageController.flash('card_action', duration: const Duration(seconds: 1));
     // Reset after notify so listeners can react and we don't trigger again
     _requestedSourceId = null;
   }
@@ -198,6 +209,7 @@ class CardCreationToolbarController extends ChangeNotifier {
 
   @override
   void dispose() {
+    stageController.dispose();
     _selectedTextController.close();
     deckNameController.dispose();
     super.dispose();

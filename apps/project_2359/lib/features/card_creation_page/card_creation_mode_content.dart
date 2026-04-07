@@ -10,6 +10,7 @@ import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/shortcut_widgets.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
+import 'package:project_2359/core/widgets/widget_stage.dart';
 
 class CardCreationModeContent extends StatefulWidget {
   final CardCreationToolbarController toolbarController;
@@ -295,13 +296,44 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
                 key: LogicalKeyboardKey.keyS,
                 modifiers: [ShortcutModifier.alt],
               ),
-              child: FilledButton.icon(
-                onPressed: _addCard,
-                style: FilledButton.styleFrom(
-                  backgroundColor: cs.primary.withAlpha(50),
+              child: WidgetStageSlot(
+                controller: widget.toolbarController.stageController,
+                id: 'card_action',
+                alternate: Container(
+                  height: 42,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: cs.primaryContainer,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle_rounded,
+                        size: 20,
+                        color: cs.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Saved!",
+                        style: TextStyle(
+                          color: cs.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                icon: const Icon(Icons.add_rounded, size: 22),
-                label: const Text("Add Card"),
+                child: FilledButton.icon(
+                  onPressed: _addCard,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: cs.primary.withAlpha(50),
+                    minimumSize: const Size(0, 42),
+                  ),
+                  icon: const Icon(Icons.add_rounded, size: 22),
+                  label: const Text("Add Card"),
+                ),
               ),
             ),
           ],
