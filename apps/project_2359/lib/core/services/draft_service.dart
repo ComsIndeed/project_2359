@@ -173,8 +173,11 @@ class DraftService {
     });
   }
 
-  /// Retrieves all cards currently associated with a draft session.
-  Future<List<CardItem>> getCardsByDraftId(String draftId) async {
+  /// Retrieves all cards currently associated with a draft session. Returns empty list if draft not found.
+  Future<List<CardItem>> getCardsByDraftId(String? draftId) async {
+    if (draftId == null) {
+      return [];
+    }
     return await (_db.select(
       _db.cardItems,
     )..where((t) => t.draftId.equals(draftId))).get();

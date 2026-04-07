@@ -157,7 +157,7 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
     if (widget.toolbarController.mode == CardCreationToolbarMode.menu ||
         widget.toolbarController.mode == CardCreationToolbarMode.cardsList ||
         widget.toolbarController.mode == CardCreationToolbarMode.sourcesList) {
-      return MenuModeContent(controller: widget.toolbarController);
+      return MenuModeContent(toolbarController: widget.toolbarController);
     }
 
     if (widget.toolbarController.mode == CardCreationToolbarMode.cardCreation) {

@@ -49,7 +49,9 @@ class CardCreationPdfView extends StatelessWidget {
                 controller: controller,
                 useProgressiveLoading: true,
                 params: PdfViewerParams(
-                  boundaryMargin: const EdgeInsets.symmetric(horizontal: 256),
+                  calculateInitialZoom: (doc, controller, alt, cover) =>
+                      cover * 1.25,
+                  boundaryMargin: const EdgeInsets.symmetric(horizontal: 2096),
                   margin: 8,
                   backgroundColor: Colors.black,
                   textSelectionParams: PdfTextSelectionParams(
@@ -63,6 +65,7 @@ class CardCreationPdfView extends StatelessWidget {
                       });
                     },
                   ),
+                  pagePaintCallbacks: [],
                   onGeneralTap: labsSettings.smartSelectionEnabled
                       ? smartSelection.handleTap
                       : null,

@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
-import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
-import 'package:project_2359/core/widgets/project_card_tile.dart';
-import 'package:project_2359/features/sources_page/source_service.dart';
-import 'package:project_2359/app_database.dart';
-import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
+import 'package:project_2359/core/app_controller.dart';
 import 'package:provider/provider.dart';
 
+import 'package:project_2359/app_database.dart';
+import 'package:project_2359/core/services/draft_service.dart';
+import 'package:project_2359/core/widgets/project_card_tile.dart';
+import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
+import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
+import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
+import 'package:project_2359/features/sources_page/source_service.dart';
+
 class MenuModeContent extends StatefulWidget {
-  final CardCreationToolbarController controller;
-  const MenuModeContent({super.key, required this.controller});
+  final CardCreationToolbarController toolbarController;
+  const MenuModeContent({super.key, required this.toolbarController});
 
   @override
   State<MenuModeContent> createState() => _MenuModeContentState();
@@ -23,9 +26,9 @@ class _MenuModeContentState extends State<MenuModeContent> {
   @override
   void initState() {
     super.initState();
-    _searchController.text = widget.controller.searchQuery;
+    _searchController.text = widget.toolbarController.searchQuery;
     _searchController.addListener(() {
-      widget.controller.setSearchQuery(_searchController.text);
+      widget.toolbarController.setSearchQuery(_searchController.text);
     });
 
     // Disable staggered animation after initial render
@@ -54,10 +57,11 @@ class _MenuModeContentState extends State<MenuModeContent> {
     final textTheme = Theme.of(context).textTheme;
 
     return ListenableBuilder(
-      listenable: widget.controller,
+      listenable: widget.toolbarController,
       builder: (context, _) {
         final isPdfMode =
-            widget.controller.mode == CardCreationToolbarMode.sourcesList;
+            widget.toolbarController.mode ==
+            CardCreationToolbarMode.sourcesList;
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -111,7 +115,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
 
   Widget _buildModeToggleButton(ColorScheme cs) {
     final isPdfMode =
-        widget.controller.mode == CardCreationToolbarMode.sourcesList;
+        widget.toolbarController.mode == CardCreationToolbarMode.sourcesList;
     return Material(
       color: cs.primary.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(12),
@@ -121,7 +125,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
           setState(() {
             _shouldAnimate = true;
           });
-          widget.controller.setMode(
+          widget.toolbarController.setMode(
             isPdfMode
                 ? CardCreationToolbarMode.cardsList
                 : CardCreationToolbarMode.sourcesList,
@@ -173,7 +177,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final query = widget.controller.searchQuery.toLowerCase();
+        final query = widget.toolbarController.searchQuery.toLowerCase();
         final items = snapshot.data!
             .where((item) => item.label.toLowerCase().contains(query))
             .toList();
@@ -188,9 +192,8 @@ class _MenuModeContentState extends State<MenuModeContent> {
           padding: const EdgeInsets.only(bottom: 8),
           itemBuilder: (context, index) {
             final item = items[index];
-            final isSelected = widget.controller.selectedItemIds.contains(
-              item.id,
-            );
+            final isSelected = widget.toolbarController.selectedItemIds
+                .contains(item.id);
 
             final tile = Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -202,13 +205,14 @@ class _MenuModeContentState extends State<MenuModeContent> {
                 isSelected: isSelected,
                 isCompact: true,
                 onTap: () {
-                  if (widget.controller.selectedItemIds.isNotEmpty) {
-                    widget.controller.toggleSelection(item.id);
+                  if (widget.toolbarController.selectedItemIds.isNotEmpty) {
+                    widget.toolbarController.toggleSelection(item.id);
                   } else {
-                    widget.controller.requestSource(item.id);
+                    widget.toolbarController.requestSource(item.id);
                   }
                 },
-                onLongTap: () => widget.controller.toggleSelection(item.id),
+                onLongTap: () =>
+                    widget.toolbarController.toggleSelection(item.id),
               ),
             );
 
@@ -225,65 +229,62 @@ class _MenuModeContentState extends State<MenuModeContent> {
   }
 
   Widget _buildCardList(ColorScheme cs, TextTheme textTheme) {
-    // Placeholder data for cards
-    final List<Map<String, String>> placeholderCards = List.generate(
-      20,
-      (i) => {
-        'id': 'card_$i',
-        'front': 'Card Front #$i',
-        'back': 'This is the back content for card number $i.',
-      },
-    );
+    return FutureBuilder(
+      future: context.read<AppController>().draftService.getCardsByDraftId(
+        widget.toolbarController.draftId,
+      ),
+      builder: (context, snapshot) {
+        final data = snapshot.data;
+        if (data == null) {
+          return const Center(
+            child: Column(
+              children: [
+                Icon(Icons.description_outlined, size: 48),
+                Text("No cards found"),
+              ],
+            ),
+          );
+        }
+        return ListView.builder(
+          shrinkWrap: true,
+          itemCount: data.length,
+          padding: const EdgeInsets.only(bottom: 8),
+          itemBuilder: (context, index) {
+            final item = data[index];
+            final isSelected = widget.toolbarController.selectedItemIds
+                .contains(item.id);
 
-    final query = widget.controller.searchQuery.toLowerCase();
-    final items = placeholderCards
-        .where(
-          (c) =>
-              c['front']!.toLowerCase().contains(query) ||
-              c['back']!.toLowerCase().contains(query),
-        )
-        .toList();
+            final tile = Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: ProjectCardTile(
+                title: Text(
+                  item.frontText ?? "",
+                ), // TODO: Might want to do something about nullable texts, maybe non-nullable but can be empty instead? Or would that be unnecessary?
+                subtitle: Text(item.backText ?? ""),
+                leading: const WizardFlashcardPreview(),
+                backgroundColor: cs.surface.withValues(alpha: 0.4),
+                isSelected: isSelected,
+                isCompact: true,
+                onTap: () {
+                  if (widget.toolbarController.selectedItemIds.isNotEmpty) {
+                    widget.toolbarController.toggleSelection(item.id);
+                  } else {
+                    widget.toolbarController.requestCard(item.id);
+                  }
+                },
+                onLongTap: () =>
+                    widget.toolbarController.toggleSelection(item.id),
+              ),
+            );
 
-    if (items.isEmpty) {
-      return _buildEmptyState("No cards found", cs);
-    }
+            if (!_shouldAnimate) return tile;
 
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: items.length,
-      padding: const EdgeInsets.only(bottom: 8),
-      itemBuilder: (context, index) {
-        final item = items[index];
-        final isSelected = widget.controller.selectedItemIds.contains(
-          item['id']!,
+            return tile
+                .animate(delay: (index * 50).ms)
+                .fadeIn(duration: 400.ms)
+                .slideX(begin: 0.1, curve: Curves.easeOutCubic);
+          },
         );
-
-        final tile = Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: ProjectCardTile(
-            title: Text(item['front']!),
-            subtitle: Text(item['back']!),
-            leading: const WizardFlashcardPreview(),
-            backgroundColor: cs.surface.withValues(alpha: 0.4),
-            isSelected: isSelected,
-            isCompact: true,
-            onTap: () {
-              if (widget.controller.selectedItemIds.isNotEmpty) {
-                widget.controller.toggleSelection(item['id']!);
-              } else {
-                widget.controller.requestCard(item['id']!);
-              }
-            },
-            onLongTap: () => widget.controller.toggleSelection(item['id']!),
-          ),
-        );
-
-        if (!_shouldAnimate) return tile;
-
-        return tile
-            .animate(delay: (index * 50).ms)
-            .fadeIn(duration: 400.ms)
-            .slideX(begin: 0.1, curve: Curves.easeOutCubic);
       },
     );
   }

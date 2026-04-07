@@ -69,7 +69,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
         key: LogicalKeyboardKey.keyS,
         modifiers: [ShortcutModifier.alt],
       ),
-      _saveCard,
+      _addCard,
     );
     ProjectShortcutManager.registerShortcut(
       const ShortcutInfo(
@@ -81,7 +81,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
     );
   }
 
-  void _saveCard() {
+  void _addCard() {
     final frontText = _frontController.text;
     final backText = _backController.text;
 
@@ -94,6 +94,9 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
         backText: drift.Value(backText),
       ),
     );
+
+    _frontController.clear();
+    _backController.clear();
   }
 
   void _cancel() {
@@ -293,7 +296,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
                 modifiers: [ShortcutModifier.alt],
               ),
               child: FilledButton.icon(
-                onPressed: _saveCard,
+                onPressed: _addCard,
                 style: FilledButton.styleFrom(
                   backgroundColor: cs.primary.withAlpha(50),
                 ),
