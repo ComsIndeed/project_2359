@@ -3,13 +3,32 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 0.1.7 - 2026-04-07
+
+### Added
+
+- Automatic official GitHub release creation when `pubspec.yaml` version is
+  bumped and a matching `CHANGELOG.md` entry exists
+- Version change detection in CI comparing current and previous commits
+- Changelog section extraction for release notes
+
+### Changed
+
+- Build workflow now triggers on version changes in addition to `[BUILD]` commit
+  prefix
+- `[BUILD]` commits still create pre-releases; version bumps with changelogs
+  create official releases
 
 ## 1.1.0 - 2026-02-01
 
 ### Added
+
 - Homepage with custom `SpecialNavigationBar` featuring animated page actions
-- `SpecialSearchBar` widget with custom styling, recent search suggestions, and quick actions
+- `SpecialSearchBar` widget with custom styling, recent search suggestions, and
+  quick actions
 - Study Page UI with popup navigation items
 - Local database for study materials and sources using Drift
 - `StudyMaterialPacks`, `StudyMaterialItems`, and `SourceItems` database tables
@@ -18,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - App logo in homepage header
 
 ### Changed
+
 - Complete codebase cleanup and restructure (migrated from vibecoded branch)
 - Refactored navigation bar into reusable `SpecialNavigationBar` component
 - Homepage screen content refactored with navbar as overlay
@@ -25,12 +45,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `homepage` directory to `home_page` for consistency
 
 ### Fixed
+
 - Web build compilation issues
 - Version mismatch errors
 - Missing dependencies
 - Broken navbar functionality
 
 ### Removed
+
 - Legacy vibecoded implementations
 - Unused imports and redundant code
 
@@ -40,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic app structure with Expo Router
 - Tamagui UI framework integration
 
-<!-- 
+<!--
 ================================================================================
 HOW TO USE THIS CHANGELOG:
 ================================================================================
@@ -50,13 +72,13 @@ When releasing a new version, add a new section ABOVE the previous version:
 ## X.Y.Z
 
 - Added: New features
-- Changed: Modified functionality  
+- Changed: Modified functionality
 - Fixed: Bug fixes
 - Removed: Removed features
 - Security: Security fixes
 
-The GitHub Action will automatically extract the content below the version 
-header (## X.Y.Z) up until the next version header and use it as the release 
+The GitHub Action will automatically extract the content below the version
+header (## X.Y.Z) up until the next version header and use it as the release
 notes.
 
 Example:

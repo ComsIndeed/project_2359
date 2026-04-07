@@ -1,4 +1,4 @@
-name: Build on [BUILD] Commit
+name: Build on [BUILD] Commit or Version Release
 
 on:
   push:
@@ -28,6 +28,8 @@ jobs:
       commit_message: ${{ steps.check.outputs.commit_message }}
       project_2359_changed: ${{ steps.changes.outputs.project_2359 }}
       playground_changed: ${{ steps.changes.outputs.playground }}
+      is_release: ${{ steps.version.outputs.is_release }}
+      new_version: ${{ steps.version.outputs.new_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -78,12 +80,60 @@ jobs:
             echo "⏭️ playground has no changes"
           fi
 
+      - name: Detect version change and changelog
+        id: version
+        run: |
+          PUBSPEC="apps/project_2359/pubspec.yaml"
+          CHANGELOG="apps/project_2359/CHANGELOG.md"
+
+          # Get current version
+          CURRENT_VERSION=$(grep '^version:' "$PUBSPEC" | sed 's/version: *//')
+          echo "Current version: $CURRENT_VERSION"
+
+          # Get previous version
+          PREVIOUS_VERSION=$(git show HEAD~1:"$PUBSPEC" 2>/dev/null | grep '^version:' | sed 's/version: *//' || echo "")
+          echo "Previous version: $PREVIOUS_VERSION"
+
+          if [ -z "$PREVIOUS_VERSION" ] || [ "$CURRENT_VERSION" == "$PREVIOUS_VERSION" ]; then
+            echo "⏭️ Version unchanged ($CURRENT_VERSION) — no release"
+            echo "is_release=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "🔄 Version changed: $PREVIOUS_VERSION → $CURRENT_VERSION"
+          echo "new_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+          # Extract changelog section for this version
+          # Matches content between "## X.Y.Z" (with optional date suffix) and the next "## " header
+          CHANGELOG_BODY=$(sed -n "/^## ${CURRENT_VERSION}/,/^## /{ /^## ${CURRENT_VERSION}/d; /^## /d; p; }" "$CHANGELOG")
+
+          if [ -z "$(echo "$CHANGELOG_BODY" | tr -d '[:space:]')" ]; then
+            echo "⚠️ No changelog entry found for version $CURRENT_VERSION — skipping release"
+            echo "is_release=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "✅ Found changelog for $CURRENT_VERSION — will create official release"
+          echo "is_release=true" >> $GITHUB_OUTPUT
+
+          # Save changelog body for use in the release job
+          echo "$CHANGELOG_BODY" > /tmp/changelog_body.md
+          cat /tmp/changelog_body.md
+
+      - name: Upload changelog artifact
+        if: steps.version.outputs.is_release == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog-body
+          path: /tmp/changelog_body.md
+          retention-days: 1
+
   # ============================================================================
   # Build Project 2359 - Web
   # ============================================================================
   build-project-2359-web:
     needs: check-trigger
-    if: needs.check-trigger.outputs.should_build == 'true' && needs.check-trigger.outputs.project_2359_changed == 'true'
+    if: (needs.check-trigger.outputs.should_build == 'true' || needs.check-trigger.outputs.is_release == 'true') && needs.check-trigger.outputs.project_2359_changed == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
     defaults:
@@ -130,7 +180,7 @@ jobs:
   # ============================================================================
   build-project-2359-android:
     needs: check-trigger
-    if: needs.check-trigger.outputs.should_build == 'true' && needs.check-trigger.outputs.project_2359_changed == 'true'
+    if: (needs.check-trigger.outputs.should_build == 'true' || needs.check-trigger.outputs.is_release == 'true') && needs.check-trigger.outputs.project_2359_changed == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
     defaults:
@@ -183,7 +233,7 @@ jobs:
   # ============================================================================
   build-project-2359-windows:
     needs: check-trigger
-    if: needs.check-trigger.outputs.should_build == 'true' && needs.check-trigger.outputs.project_2359_changed == 'true'
+    if: (needs.check-trigger.outputs.should_build == 'true' || needs.check-trigger.outputs.is_release == 'true') && needs.check-trigger.outputs.project_2359_changed == 'true'
     runs-on: windows-latest
     continue-on-error: true
     defaults:
@@ -284,7 +334,7 @@ jobs:
     needs: [check-trigger, build-project-2359-web, build-playground-web]
     if: |
       always() && 
-      needs.check-trigger.outputs.should_build == 'true' && 
+      (needs.check-trigger.outputs.should_build == 'true' || needs.check-trigger.outputs.is_release == 'true') && 
       (needs.build-project-2359-web.outputs.success == 'true' || needs.build-playground-web.outputs.success == 'true')
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -348,7 +398,7 @@ jobs:
     needs: [check-trigger, build-project-2359-android, build-project-2359-windows, deploy-web]
     if: |
       always() && 
-      needs.check-trigger.outputs.should_build == 'true' && 
+      (needs.check-trigger.outputs.should_build == 'true' || needs.check-trigger.outputs.is_release == 'true') && 
       needs.check-trigger.outputs.project_2359_changed == 'true' &&
       (needs.build-project-2359-android.outputs.success == 'true' || 
        needs.build-project-2359-windows.outputs.success == 'true')
@@ -375,6 +425,12 @@ jobs:
           name: project-2359-windows
           path: ./release-assets
 
+      - name: Download changelog body
+        if: needs.check-trigger.outputs.is_release == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: changelog-body
+          path: ./changelog
 
       - name: Rename APK
         if: needs.build-project-2359-android.outputs.success == 'true'
@@ -420,7 +476,53 @@ jobs:
             echo "release_type=Partial" >> $GITHUB_OUTPUT
           fi
 
-      - name: Generate release notes
+      # ── Official version release ──────────────────────────────────────────
+      - name: Generate official release notes
+        if: needs.check-trigger.outputs.is_release == 'true'
+        run: |
+          VERSION="${{ needs.check-trigger.outputs.new_version }}"
+          REPO_OWNER="${{ github.repository_owner }}"
+          REPO_NAME="${{ github.event.repository.name }}"
+          PAGES_URL="https://${REPO_OWNER}.github.io/${REPO_NAME}"
+
+          CHANGELOG_BODY=$(cat ./changelog/changelog_body.md)
+
+          cat > release_notes.md << EOF
+          # 🚀 Project 2359 — v${VERSION}
+
+          ${CHANGELOG_BODY}
+
+          ## 📦 Available Downloads
+
+          | Platform | Status | Description |
+          |----------|--------|-------------|
+          | 🤖 Android | ${{ steps.build_status.outputs.android_success == 'true' && '✅' || '❌' }} | Release APK |
+          | 🪟 Windows | ${{ steps.build_status.outputs.windows_success == 'true' && '✅' || '❌' }} | Portable executable |
+          | 🌐 Web | ${{ steps.build_status.outputs.web_success == 'true' && '✅' || '❌' }} | [Open Web App](${PAGES_URL}) |
+
+          ---
+          *Automated release from version bump in \`pubspec.yaml\`.*
+          EOF
+
+      - name: Create official GitHub Release
+        if: needs.check-trigger.outputs.is_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.check-trigger.outputs.new_version }}
+          name: "Project 2359 v${{ needs.check-trigger.outputs.new_version }}"
+          body_path: release_notes.md
+          files: |
+            ./release-assets/project_2359-android.apk
+            ./release-assets/project_2359-windows.zip
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── Pre-release [BUILD] commit release ────────────────────────────────
+      - name: Generate pre-release notes
+        if: needs.check-trigger.outputs.is_release != 'true' && needs.check-trigger.outputs.should_build == 'true'
         run: |
           REPO_OWNER="${{ github.repository_owner }}"
           REPO_NAME="${{ github.event.repository.name }}"
@@ -454,7 +556,8 @@ jobs:
           *Automated build triggered by \`[BUILD]\` commit prefix.*
           EOF
 
-      - name: Create GitHub Release
+      - name: Create pre-release
+        if: needs.check-trigger.outputs.is_release != 'true' && needs.check-trigger.outputs.should_build == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: project-2359-${{ steps.build_info.outputs.build_datetime }}-${{ steps.build_info.outputs.short_sha }}

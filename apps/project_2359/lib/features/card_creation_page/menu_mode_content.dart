@@ -95,6 +95,8 @@ class _MenuModeContentState extends State<MenuModeContent> {
                 ),
                 const SizedBox(width: 12),
                 _buildModeToggleButton(cs),
+                const SizedBox(width: 8),
+                _buildSaveChangesButton(cs),
               ],
             ).animate().fadeIn().slideY(begin: -0.2),
 
@@ -110,6 +112,35 @@ class _MenuModeContentState extends State<MenuModeContent> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildSaveChangesButton(ColorScheme cs) {
+    return Material(
+      color: cs.primary,
+      shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {},
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_rounded, size: 18, color: cs.onPrimary),
+              const SizedBox(width: 8),
+              Text(
+                "Save Changes",
+                style: TextStyle(
+                  color: cs.onPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
