@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/features/study_page/study_page.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -626,7 +627,10 @@ class _HomePageState extends State<HomePage> {
     switch (_mainContentType) {
       case MainContentType.study:
         if (_selectedDeckId != null) {
-          return Center(child: Text("Study Page"));
+          return StudyPage(
+            deckId: _selectedDeckId!,
+            deckName: _selectedDeckName!,
+          );
         }
         break;
       case MainContentType.sourceDetail:
