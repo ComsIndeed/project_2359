@@ -382,6 +382,16 @@ class SettingsPage extends StatelessWidget {
                           onChanged: (value) =>
                               labsSettings.setMobileEmulationEnabled(value),
                         ),
+                        _divider(theme),
+                        _SettingsToggleTile(
+                          icon: FontAwesomeIcons.handPointer,
+                          title: 'Swipe to Rate',
+                          subtitle:
+                              'Left for Again, Right for Good, Down for Hard, Up for Easy',
+                          value: labsSettings.swipeToRateEnabled,
+                          onChanged: (value) =>
+                              labsSettings.setSwipeToRateEnabled(value),
+                        ),
                       ],
                     ),
 
