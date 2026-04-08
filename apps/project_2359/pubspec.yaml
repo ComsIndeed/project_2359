@@ -34,7 +34,7 @@ dependencies:
   syncfusion_flutter_core: ^32.2.7
   syncfusion_flutter_pdf: ^32.2.7
   syncfusion_flutter_pdfviewer: ^32.2.7
-  uuid: ^4.5.2
+  uuid: ^4.5.3
   provider: ^6.1.1
   sensors_plus: ^7.0.0
   pdfrx: ^2.2.24

@@ -15,7 +15,6 @@ class CardItems extends Table {
   TextColumn get occlusionData =>
       text().map(const CardOcclusionConverter()).nullable()();
 
-  DateTimeColumn get due => dateTime().withDefault(currentDateAndTime)();
   TextColumn get deckId => text().nullable().references(DeckItems, #id)();
   TextColumn get draftId =>
       text().nullable().references(CardCreationDraftItems, #id)();
