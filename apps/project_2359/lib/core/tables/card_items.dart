@@ -15,6 +15,22 @@ class CardItems extends Table {
   TextColumn get occlusionData =>
       text().map(const CardOcclusionConverter()).nullable()();
 
+  // --- Spaced Repetition (Standard) ---
+  DateTimeColumn get spacedDue => dateTime().withDefault(currentDateAndTime)();
+  RealColumn get spacedStability => real().withDefault(const Constant(0.0))();
+  RealColumn get spacedDifficulty => real().withDefault(const Constant(0.0))();
+  IntColumn get spacedState => integer().withDefault(const Constant(0))();
+  IntColumn get spacedStep => integer().withDefault(const Constant(0))();
+  DateTimeColumn get spacedLastReview => dateTime().nullable()();
+
+  // --- Drill Mode (Standby) ---
+  DateTimeColumn get drillDue => dateTime().withDefault(currentDateAndTime)();
+  RealColumn get drillStability => real().withDefault(const Constant(0.0))();
+  RealColumn get drillDifficulty => real().withDefault(const Constant(0.0))();
+  IntColumn get drillState => integer().withDefault(const Constant(0))();
+  IntColumn get drillStep => integer().withDefault(const Constant(0))();
+  DateTimeColumn get drillLastReview => dateTime().nullable()();
+
   TextColumn get deckId => text().nullable().references(DeckItems, #id)();
   TextColumn get draftId =>
       text().nullable().references(CardCreationDraftItems, #id)();

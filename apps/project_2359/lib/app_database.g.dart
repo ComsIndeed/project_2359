@@ -2138,16 +2138,150 @@ class $CardItemsTable extends CardItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   ).withConverter<CardOcclusion?>($CardItemsTable.$converterocclusionDatan);
-  static const VerificationMeta _dueMeta = const VerificationMeta('due');
+  static const VerificationMeta _spacedDueMeta = const VerificationMeta(
+    'spacedDue',
+  );
   @override
-  late final GeneratedColumn<DateTime> due = GeneratedColumn<DateTime>(
-    'due',
+  late final GeneratedColumn<DateTime> spacedDue = GeneratedColumn<DateTime>(
+    'spaced_due',
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _spacedStabilityMeta = const VerificationMeta(
+    'spacedStability',
+  );
+  @override
+  late final GeneratedColumn<double> spacedStability = GeneratedColumn<double>(
+    'spaced_stability',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _spacedDifficultyMeta = const VerificationMeta(
+    'spacedDifficulty',
+  );
+  @override
+  late final GeneratedColumn<double> spacedDifficulty = GeneratedColumn<double>(
+    'spaced_difficulty',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _spacedStateMeta = const VerificationMeta(
+    'spacedState',
+  );
+  @override
+  late final GeneratedColumn<int> spacedState = GeneratedColumn<int>(
+    'spaced_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _spacedStepMeta = const VerificationMeta(
+    'spacedStep',
+  );
+  @override
+  late final GeneratedColumn<int> spacedStep = GeneratedColumn<int>(
+    'spaced_step',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _spacedLastReviewMeta = const VerificationMeta(
+    'spacedLastReview',
+  );
+  @override
+  late final GeneratedColumn<DateTime> spacedLastReview =
+      GeneratedColumn<DateTime>(
+        'spaced_last_review',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _drillDueMeta = const VerificationMeta(
+    'drillDue',
+  );
+  @override
+  late final GeneratedColumn<DateTime> drillDue = GeneratedColumn<DateTime>(
+    'drill_due',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _drillStabilityMeta = const VerificationMeta(
+    'drillStability',
+  );
+  @override
+  late final GeneratedColumn<double> drillStability = GeneratedColumn<double>(
+    'drill_stability',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _drillDifficultyMeta = const VerificationMeta(
+    'drillDifficulty',
+  );
+  @override
+  late final GeneratedColumn<double> drillDifficulty = GeneratedColumn<double>(
+    'drill_difficulty',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _drillStateMeta = const VerificationMeta(
+    'drillState',
+  );
+  @override
+  late final GeneratedColumn<int> drillState = GeneratedColumn<int>(
+    'drill_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _drillStepMeta = const VerificationMeta(
+    'drillStep',
+  );
+  @override
+  late final GeneratedColumn<int> drillStep = GeneratedColumn<int>(
+    'drill_step',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _drillLastReviewMeta = const VerificationMeta(
+    'drillLastReview',
+  );
+  @override
+  late final GeneratedColumn<DateTime> drillLastReview =
+      GeneratedColumn<DateTime>(
+        'drill_last_review',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _deckIdMeta = const VerificationMeta('deckId');
   @override
   late final GeneratedColumn<String> deckId = GeneratedColumn<String>(
@@ -2206,7 +2340,18 @@ class $CardItemsTable extends CardItems
     frontImageId,
     backImageId,
     occlusionData,
-    due,
+    spacedDue,
+    spacedStability,
+    spacedDifficulty,
+    spacedState,
+    spacedStep,
+    spacedLastReview,
+    drillDue,
+    drillStability,
+    drillDifficulty,
+    drillState,
+    drillStep,
+    drillLastReview,
     deckId,
     draftId,
     createdAt,
@@ -2259,10 +2404,97 @@ class $CardItemsTable extends CardItems
         ),
       );
     }
-    if (data.containsKey('due')) {
+    if (data.containsKey('spaced_due')) {
       context.handle(
-        _dueMeta,
-        due.isAcceptableOrUnknown(data['due']!, _dueMeta),
+        _spacedDueMeta,
+        spacedDue.isAcceptableOrUnknown(data['spaced_due']!, _spacedDueMeta),
+      );
+    }
+    if (data.containsKey('spaced_stability')) {
+      context.handle(
+        _spacedStabilityMeta,
+        spacedStability.isAcceptableOrUnknown(
+          data['spaced_stability']!,
+          _spacedStabilityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('spaced_difficulty')) {
+      context.handle(
+        _spacedDifficultyMeta,
+        spacedDifficulty.isAcceptableOrUnknown(
+          data['spaced_difficulty']!,
+          _spacedDifficultyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('spaced_state')) {
+      context.handle(
+        _spacedStateMeta,
+        spacedState.isAcceptableOrUnknown(
+          data['spaced_state']!,
+          _spacedStateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('spaced_step')) {
+      context.handle(
+        _spacedStepMeta,
+        spacedStep.isAcceptableOrUnknown(data['spaced_step']!, _spacedStepMeta),
+      );
+    }
+    if (data.containsKey('spaced_last_review')) {
+      context.handle(
+        _spacedLastReviewMeta,
+        spacedLastReview.isAcceptableOrUnknown(
+          data['spaced_last_review']!,
+          _spacedLastReviewMeta,
+        ),
+      );
+    }
+    if (data.containsKey('drill_due')) {
+      context.handle(
+        _drillDueMeta,
+        drillDue.isAcceptableOrUnknown(data['drill_due']!, _drillDueMeta),
+      );
+    }
+    if (data.containsKey('drill_stability')) {
+      context.handle(
+        _drillStabilityMeta,
+        drillStability.isAcceptableOrUnknown(
+          data['drill_stability']!,
+          _drillStabilityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('drill_difficulty')) {
+      context.handle(
+        _drillDifficultyMeta,
+        drillDifficulty.isAcceptableOrUnknown(
+          data['drill_difficulty']!,
+          _drillDifficultyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('drill_state')) {
+      context.handle(
+        _drillStateMeta,
+        drillState.isAcceptableOrUnknown(data['drill_state']!, _drillStateMeta),
+      );
+    }
+    if (data.containsKey('drill_step')) {
+      context.handle(
+        _drillStepMeta,
+        drillStep.isAcceptableOrUnknown(data['drill_step']!, _drillStepMeta),
+      );
+    }
+    if (data.containsKey('drill_last_review')) {
+      context.handle(
+        _drillLastReviewMeta,
+        drillLastReview.isAcceptableOrUnknown(
+          data['drill_last_review']!,
+          _drillLastReviewMeta,
+        ),
       );
     }
     if (data.containsKey('deck_id')) {
@@ -2324,10 +2556,54 @@ class $CardItemsTable extends CardItems
           data['${effectivePrefix}occlusion_data'],
         ),
       ),
-      due: attachedDatabase.typeMapping.read(
+      spacedDue: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
-        data['${effectivePrefix}due'],
+        data['${effectivePrefix}spaced_due'],
       )!,
+      spacedStability: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}spaced_stability'],
+      )!,
+      spacedDifficulty: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}spaced_difficulty'],
+      )!,
+      spacedState: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}spaced_state'],
+      )!,
+      spacedStep: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}spaced_step'],
+      )!,
+      spacedLastReview: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}spaced_last_review'],
+      ),
+      drillDue: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}drill_due'],
+      )!,
+      drillStability: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}drill_stability'],
+      )!,
+      drillDifficulty: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}drill_difficulty'],
+      )!,
+      drillState: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}drill_state'],
+      )!,
+      drillStep: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}drill_step'],
+      )!,
+      drillLastReview: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}drill_last_review'],
+      ),
       deckId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}deck_id'],
@@ -2365,7 +2641,18 @@ class CardItem extends DataClass implements Insertable<CardItem> {
   final String? frontImageId;
   final String? backImageId;
   final CardOcclusion? occlusionData;
-  final DateTime due;
+  final DateTime spacedDue;
+  final double spacedStability;
+  final double spacedDifficulty;
+  final int spacedState;
+  final int spacedStep;
+  final DateTime? spacedLastReview;
+  final DateTime drillDue;
+  final double drillStability;
+  final double drillDifficulty;
+  final int drillState;
+  final int drillStep;
+  final DateTime? drillLastReview;
   final String? deckId;
   final String? draftId;
   final DateTime createdAt;
@@ -2377,7 +2664,18 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     this.frontImageId,
     this.backImageId,
     this.occlusionData,
-    required this.due,
+    required this.spacedDue,
+    required this.spacedStability,
+    required this.spacedDifficulty,
+    required this.spacedState,
+    required this.spacedStep,
+    this.spacedLastReview,
+    required this.drillDue,
+    required this.drillStability,
+    required this.drillDifficulty,
+    required this.drillState,
+    required this.drillStep,
+    this.drillLastReview,
     this.deckId,
     this.draftId,
     required this.createdAt,
@@ -2404,7 +2702,22 @@ class CardItem extends DataClass implements Insertable<CardItem> {
         $CardItemsTable.$converterocclusionDatan.toSql(occlusionData),
       );
     }
-    map['due'] = Variable<DateTime>(due);
+    map['spaced_due'] = Variable<DateTime>(spacedDue);
+    map['spaced_stability'] = Variable<double>(spacedStability);
+    map['spaced_difficulty'] = Variable<double>(spacedDifficulty);
+    map['spaced_state'] = Variable<int>(spacedState);
+    map['spaced_step'] = Variable<int>(spacedStep);
+    if (!nullToAbsent || spacedLastReview != null) {
+      map['spaced_last_review'] = Variable<DateTime>(spacedLastReview);
+    }
+    map['drill_due'] = Variable<DateTime>(drillDue);
+    map['drill_stability'] = Variable<double>(drillStability);
+    map['drill_difficulty'] = Variable<double>(drillDifficulty);
+    map['drill_state'] = Variable<int>(drillState);
+    map['drill_step'] = Variable<int>(drillStep);
+    if (!nullToAbsent || drillLastReview != null) {
+      map['drill_last_review'] = Variable<DateTime>(drillLastReview);
+    }
     if (!nullToAbsent || deckId != null) {
       map['deck_id'] = Variable<String>(deckId);
     }
@@ -2434,7 +2747,22 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       occlusionData: occlusionData == null && nullToAbsent
           ? const Value.absent()
           : Value(occlusionData),
-      due: Value(due),
+      spacedDue: Value(spacedDue),
+      spacedStability: Value(spacedStability),
+      spacedDifficulty: Value(spacedDifficulty),
+      spacedState: Value(spacedState),
+      spacedStep: Value(spacedStep),
+      spacedLastReview: spacedLastReview == null && nullToAbsent
+          ? const Value.absent()
+          : Value(spacedLastReview),
+      drillDue: Value(drillDue),
+      drillStability: Value(drillStability),
+      drillDifficulty: Value(drillDifficulty),
+      drillState: Value(drillState),
+      drillStep: Value(drillStep),
+      drillLastReview: drillLastReview == null && nullToAbsent
+          ? const Value.absent()
+          : Value(drillLastReview),
       deckId: deckId == null && nullToAbsent
           ? const Value.absent()
           : Value(deckId),
@@ -2458,7 +2786,20 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       frontImageId: serializer.fromJson<String?>(json['frontImageId']),
       backImageId: serializer.fromJson<String?>(json['backImageId']),
       occlusionData: serializer.fromJson<CardOcclusion?>(json['occlusionData']),
-      due: serializer.fromJson<DateTime>(json['due']),
+      spacedDue: serializer.fromJson<DateTime>(json['spacedDue']),
+      spacedStability: serializer.fromJson<double>(json['spacedStability']),
+      spacedDifficulty: serializer.fromJson<double>(json['spacedDifficulty']),
+      spacedState: serializer.fromJson<int>(json['spacedState']),
+      spacedStep: serializer.fromJson<int>(json['spacedStep']),
+      spacedLastReview: serializer.fromJson<DateTime?>(
+        json['spacedLastReview'],
+      ),
+      drillDue: serializer.fromJson<DateTime>(json['drillDue']),
+      drillStability: serializer.fromJson<double>(json['drillStability']),
+      drillDifficulty: serializer.fromJson<double>(json['drillDifficulty']),
+      drillState: serializer.fromJson<int>(json['drillState']),
+      drillStep: serializer.fromJson<int>(json['drillStep']),
+      drillLastReview: serializer.fromJson<DateTime?>(json['drillLastReview']),
       deckId: serializer.fromJson<String?>(json['deckId']),
       draftId: serializer.fromJson<String?>(json['draftId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -2475,7 +2816,18 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       'frontImageId': serializer.toJson<String?>(frontImageId),
       'backImageId': serializer.toJson<String?>(backImageId),
       'occlusionData': serializer.toJson<CardOcclusion?>(occlusionData),
-      'due': serializer.toJson<DateTime>(due),
+      'spacedDue': serializer.toJson<DateTime>(spacedDue),
+      'spacedStability': serializer.toJson<double>(spacedStability),
+      'spacedDifficulty': serializer.toJson<double>(spacedDifficulty),
+      'spacedState': serializer.toJson<int>(spacedState),
+      'spacedStep': serializer.toJson<int>(spacedStep),
+      'spacedLastReview': serializer.toJson<DateTime?>(spacedLastReview),
+      'drillDue': serializer.toJson<DateTime>(drillDue),
+      'drillStability': serializer.toJson<double>(drillStability),
+      'drillDifficulty': serializer.toJson<double>(drillDifficulty),
+      'drillState': serializer.toJson<int>(drillState),
+      'drillStep': serializer.toJson<int>(drillStep),
+      'drillLastReview': serializer.toJson<DateTime?>(drillLastReview),
       'deckId': serializer.toJson<String?>(deckId),
       'draftId': serializer.toJson<String?>(draftId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -2490,7 +2842,18 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     Value<String?> frontImageId = const Value.absent(),
     Value<String?> backImageId = const Value.absent(),
     Value<CardOcclusion?> occlusionData = const Value.absent(),
-    DateTime? due,
+    DateTime? spacedDue,
+    double? spacedStability,
+    double? spacedDifficulty,
+    int? spacedState,
+    int? spacedStep,
+    Value<DateTime?> spacedLastReview = const Value.absent(),
+    DateTime? drillDue,
+    double? drillStability,
+    double? drillDifficulty,
+    int? drillState,
+    int? drillStep,
+    Value<DateTime?> drillLastReview = const Value.absent(),
     Value<String?> deckId = const Value.absent(),
     Value<String?> draftId = const Value.absent(),
     DateTime? createdAt,
@@ -2504,7 +2867,22 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     occlusionData: occlusionData.present
         ? occlusionData.value
         : this.occlusionData,
-    due: due ?? this.due,
+    spacedDue: spacedDue ?? this.spacedDue,
+    spacedStability: spacedStability ?? this.spacedStability,
+    spacedDifficulty: spacedDifficulty ?? this.spacedDifficulty,
+    spacedState: spacedState ?? this.spacedState,
+    spacedStep: spacedStep ?? this.spacedStep,
+    spacedLastReview: spacedLastReview.present
+        ? spacedLastReview.value
+        : this.spacedLastReview,
+    drillDue: drillDue ?? this.drillDue,
+    drillStability: drillStability ?? this.drillStability,
+    drillDifficulty: drillDifficulty ?? this.drillDifficulty,
+    drillState: drillState ?? this.drillState,
+    drillStep: drillStep ?? this.drillStep,
+    drillLastReview: drillLastReview.present
+        ? drillLastReview.value
+        : this.drillLastReview,
     deckId: deckId.present ? deckId.value : this.deckId,
     draftId: draftId.present ? draftId.value : this.draftId,
     createdAt: createdAt ?? this.createdAt,
@@ -2524,7 +2902,36 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       occlusionData: data.occlusionData.present
           ? data.occlusionData.value
           : this.occlusionData,
-      due: data.due.present ? data.due.value : this.due,
+      spacedDue: data.spacedDue.present ? data.spacedDue.value : this.spacedDue,
+      spacedStability: data.spacedStability.present
+          ? data.spacedStability.value
+          : this.spacedStability,
+      spacedDifficulty: data.spacedDifficulty.present
+          ? data.spacedDifficulty.value
+          : this.spacedDifficulty,
+      spacedState: data.spacedState.present
+          ? data.spacedState.value
+          : this.spacedState,
+      spacedStep: data.spacedStep.present
+          ? data.spacedStep.value
+          : this.spacedStep,
+      spacedLastReview: data.spacedLastReview.present
+          ? data.spacedLastReview.value
+          : this.spacedLastReview,
+      drillDue: data.drillDue.present ? data.drillDue.value : this.drillDue,
+      drillStability: data.drillStability.present
+          ? data.drillStability.value
+          : this.drillStability,
+      drillDifficulty: data.drillDifficulty.present
+          ? data.drillDifficulty.value
+          : this.drillDifficulty,
+      drillState: data.drillState.present
+          ? data.drillState.value
+          : this.drillState,
+      drillStep: data.drillStep.present ? data.drillStep.value : this.drillStep,
+      drillLastReview: data.drillLastReview.present
+          ? data.drillLastReview.value
+          : this.drillLastReview,
       deckId: data.deckId.present ? data.deckId.value : this.deckId,
       draftId: data.draftId.present ? data.draftId.value : this.draftId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -2541,7 +2948,18 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           ..write('frontImageId: $frontImageId, ')
           ..write('backImageId: $backImageId, ')
           ..write('occlusionData: $occlusionData, ')
-          ..write('due: $due, ')
+          ..write('spacedDue: $spacedDue, ')
+          ..write('spacedStability: $spacedStability, ')
+          ..write('spacedDifficulty: $spacedDifficulty, ')
+          ..write('spacedState: $spacedState, ')
+          ..write('spacedStep: $spacedStep, ')
+          ..write('spacedLastReview: $spacedLastReview, ')
+          ..write('drillDue: $drillDue, ')
+          ..write('drillStability: $drillStability, ')
+          ..write('drillDifficulty: $drillDifficulty, ')
+          ..write('drillState: $drillState, ')
+          ..write('drillStep: $drillStep, ')
+          ..write('drillLastReview: $drillLastReview, ')
           ..write('deckId: $deckId, ')
           ..write('draftId: $draftId, ')
           ..write('createdAt: $createdAt, ')
@@ -2551,19 +2969,30 @@ class CardItem extends DataClass implements Insertable<CardItem> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     frontText,
     backText,
     frontImageId,
     backImageId,
     occlusionData,
-    due,
+    spacedDue,
+    spacedStability,
+    spacedDifficulty,
+    spacedState,
+    spacedStep,
+    spacedLastReview,
+    drillDue,
+    drillStability,
+    drillDifficulty,
+    drillState,
+    drillStep,
+    drillLastReview,
     deckId,
     draftId,
     createdAt,
     updatedAt,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2574,7 +3003,18 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           other.frontImageId == this.frontImageId &&
           other.backImageId == this.backImageId &&
           other.occlusionData == this.occlusionData &&
-          other.due == this.due &&
+          other.spacedDue == this.spacedDue &&
+          other.spacedStability == this.spacedStability &&
+          other.spacedDifficulty == this.spacedDifficulty &&
+          other.spacedState == this.spacedState &&
+          other.spacedStep == this.spacedStep &&
+          other.spacedLastReview == this.spacedLastReview &&
+          other.drillDue == this.drillDue &&
+          other.drillStability == this.drillStability &&
+          other.drillDifficulty == this.drillDifficulty &&
+          other.drillState == this.drillState &&
+          other.drillStep == this.drillStep &&
+          other.drillLastReview == this.drillLastReview &&
           other.deckId == this.deckId &&
           other.draftId == this.draftId &&
           other.createdAt == this.createdAt &&
@@ -2588,7 +3028,18 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
   final Value<String?> frontImageId;
   final Value<String?> backImageId;
   final Value<CardOcclusion?> occlusionData;
-  final Value<DateTime> due;
+  final Value<DateTime> spacedDue;
+  final Value<double> spacedStability;
+  final Value<double> spacedDifficulty;
+  final Value<int> spacedState;
+  final Value<int> spacedStep;
+  final Value<DateTime?> spacedLastReview;
+  final Value<DateTime> drillDue;
+  final Value<double> drillStability;
+  final Value<double> drillDifficulty;
+  final Value<int> drillState;
+  final Value<int> drillStep;
+  final Value<DateTime?> drillLastReview;
   final Value<String?> deckId;
   final Value<String?> draftId;
   final Value<DateTime> createdAt;
@@ -2601,7 +3052,18 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     this.frontImageId = const Value.absent(),
     this.backImageId = const Value.absent(),
     this.occlusionData = const Value.absent(),
-    this.due = const Value.absent(),
+    this.spacedDue = const Value.absent(),
+    this.spacedStability = const Value.absent(),
+    this.spacedDifficulty = const Value.absent(),
+    this.spacedState = const Value.absent(),
+    this.spacedStep = const Value.absent(),
+    this.spacedLastReview = const Value.absent(),
+    this.drillDue = const Value.absent(),
+    this.drillStability = const Value.absent(),
+    this.drillDifficulty = const Value.absent(),
+    this.drillState = const Value.absent(),
+    this.drillStep = const Value.absent(),
+    this.drillLastReview = const Value.absent(),
     this.deckId = const Value.absent(),
     this.draftId = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -2615,7 +3077,18 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     this.frontImageId = const Value.absent(),
     this.backImageId = const Value.absent(),
     this.occlusionData = const Value.absent(),
-    this.due = const Value.absent(),
+    this.spacedDue = const Value.absent(),
+    this.spacedStability = const Value.absent(),
+    this.spacedDifficulty = const Value.absent(),
+    this.spacedState = const Value.absent(),
+    this.spacedStep = const Value.absent(),
+    this.spacedLastReview = const Value.absent(),
+    this.drillDue = const Value.absent(),
+    this.drillStability = const Value.absent(),
+    this.drillDifficulty = const Value.absent(),
+    this.drillState = const Value.absent(),
+    this.drillStep = const Value.absent(),
+    this.drillLastReview = const Value.absent(),
     this.deckId = const Value.absent(),
     this.draftId = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -2629,7 +3102,18 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Expression<String>? frontImageId,
     Expression<String>? backImageId,
     Expression<String>? occlusionData,
-    Expression<DateTime>? due,
+    Expression<DateTime>? spacedDue,
+    Expression<double>? spacedStability,
+    Expression<double>? spacedDifficulty,
+    Expression<int>? spacedState,
+    Expression<int>? spacedStep,
+    Expression<DateTime>? spacedLastReview,
+    Expression<DateTime>? drillDue,
+    Expression<double>? drillStability,
+    Expression<double>? drillDifficulty,
+    Expression<int>? drillState,
+    Expression<int>? drillStep,
+    Expression<DateTime>? drillLastReview,
     Expression<String>? deckId,
     Expression<String>? draftId,
     Expression<DateTime>? createdAt,
@@ -2643,7 +3127,18 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
       if (frontImageId != null) 'front_image_id': frontImageId,
       if (backImageId != null) 'back_image_id': backImageId,
       if (occlusionData != null) 'occlusion_data': occlusionData,
-      if (due != null) 'due': due,
+      if (spacedDue != null) 'spaced_due': spacedDue,
+      if (spacedStability != null) 'spaced_stability': spacedStability,
+      if (spacedDifficulty != null) 'spaced_difficulty': spacedDifficulty,
+      if (spacedState != null) 'spaced_state': spacedState,
+      if (spacedStep != null) 'spaced_step': spacedStep,
+      if (spacedLastReview != null) 'spaced_last_review': spacedLastReview,
+      if (drillDue != null) 'drill_due': drillDue,
+      if (drillStability != null) 'drill_stability': drillStability,
+      if (drillDifficulty != null) 'drill_difficulty': drillDifficulty,
+      if (drillState != null) 'drill_state': drillState,
+      if (drillStep != null) 'drill_step': drillStep,
+      if (drillLastReview != null) 'drill_last_review': drillLastReview,
       if (deckId != null) 'deck_id': deckId,
       if (draftId != null) 'draft_id': draftId,
       if (createdAt != null) 'created_at': createdAt,
@@ -2659,7 +3154,18 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Value<String?>? frontImageId,
     Value<String?>? backImageId,
     Value<CardOcclusion?>? occlusionData,
-    Value<DateTime>? due,
+    Value<DateTime>? spacedDue,
+    Value<double>? spacedStability,
+    Value<double>? spacedDifficulty,
+    Value<int>? spacedState,
+    Value<int>? spacedStep,
+    Value<DateTime?>? spacedLastReview,
+    Value<DateTime>? drillDue,
+    Value<double>? drillStability,
+    Value<double>? drillDifficulty,
+    Value<int>? drillState,
+    Value<int>? drillStep,
+    Value<DateTime?>? drillLastReview,
     Value<String?>? deckId,
     Value<String?>? draftId,
     Value<DateTime>? createdAt,
@@ -2673,7 +3179,18 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
       frontImageId: frontImageId ?? this.frontImageId,
       backImageId: backImageId ?? this.backImageId,
       occlusionData: occlusionData ?? this.occlusionData,
-      due: due ?? this.due,
+      spacedDue: spacedDue ?? this.spacedDue,
+      spacedStability: spacedStability ?? this.spacedStability,
+      spacedDifficulty: spacedDifficulty ?? this.spacedDifficulty,
+      spacedState: spacedState ?? this.spacedState,
+      spacedStep: spacedStep ?? this.spacedStep,
+      spacedLastReview: spacedLastReview ?? this.spacedLastReview,
+      drillDue: drillDue ?? this.drillDue,
+      drillStability: drillStability ?? this.drillStability,
+      drillDifficulty: drillDifficulty ?? this.drillDifficulty,
+      drillState: drillState ?? this.drillState,
+      drillStep: drillStep ?? this.drillStep,
+      drillLastReview: drillLastReview ?? this.drillLastReview,
       deckId: deckId ?? this.deckId,
       draftId: draftId ?? this.draftId,
       createdAt: createdAt ?? this.createdAt,
@@ -2705,8 +3222,41 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
         $CardItemsTable.$converterocclusionDatan.toSql(occlusionData.value),
       );
     }
-    if (due.present) {
-      map['due'] = Variable<DateTime>(due.value);
+    if (spacedDue.present) {
+      map['spaced_due'] = Variable<DateTime>(spacedDue.value);
+    }
+    if (spacedStability.present) {
+      map['spaced_stability'] = Variable<double>(spacedStability.value);
+    }
+    if (spacedDifficulty.present) {
+      map['spaced_difficulty'] = Variable<double>(spacedDifficulty.value);
+    }
+    if (spacedState.present) {
+      map['spaced_state'] = Variable<int>(spacedState.value);
+    }
+    if (spacedStep.present) {
+      map['spaced_step'] = Variable<int>(spacedStep.value);
+    }
+    if (spacedLastReview.present) {
+      map['spaced_last_review'] = Variable<DateTime>(spacedLastReview.value);
+    }
+    if (drillDue.present) {
+      map['drill_due'] = Variable<DateTime>(drillDue.value);
+    }
+    if (drillStability.present) {
+      map['drill_stability'] = Variable<double>(drillStability.value);
+    }
+    if (drillDifficulty.present) {
+      map['drill_difficulty'] = Variable<double>(drillDifficulty.value);
+    }
+    if (drillState.present) {
+      map['drill_state'] = Variable<int>(drillState.value);
+    }
+    if (drillStep.present) {
+      map['drill_step'] = Variable<int>(drillStep.value);
+    }
+    if (drillLastReview.present) {
+      map['drill_last_review'] = Variable<DateTime>(drillLastReview.value);
     }
     if (deckId.present) {
       map['deck_id'] = Variable<String>(deckId.value);
@@ -2735,7 +3285,18 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
           ..write('frontImageId: $frontImageId, ')
           ..write('backImageId: $backImageId, ')
           ..write('occlusionData: $occlusionData, ')
-          ..write('due: $due, ')
+          ..write('spacedDue: $spacedDue, ')
+          ..write('spacedStability: $spacedStability, ')
+          ..write('spacedDifficulty: $spacedDifficulty, ')
+          ..write('spacedState: $spacedState, ')
+          ..write('spacedStep: $spacedStep, ')
+          ..write('spacedLastReview: $spacedLastReview, ')
+          ..write('drillDue: $drillDue, ')
+          ..write('drillStability: $drillStability, ')
+          ..write('drillDifficulty: $drillDifficulty, ')
+          ..write('drillState: $drillState, ')
+          ..write('drillStep: $drillStep, ')
+          ..write('drillLastReview: $drillLastReview, ')
           ..write('deckId: $deckId, ')
           ..write('draftId: $draftId, ')
           ..write('createdAt: $createdAt, ')
@@ -2811,6 +3372,17 @@ class $StudySessionEventsTable extends StudySessionEvents
     requiredDuringInsert: true,
   );
   @override
+  late final GeneratedColumnWithTypeConverter<StudySessionMode, String> mode =
+      GeneratedColumn<String>(
+        'mode',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<StudySessionMode>(
+        $StudySessionEventsTable.$convertermode,
+      );
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     cardId,
@@ -2818,6 +3390,7 @@ class $StudySessionEventsTable extends StudySessionEvents
     rating,
     reviewedAt,
     scheduledDays,
+    mode,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2912,6 +3485,12 @@ class $StudySessionEventsTable extends StudySessionEvents
         DriftSqlType.int,
         data['${effectivePrefix}scheduled_days'],
       )!,
+      mode: $StudySessionEventsTable.$convertermode.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}mode'],
+        )!,
+      ),
     );
   }
 
@@ -2919,6 +3498,9 @@ class $StudySessionEventsTable extends StudySessionEvents
   $StudySessionEventsTable createAlias(String alias) {
     return $StudySessionEventsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<StudySessionMode, String, String> $convertermode =
+      const EnumNameConverter<StudySessionMode>(StudySessionMode.values);
 }
 
 class StudySessionEvent extends DataClass
@@ -2929,6 +3511,7 @@ class StudySessionEvent extends DataClass
   final int rating;
   final String reviewedAt;
   final int scheduledDays;
+  final StudySessionMode mode;
   const StudySessionEvent({
     required this.id,
     required this.cardId,
@@ -2936,6 +3519,7 @@ class StudySessionEvent extends DataClass
     required this.rating,
     required this.reviewedAt,
     required this.scheduledDays,
+    required this.mode,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2946,6 +3530,11 @@ class StudySessionEvent extends DataClass
     map['rating'] = Variable<int>(rating);
     map['reviewed_at'] = Variable<String>(reviewedAt);
     map['scheduled_days'] = Variable<int>(scheduledDays);
+    {
+      map['mode'] = Variable<String>(
+        $StudySessionEventsTable.$convertermode.toSql(mode),
+      );
+    }
     return map;
   }
 
@@ -2957,6 +3546,7 @@ class StudySessionEvent extends DataClass
       rating: Value(rating),
       reviewedAt: Value(reviewedAt),
       scheduledDays: Value(scheduledDays),
+      mode: Value(mode),
     );
   }
 
@@ -2972,6 +3562,9 @@ class StudySessionEvent extends DataClass
       rating: serializer.fromJson<int>(json['rating']),
       reviewedAt: serializer.fromJson<String>(json['reviewedAt']),
       scheduledDays: serializer.fromJson<int>(json['scheduledDays']),
+      mode: $StudySessionEventsTable.$convertermode.fromJson(
+        serializer.fromJson<String>(json['mode']),
+      ),
     );
   }
   @override
@@ -2984,6 +3577,9 @@ class StudySessionEvent extends DataClass
       'rating': serializer.toJson<int>(rating),
       'reviewedAt': serializer.toJson<String>(reviewedAt),
       'scheduledDays': serializer.toJson<int>(scheduledDays),
+      'mode': serializer.toJson<String>(
+        $StudySessionEventsTable.$convertermode.toJson(mode),
+      ),
     };
   }
 
@@ -2994,6 +3590,7 @@ class StudySessionEvent extends DataClass
     int? rating,
     String? reviewedAt,
     int? scheduledDays,
+    StudySessionMode? mode,
   }) => StudySessionEvent(
     id: id ?? this.id,
     cardId: cardId ?? this.cardId,
@@ -3001,6 +3598,7 @@ class StudySessionEvent extends DataClass
     rating: rating ?? this.rating,
     reviewedAt: reviewedAt ?? this.reviewedAt,
     scheduledDays: scheduledDays ?? this.scheduledDays,
+    mode: mode ?? this.mode,
   );
   StudySessionEvent copyWithCompanion(StudySessionEventsCompanion data) {
     return StudySessionEvent(
@@ -3014,6 +3612,7 @@ class StudySessionEvent extends DataClass
       scheduledDays: data.scheduledDays.present
           ? data.scheduledDays.value
           : this.scheduledDays,
+      mode: data.mode.present ? data.mode.value : this.mode,
     );
   }
 
@@ -3025,14 +3624,15 @@ class StudySessionEvent extends DataClass
           ..write('deckId: $deckId, ')
           ..write('rating: $rating, ')
           ..write('reviewedAt: $reviewedAt, ')
-          ..write('scheduledDays: $scheduledDays')
+          ..write('scheduledDays: $scheduledDays, ')
+          ..write('mode: $mode')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, cardId, deckId, rating, reviewedAt, scheduledDays);
+      Object.hash(id, cardId, deckId, rating, reviewedAt, scheduledDays, mode);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3042,7 +3642,8 @@ class StudySessionEvent extends DataClass
           other.deckId == this.deckId &&
           other.rating == this.rating &&
           other.reviewedAt == this.reviewedAt &&
-          other.scheduledDays == this.scheduledDays);
+          other.scheduledDays == this.scheduledDays &&
+          other.mode == this.mode);
 }
 
 class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
@@ -3052,6 +3653,7 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
   final Value<int> rating;
   final Value<String> reviewedAt;
   final Value<int> scheduledDays;
+  final Value<StudySessionMode> mode;
   final Value<int> rowid;
   const StudySessionEventsCompanion({
     this.id = const Value.absent(),
@@ -3060,6 +3662,7 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
     this.rating = const Value.absent(),
     this.reviewedAt = const Value.absent(),
     this.scheduledDays = const Value.absent(),
+    this.mode = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   StudySessionEventsCompanion.insert({
@@ -3069,13 +3672,15 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
     required int rating,
     required String reviewedAt,
     required int scheduledDays,
+    required StudySessionMode mode,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        cardId = Value(cardId),
        deckId = Value(deckId),
        rating = Value(rating),
        reviewedAt = Value(reviewedAt),
-       scheduledDays = Value(scheduledDays);
+       scheduledDays = Value(scheduledDays),
+       mode = Value(mode);
   static Insertable<StudySessionEvent> custom({
     Expression<String>? id,
     Expression<String>? cardId,
@@ -3083,6 +3688,7 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
     Expression<int>? rating,
     Expression<String>? reviewedAt,
     Expression<int>? scheduledDays,
+    Expression<String>? mode,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3092,6 +3698,7 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
       if (rating != null) 'rating': rating,
       if (reviewedAt != null) 'reviewed_at': reviewedAt,
       if (scheduledDays != null) 'scheduled_days': scheduledDays,
+      if (mode != null) 'mode': mode,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3103,6 +3710,7 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
     Value<int>? rating,
     Value<String>? reviewedAt,
     Value<int>? scheduledDays,
+    Value<StudySessionMode>? mode,
     Value<int>? rowid,
   }) {
     return StudySessionEventsCompanion(
@@ -3112,6 +3720,7 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
       rating: rating ?? this.rating,
       reviewedAt: reviewedAt ?? this.reviewedAt,
       scheduledDays: scheduledDays ?? this.scheduledDays,
+      mode: mode ?? this.mode,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3137,6 +3746,11 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
     if (scheduledDays.present) {
       map['scheduled_days'] = Variable<int>(scheduledDays.value);
     }
+    if (mode.present) {
+      map['mode'] = Variable<String>(
+        $StudySessionEventsTable.$convertermode.toSql(mode.value),
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3152,6 +3766,7 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
           ..write('rating: $rating, ')
           ..write('reviewedAt: $reviewedAt, ')
           ..write('scheduledDays: $scheduledDays, ')
+          ..write('mode: $mode, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5860,7 +6475,18 @@ typedef $$CardItemsTableCreateCompanionBuilder =
       Value<String?> frontImageId,
       Value<String?> backImageId,
       Value<CardOcclusion?> occlusionData,
-      Value<DateTime> due,
+      Value<DateTime> spacedDue,
+      Value<double> spacedStability,
+      Value<double> spacedDifficulty,
+      Value<int> spacedState,
+      Value<int> spacedStep,
+      Value<DateTime?> spacedLastReview,
+      Value<DateTime> drillDue,
+      Value<double> drillStability,
+      Value<double> drillDifficulty,
+      Value<int> drillState,
+      Value<int> drillStep,
+      Value<DateTime?> drillLastReview,
       Value<String?> deckId,
       Value<String?> draftId,
       Value<DateTime> createdAt,
@@ -5875,7 +6501,18 @@ typedef $$CardItemsTableUpdateCompanionBuilder =
       Value<String?> frontImageId,
       Value<String?> backImageId,
       Value<CardOcclusion?> occlusionData,
-      Value<DateTime> due,
+      Value<DateTime> spacedDue,
+      Value<double> spacedStability,
+      Value<double> spacedDifficulty,
+      Value<int> spacedState,
+      Value<int> spacedStep,
+      Value<DateTime?> spacedLastReview,
+      Value<DateTime> drillDue,
+      Value<double> drillStability,
+      Value<double> drillDifficulty,
+      Value<int> drillState,
+      Value<int> drillStep,
+      Value<DateTime?> drillLastReview,
       Value<String?> deckId,
       Value<String?> draftId,
       Value<DateTime> createdAt,
@@ -5967,8 +6604,63 @@ class $$CardItemsTableFilterComposer
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnFilters<DateTime> get due => $composableBuilder(
-    column: $table.due,
+  ColumnFilters<DateTime> get spacedDue => $composableBuilder(
+    column: $table.spacedDue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get spacedStability => $composableBuilder(
+    column: $table.spacedStability,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get spacedDifficulty => $composableBuilder(
+    column: $table.spacedDifficulty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get spacedState => $composableBuilder(
+    column: $table.spacedState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get spacedStep => $composableBuilder(
+    column: $table.spacedStep,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get spacedLastReview => $composableBuilder(
+    column: $table.spacedLastReview,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get drillDue => $composableBuilder(
+    column: $table.drillDue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get drillStability => $composableBuilder(
+    column: $table.drillStability,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get drillDifficulty => $composableBuilder(
+    column: $table.drillDifficulty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get drillState => $composableBuilder(
+    column: $table.drillState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get drillStep => $composableBuilder(
+    column: $table.drillStep,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get drillLastReview => $composableBuilder(
+    column: $table.drillLastReview,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6069,8 +6761,63 @@ class $$CardItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get due => $composableBuilder(
-    column: $table.due,
+  ColumnOrderings<DateTime> get spacedDue => $composableBuilder(
+    column: $table.spacedDue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get spacedStability => $composableBuilder(
+    column: $table.spacedStability,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get spacedDifficulty => $composableBuilder(
+    column: $table.spacedDifficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get spacedState => $composableBuilder(
+    column: $table.spacedState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get spacedStep => $composableBuilder(
+    column: $table.spacedStep,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get spacedLastReview => $composableBuilder(
+    column: $table.spacedLastReview,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get drillDue => $composableBuilder(
+    column: $table.drillDue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get drillStability => $composableBuilder(
+    column: $table.drillStability,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get drillDifficulty => $composableBuilder(
+    column: $table.drillDifficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get drillState => $composableBuilder(
+    column: $table.drillState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get drillStep => $composableBuilder(
+    column: $table.drillStep,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get drillLastReview => $composableBuilder(
+    column: $table.drillLastReview,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6166,8 +6913,59 @@ class $$CardItemsTableAnnotationComposer
         builder: (column) => column,
       );
 
-  GeneratedColumn<DateTime> get due =>
-      $composableBuilder(column: $table.due, builder: (column) => column);
+  GeneratedColumn<DateTime> get spacedDue =>
+      $composableBuilder(column: $table.spacedDue, builder: (column) => column);
+
+  GeneratedColumn<double> get spacedStability => $composableBuilder(
+    column: $table.spacedStability,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get spacedDifficulty => $composableBuilder(
+    column: $table.spacedDifficulty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get spacedState => $composableBuilder(
+    column: $table.spacedState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get spacedStep => $composableBuilder(
+    column: $table.spacedStep,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get spacedLastReview => $composableBuilder(
+    column: $table.spacedLastReview,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get drillDue =>
+      $composableBuilder(column: $table.drillDue, builder: (column) => column);
+
+  GeneratedColumn<double> get drillStability => $composableBuilder(
+    column: $table.drillStability,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get drillDifficulty => $composableBuilder(
+    column: $table.drillDifficulty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get drillState => $composableBuilder(
+    column: $table.drillState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get drillStep =>
+      $composableBuilder(column: $table.drillStep, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get drillLastReview => $composableBuilder(
+    column: $table.drillLastReview,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -6257,7 +7055,18 @@ class $$CardItemsTableTableManager
                 Value<String?> frontImageId = const Value.absent(),
                 Value<String?> backImageId = const Value.absent(),
                 Value<CardOcclusion?> occlusionData = const Value.absent(),
-                Value<DateTime> due = const Value.absent(),
+                Value<DateTime> spacedDue = const Value.absent(),
+                Value<double> spacedStability = const Value.absent(),
+                Value<double> spacedDifficulty = const Value.absent(),
+                Value<int> spacedState = const Value.absent(),
+                Value<int> spacedStep = const Value.absent(),
+                Value<DateTime?> spacedLastReview = const Value.absent(),
+                Value<DateTime> drillDue = const Value.absent(),
+                Value<double> drillStability = const Value.absent(),
+                Value<double> drillDifficulty = const Value.absent(),
+                Value<int> drillState = const Value.absent(),
+                Value<int> drillStep = const Value.absent(),
+                Value<DateTime?> drillLastReview = const Value.absent(),
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -6270,7 +7079,18 @@ class $$CardItemsTableTableManager
                 frontImageId: frontImageId,
                 backImageId: backImageId,
                 occlusionData: occlusionData,
-                due: due,
+                spacedDue: spacedDue,
+                spacedStability: spacedStability,
+                spacedDifficulty: spacedDifficulty,
+                spacedState: spacedState,
+                spacedStep: spacedStep,
+                spacedLastReview: spacedLastReview,
+                drillDue: drillDue,
+                drillStability: drillStability,
+                drillDifficulty: drillDifficulty,
+                drillState: drillState,
+                drillStep: drillStep,
+                drillLastReview: drillLastReview,
                 deckId: deckId,
                 draftId: draftId,
                 createdAt: createdAt,
@@ -6285,7 +7105,18 @@ class $$CardItemsTableTableManager
                 Value<String?> frontImageId = const Value.absent(),
                 Value<String?> backImageId = const Value.absent(),
                 Value<CardOcclusion?> occlusionData = const Value.absent(),
-                Value<DateTime> due = const Value.absent(),
+                Value<DateTime> spacedDue = const Value.absent(),
+                Value<double> spacedStability = const Value.absent(),
+                Value<double> spacedDifficulty = const Value.absent(),
+                Value<int> spacedState = const Value.absent(),
+                Value<int> spacedStep = const Value.absent(),
+                Value<DateTime?> spacedLastReview = const Value.absent(),
+                Value<DateTime> drillDue = const Value.absent(),
+                Value<double> drillStability = const Value.absent(),
+                Value<double> drillDifficulty = const Value.absent(),
+                Value<int> drillState = const Value.absent(),
+                Value<int> drillStep = const Value.absent(),
+                Value<DateTime?> drillLastReview = const Value.absent(),
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -6298,7 +7129,18 @@ class $$CardItemsTableTableManager
                 frontImageId: frontImageId,
                 backImageId: backImageId,
                 occlusionData: occlusionData,
-                due: due,
+                spacedDue: spacedDue,
+                spacedStability: spacedStability,
+                spacedDifficulty: spacedDifficulty,
+                spacedState: spacedState,
+                spacedStep: spacedStep,
+                spacedLastReview: spacedLastReview,
+                drillDue: drillDue,
+                drillStability: drillStability,
+                drillDifficulty: drillDifficulty,
+                drillState: drillState,
+                drillStep: drillStep,
+                drillLastReview: drillLastReview,
                 deckId: deckId,
                 draftId: draftId,
                 createdAt: createdAt,
@@ -6393,6 +7235,7 @@ typedef $$StudySessionEventsTableCreateCompanionBuilder =
       required int rating,
       required String reviewedAt,
       required int scheduledDays,
+      required StudySessionMode mode,
       Value<int> rowid,
     });
 typedef $$StudySessionEventsTableUpdateCompanionBuilder =
@@ -6403,6 +7246,7 @@ typedef $$StudySessionEventsTableUpdateCompanionBuilder =
       Value<int> rating,
       Value<String> reviewedAt,
       Value<int> scheduledDays,
+      Value<StudySessionMode> mode,
       Value<int> rowid,
     });
 
@@ -6444,6 +7288,12 @@ class $$StudySessionEventsTableFilterComposer
     column: $table.scheduledDays,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<StudySessionMode, StudySessionMode, String>
+  get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 }
 
 class $$StudySessionEventsTableOrderingComposer
@@ -6484,6 +7334,11 @@ class $$StudySessionEventsTableOrderingComposer
     column: $table.scheduledDays,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$StudySessionEventsTableAnnotationComposer
@@ -6516,6 +7371,9 @@ class $$StudySessionEventsTableAnnotationComposer
     column: $table.scheduledDays,
     builder: (column) => column,
   );
+
+  GeneratedColumnWithTypeConverter<StudySessionMode, String> get mode =>
+      $composableBuilder(column: $table.mode, builder: (column) => column);
 }
 
 class $$StudySessionEventsTableTableManager
@@ -6564,6 +7422,7 @@ class $$StudySessionEventsTableTableManager
                 Value<int> rating = const Value.absent(),
                 Value<String> reviewedAt = const Value.absent(),
                 Value<int> scheduledDays = const Value.absent(),
+                Value<StudySessionMode> mode = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StudySessionEventsCompanion(
                 id: id,
@@ -6572,6 +7431,7 @@ class $$StudySessionEventsTableTableManager
                 rating: rating,
                 reviewedAt: reviewedAt,
                 scheduledDays: scheduledDays,
+                mode: mode,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6582,6 +7442,7 @@ class $$StudySessionEventsTableTableManager
                 required int rating,
                 required String reviewedAt,
                 required int scheduledDays,
+                required StudySessionMode mode,
                 Value<int> rowid = const Value.absent(),
               }) => StudySessionEventsCompanion.insert(
                 id: id,
@@ -6590,6 +7451,7 @@ class $$StudySessionEventsTableTableManager
                 rating: rating,
                 reviewedAt: reviewedAt,
                 scheduledDays: scheduledDays,
+                mode: mode,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

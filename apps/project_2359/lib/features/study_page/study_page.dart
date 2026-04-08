@@ -172,7 +172,43 @@ class _StudyPageState extends State<StudyPage> {
                       icon: FontAwesomeIcons.chevronLeft,
                       onPressed: _currentIndex > 0 ? _previousCard : null,
                     ),
-                    _FlipButton(onPressed: _flipCard),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: !_isFlipped
+                            ? _FlipButton(
+                                label: 'Show Answer',
+                                onPressed: _flipCard,
+                              )
+                            : Row(
+                                children: [
+                                  _FsrsButton(
+                                    label: 'Again',
+                                    color: Colors.red.shade400,
+                                    onPressed: () {}, // TODO: Implement
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _FsrsButton(
+                                    label: 'Hard',
+                                    color: Colors.orange.shade400,
+                                    onPressed: () {}, // TODO: Implement
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _FsrsButton(
+                                    label: 'Good',
+                                    color: Colors.green.shade400,
+                                    onPressed: () {}, // TODO: Implement
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _FsrsButton(
+                                    label: 'Easy',
+                                    color: Colors.blue.shade400,
+                                    onPressed: () {}, // TODO: Implement
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
                     _NavButton(
                       icon: FontAwesomeIcons.chevronRight,
                       onPressed:
@@ -226,9 +262,10 @@ class _NavButton extends StatelessWidget {
 }
 
 class _FlipButton extends StatelessWidget {
+  final String label;
   final VoidCallback onPressed;
 
-  const _FlipButton({required this.onPressed});
+  const _FlipButton({required this.label, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -241,11 +278,65 @@ class _FlipButton extends StatelessWidget {
       child: InkWell(
         onTap: onPressed,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 18),
-          child: const FaIcon(
-            FontAwesomeIcons.rotate,
-            color: Colors.white,
-            size: 20,
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FsrsButton extends StatelessWidget {
+  final String label;
+  final Color color;
+  final VoidCallback onPressed;
+
+  const _FsrsButton({
+    required this.label,
+    required this.color,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Expanded(
+      child: Material(
+        color: color.withValues(alpha: 0.1),
+        shape: AppTheme.buttonShape,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: color.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
