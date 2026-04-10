@@ -92,8 +92,9 @@ class SchedulingService {
   fsrs.Card _toFsrsCard(CardItem card, StudySessionMode mode) {
     // Note: fsrs.Card uses named parameters in this version.
     final fCardId = card.id.hashCode;
+    final isSpaced = mode == StudySessionMode.spaced;
 
-    if (mode == StudySessionMode.spaced) {
+    if (isSpaced) {
       return fsrs.Card(
         cardId: fCardId,
         due: card.spacedDue,
@@ -121,8 +122,8 @@ class SchedulingService {
     if (mode == StudySessionMode.spaced) {
       return CardItemsCompanion(
         spacedDue: Value(card.due),
-        spacedStability: Value(card.stability!),
-        spacedDifficulty: Value(card.difficulty!),
+        spacedStability: Value(card.stability),
+        spacedDifficulty: Value(card.difficulty),
         spacedState: Value(card.state.index),
         spacedStep: Value(card.step!),
         spacedLastReview: Value(card.lastReview),
@@ -130,8 +131,8 @@ class SchedulingService {
     } else {
       return CardItemsCompanion(
         drillDue: Value(card.due),
-        drillStability: Value(card.stability!),
-        drillDifficulty: Value(card.difficulty!),
+        drillStability: Value(card.stability),
+        drillDifficulty: Value(card.difficulty),
         drillState: Value(card.state.index),
         drillStep: Value(card.step!),
         drillLastReview: Value(card.lastReview),

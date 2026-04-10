@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fsrs/fsrs.dart' as fsrs;
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/core/app_controller.dart';
 import 'package:project_2359/core/settings/labs_settings.dart';
 import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
@@ -47,26 +49,33 @@ class _StudyPageState extends State<StudyPage> {
     }
   }
 
-  void _nextCard() {
-    if (_cards == null || _currentIndex >= _cards!.length - 1) return;
-    setState(() {
-      _currentIndex++;
-      _isFlipped = false;
-    });
-  }
-
-  void _previousCard() {
-    if (_currentIndex <= 0) return;
-    setState(() {
-      _currentIndex--;
-      _isFlipped = false;
-    });
-  }
-
   void _flipCard() {
     setState(() {
       _isFlipped = !_isFlipped;
     });
+  }
+
+  void _rateCard(fsrs.Rating rating) async {
+    final appController = context.read<AppController>();
+    final cardId = _cards![_currentIndex].id;
+
+    // Await the update
+    await appController.schedulingService.reviewCard(
+      cardId: cardId,
+      rating: rating,
+    );
+
+    if (mounted) {
+      if (_currentIndex < _cards!.length - 1) {
+        setState(() {
+          _currentIndex++;
+          _isFlipped = false;
+        });
+      } else {
+        // Deck finished
+        Navigator.pop(context);
+      }
+    }
   }
 
   @override
@@ -82,10 +91,6 @@ class _StudyPageState extends State<StudyPage> {
             if (event.logicalKey == LogicalKeyboardKey.space ||
                 event.logicalKey == LogicalKeyboardKey.enter) {
               _flipCard();
-            } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-              _nextCard();
-            } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-              _previousCard();
             }
           }
         },
@@ -185,58 +190,37 @@ class _StudyPageState extends State<StudyPage> {
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(32, 0, 32, 48),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _NavButton(
-                      icon: FontAwesomeIcons.chevronLeft,
-                      onPressed: _currentIndex > 0 ? _previousCard : null,
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: !_isFlipped
-                            ? _FlipButton(
-                                label: 'Show Answer',
-                                onPressed: _flipCard,
-                              )
-                            : Row(
-                                children: [
-                                  _FsrsButton(
-                                    label: 'Again',
-                                    color: Colors.red.shade400,
-                                    onPressed: () {}, // TODO: Implement
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _FsrsButton(
-                                    label: 'Hard',
-                                    color: Colors.orange.shade400,
-                                    onPressed: () {}, // TODO: Implement
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _FsrsButton(
-                                    label: 'Good',
-                                    color: Colors.green.shade400,
-                                    onPressed: () {}, // TODO: Implement
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _FsrsButton(
-                                    label: 'Easy',
-                                    color: Colors.blue.shade400,
-                                    onPressed: () {}, // TODO: Implement
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                    _NavButton(
-                      icon: FontAwesomeIcons.chevronRight,
-                      onPressed:
-                          (_cards != null && _currentIndex < _cards!.length - 1)
-                          ? _nextCard
-                          : null,
-                    ),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: !_isFlipped
+                      ? _FlipButton(label: 'Show Answer', onPressed: _flipCard)
+                      : Row(
+                          children: [
+                            _FsrsButton(
+                              label: 'Again',
+                              color: Colors.red.shade400,
+                              onPressed: () => _rateCard(fsrs.Rating.again),
+                            ),
+                            const SizedBox(width: 8),
+                            _FsrsButton(
+                              label: 'Hard',
+                              color: Colors.orange.shade400,
+                              onPressed: () => _rateCard(fsrs.Rating.hard),
+                            ),
+                            const SizedBox(width: 8),
+                            _FsrsButton(
+                              label: 'Good',
+                              color: Colors.green.shade400,
+                              onPressed: () => _rateCard(fsrs.Rating.good),
+                            ),
+                            const SizedBox(width: 8),
+                            _FsrsButton(
+                              label: 'Easy',
+                              color: Colors.blue.shade400,
+                              onPressed: () => _rateCard(fsrs.Rating.easy),
+                            ),
+                          ],
+                        ),
                 ),
               ),
             ],
@@ -330,32 +314,25 @@ class _FsrsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Expanded(
-      child: Material(
-        color: color.withValues(alpha: 0.1),
-        shape: AppTheme.buttonShape,
+      child: Container(
+        height: 48,
+        decoration: ShapeDecoration(
+          color: color.withAlpha(10),
+          shape: RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: BorderSide(color: color.withValues(alpha: 0.3), width: 1.5),
+          ),
+        ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onPressed,
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-                width: 1.5,
+          child: Center(
+            child: Text(
+              label,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: color,
+                fontWeight: FontWeight.bold,
               ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
             ),
           ),
         ),

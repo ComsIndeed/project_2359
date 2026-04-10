@@ -2157,10 +2157,9 @@ class $CardItemsTable extends CardItems
   late final GeneratedColumn<double> spacedStability = GeneratedColumn<double>(
     'spaced_stability',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0.0),
   );
   static const VerificationMeta _spacedDifficultyMeta = const VerificationMeta(
     'spacedDifficulty',
@@ -2169,10 +2168,9 @@ class $CardItemsTable extends CardItems
   late final GeneratedColumn<double> spacedDifficulty = GeneratedColumn<double>(
     'spaced_difficulty',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0.0),
   );
   static const VerificationMeta _spacedStateMeta = const VerificationMeta(
     'spacedState',
@@ -2229,10 +2227,9 @@ class $CardItemsTable extends CardItems
   late final GeneratedColumn<double> drillStability = GeneratedColumn<double>(
     'drill_stability',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0.0),
   );
   static const VerificationMeta _drillDifficultyMeta = const VerificationMeta(
     'drillDifficulty',
@@ -2241,10 +2238,9 @@ class $CardItemsTable extends CardItems
   late final GeneratedColumn<double> drillDifficulty = GeneratedColumn<double>(
     'drill_difficulty',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0.0),
   );
   static const VerificationMeta _drillStateMeta = const VerificationMeta(
     'drillState',
@@ -2563,11 +2559,11 @@ class $CardItemsTable extends CardItems
       spacedStability: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}spaced_stability'],
-      )!,
+      ),
       spacedDifficulty: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}spaced_difficulty'],
-      )!,
+      ),
       spacedState: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}spaced_state'],
@@ -2587,11 +2583,11 @@ class $CardItemsTable extends CardItems
       drillStability: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}drill_stability'],
-      )!,
+      ),
       drillDifficulty: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}drill_difficulty'],
-      )!,
+      ),
       drillState: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}drill_state'],
@@ -2642,14 +2638,14 @@ class CardItem extends DataClass implements Insertable<CardItem> {
   final String? backImageId;
   final CardOcclusion? occlusionData;
   final DateTime spacedDue;
-  final double spacedStability;
-  final double spacedDifficulty;
+  final double? spacedStability;
+  final double? spacedDifficulty;
   final int spacedState;
   final int spacedStep;
   final DateTime? spacedLastReview;
   final DateTime drillDue;
-  final double drillStability;
-  final double drillDifficulty;
+  final double? drillStability;
+  final double? drillDifficulty;
   final int drillState;
   final int drillStep;
   final DateTime? drillLastReview;
@@ -2665,14 +2661,14 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     this.backImageId,
     this.occlusionData,
     required this.spacedDue,
-    required this.spacedStability,
-    required this.spacedDifficulty,
+    this.spacedStability,
+    this.spacedDifficulty,
     required this.spacedState,
     required this.spacedStep,
     this.spacedLastReview,
     required this.drillDue,
-    required this.drillStability,
-    required this.drillDifficulty,
+    this.drillStability,
+    this.drillDifficulty,
     required this.drillState,
     required this.drillStep,
     this.drillLastReview,
@@ -2703,16 +2699,24 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       );
     }
     map['spaced_due'] = Variable<DateTime>(spacedDue);
-    map['spaced_stability'] = Variable<double>(spacedStability);
-    map['spaced_difficulty'] = Variable<double>(spacedDifficulty);
+    if (!nullToAbsent || spacedStability != null) {
+      map['spaced_stability'] = Variable<double>(spacedStability);
+    }
+    if (!nullToAbsent || spacedDifficulty != null) {
+      map['spaced_difficulty'] = Variable<double>(spacedDifficulty);
+    }
     map['spaced_state'] = Variable<int>(spacedState);
     map['spaced_step'] = Variable<int>(spacedStep);
     if (!nullToAbsent || spacedLastReview != null) {
       map['spaced_last_review'] = Variable<DateTime>(spacedLastReview);
     }
     map['drill_due'] = Variable<DateTime>(drillDue);
-    map['drill_stability'] = Variable<double>(drillStability);
-    map['drill_difficulty'] = Variable<double>(drillDifficulty);
+    if (!nullToAbsent || drillStability != null) {
+      map['drill_stability'] = Variable<double>(drillStability);
+    }
+    if (!nullToAbsent || drillDifficulty != null) {
+      map['drill_difficulty'] = Variable<double>(drillDifficulty);
+    }
     map['drill_state'] = Variable<int>(drillState);
     map['drill_step'] = Variable<int>(drillStep);
     if (!nullToAbsent || drillLastReview != null) {
@@ -2748,16 +2752,24 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           ? const Value.absent()
           : Value(occlusionData),
       spacedDue: Value(spacedDue),
-      spacedStability: Value(spacedStability),
-      spacedDifficulty: Value(spacedDifficulty),
+      spacedStability: spacedStability == null && nullToAbsent
+          ? const Value.absent()
+          : Value(spacedStability),
+      spacedDifficulty: spacedDifficulty == null && nullToAbsent
+          ? const Value.absent()
+          : Value(spacedDifficulty),
       spacedState: Value(spacedState),
       spacedStep: Value(spacedStep),
       spacedLastReview: spacedLastReview == null && nullToAbsent
           ? const Value.absent()
           : Value(spacedLastReview),
       drillDue: Value(drillDue),
-      drillStability: Value(drillStability),
-      drillDifficulty: Value(drillDifficulty),
+      drillStability: drillStability == null && nullToAbsent
+          ? const Value.absent()
+          : Value(drillStability),
+      drillDifficulty: drillDifficulty == null && nullToAbsent
+          ? const Value.absent()
+          : Value(drillDifficulty),
       drillState: Value(drillState),
       drillStep: Value(drillStep),
       drillLastReview: drillLastReview == null && nullToAbsent
@@ -2787,16 +2799,16 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       backImageId: serializer.fromJson<String?>(json['backImageId']),
       occlusionData: serializer.fromJson<CardOcclusion?>(json['occlusionData']),
       spacedDue: serializer.fromJson<DateTime>(json['spacedDue']),
-      spacedStability: serializer.fromJson<double>(json['spacedStability']),
-      spacedDifficulty: serializer.fromJson<double>(json['spacedDifficulty']),
+      spacedStability: serializer.fromJson<double?>(json['spacedStability']),
+      spacedDifficulty: serializer.fromJson<double?>(json['spacedDifficulty']),
       spacedState: serializer.fromJson<int>(json['spacedState']),
       spacedStep: serializer.fromJson<int>(json['spacedStep']),
       spacedLastReview: serializer.fromJson<DateTime?>(
         json['spacedLastReview'],
       ),
       drillDue: serializer.fromJson<DateTime>(json['drillDue']),
-      drillStability: serializer.fromJson<double>(json['drillStability']),
-      drillDifficulty: serializer.fromJson<double>(json['drillDifficulty']),
+      drillStability: serializer.fromJson<double?>(json['drillStability']),
+      drillDifficulty: serializer.fromJson<double?>(json['drillDifficulty']),
       drillState: serializer.fromJson<int>(json['drillState']),
       drillStep: serializer.fromJson<int>(json['drillStep']),
       drillLastReview: serializer.fromJson<DateTime?>(json['drillLastReview']),
@@ -2817,14 +2829,14 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       'backImageId': serializer.toJson<String?>(backImageId),
       'occlusionData': serializer.toJson<CardOcclusion?>(occlusionData),
       'spacedDue': serializer.toJson<DateTime>(spacedDue),
-      'spacedStability': serializer.toJson<double>(spacedStability),
-      'spacedDifficulty': serializer.toJson<double>(spacedDifficulty),
+      'spacedStability': serializer.toJson<double?>(spacedStability),
+      'spacedDifficulty': serializer.toJson<double?>(spacedDifficulty),
       'spacedState': serializer.toJson<int>(spacedState),
       'spacedStep': serializer.toJson<int>(spacedStep),
       'spacedLastReview': serializer.toJson<DateTime?>(spacedLastReview),
       'drillDue': serializer.toJson<DateTime>(drillDue),
-      'drillStability': serializer.toJson<double>(drillStability),
-      'drillDifficulty': serializer.toJson<double>(drillDifficulty),
+      'drillStability': serializer.toJson<double?>(drillStability),
+      'drillDifficulty': serializer.toJson<double?>(drillDifficulty),
       'drillState': serializer.toJson<int>(drillState),
       'drillStep': serializer.toJson<int>(drillStep),
       'drillLastReview': serializer.toJson<DateTime?>(drillLastReview),
@@ -2843,14 +2855,14 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     Value<String?> backImageId = const Value.absent(),
     Value<CardOcclusion?> occlusionData = const Value.absent(),
     DateTime? spacedDue,
-    double? spacedStability,
-    double? spacedDifficulty,
+    Value<double?> spacedStability = const Value.absent(),
+    Value<double?> spacedDifficulty = const Value.absent(),
     int? spacedState,
     int? spacedStep,
     Value<DateTime?> spacedLastReview = const Value.absent(),
     DateTime? drillDue,
-    double? drillStability,
-    double? drillDifficulty,
+    Value<double?> drillStability = const Value.absent(),
+    Value<double?> drillDifficulty = const Value.absent(),
     int? drillState,
     int? drillStep,
     Value<DateTime?> drillLastReview = const Value.absent(),
@@ -2868,16 +2880,24 @@ class CardItem extends DataClass implements Insertable<CardItem> {
         ? occlusionData.value
         : this.occlusionData,
     spacedDue: spacedDue ?? this.spacedDue,
-    spacedStability: spacedStability ?? this.spacedStability,
-    spacedDifficulty: spacedDifficulty ?? this.spacedDifficulty,
+    spacedStability: spacedStability.present
+        ? spacedStability.value
+        : this.spacedStability,
+    spacedDifficulty: spacedDifficulty.present
+        ? spacedDifficulty.value
+        : this.spacedDifficulty,
     spacedState: spacedState ?? this.spacedState,
     spacedStep: spacedStep ?? this.spacedStep,
     spacedLastReview: spacedLastReview.present
         ? spacedLastReview.value
         : this.spacedLastReview,
     drillDue: drillDue ?? this.drillDue,
-    drillStability: drillStability ?? this.drillStability,
-    drillDifficulty: drillDifficulty ?? this.drillDifficulty,
+    drillStability: drillStability.present
+        ? drillStability.value
+        : this.drillStability,
+    drillDifficulty: drillDifficulty.present
+        ? drillDifficulty.value
+        : this.drillDifficulty,
     drillState: drillState ?? this.drillState,
     drillStep: drillStep ?? this.drillStep,
     drillLastReview: drillLastReview.present
@@ -3029,14 +3049,14 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
   final Value<String?> backImageId;
   final Value<CardOcclusion?> occlusionData;
   final Value<DateTime> spacedDue;
-  final Value<double> spacedStability;
-  final Value<double> spacedDifficulty;
+  final Value<double?> spacedStability;
+  final Value<double?> spacedDifficulty;
   final Value<int> spacedState;
   final Value<int> spacedStep;
   final Value<DateTime?> spacedLastReview;
   final Value<DateTime> drillDue;
-  final Value<double> drillStability;
-  final Value<double> drillDifficulty;
+  final Value<double?> drillStability;
+  final Value<double?> drillDifficulty;
   final Value<int> drillState;
   final Value<int> drillStep;
   final Value<DateTime?> drillLastReview;
@@ -3155,14 +3175,14 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Value<String?>? backImageId,
     Value<CardOcclusion?>? occlusionData,
     Value<DateTime>? spacedDue,
-    Value<double>? spacedStability,
-    Value<double>? spacedDifficulty,
+    Value<double?>? spacedStability,
+    Value<double?>? spacedDifficulty,
     Value<int>? spacedState,
     Value<int>? spacedStep,
     Value<DateTime?>? spacedLastReview,
     Value<DateTime>? drillDue,
-    Value<double>? drillStability,
-    Value<double>? drillDifficulty,
+    Value<double?>? drillStability,
+    Value<double?>? drillDifficulty,
     Value<int>? drillState,
     Value<int>? drillStep,
     Value<DateTime?>? drillLastReview,
@@ -6476,14 +6496,14 @@ typedef $$CardItemsTableCreateCompanionBuilder =
       Value<String?> backImageId,
       Value<CardOcclusion?> occlusionData,
       Value<DateTime> spacedDue,
-      Value<double> spacedStability,
-      Value<double> spacedDifficulty,
+      Value<double?> spacedStability,
+      Value<double?> spacedDifficulty,
       Value<int> spacedState,
       Value<int> spacedStep,
       Value<DateTime?> spacedLastReview,
       Value<DateTime> drillDue,
-      Value<double> drillStability,
-      Value<double> drillDifficulty,
+      Value<double?> drillStability,
+      Value<double?> drillDifficulty,
       Value<int> drillState,
       Value<int> drillStep,
       Value<DateTime?> drillLastReview,
@@ -6502,14 +6522,14 @@ typedef $$CardItemsTableUpdateCompanionBuilder =
       Value<String?> backImageId,
       Value<CardOcclusion?> occlusionData,
       Value<DateTime> spacedDue,
-      Value<double> spacedStability,
-      Value<double> spacedDifficulty,
+      Value<double?> spacedStability,
+      Value<double?> spacedDifficulty,
       Value<int> spacedState,
       Value<int> spacedStep,
       Value<DateTime?> spacedLastReview,
       Value<DateTime> drillDue,
-      Value<double> drillStability,
-      Value<double> drillDifficulty,
+      Value<double?> drillStability,
+      Value<double?> drillDifficulty,
       Value<int> drillState,
       Value<int> drillStep,
       Value<DateTime?> drillLastReview,
@@ -7056,14 +7076,14 @@ class $$CardItemsTableTableManager
                 Value<String?> backImageId = const Value.absent(),
                 Value<CardOcclusion?> occlusionData = const Value.absent(),
                 Value<DateTime> spacedDue = const Value.absent(),
-                Value<double> spacedStability = const Value.absent(),
-                Value<double> spacedDifficulty = const Value.absent(),
+                Value<double?> spacedStability = const Value.absent(),
+                Value<double?> spacedDifficulty = const Value.absent(),
                 Value<int> spacedState = const Value.absent(),
                 Value<int> spacedStep = const Value.absent(),
                 Value<DateTime?> spacedLastReview = const Value.absent(),
                 Value<DateTime> drillDue = const Value.absent(),
-                Value<double> drillStability = const Value.absent(),
-                Value<double> drillDifficulty = const Value.absent(),
+                Value<double?> drillStability = const Value.absent(),
+                Value<double?> drillDifficulty = const Value.absent(),
                 Value<int> drillState = const Value.absent(),
                 Value<int> drillStep = const Value.absent(),
                 Value<DateTime?> drillLastReview = const Value.absent(),
@@ -7106,14 +7126,14 @@ class $$CardItemsTableTableManager
                 Value<String?> backImageId = const Value.absent(),
                 Value<CardOcclusion?> occlusionData = const Value.absent(),
                 Value<DateTime> spacedDue = const Value.absent(),
-                Value<double> spacedStability = const Value.absent(),
-                Value<double> spacedDifficulty = const Value.absent(),
+                Value<double?> spacedStability = const Value.absent(),
+                Value<double?> spacedDifficulty = const Value.absent(),
                 Value<int> spacedState = const Value.absent(),
                 Value<int> spacedStep = const Value.absent(),
                 Value<DateTime?> spacedLastReview = const Value.absent(),
                 Value<DateTime> drillDue = const Value.absent(),
-                Value<double> drillStability = const Value.absent(),
-                Value<double> drillDifficulty = const Value.absent(),
+                Value<double?> drillStability = const Value.absent(),
+                Value<double?> drillDifficulty = const Value.absent(),
                 Value<int> drillState = const Value.absent(),
                 Value<int> drillStep = const Value.absent(),
                 Value<DateTime?> drillLastReview = const Value.absent(),
