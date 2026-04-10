@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/core/services/debug_seeder.dart';
 import 'package:project_2359/features/study_page/study_page.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -310,7 +312,10 @@ class _HomePageState extends State<HomePage> {
                           });
                         },
                       ),
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 16),
+                      if (MediaQuery.of(context).viewInsets.bottom == 0)
+                        const _GlitchyDebugTile(),
+                      const SizedBox(height: 32),
 
                       // PINNED SECTION
                       _PinnedFoldersSection(
@@ -1632,6 +1637,164 @@ class _BarAction extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _GlitchyDebugTile extends StatefulWidget {
+  const _GlitchyDebugTile();
+
+  @override
+  State<_GlitchyDebugTile> createState() => _GlitchyDebugTileState();
+}
+
+class _GlitchyDebugTileState extends State<_GlitchyDebugTile> {
+  bool _isSeeding = false;
+
+  Future<void> _handleSeed() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.black,
+        title: const Text(
+          '[SYSTEM_WARNING]: DATA_INJECTION',
+          style: TextStyle(
+            color: Colors.pinkAccent,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Courier',
+          ),
+        ),
+        content: const Text(
+          'INJECTION REQUIRES ~15MB NETWORK RETRIEVAL FROM GITHUB_RAW.\n\nPROCEED WITH MOCK_DATA_OVERRIDE?',
+          style: TextStyle(color: Colors.white70, fontFamily: 'Courier'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('ABORT', style: TextStyle(color: Colors.white24)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'PROCEED',
+              style: TextStyle(color: Colors.cyanAccent),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() => _isSeeding = true);
+      try {
+        await DebugSeeder.seed(context.read<AppDatabase>());
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('INJECTION_SUCCESSFUL')));
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('INJECTION_FAILED: $e')));
+        }
+      } finally {
+        if (mounted) setState(() => _isSeeding = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!kDebugMode) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: _isSeeding ? null : _handleSeed,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.pinkAccent.withValues(alpha: 0.3)),
+            gradient: LinearGradient(
+              colors: [
+                Colors.pinkAccent.withValues(alpha: 0.05),
+                Colors.cyanAccent.withValues(alpha: 0.05),
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Stack(
+                  children: [
+                    const Icon(
+                          FontAwesomeIcons.bug,
+                          color: Colors.pinkAccent,
+                          size: 20,
+                        )
+                        .animate(onPlay: (controller) => controller.repeat())
+                        .shake(hz: 4, curve: Curves.easeInOut),
+                    Positioned(
+                      left: 2,
+                      top: 2,
+                      child:
+                          const Icon(
+                                FontAwesomeIcons.bug,
+                                color: Colors.cyanAccent,
+                                size: 20,
+                              )
+                              .animate(
+                                onPlay: (controller) => controller.repeat(),
+                              )
+                              .shake(hz: 3, curve: Curves.easeInOut),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _isSeeding
+                            ? 'INJECTING...'
+                            : '[SYSTEM_DEBUG]: INJECT_MOCK_DATA',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
+                          fontFamily: 'Courier',
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Pulls biology seeds from GitHub Main.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.white38,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_isSeeding)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(Colors.cyanAccent),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ).animate().fadeIn().slideY(begin: 0.1),
       ),
     );
   }

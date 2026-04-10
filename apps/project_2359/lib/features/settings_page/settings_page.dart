@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/core/services/debug_seeder.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
@@ -356,6 +358,63 @@ class SettingsPage extends StatelessWidget {
                             subtitle: 'Inspect system events and errors',
                             onTap: trigger,
                           ),
+                        ),
+                        _divider(theme),
+                        _SettingsTile(
+                          icon: FontAwesomeIcons.vial,
+                          title: 'Inject Mock Data',
+                          subtitle: 'Download ~15MB of PDF study material',
+                          onTap: () async {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Inject Mock Data?'),
+                                content: const Text(
+                                  'This will download biology seed files from GitHub and create 3 test decks with 20 cards total.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    child: const Text('Inject'),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (confirmed == true && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Starting injection...'),
+                                ),
+                              );
+                              try {
+                                await DebugSeeder.seed(
+                                  context.read<AppDatabase>(),
+                                );
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Injection successful!'),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Injection failed: $e'),
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+                          },
                         ),
                       ],
                     ),
