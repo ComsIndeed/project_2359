@@ -14,7 +14,10 @@ import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
+import 'package:project_2359/core/widgets/project_important_tile.dart';
+import 'package:project_2359/features/home_page/widgets/due_cards_overview.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' as drift;
@@ -842,6 +845,8 @@ class _CardsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _FolderDueCardsTile(folderId: folderId),
+          const SizedBox(height: 16),
           if (drafts.isNotEmpty) ...[
             const _SectionLabel(title: "Resume Projects"),
             const SizedBox(height: 12),
@@ -1316,3 +1321,62 @@ class _FabMenuItem extends StatelessWidget {
 
 // ---------------------------------------------------------------------------
 // SELECTION ACTION BAR
+
+class _FolderDueCardsTile extends StatelessWidget {
+  final String folderId;
+  const _FolderDueCardsTile({required this.folderId});
+
+  @override
+  Widget build(BuildContext context) {
+    final appController = context.watch<AppController>();
+    final schedulingService = appController.schedulingService;
+    final database = context.read<AppDatabase>();
+
+    return StreamBuilder<List<CardItem>>(
+      stream: schedulingService.watchDueCardItemsForFolder(folderId: folderId),
+      builder: (context, snapshot) {
+        final cards = snapshot.data ?? [];
+        if (cards.isEmpty) return const SizedBox.shrink();
+
+        return FutureBuilder<Map<String, int>>(
+          future: _groupCardsByDeck(database, cards),
+          builder: (context, deckSnapshot) {
+            final deckCounts = deckSnapshot.data ?? {};
+            if (deckCounts.isEmpty) return const SizedBox.shrink();
+
+            return ProjectImportantTile(
+              child: DueCardsOverview(
+                totalDue: cards.length,
+                items: deckCounts,
+                isFolderPage: true,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<Map<String, int>> _groupCardsByDeck(
+    AppDatabase db,
+    List<CardItem> cards,
+  ) async {
+    final Map<String, int> deckCounts = {};
+    final deckIds = cards.map((c) => c.deckId).whereType<String>().toSet();
+
+    if (deckIds.isEmpty) return deckCounts;
+
+    // Fetch deck names
+    final decks = await (db.select(
+      db.deckItems,
+    )..where((t) => t.id.isIn(deckIds))).get();
+    final deckIdToName = {for (var d in decks) d.id: d.name};
+
+    for (var card in cards) {
+      final deckName = deckIdToName[card.deckId] ?? "Unknown Deck";
+      deckCounts[deckName] = (deckCounts[deckName] ?? 0) + 1;
+    }
+
+    return deckCounts;
+  }
+}
