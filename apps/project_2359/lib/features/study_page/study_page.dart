@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fsrs/fsrs.dart' as fsrs;
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
@@ -14,8 +13,14 @@ import 'package:project_2359/features/study_page/flippable_card.dart';
 class StudyPage extends StatefulWidget {
   final String deckId;
   final String deckName;
+  final bool isNested;
 
-  const StudyPage({super.key, required this.deckId, required this.deckName});
+  const StudyPage({
+    super.key,
+    required this.deckId,
+    required this.deckName,
+    this.isNested = false,
+  });
 
   @override
   State<StudyPage> createState() => _StudyPageState();
@@ -82,186 +87,150 @@ class _StudyPageState extends State<StudyPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      body: KeyboardListener(
-        focusNode: _focusNode,
-        autofocus: true,
-        onKeyEvent: (event) {
-          if (event is KeyDownEvent) {
-            if (event.logicalKey == LogicalKeyboardKey.space ||
-                event.logicalKey == LogicalKeyboardKey.enter) {
-              _flipCard();
-            }
+    final content = KeyboardListener(
+      focusNode: _focusNode,
+      autofocus: true,
+      onKeyEvent: (event) {
+        if (event is KeyDownEvent) {
+          if (event.logicalKey == LogicalKeyboardKey.space ||
+              event.logicalKey == LogicalKeyboardKey.enter) {
+            _flipCard();
           }
-        },
-        child: SafeArea(
-          child: Column(
-            children: [
+        }
+      },
+      child: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Row(
+                children: [
+                  if (!widget.isNested) ...[
+                    ProjectBackButton(onPressed: () => Navigator.pop(context)),
+                    const SizedBox(width: 16),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.deckName,
+                          style: theme.textTheme.displaySmall,
+                        ),
+                        if (_cards != null)
+                          Text(
+                            '${_currentIndex + 1} of ${_cards!.length} cards',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_cards != null && _cards!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 8,
                 ),
-                child: Row(
-                  children: [
-                    ProjectBackButton(onPressed: () => Navigator.pop(context)),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.deckName,
-                            style: theme.textTheme.displaySmall,
-                          ),
-                          if (_cards != null)
-                            Text(
-                              '${_currentIndex + 1} of ${_cards!.length} cards',
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                        ],
-                      ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: LinearProgressIndicator(
+                    value: (_currentIndex + 1) / _cards!.length,
+                    backgroundColor: theme.colorScheme.onSurface.withValues(
+                      alpha: 0.05,
                     ),
-                  ],
-                ),
-              ),
-              if (_cards != null && _cards!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(2),
-                    child: LinearProgressIndicator(
-                      value: (_currentIndex + 1) / _cards!.length,
-                      backgroundColor: theme.colorScheme.onSurface.withValues(
-                        alpha: 0.05,
-                      ),
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        theme.colorScheme.primary,
-                      ),
-                      minHeight: 3,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.colorScheme.primary,
                     ),
-                  ),
-                ),
-              Expanded(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32.0),
-                    child: _cards == null
-                        ? const CircularProgressIndicator()
-                        : ListenableBuilder(
-                            listenable: labsSettings,
-                            builder: (context, _) {
-                              final cardContent = ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 600,
-                                ),
-                                child: AspectRatio(
-                                  aspectRatio: 3 / 4,
-                                  child: FlippableCard(
-                                    frontText:
-                                        _cards![_currentIndex].frontText ?? '',
-                                    backText:
-                                        _cards![_currentIndex].backText ?? '',
-                                    isFlipped: _isFlipped,
-                                    onTap: _flipCard,
-                                  ),
-                                ),
-                              );
-
-                              if (!labsSettings.swipeToRateEnabled) {
-                                return cardContent;
-                              }
-
-                              return _SwipeableCardWrapper(
-                                isFlipped: _isFlipped,
-                                onSwipeLeft: () {}, // TODO
-                                onSwipeRight: () {}, // TODO
-                                onSwipeUp: () {}, // TODO
-                                onSwipeDown: () {}, // TODO
-                                child: cardContent,
-                              );
-                            },
-                          ),
+                    minHeight: 3,
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(32, 0, 32, 48),
+            Expanded(
+              child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: !_isFlipped
-                      ? _FlipButton(label: 'Show Answer', onPressed: _flipCard)
-                      : Row(
-                          children: [
-                            _FsrsButton(
-                              label: 'Again',
-                              color: Colors.red.shade400,
-                              onPressed: () => _rateCard(fsrs.Rating.again),
-                            ),
-                            const SizedBox(width: 8),
-                            _FsrsButton(
-                              label: 'Hard',
-                              color: Colors.orange.shade400,
-                              onPressed: () => _rateCard(fsrs.Rating.hard),
-                            ),
-                            const SizedBox(width: 8),
-                            _FsrsButton(
-                              label: 'Good',
-                              color: Colors.green.shade400,
-                              onPressed: () => _rateCard(fsrs.Rating.good),
-                            ),
-                            const SizedBox(width: 8),
-                            _FsrsButton(
-                              label: 'Easy',
-                              color: Colors.blue.shade400,
-                              onPressed: () => _rateCard(fsrs.Rating.easy),
-                            ),
-                          ],
+                  padding: const EdgeInsets.all(32.0),
+                  child: _cards == null
+                      ? const CircularProgressIndicator()
+                      : ListenableBuilder(
+                          listenable: labsSettings,
+                          builder: (context, _) {
+                            final cardContent = ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 600),
+                              child: AspectRatio(
+                                aspectRatio: 3 / 4,
+                                child: FlippableCard(
+                                  frontText:
+                                      _cards![_currentIndex].frontText ?? '',
+                                  backText:
+                                      _cards![_currentIndex].backText ?? '',
+                                  isFlipped: _isFlipped,
+                                  onTap: _flipCard,
+                                ),
+                              ),
+                            );
+
+                            if (!labsSettings.swipeToRateEnabled) {
+                              return cardContent;
+                            }
+
+                            return _SwipeableCardWrapper(
+                              isFlipped: _isFlipped,
+                              onSwipeLeft: () {}, // TODO
+                              onSwipeRight: () {}, // TODO
+                              onSwipeUp: () {}, // TODO
+                              onSwipeDown: () {}, // TODO
+                              child: cardContent,
+                            );
+                          },
                         ),
                 ),
               ),
-            ],
-          ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32, 0, 32, 48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: !_isFlipped
+                    ? _FlipButton(label: 'Show Answer', onPressed: _flipCard)
+                    : Row(
+                        children: [
+                          _FsrsButton(
+                            label: 'Again',
+                            color: Colors.red.shade400,
+                            onPressed: () => _rateCard(fsrs.Rating.again),
+                          ),
+                          const SizedBox(width: 8),
+                          _FsrsButton(
+                            label: 'Hard',
+                            color: Colors.orange.shade400,
+                            onPressed: () => _rateCard(fsrs.Rating.hard),
+                          ),
+                          const SizedBox(width: 8),
+                          _FsrsButton(
+                            label: 'Good',
+                            color: Colors.green.shade400,
+                            onPressed: () => _rateCard(fsrs.Rating.good),
+                          ),
+                          const SizedBox(width: 8),
+                          _FsrsButton(
+                            label: 'Easy',
+                            color: Colors.blue.shade400,
+                            onPressed: () => _rateCard(fsrs.Rating.easy),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ],
         ),
       ),
     );
-  }
-}
 
-class _NavButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onPressed;
-
-  const _NavButton({required this.icon, this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDisabled = onPressed == null;
-
-    return Material(
-      color: isDisabled
-          ? theme.colorScheme.onSurface.withValues(alpha: 0.05)
-          : theme.colorScheme.surface,
-      shape: const CircleBorder(),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onPressed,
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          child: FaIcon(
-            icon,
-            size: 20,
-            color: isDisabled
-                ? theme.colorScheme.onSurface.withValues(alpha: 0.1)
-                : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
-      ),
-    );
+    if (widget.isNested) return content;
+    return Scaffold(body: content);
   }
 }
 

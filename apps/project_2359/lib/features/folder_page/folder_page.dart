@@ -10,12 +10,14 @@ import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/core/widgets/due_cards_tiles.dart';
 import 'package:project_2359/core/widgets/selection_action_bar.dart';
+import 'package:project_2359/core/widgets/adaptive_pane_layout.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 
 import 'package:file_picker/file_picker.dart';
@@ -29,11 +31,13 @@ import 'package:project_2359/features/study_page/study_page.dart';
 class FolderPage extends StatefulWidget {
   final String folderId;
   final String initialFolderName;
+  final bool isNested;
 
   const FolderPage({
     super.key,
     required this.folderId,
     required this.initialFolderName,
+    this.isNested = false,
   });
 
   @override
@@ -43,6 +47,7 @@ class FolderPage extends StatefulWidget {
 class _FolderPageState extends State<FolderPage> {
   late String folderName;
   final Set<String> _selectedDeckIds = {};
+  String? _selectedDeckId;
   List<DeckItem> _allDecks = [];
   List<CardCreationDraftItem> _allDrafts = [];
   StreamSubscription? _deckSub;
@@ -150,6 +155,7 @@ class _FolderPageState extends State<FolderPage> {
 
       if (result == null || result.files.isEmpty) return;
 
+      if (!mounted) return;
       final sourceService = SourceService(context.read<AppDatabase>());
       final uuid = const Uuid();
 
@@ -264,10 +270,29 @@ class _FolderPageState extends State<FolderPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isNested) {
+      return _buildContent();
+    }
+
+    return Scaffold(backgroundColor: Colors.black, body: _buildContent());
+  }
+
+  Widget _buildContent() {
+    return AdaptivePaneLayout(
+      masterWidth: 350,
+      master: _buildMasterView(),
+      detail: _selectedDeckId != null
+          ? _buildDetailView()
+          : _buildEmptyDetail(),
+    );
+  }
+
+  Widget _buildMasterView() {
     final theme = Theme.of(context);
+    final folderName = widget.initialFolderName;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       body: ExpandableFab(
         isVisible: _currentPageIndex != 2,
         collapsedBuilder: (context, isOpen, expand, close) {
@@ -453,8 +478,12 @@ class _FolderPageState extends State<FolderPage> {
                     pinned: true,
                     delegate: _CollapsingHeaderDelegate(
                       folderName: folderName,
-                      topPadding: MediaQuery.of(context).padding.top,
-                      onBack: () => Navigator.pop(context),
+                      topPadding: widget.isNested
+                          ? 0
+                          : MediaQuery.of(context).padding.top,
+                      onBack: widget.isNested
+                          ? null
+                          : () => Navigator.pop(context),
                       currentIndex: _currentPageIndex,
                       onPageRequested: _requestPage,
                     ),
@@ -472,6 +501,23 @@ class _FolderPageState extends State<FolderPage> {
                     selectedIds: _selectedDeckIds,
                     onToggleSelection: _toggleDeckSelection,
                     isSelecting: _isSelecting,
+                    selectedDeckId: _selectedDeckId,
+                    onDeckTap: (id) {
+                      setState(() => _selectedDeckId = id);
+                      // If on mobile, push. Else, we already updated state for detail pane.
+                      if (!ResponsiveBreakpoints.of(
+                        context,
+                      ).largerThan(MOBILE)) {
+                        final deck = _allDecks.firstWhere((d) => d.id == id);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StudyPage(deckId: id, deckName: deck.name),
+                          ),
+                        );
+                      }
+                    },
                   ),
                   _SourcesPage(
                     folderId: widget.folderId,
@@ -489,19 +535,47 @@ class _FolderPageState extends State<FolderPage> {
       ),
     );
   }
+
+  Widget _buildDetailView() {
+    final deck = _allDecks.firstWhere((d) => d.id == _selectedDeckId);
+    return StudyPage(deckId: deck.id, deckName: deck.name, isNested: true);
+  }
+
+  Widget _buildEmptyDetail() {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FaIcon(
+            FontAwesomeIcons.layerGroup,
+            size: 48,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Select a Card Pack to Start",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
   final String folderName;
   final double topPadding;
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
   final int currentIndex;
   final ValueChanged<int> onPageRequested;
 
   _CollapsingHeaderDelegate({
     required this.folderName,
     required this.topPadding,
-    required this.onBack,
+    this.onBack,
     required this.currentIndex,
     required this.onPageRequested,
   });
@@ -792,6 +866,8 @@ class _CardsPage extends StatelessWidget {
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
   final bool isSelecting;
+  final ValueChanged<String>? onDeckTap;
+  final String? selectedDeckId;
 
   const _CardsPage({
     required this.decks,
@@ -800,6 +876,8 @@ class _CardsPage extends StatelessWidget {
     required this.selectedIds,
     required this.onToggleSelection,
     required this.isSelecting,
+    this.onDeckTap,
+    this.selectedDeckId,
   });
 
   @override
@@ -874,6 +952,8 @@ class _CardsPage extends StatelessWidget {
             selectedIds: selectedIds,
             onToggleSelection: onToggleSelection,
             isSelecting: isSelecting,
+            onDeckTap: onDeckTap,
+            selectedDeckId: selectedDeckId,
           ),
           const SizedBox(height: 100),
         ],
@@ -1117,6 +1197,8 @@ class _DecksList extends StatelessWidget {
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
   final bool isSelecting;
+  final ValueChanged<String>? onDeckTap;
+  final String? selectedDeckId;
 
   const _DecksList({
     required this.decks,
@@ -1124,6 +1206,8 @@ class _DecksList extends StatelessWidget {
     required this.selectedIds,
     required this.onToggleSelection,
     required this.isSelecting,
+    this.onDeckTap,
+    this.selectedDeckId,
   });
 
   @override
@@ -1181,22 +1265,26 @@ class _DecksList extends StatelessWidget {
                 ProjectCardTile(
                       backgroundColor: theme.colorScheme.surfaceContainerHighest
                           .withValues(alpha: 0.5),
+                      isSelected:
+                          selectedIds.contains(decks[i].id) ||
+                          (selectedDeckId == decks[i].id),
                       leading: const WizardFlashcardPreview(),
-                      title: Text(decks[i].name),
-                      subtitle: Text(decks[i].description ?? "Card Pack"),
-                      isSelected: selectedIds.contains(decks[i].id),
                       onTap: isSelecting
                           ? () => onToggleSelection(decks[i].id)
                           : () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => StudyPage(
-                                    deckId: decks[i].id,
-                                    deckName: decks[i].name,
+                              if (onDeckTap != null) {
+                                onDeckTap!(decks[i].id);
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => StudyPage(
+                                      deckId: decks[i].id,
+                                      deckName: decks[i].name,
+                                    ),
                                   ),
-                                ),
-                              );
+                                );
+                              }
                             },
                       onLongTap: () => onToggleSelection(decks[i].id),
                     )

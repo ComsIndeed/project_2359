@@ -14,25 +14,14 @@ import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/core/utils/logger.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
-import 'package:project_2359/core/widgets/project_card_tile.dart';
-import 'package:project_2359/core/widgets/project_list_tile.dart';
-import 'package:project_2359/core/widgets/special_search_bar.dart';
-import 'package:project_2359/features/card_creation_page/card_creation_page.dart';
-import 'package:project_2359/features/folder_page/folder_page.dart';
-import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
-import 'package:project_2359/features/settings_page/settings_page.dart';
-import 'package:project_2359/features/source_page/source_page.dart';
-import 'package:project_2359/features/sources_page/source_service.dart';
-import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
-import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:project_2359/core/widgets/due_cards_tiles.dart';
+import 'package:project_2359/features/home_page/widgets/folder_list_view.dart';
 import 'package:project_2359/core/widgets/selection_action_bar.dart';
 import 'package:project_2359/features/home_page/widgets/home_header.dart';
 import 'package:project_2359/features/home_page/widgets/new_item_menu.dart';
-import 'package:project_2359/features/home_page/widgets/folder_list_view.dart';
-
-import 'package:project_2359/layouts/landscape/home_page_landscape_layout.dart';
+import 'package:project_2359/core/widgets/adaptive_pane_layout.dart';
+import 'package:project_2359/features/folder_page/folder_page.dart';
+import 'package:project_2359/features/settings_page/settings_page.dart';
+import 'package:project_2359/core/widgets/due_cards_tiles.dart';
 
 enum MainContentType { empty, study, sourceDetail, settings }
 
@@ -47,7 +36,6 @@ class _HomePageState extends State<HomePage> {
   final Set<String> _selectedFolderIds = {};
   final Set<String> _selectedDeckIds = {};
   List<StudyFolderItem> _allFolders = [];
-  List<DeckItem> _allDecks = [];
   StreamSubscription? _folderSub;
   StreamSubscription? _deckSub;
 
@@ -55,8 +43,6 @@ class _HomePageState extends State<HomePage> {
   String? _selectedFolderId;
   String? _selectedDeckId;
   String? _selectedDeckName;
-  String? _selectedSourceId;
-  Uint8List? _selectedSourceBlob;
   MainContentType _mainContentType = MainContentType.empty;
 
   final TextEditingController _searchController = TextEditingController();
@@ -80,43 +66,6 @@ class _HomePageState extends State<HomePage> {
       _selectedFolderIds.clear();
       _selectedDeckIds.clear();
     });
-  }
-
-  void _navigateToMain(
-    MainContentType type, {
-    String? deckId,
-    String? deckName,
-    String? sourceId,
-    Uint8List? sourceBlob,
-  }) {
-    setState(() {
-      _mainContentType = type;
-      _selectedDeckId = deckId;
-      _selectedDeckName = deckName;
-      _selectedSourceId = sourceId;
-      _selectedSourceBlob = sourceBlob;
-    });
-  }
-
-  Future<void> _loadSourceAndNavigate(SourceItem source) async {
-    final service = context.read<SourceService>();
-    final blob = await service.getSourceBlobBySourceId(source.id);
-    if (blob != null) {
-      _navigateToMain(
-        MainContentType.sourceDetail,
-        sourceId: source.id,
-        sourceBlob: blob.bytes,
-      );
-    } else {
-      // Fallback if no blob: if it's a text source, maybe we can use extractedContent?
-      // For now, let's just use empty bytes or notify
-      AppLogger.warning(
-        'No blob found for source: ${source.id}',
-        tag: 'HomePage',
-      );
-      // If it's a text source, we might want to wrap it in a PDF or show a text viewer
-      // But SourcePage expects PDF bytes.
-    }
   }
 
   Future<void> _handlePinSelected({required bool pin}) async {
@@ -177,21 +126,6 @@ class _HomePageState extends State<HomePage> {
         false;
   }
 
-  Future<void> _importDocument(BuildContext context, String folderId) async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowMultiple: true,
-      withData: true,
-      allowedExtensions: ["pdf", "docx", "pptx", "txt"],
-    );
-
-    if (result == null || !context.mounted) return;
-
-    context.read<SourcesPageBloc>().add(
-      ImportDocumentsEvent(result.files, folderId: folderId),
-    );
-  }
-
   late Stream<List<(StudyFolderItem, int)>> _foldersStream;
   late Stream<List<(StudyFolderItem, int)>> _pinnedFoldersStream;
 
@@ -206,9 +140,6 @@ class _HomePageState extends State<HomePage> {
     _folderSub = service.watchAllFolders().listen((folders) {
       if (mounted) setState(() => _allFolders = folders);
     });
-    _deckSub = service.watchAllDecks().listen((decks) {
-      if (mounted) setState(() => _allDecks = decks);
-    });
   }
 
   @override
@@ -221,52 +152,31 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
-      return _buildLandscapeLayout();
-    }
-    return _buildMobileLayout();
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: AdaptivePaneLayout(
+        masterWidth: 350,
+        master: _buildMasterView(),
+        detail: _buildDetailView(),
+      ),
+    );
   }
 
-  Widget _buildMobileLayout() {
+  Widget _buildMasterView() {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       body: ExpandableFab(
         collapsedBuilder: (context, isOpen, expand, close) {
           if (_isSelecting) {
-            final selectedFolders = _allFolders
-                .where((f) => _selectedFolderIds.contains(f.id))
-                .toList();
-            final selectedDecks = _allDecks
-                .where((m) => _selectedDeckIds.contains(m.id))
-                .toList();
-
-            final allSelected = [...selectedFolders, ...selectedDecks];
-            final allPinned =
-                allSelected.isNotEmpty &&
-                allSelected.every((i) {
-                  if (i is StudyFolderItem) return i.isPinned;
-                  if (i is DeckItem) return i.isPinned;
-                  return false;
-                });
-            final allUnpinned =
-                allSelected.isNotEmpty &&
-                allSelected.every((i) {
-                  if (i is StudyFolderItem) return !i.isPinned;
-                  if (i is DeckItem) return !i.isPinned;
-                  return false;
-                });
-            final isMixed = !allPinned && !allUnpinned;
-
+            final selectedCount =
+                _selectedFolderIds.length + _selectedDeckIds.length;
             return SelectionActionBar(
-              selectedCount:
-                  _selectedFolderIds.length + _selectedDeckIds.length,
+              selectedCount: selectedCount,
               onClose: _clearSelection,
               onPin: () => _handlePinSelected(pin: true),
               onUnpin: () => _handlePinSelected(pin: false),
-              isUnpin: allPinned,
-              isPinDisabled: isMixed,
               onDelete: _handleDeleteSelected,
             );
           }
@@ -293,361 +203,105 @@ class _HomePageState extends State<HomePage> {
         expandedBuilder: (context, isOpen, expand, close) {
           return const NewItemMenu();
         },
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            final topBgHeight = constraints.maxHeight * 0.10;
-
-            return Stack(
-              children: [
-                // MAIN CONTENT
-                SafeArea(
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    physics: const ClampingScrollPhysics(),
-                    children: [
-                      SizedBox(height: topBgHeight * 0.3),
-                      const HomeHeader(),
-                      const SizedBox(height: 24),
-                      // REFINED SEARCH BAR
-                      SpecialSearchBar(
-                        controller: _searchController,
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value.toLowerCase();
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      if (MediaQuery.of(context).viewInsets.bottom == 0)
-                        const _GlitchyDebugTile(),
-                      const SizedBox(height: 16),
-                      const HomeDueCardsTile(),
-                      const SizedBox(height: 32),
-
-                      // PINNED SECTION
-                      PinnedFoldersSection(
-                        stream: _pinnedFoldersStream,
-                        searchQuery: _searchQuery,
-                        selectedIds: _selectedFolderIds,
-                        onToggleSelection: _toggleFolderSelection,
-                        onSelect:
-                            (id) {}, // Not used on mobile due to internal check
-                        isSelecting: _isSelecting,
-                        onContextMenu: (pos, id, isF) => _showCoolContextMenu(
-                          context,
-                          pos,
-                          id,
-                          isFolder: isF,
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // ALL COLLECTIONS SECTION
-                      const SectionHeader(title: "Today"),
-                      const SizedBox(height: 8),
-                      FolderList(
-                        stream: _foldersStream,
-                        searchQuery: _searchQuery,
-                        backgroundColor: theme.colorScheme.surfaceContainer,
-                        selectedIds: _selectedFolderIds,
-                        onToggleSelection: _toggleFolderSelection,
-                        onSelect:
-                            (id) {}, // Not used on mobile due to internal check
-                        isSelecting: _isSelecting,
-                        onContextMenu: (pos, id, isF) => _showCoolContextMenu(
-                          context,
-                          pos,
-                          id,
-                          isFolder: isF,
-                        ),
-                      ),
-                      const SizedBox(height: 48),
-                      Center(
-                        child: StreamBuilder<List<(StudyFolderItem, int)>>(
-                          stream: _foldersStream,
-                          builder: (context, snapshot) {
-                            final count = (snapshot.data?.length ?? 0);
-                            return Text(
-                              "$count Collection${count == 1 ? '' : 's'}",
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurface.withValues(
-                                  alpha: 0.4,
-                                ),
-                                letterSpacing: 0.2,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                    ],
+        body: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            const HomeHeader(),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  const SizedBox(height: 16),
+                  _buildSearchBar(),
+                  const SizedBox(height: 16),
+                  const HomeDueCardsTile(),
+                  const SizedBox(height: 32),
+                  PinnedFoldersSection(
+                    stream: _pinnedFoldersStream,
+                    searchQuery: _searchQuery,
+                    selectedIds: _selectedFolderIds,
+                    onToggleSelection: _toggleFolderSelection,
+                    onSelect: _handleFolderSelect,
+                    activeFolderId: _selectedFolderId,
+                    isSelecting: _isSelecting,
+                    onContextMenu: (pos, id, isF) =>
+                        _showCoolContextMenu(context, pos, id, isFolder: isF),
                   ),
-                ),
-              ],
-            );
-          },
+                  const SizedBox(height: 24),
+                  const SectionHeader(title: "Collections"),
+                  const SizedBox(height: 8),
+                  FolderList(
+                    stream: _foldersStream,
+                    searchQuery: _searchQuery,
+                    selectedIds: _selectedFolderIds,
+                    onToggleSelection: _toggleFolderSelection,
+                    onSelect: _handleFolderSelect,
+                    activeFolderId: _selectedFolderId,
+                    isSelecting: _isSelecting,
+                    onContextMenu: (pos, id, isF) =>
+                        _showCoolContextMenu(context, pos, id, isFolder: isF),
+                  ),
+                  const SizedBox(height: 48),
+                  const _GlitchyDebugTile(),
+                  const SizedBox(height: 100),
+                ]),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  /// TODO: Refactor the UI into layouts and contents.
-  /// That way, only the layout changes, the contents aren't repeated.
-  Widget _buildLandscapeLayout() {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: HomePageLandscapeLayout(
-        header: HomeHeader(
-          isLandscape: true,
-          onPlusTap: () => _showNewMenu(context),
-        ),
-        sidebarA: _buildSidebarA(),
-        sidebarB: _selectedFolderId != null ? _buildSidebarB() : null,
-        mainContent: _buildMainContent(),
-        onSettingsTap: () => _navigateToMain(MainContentType.settings),
-        onProfileTap: () {
-          // TODO: Profile implementation
-        },
-      ),
-    );
+  Widget _buildDetailView() {
+    if (_selectedFolderId != null) {
+      final folder = _allFolders.any((f) => f.id == _selectedFolderId)
+          ? _allFolders.firstWhere((f) => f.id == _selectedFolderId)
+          : null;
+
+      if (folder != null) {
+        return FolderPage(
+          key: ValueKey(_selectedFolderId),
+          folderId: _selectedFolderId!,
+          initialFolderName: folder.name,
+          isNested: true,
+        );
+      }
+    }
+
+    if (_mainContentType == MainContentType.settings) {
+      return const SettingsPage();
+    }
+
+    // New case: Global study if needed
+    if (_mainContentType == MainContentType.study && _selectedDeckId != null) {
+      return StudyPage(
+        key: ValueKey(_selectedDeckId),
+        deckId: _selectedDeckId!,
+        deckName: _selectedDeckName ?? "Study",
+        isNested: true,
+      );
+    }
+
+    return _buildEmptyDetail();
   }
 
-  Widget _buildSidebarA() {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      children: [
-        const SizedBox(height: 16),
-        const HomeDueCardsTile(),
-        const SizedBox(height: 16),
-
-        PinnedFoldersSection(
-          stream: _pinnedFoldersStream,
-          searchQuery: _searchQuery,
-          selectedIds: _selectedFolderIds,
-          activeFolderId: _selectedFolderId,
-          onToggleSelection: _toggleFolderSelection,
-          onSelect: (id) => setState(() {
-            _selectedFolderId = id;
-            _mainContentType = MainContentType.empty;
-            _selectedDeckId = null;
-          }),
-          isSelecting: _isSelecting,
-          isLandscape: true,
-          onContextMenu: (pos, id, isF) =>
-              _showCoolContextMenu(context, pos, id, isFolder: isF),
-        ),
-        const SizedBox(height: 24),
-        const SectionHeader(title: "Collections"),
-        FolderList(
-          stream: _foldersStream,
-          searchQuery: _searchQuery,
-          selectedIds: _selectedFolderIds,
-          activeFolderId: _selectedFolderId,
-          onToggleSelection: _toggleFolderSelection,
-          onSelect: (id) => setState(() {
-            _selectedFolderId = id;
-            _mainContentType = MainContentType.empty;
-            _selectedDeckId = null;
-          }),
-          isSelecting: _isSelecting,
-          isLandscape: true,
-          onContextMenu: (pos, id, isF) =>
-              _showCoolContextMenu(context, pos, id, isFolder: isF),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSidebarB() {
+  Widget _buildEmptyDetail() {
     final theme = Theme.of(context);
-    if (_selectedFolderId == null) return const SizedBox.shrink();
-
-    final service = context.read<StudyDatabaseService>();
-    final decksStream = service.watchDecksByFolderId(_selectedFolderId!);
-
-    final folderName = _allFolders.any((f) => f.id == _selectedFolderId)
-        ? _allFolders.firstWhere((f) => f.id == _selectedFolderId).name
-        : "Folder Contents";
-
-    return Container(
-      width: 320,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainer.withValues(alpha: 0.3),
-        border: Border(
-          right: BorderSide(
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FaIcon(
+            FontAwesomeIcons.folderOpen,
+            size: 64,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
           ),
-        ),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    folderName,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => _importDocument(context, _selectedFolderId!),
-                  icon: const FaIcon(FontAwesomeIcons.fileImport, size: 18),
-                  tooltip: 'Import Source',
-                  style: IconButton.styleFrom(
-                    backgroundColor: theme.colorScheme.onSurface.withValues(
-                      alpha: 0.05,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            CardCreationPage(folderId: _selectedFolderId!),
-                      ),
-                    );
-                  },
-                  icon: const FaIcon(FontAwesomeIcons.circlePlus, size: 18),
-                  style: IconButton.styleFrom(
-                    backgroundColor: theme.colorScheme.onSurface.withValues(
-                      alpha: 0.05,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                const SizedBox(height: 16),
-                FolderDueCardsTile(folderId: _selectedFolderId!),
-                const SizedBox(height: 16),
-                StreamBuilder<List<DeckItem>>(
-                  stream: decksStream,
-                  builder: (context, snapshot) {
-                    final decks = snapshot.data ?? [];
-                    if (decks.isEmpty) return const SizedBox.shrink();
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SectionHeader(title: "Decks"),
-                        for (var m in decks)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child:
-                                GestureDetector(
-                                      onSecondaryTapDown: (details) =>
-                                          _showCoolContextMenu(
-                                            context,
-                                            details.globalPosition,
-                                            m.id,
-                                          ),
-                                      child: ProjectCardTile(
-                                        backgroundColor: theme
-                                            .colorScheme
-                                            .surfaceContainerHighest
-                                            .withValues(alpha: 0.5),
-                                        title: Text(m.name),
-                                        subtitle: Text(
-                                          m.description ?? "Card Pack",
-                                        ),
-                                        isSelected: _selectedDeckId == m.id,
-                                        isCompact: true,
-                                        leading: const WizardFlashcardPreview(),
-                                        onTap: () {
-                                          _navigateToMain(
-                                            MainContentType.study,
-                                            deckId: m.id,
-                                            deckName: m.name,
-                                          );
-                                        },
-                                      ),
-                                    )
-                                    .animate(
-                                      key: ValueKey(
-                                        "ani_mat_${_selectedFolderId!}_${m.id}",
-                                      ),
-                                    )
-                                    .fadeIn(duration: 250.ms)
-                                    .slideX(
-                                      begin: 0.1,
-                                      end: 0,
-                                      curve: Curves.easeOutCubic,
-                                    ),
-                          ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                StreamBuilder<List<SourceItem>>(
-                  stream: context.read<SourceService>().watchSourcesByFolderId(
-                    _selectedFolderId!,
-                  ),
-                  builder: (context, snapshot) {
-                    final sources = snapshot.data ?? [];
-                    if (sources.isEmpty) return const SizedBox.shrink();
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SectionHeader(title: "Sources"),
-                        for (var s in sources)
-                          Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: GestureDetector(
-                                  onSecondaryTapDown: (details) =>
-                                      _showCoolContextMenu(
-                                        context,
-                                        details.globalPosition,
-                                        s.id,
-                                      ),
-                                  child: ProjectCardTile(
-                                    backgroundColor: theme
-                                        .colorScheme
-                                        .surfaceContainerHighest
-                                        .withValues(alpha: 0.5),
-                                    title: Text(s.label),
-                                    subtitle: Text(
-                                      "${s.type.name.toUpperCase()} | ${s.extractedContent?.length ?? 0} chars",
-                                    ),
-                                    isSelected: false,
-                                    isCompact: true,
-                                    leading: const WizardSourcePagePreview(),
-                                    onTap: () {
-                                      _loadSourceAndNavigate(s);
-                                    },
-                                  ),
-                                ),
-                              )
-                              .animate(
-                                key: ValueKey(
-                                  "ani_src_${_selectedFolderId!}_${s.id}",
-                                ),
-                              )
-                              .fadeIn(duration: 250.ms)
-                              .slideX(
-                                begin: 0.1,
-                                end: 0,
-                                curve: Curves.easeOutCubic,
-                              ),
-                      ],
-                    );
-                  },
-                ),
-              ],
+          const SizedBox(height: 24),
+          Text(
+            "Select a Collection to View Contents",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
             ),
           ),
         ],
@@ -655,61 +309,46 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildMainContent() {
-    final theme = Theme.of(context);
-    final isLandscape = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
-
-    switch (_mainContentType) {
-      case MainContentType.study:
-        if (_selectedDeckId != null) {
-          return StudyPage(
-            deckId: _selectedDeckId!,
-            deckName: _selectedDeckName!,
-          );
-        }
-        break;
-      case MainContentType.sourceDetail:
-        if (_selectedSourceBlob != null) {
-          return SourcePage(
-            fileBytes: _selectedSourceBlob!,
-            title: _selectedSourceId,
-            showBackButton: !isLandscape,
-          );
-        }
-        break;
-      case MainContentType.settings:
-        return const SettingsPage();
-      case MainContentType.empty:
-        break;
+  void _handleFolderSelect(String id) {
+    if (!ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
+      final folder = _allFolders.firstWhere((f) => f.id == id);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              FolderPage(folderId: id, initialFolderName: folder.name),
+        ),
+      );
+    } else {
+      setState(() {
+        _selectedFolderId = id;
+        _mainContentType = MainContentType.empty;
+      });
     }
+  }
 
+  Widget _buildSearchBar() {
+    final theme = Theme.of(context);
     return Container(
-      color: theme.colorScheme.surface,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FaIcon(
-              FontAwesomeIcons.ghost,
-              size: 64,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              "Select something to view.",
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "idk what else to tell you yet...",
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-              ),
-            ),
-          ],
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+        ),
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+        decoration: InputDecoration(
+          hintText: "Search collections...",
+          border: InputBorder.none,
+          icon: FaIcon(
+            FontAwesomeIcons.magnifyingGlass,
+            size: 14,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+          ),
         ),
       ),
     );
@@ -841,73 +480,6 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-    );
-  }
-
-  void _showNewMenu(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: "Dismiss",
-      barrierColor: Colors.black.withValues(alpha: 0.5),
-      transitionDuration: const Duration(milliseconds: 400),
-      pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
-      transitionBuilder: (context, anim1, anim2, child) {
-        final curve = Curves.easeInOutCubicEmphasized.transform(anim1.value);
-        return Stack(
-          children: [
-            Center(
-              child: Opacity(
-                opacity: anim1.value,
-                child: Transform.scale(
-                  scale: 0.8 + (0.2 * curve),
-                  child: Container(
-                    width: 400,
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 40,
-                    ),
-                    decoration: ShapeDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest
-                          .withValues(alpha: 0.98),
-                      shadows: [
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: isDark ? 0.4 : 0.12,
-                          ),
-                          blurRadius: 18,
-                          offset: const Offset(0, 6),
-                          spreadRadius: -2,
-                        ),
-                      ],
-                      shape: RoundedSuperellipseBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        side: BorderSide(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.2,
-                          ),
-                          width: 1.0,
-                        ),
-                      ),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: NewItemMenu(
-                        onActionCompleted: () => Navigator.pop(context),
-                        activeFolderId: _selectedFolderId,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
