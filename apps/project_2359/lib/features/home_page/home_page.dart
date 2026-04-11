@@ -1032,10 +1032,8 @@ class _PinnedFoldersSection extends StatelessWidget {
 
 class _FolderList extends StatelessWidget {
   final Stream<List<(StudyFolderItem, int)>> stream;
-  static const Color warning = Color(0xFFFFAB40);
-  static const Color important = Color(0xFFFFB3B3);
-
   final String searchQuery;
+
   final Color? backgroundColor;
   final Set<String> selectedIds;
   final Function(String) onToggleSelection;

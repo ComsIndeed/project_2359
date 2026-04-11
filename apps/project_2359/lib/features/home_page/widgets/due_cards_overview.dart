@@ -15,7 +15,7 @@ class DueCardsOverview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final onImportantColor = Colors.black87; // Good contrast on pastel red
+    final cs = theme.colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -23,8 +23,10 @@ class DueCardsOverview extends StatelessWidget {
         Text(
           "$totalDue Cards Due",
           style: theme.textTheme.titleMedium?.copyWith(
-            color: onImportantColor,
+            color: cs.onSurface.withValues(alpha: 0.9),
             fontWeight: FontWeight.w900,
+            fontSize: 17,
+            letterSpacing: -0.3,
           ),
         ),
         if (items.isNotEmpty) ...[
@@ -36,7 +38,7 @@ class DueCardsOverview extends StatelessWidget {
               return _DueChip(
                 label: entry.key,
                 count: entry.value,
-                onColor: onImportantColor,
+                onColor: cs.onSurface,
               );
             }).toList(),
           ),
@@ -62,8 +64,9 @@ class _DueChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.3),
+        color: onColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: onColor.withValues(alpha: 0.1), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -71,7 +74,7 @@ class _DueChip extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: const BoxDecoration(
-              color: Colors.black,
+              color: Colors.black, // Dark circle as requested
               shape: BoxShape.circle,
             ),
             constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
@@ -81,7 +84,7 @@ class _DueChip extends StatelessWidget {
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 10,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ),
@@ -91,7 +94,7 @@ class _DueChip extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                color: onColor,
+                color: onColor.withValues(alpha: 0.7),
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
