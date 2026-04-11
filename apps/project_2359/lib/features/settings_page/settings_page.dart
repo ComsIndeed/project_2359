@@ -12,6 +12,7 @@ import 'package:project_2359/features/credits/credits_page.dart';
 import 'package:project_2359/features/profile_page/profile_page.dart';
 import 'package:project_2359/features/settings_page/storage_page.dart';
 import 'package:project_2359/features/settings_page/log_page.dart';
+import 'package:project_2359/features/database_inspector/database_inspector_page.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/core/settings/labs_settings.dart';
 import 'package:project_2359/theme_notifier.dart';
@@ -415,6 +416,19 @@ class SettingsPage extends StatelessWidget {
                               }
                             }
                           },
+                        ),
+                        _divider(theme),
+                        TapToSlide(
+                          page: DatabaseInspectorPage(
+                            db: context.read<AppDatabase>(),
+                          ),
+                          direction: SlideDirection.left,
+                          builder: (trigger) => _SettingsTile(
+                            icon: FontAwesomeIcons.database,
+                            title: 'Database Inspector',
+                            subtitle: 'View and manage app database',
+                            onTap: trigger,
+                          ),
                         ),
                       ],
                     ),
