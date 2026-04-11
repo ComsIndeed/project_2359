@@ -26,10 +26,8 @@ import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:project_2359/core/app_controller.dart';
-import 'package:project_2359/core/widgets/project_important_tile.dart';
+import 'package:project_2359/core/widgets/due_cards_tiles.dart';
 
-import 'package:project_2359/features/home_page/widgets/due_cards_overview.dart';
 import 'package:project_2359/layouts/landscape/home_page_landscape_layout.dart';
 
 enum MainContentType { empty, study, sourceDetail, settings }
@@ -319,7 +317,7 @@ class _HomePageState extends State<HomePage> {
                       if (MediaQuery.of(context).viewInsets.bottom == 0)
                         const _GlitchyDebugTile(),
                       const SizedBox(height: 16),
-                      const _HomeDueCardsTile(),
+                      const HomeDueCardsTile(),
                       const SizedBox(height: 32),
 
                       // PINNED SECTION
@@ -404,8 +402,9 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       children: [
         const SizedBox(height: 16),
-        const _HomeDueCardsTile(),
+        const HomeDueCardsTile(),
         const SizedBox(height: 16),
+
         _PinnedFoldersSection(
           stream: _pinnedFoldersStream,
           searchQuery: _searchQuery,
@@ -513,6 +512,9 @@ class _HomePageState extends State<HomePage> {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
+                const SizedBox(height: 16),
+                FolderDueCardsTile(folderId: _selectedFolderId!),
+                const SizedBox(height: 16),
                 StreamBuilder<List<DeckItem>>(
                   stream: decksStream,
                   builder: (context, snapshot) {
@@ -1806,70 +1808,5 @@ class _GlitchyDebugTileState extends State<_GlitchyDebugTile> {
         ).animate().fadeIn().slideY(begin: 0.1),
       ),
     );
-  }
-}
-
-class _HomeDueCardsTile extends StatelessWidget {
-  const _HomeDueCardsTile();
-
-  @override
-  Widget build(BuildContext context) {
-    final appController = context.watch<AppController>();
-    final schedulingService = appController.schedulingService;
-    final database = context.read<AppDatabase>();
-
-    return StreamBuilder<List<CardItem>>(
-      stream: schedulingService.watchTotalDueCardItems(),
-      builder: (context, snapshot) {
-        final cards = snapshot.data ?? [];
-        if (cards.isEmpty) return const SizedBox.shrink();
-
-        return FutureBuilder<Map<String, int>>(
-          future: _groupCardsByFolder(database, cards),
-          builder: (context, folderSnapshot) {
-            final folderCounts = folderSnapshot.data ?? {};
-            if (folderCounts.isEmpty) return const SizedBox.shrink();
-
-            return ProjectImportantTile(
-              child: DueCardsOverview(
-                totalDue: cards.length,
-                items: folderCounts,
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Future<Map<String, int>> _groupCardsByFolder(
-    AppDatabase db,
-    List<CardItem> cards,
-  ) async {
-    final Map<String, int> folderCounts = {};
-    final deckIds = cards.map((c) => c.deckId).whereType<String>().toSet();
-
-    if (deckIds.isEmpty) return folderCounts;
-
-    // Fetch decks to get folderIds
-    final decks = await (db.select(
-      db.deckItems,
-    )..where((t) => t.id.isIn(deckIds))).get();
-    final deckToFolder = {for (var d in decks) d.id: d.folderId};
-
-    // Fetch folder names
-    final folderIds = deckToFolder.values.toSet();
-    final folders = await (db.select(
-      db.studyFolderItems,
-    )..where((t) => t.id.isIn(folderIds))).get();
-    final folderIdToName = {for (var f in folders) f.id: f.name};
-
-    for (var card in cards) {
-      final folderId = deckToFolder[card.deckId];
-      final folderName = folderIdToName[folderId] ?? "Unknown Folder";
-      folderCounts[folderName] = (folderCounts[folderName] ?? 0) + 1;
-    }
-
-    return folderCounts;
   }
 }

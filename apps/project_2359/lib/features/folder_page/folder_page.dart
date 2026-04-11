@@ -14,15 +14,14 @@ import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
-import 'package:project_2359/core/widgets/project_important_tile.dart';
-import 'package:project_2359/features/home_page/widgets/due_cards_overview.dart';
+import 'package:project_2359/core/widgets/due_cards_tiles.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' as drift;
-import 'package:project_2359/core/enums/media_type.dart'; // For MediaType
-import 'package:project_2359/core/tables/source_item_blobs.dart'; // For SourceFileType
+import 'package:project_2359/core/enums/media_type.dart';
+import 'package:project_2359/core/tables/source_item_blobs.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_page.dart';
 import 'package:project_2359/features/study_page/study_page.dart';
 
@@ -208,7 +207,6 @@ class _FolderPageState extends State<FolderPage> {
       if (mounted) setState(() => _allDecks = decks);
     });
 
-    // Watch drafts for this folder
     final draftService = context.read<AppController>().draftService;
     _draftSub = draftService.watchDraftsByFolderId(widget.folderId).listen((
       drafts,
@@ -216,7 +214,6 @@ class _FolderPageState extends State<FolderPage> {
       if (mounted) setState(() => _allDrafts = drafts);
     });
 
-    // Also watch sources to provide initialData to FAB for smooth animation
     final sourceService = context.read<SourceService>();
     _sourcesSub = sourceService.watchSourcesByFolderId(widget.folderId).listen((
       sources,
@@ -264,10 +261,6 @@ class _FolderPageState extends State<FolderPage> {
     super.dispose();
   }
 
-  // Removed _showFolderSettings
-
-  // Removed _showDeleteConfirmation
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -311,7 +304,6 @@ class _FolderPageState extends State<FolderPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Main Button
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
@@ -350,13 +342,11 @@ class _FolderPageState extends State<FolderPage> {
                     ),
                   ),
                 ),
-                // Divider
                 Container(
                   width: 1,
                   margin: const EdgeInsets.symmetric(vertical: 12),
                   color: Colors.white.withValues(alpha: 0.1),
                 ),
-                // Expand Trigger
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
@@ -417,7 +407,6 @@ class _FolderPageState extends State<FolderPage> {
                     icon: FontAwesomeIcons.fileLines,
                     onTap: () {
                       close();
-                      // Logic for text import
                     },
                   ),
                   _FabMenuItem(
@@ -425,7 +414,6 @@ class _FolderPageState extends State<FolderPage> {
                     icon: FontAwesomeIcons.youtube,
                     onTap: () {
                       close();
-                      // Logic for youtube import
                     },
                   ),
                 ] else ...[
@@ -434,7 +422,6 @@ class _FolderPageState extends State<FolderPage> {
                     icon: FontAwesomeIcons.wandMagicSparkles,
                     onTap: () {
                       close();
-                      // Logic for AI Generation
                     },
                   ),
                 ],
@@ -445,7 +432,6 @@ class _FolderPageState extends State<FolderPage> {
         },
         body: Stack(
           children: [
-            // Full-screen animated background
             Positioned.fill(
               child: SpecialBackgroundGenerator(
                 type: SpecialBackgroundType.geometricSquares,
@@ -478,7 +464,6 @@ class _FolderPageState extends State<FolderPage> {
                 controller: _pageController,
                 onPageChanged: _onPageChanged,
                 children: [
-                  // PAGE 0: DECKS
                   _CardsPage(
                     decks: _allDecks,
                     drafts: _allDrafts,
@@ -487,12 +472,10 @@ class _FolderPageState extends State<FolderPage> {
                     onToggleSelection: _toggleDeckSelection,
                     isSelecting: _isSelecting,
                   ),
-                  // PAGE 1: SOURCES
                   _SourcesPage(
                     folderId: widget.folderId,
                     sources: _currentSources ?? [],
                   ),
-                  // PAGE 2: SETTINGS
                   _SettingsPage(
                     folderId: widget.folderId,
                     folderName: folderName,
@@ -506,10 +489,6 @@ class _FolderPageState extends State<FolderPage> {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// COLLAPSING HEADER DELEGATE
-// ---------------------------------------------------------------------------
 
 class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
   final String folderName;
@@ -529,7 +508,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
   static const double _collapsedBarHeight = 64.0;
 
   @override
-  double get maxExtent => 280 + topPadding; // Increased to avoid overflow
+  double get maxExtent => 280 + topPadding;
 
   @override
   double get minExtent => _collapsedBarHeight + topPadding;
@@ -545,11 +524,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) {
     final theme = Theme.of(context);
-
-    // 0.0 = fully expanded, 1.0 = fully collapsed
     final t = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
-
-    // Appbar background — solid black but with a subtle border when collapsed
     final bgColor = Color.lerp(
       Colors.black.withValues(alpha: 0.0),
       Colors.black,
@@ -569,7 +544,6 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // ── EXPANDED CONTENT ──
           Positioned(
             left: 20,
             right: 20,
@@ -583,7 +557,6 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Tagline
                       Text(
                         "FOLDER",
                         style: theme.textTheme.labelSmall?.copyWith(
@@ -594,7 +567,6 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Title with Accent Bar
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -623,7 +595,6 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      // Header Actions
                       Row(
                         children: [
                           _HeaderCircleAction(
@@ -654,8 +625,6 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
               ),
             ),
           ),
-
-          // ── COLLAPSED BAR ──
           Positioned(
             left: 0,
             right: 0,
@@ -682,7 +651,6 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                       ),
                     ),
                   ),
-                  // Collapsed Actions
                   Opacity(
                     opacity: (t * 2.0 - 0.6).clamp(0.0, 1.0),
                     child: Row(
@@ -816,10 +784,6 @@ class _CompactIconButton extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// PAGE CONTENT WIDGETS
-// ---------------------------------------------------------------------------
-
 class _CardsPage extends StatelessWidget {
   final List<DeckItem> decks;
   final List<CardCreationDraftItem> drafts;
@@ -845,7 +809,7 @@ class _CardsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _FolderDueCardsTile(folderId: folderId),
+          FolderDueCardsTile(folderId: folderId),
           const SizedBox(height: 16),
           if (drafts.isNotEmpty) ...[
             const _SectionLabel(title: "Resume Projects"),
@@ -910,7 +874,7 @@ class _CardsPage extends StatelessWidget {
             onToggleSelection: onToggleSelection,
             isSelecting: isSelecting,
           ),
-          const SizedBox(height: 100), // FAB spacing
+          const SizedBox(height: 100),
         ],
       ),
     );
@@ -1146,12 +1110,6 @@ class _SettingsPage extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// EXISTING WIDGETS (preserved from original)
-// ---------------------------------------------------------------------------
-
-// DELETED _ActionButtonChip
-
 class _DecksList extends StatelessWidget {
   final List<DeckItem> decks;
   final String folderId;
@@ -1271,12 +1229,6 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-// DELETED _SourcesBottomSheet
-
-// ---------------------------------------------------------------------------
-// HELPER COMPONENTS
-// ---------------------------------------------------------------------------
-
 class _FabMenuItem extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -1316,67 +1268,5 @@ class _FabMenuItem extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// SELECTION ACTION BAR
-
-class _FolderDueCardsTile extends StatelessWidget {
-  final String folderId;
-  const _FolderDueCardsTile({required this.folderId});
-
-  @override
-  Widget build(BuildContext context) {
-    final appController = context.watch<AppController>();
-    final schedulingService = appController.schedulingService;
-    final database = context.read<AppDatabase>();
-
-    return StreamBuilder<List<CardItem>>(
-      stream: schedulingService.watchDueCardItemsForFolder(folderId: folderId),
-      builder: (context, snapshot) {
-        final cards = snapshot.data ?? [];
-        if (cards.isEmpty) return const SizedBox.shrink();
-
-        return FutureBuilder<Map<String, int>>(
-          future: _groupCardsByDeck(database, cards),
-          builder: (context, deckSnapshot) {
-            final deckCounts = deckSnapshot.data ?? {};
-            if (deckCounts.isEmpty) return const SizedBox.shrink();
-
-            return ProjectImportantTile(
-              child: DueCardsOverview(
-                totalDue: cards.length,
-                items: deckCounts,
-                isFolderPage: true,
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Future<Map<String, int>> _groupCardsByDeck(
-    AppDatabase db,
-    List<CardItem> cards,
-  ) async {
-    final Map<String, int> deckCounts = {};
-    final deckIds = cards.map((c) => c.deckId).whereType<String>().toSet();
-
-    if (deckIds.isEmpty) return deckCounts;
-
-    // Fetch deck names
-    final decks = await (db.select(
-      db.deckItems,
-    )..where((t) => t.id.isIn(deckIds))).get();
-    final deckIdToName = {for (var d in decks) d.id: d.name};
-
-    for (var card in cards) {
-      final deckName = deckIdToName[card.deckId] ?? "Unknown Deck";
-      deckCounts[deckName] = (deckCounts[deckName] ?? 0) + 1;
-    }
-
-    return deckCounts;
   }
 }
