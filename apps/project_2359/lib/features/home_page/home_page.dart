@@ -27,6 +27,10 @@ import 'package:project_2359/features/sources_page/sources_page_bloc/sources_pag
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:project_2359/core/widgets/due_cards_tiles.dart';
+import 'package:project_2359/core/widgets/selection_action_bar.dart';
+import 'package:project_2359/features/home_page/widgets/home_header.dart';
+import 'package:project_2359/features/home_page/widgets/new_item_menu.dart';
+import 'package:project_2359/features/home_page/widgets/folder_list_view.dart';
 
 import 'package:project_2359/layouts/landscape/home_page_landscape_layout.dart';
 
@@ -255,7 +259,7 @@ class _HomePageState extends State<HomePage> {
                 });
             final isMixed = !allPinned && !allUnpinned;
 
-            return _SelectionActionBar(
+            return SelectionActionBar(
               selectedCount:
                   _selectedFolderIds.length + _selectedDeckIds.length,
               onClose: _clearSelection,
@@ -287,7 +291,7 @@ class _HomePageState extends State<HomePage> {
           );
         },
         expandedBuilder: (context, isOpen, expand, close) {
-          return const _NewButtonExpandedContent();
+          return const NewItemMenu();
         },
         body: LayoutBuilder(
           builder: (context, constraints) {
@@ -302,7 +306,7 @@ class _HomePageState extends State<HomePage> {
                     physics: const ClampingScrollPhysics(),
                     children: [
                       SizedBox(height: topBgHeight * 0.3),
-                      const _HomeHeader(),
+                      const HomeHeader(),
                       const SizedBox(height: 24),
                       // REFINED SEARCH BAR
                       SpecialSearchBar(
@@ -321,7 +325,7 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(height: 32),
 
                       // PINNED SECTION
-                      _PinnedFoldersSection(
+                      PinnedFoldersSection(
                         stream: _pinnedFoldersStream,
                         searchQuery: _searchQuery,
                         selectedIds: _selectedFolderIds,
@@ -329,14 +333,20 @@ class _HomePageState extends State<HomePage> {
                         onSelect:
                             (id) {}, // Not used on mobile due to internal check
                         isSelecting: _isSelecting,
+                        onContextMenu: (pos, id, isF) => _showCoolContextMenu(
+                          context,
+                          pos,
+                          id,
+                          isFolder: isF,
+                        ),
                       ),
 
                       const SizedBox(height: 24),
 
                       // ALL COLLECTIONS SECTION
-                      const _SectionHeader(title: "Today"),
+                      const SectionHeader(title: "Today"),
                       const SizedBox(height: 8),
-                      _FolderList(
+                      FolderList(
                         stream: _foldersStream,
                         searchQuery: _searchQuery,
                         backgroundColor: theme.colorScheme.surfaceContainer,
@@ -345,6 +355,12 @@ class _HomePageState extends State<HomePage> {
                         onSelect:
                             (id) {}, // Not used on mobile due to internal check
                         isSelecting: _isSelecting,
+                        onContextMenu: (pos, id, isF) => _showCoolContextMenu(
+                          context,
+                          pos,
+                          id,
+                          isFolder: isF,
+                        ),
                       ),
                       const SizedBox(height: 48),
                       Center(
@@ -382,7 +398,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: HomePageLandscapeLayout(
-        header: _HomeHeader(
+        header: HomeHeader(
           isLandscape: true,
           onPlusTap: () => _showNewMenu(context),
         ),
@@ -405,7 +421,7 @@ class _HomePageState extends State<HomePage> {
         const HomeDueCardsTile(),
         const SizedBox(height: 16),
 
-        _PinnedFoldersSection(
+        PinnedFoldersSection(
           stream: _pinnedFoldersStream,
           searchQuery: _searchQuery,
           selectedIds: _selectedFolderIds,
@@ -418,10 +434,12 @@ class _HomePageState extends State<HomePage> {
           }),
           isSelecting: _isSelecting,
           isLandscape: true,
+          onContextMenu: (pos, id, isF) =>
+              _showCoolContextMenu(context, pos, id, isFolder: isF),
         ),
         const SizedBox(height: 24),
-        const _SectionHeader(title: "Collections"),
-        _FolderList(
+        const SectionHeader(title: "Collections"),
+        FolderList(
           stream: _foldersStream,
           searchQuery: _searchQuery,
           selectedIds: _selectedFolderIds,
@@ -434,6 +452,8 @@ class _HomePageState extends State<HomePage> {
           }),
           isSelecting: _isSelecting,
           isLandscape: true,
+          onContextMenu: (pos, id, isF) =>
+              _showCoolContextMenu(context, pos, id, isFolder: isF),
         ),
       ],
     );
@@ -523,7 +543,7 @@ class _HomePageState extends State<HomePage> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const _SectionHeader(title: "Decks"),
+                        const SectionHeader(title: "Decks"),
                         for (var m in decks)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 12),
@@ -583,7 +603,7 @@ class _HomePageState extends State<HomePage> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const _SectionHeader(title: "Sources"),
+                        const SectionHeader(title: "Sources"),
                         for (var s in sources)
                           Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
@@ -876,7 +896,7 @@ class _HomePageState extends State<HomePage> {
                     clipBehavior: Clip.antiAlias,
                     child: Material(
                       color: Colors.transparent,
-                      child: _NewButtonExpandedContent(
+                      child: NewItemMenu(
                         onActionCompleted: () => Navigator.pop(context),
                         activeFolderId: _selectedFolderId,
                       ),
@@ -888,767 +908,6 @@ class _HomePageState extends State<HomePage> {
           ],
         );
       },
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-
-  const _SectionHeader({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Text(
-        title,
-        style: theme.textTheme.labelMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-          letterSpacing: 0.5,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-}
-
-class _PinnedFoldersSection extends StatelessWidget {
-  final Stream<List<(StudyFolderItem, int)>> stream;
-  final String searchQuery;
-  final Set<String> selectedIds;
-  final Function(String) onToggleSelection;
-  final Function(String) onSelect;
-  final bool isSelecting;
-  final bool isLandscape;
-  final String? activeFolderId;
-
-  const _PinnedFoldersSection({
-    required this.stream,
-    required this.searchQuery,
-    required this.selectedIds,
-    required this.onToggleSelection,
-    required this.onSelect,
-    required this.isSelecting,
-    this.isLandscape = false,
-    this.activeFolderId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return StreamBuilder<List<(StudyFolderItem, int)>>(
-      stream: stream,
-      builder: (context, snapshot) {
-        final folderPairs = (snapshot.data ?? []).where((p) {
-          if (searchQuery.isEmpty) return true;
-          return p.$1.name.toLowerCase().contains(searchQuery.toLowerCase());
-        }).toList();
-
-        if (folderPairs.isEmpty) return const SizedBox.shrink();
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _SectionHeader(title: "Pinned"),
-            for (final pair in folderPairs)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: GestureDetector(
-                  onSecondaryTapDown: (details) =>
-                      (context.findAncestorStateOfType<_HomePageState>())
-                          ?._showCoolContextMenu(
-                            context,
-                            details.globalPosition,
-                            pair.$1.id,
-                            isFolder: true,
-                          ),
-                  child: ProjectCardTile(
-                    title: Row(
-                      children: [
-                        FaIcon(
-                          FontAwesomeIcons.thumbtack,
-                          size: 14,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            pair.$1.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    subtitle: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        FaIcon(
-                          FontAwesomeIcons.layerGroup,
-                          size: 10,
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.4,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text("${pair.$2} Card${pair.$2 == 1 ? '' : 's'}"),
-                      ],
-                    ),
-                    isSelected:
-                        selectedIds.contains(pair.$1.id) ||
-                        (isLandscape && activeFolderId == pair.$1.id),
-                    isCompact: isLandscape,
-                    onTap: isSelecting
-                        ? () => onToggleSelection(pair.$1.id)
-                        : () {
-                            if (ResponsiveBreakpoints.of(
-                              context,
-                            ).largerThan(MOBILE)) {
-                              onSelect(pair.$1.id);
-                            } else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => FolderPage(
-                                    folderId: pair.$1.id,
-                                    initialFolderName: pair.$1.name,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                    onLongTap: () => onToggleSelection(pair.$1.id),
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _FolderList extends StatelessWidget {
-  final Stream<List<(StudyFolderItem, int)>> stream;
-  final String searchQuery;
-
-  final Color? backgroundColor;
-  final Set<String> selectedIds;
-  final Function(String) onToggleSelection;
-  final Function(String) onSelect;
-  final bool isSelecting;
-  final bool isLandscape;
-  final String? activeFolderId;
-
-  const _FolderList({
-    required this.stream,
-    required this.searchQuery,
-    this.backgroundColor,
-    required this.selectedIds,
-    required this.onToggleSelection,
-    required this.onSelect,
-    required this.isSelecting,
-    this.isLandscape = false,
-    this.activeFolderId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return StreamBuilder<List<(StudyFolderItem, int)>>(
-      stream: stream,
-      builder: (context, snapshot) {
-        final folderPairs = (snapshot.data ?? []).where((p) {
-          if (searchQuery.isEmpty) return true;
-          return p.$1.name.toLowerCase().contains(searchQuery.toLowerCase());
-        }).toList();
-
-        if (folderPairs.isEmpty) {
-          final isSearching = searchQuery.isNotEmpty;
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Center(
-              child: Text(
-                isSearching
-                    ? "No matching collections found."
-                    : "No collections yet. Create one below!",
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                ),
-              ),
-            ),
-          );
-        }
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final pair in folderPairs)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: GestureDetector(
-                  onSecondaryTapDown: (details) =>
-                      (context.findAncestorStateOfType<_HomePageState>())
-                          ?._showCoolContextMenu(
-                            context,
-                            details.globalPosition,
-                            pair.$1.id,
-                            isFolder: true,
-                          ),
-                  child: ProjectCardTile(
-                    title: Row(
-                      children: [
-                        if (pair.$1.isPinned) ...[
-                          FaIcon(
-                            FontAwesomeIcons.thumbtack,
-                            size: 14,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                        Expanded(
-                          child: Text(
-                            pair.$1.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    subtitle: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        FaIcon(
-                          FontAwesomeIcons.layerGroup,
-                          size: 10,
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.4,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text("${pair.$2} Card${pair.$2 == 1 ? '' : 's'}"),
-                      ],
-                    ),
-                    isSelected:
-                        selectedIds.contains(pair.$1.id) ||
-                        (isLandscape && activeFolderId == pair.$1.id),
-                    isCompact: isLandscape,
-                    onTap: isSelecting
-                        ? () => onToggleSelection(pair.$1.id)
-                        : () {
-                            if (ResponsiveBreakpoints.of(
-                              context,
-                            ).largerThan(MOBILE)) {
-                              onSelect(pair.$1.id);
-                            } else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => FolderPage(
-                                    folderId: pair.$1.id,
-                                    initialFolderName: pair.$1.name,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                    onLongTap: () => onToggleSelection(pair.$1.id),
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _HomeHeader extends StatelessWidget {
-  final bool isLandscape;
-  final VoidCallback? onPlusTap;
-  const _HomeHeader({this.isLandscape = false, this.onPlusTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Compact App Icon
-        Hero(
-          tag: 'app_icon',
-          child: Image.asset(
-            isDark
-                ? 'assets/images/app_icon_light_nobg.png'
-                : 'assets/images/app_icon_nobg.png',
-            height: 28, // More compact icon
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            "Project 2359",
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.4,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.95),
-            ),
-          ),
-        ),
-        // Settings Action
-        if (!isLandscape) const _HeaderActions(),
-        if (isLandscape)
-          IconButton(
-            onPressed: onPlusTap,
-            icon: const FaIcon(FontAwesomeIcons.circlePlus, size: 18),
-            style: IconButton.styleFrom(
-              backgroundColor: theme.colorScheme.onSurface.withValues(
-                alpha: 0.05,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _HeaderActions extends StatelessWidget {
-  const _HeaderActions();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurface.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsPage()),
-              );
-            },
-            icon: FaIcon(
-              FontAwesomeIcons.gear,
-              size: 15,
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.4),
-            ),
-            visualDensity: VisualDensity.compact,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _NewButtonExpandedContent extends StatefulWidget {
-  final VoidCallback? onActionCompleted;
-  final String? activeFolderId;
-
-  const _NewButtonExpandedContent({
-    this.onActionCompleted,
-    this.activeFolderId,
-  });
-
-  @override
-  State<_NewButtonExpandedContent> createState() =>
-      _NewButtonExpandedContentState();
-}
-
-class _NewButtonExpandedContentState extends State<_NewButtonExpandedContent> {
-  final TextEditingController folderNameController = TextEditingController();
-  bool isCreatingFolder = false;
-
-  @override
-  void initState() {
-    super.initState();
-    folderNameController.addListener(() {
-      setState(() {}); // Trigger rebuild to show/hide the button
-    });
-  }
-
-  Future<void> createFolder() async {
-    final name = folderNameController.text.trim();
-    if (name.isEmpty) return;
-
-    setState(() => isCreatingFolder = true);
-    try {
-      final service = context.read<StudyDatabaseService>();
-      final id = DateTime.now().millisecondsSinceEpoch.toString();
-      await service.insertFolder(
-        StudyFolderItemsCompanion.insert(
-          id: id,
-          name: name,
-          createdAt: DateTime.now().toIso8601String(),
-          updatedAt: DateTime.now().toIso8601String(),
-        ),
-      );
-
-      if (mounted) {
-        folderNameController.clear();
-        if (widget.onActionCompleted != null) {
-          widget.onActionCompleted!();
-        } else {
-          try {
-            ExpandableFab.of(context).close();
-          } catch (_) {
-            // Fallback for when not used inside ExpandableFab but callback is missing
-            Navigator.maybePop(context);
-          }
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => isCreatingFolder = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Error: $e"),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    folderNameController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // NEW COLLECTION CREATION
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "NEW COLLECTION",
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: cs.primary,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: folderNameController,
-                        decoration: InputDecoration(
-                          hintText: "Enter Name...",
-                          hintStyle: TextStyle(
-                            color: cs.onSurface.withValues(alpha: 0.3),
-                            fontSize: 15,
-                          ),
-                          prefixIcon: Container(
-                            padding: const EdgeInsets.all(12),
-                            child: FaIcon(
-                              FontAwesomeIcons.folderPlus,
-                              size: 16,
-                              color: cs.primary.withValues(alpha: 0.6),
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: cs.onSurface.withValues(alpha: 0.04),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide(
-                              color: cs.primary.withValues(alpha: 0.2),
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        onSubmitted: (_) => createFolder(),
-                      ),
-                    ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOutCubic,
-                      child: folderNameController.text.isNotEmpty
-                          ? Padding(
-                              padding: const EdgeInsets.only(left: 10),
-                              child: IconButton(
-                                onPressed: isCreatingFolder
-                                    ? null
-                                    : createFolder,
-                                icon: isCreatingFolder
-                                    ? const SizedBox(
-                                        height: 18,
-                                        width: 18,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : const FaIcon(
-                                        FontAwesomeIcons.check,
-                                        size: 16,
-                                        color: Colors.white,
-                                      ),
-                                style: IconButton.styleFrom(
-                                  backgroundColor: cs.primary,
-                                  fixedSize: const Size(54, 54),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          // SEPARATOR
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Divider(
-                  color: cs.onSurface.withValues(alpha: 0.08),
-                  indent: 32,
-                  endIndent: 32,
-                ),
-                Container(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.98,
-                  ), // Match FAB bg
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text(
-                    "OR",
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: cs.onSurface.withValues(alpha: 0.3),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // LIST TILES FOR MORE OPTIONS
-          ProjectListGroup(
-            backgroundColor:
-                Colors.transparent, // Let FAB background show through
-            margin: const EdgeInsets.symmetric(horizontal: 8),
-            children: [
-              ProjectListTile.simple(
-                label: "New Card Pack",
-                icon: FontAwesomeIcons.layerGroup,
-                showDivider: true,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CardCreationPage(
-                        folderId: widget.activeFolderId ?? "default",
-                      ),
-                    ),
-                  );
-                  if (widget.onActionCompleted != null) {
-                    widget.onActionCompleted!();
-                  } else {
-                    try {
-                      ExpandableFab.of(context).close();
-                    } catch (_) {}
-                  }
-                },
-                showChevron: false,
-              ),
-              ProjectListTile.simple(
-                label: "Scan Documents",
-                icon: FontAwesomeIcons.camera,
-                showDivider: true,
-                onTap: () {},
-                showChevron: false,
-              ),
-              ProjectListTile.simple(
-                label: "Import Source",
-                icon: FontAwesomeIcons.fileImport,
-                showDivider: false,
-                onTap: () async {
-                  final result = await FilePicker.platform.pickFiles(
-                    type: FileType.custom,
-                    allowMultiple: true,
-                    withData: true,
-                    allowedExtensions: ["pdf", "docx", "pptx", "txt"],
-                  );
-
-                  if (result == null || !context.mounted) return;
-
-                  context.read<SourcesPageBloc>().add(
-                    ImportDocumentsEvent(
-                      result.files,
-                      folderId: widget.activeFolderId,
-                    ),
-                  );
-
-                  if (widget.onActionCompleted != null) {
-                    widget.onActionCompleted!();
-                  } else {
-                    try {
-                      ExpandableFab.of(context).close();
-                    } catch (_) {}
-                  }
-                },
-                showChevron: false,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SelectionActionBar extends StatelessWidget {
-  final int selectedCount;
-  final VoidCallback onClose;
-  final VoidCallback onPin;
-  final VoidCallback onUnpin;
-  final VoidCallback onDelete;
-  final bool isUnpin;
-  final bool isPinDisabled;
-
-  const _SelectionActionBar({
-    required this.selectedCount,
-    required this.onClose,
-    required this.onPin,
-    required this.onUnpin,
-    required this.onDelete,
-    this.isUnpin = false,
-    this.isPinDisabled = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            onPressed: onClose,
-            icon: const FaIcon(FontAwesomeIcons.xmark, size: 16),
-            visualDensity: VisualDensity.compact,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            "$selectedCount Selected",
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(width: 16),
-          _BarAction(
-            icon: isUnpin
-                ? FontAwesomeIcons.thumbtack
-                : FontAwesomeIcons.thumbtack,
-            label: isUnpin ? "Unpin" : "Pin",
-            onTap: isUnpin ? onUnpin : onPin,
-            isDisabled: isPinDisabled,
-          ),
-          const SizedBox(width: 8),
-          _BarAction(
-            icon: FontAwesomeIcons.trashCan,
-            label: "Delete",
-            onTap: onDelete,
-            isDestructive: true,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BarAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isDestructive;
-  final bool isDisabled;
-
-  const _BarAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.isDestructive = false,
-    this.isDisabled = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = isDisabled
-        ? theme.colorScheme.onSurface.withValues(alpha: 0.2)
-        : isDestructive
-        ? theme.colorScheme.error
-        : theme.colorScheme.onSurface;
-
-    return InkWell(
-      onTap: isDisabled ? null : onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FaIcon(icon, size: 14, color: color),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
