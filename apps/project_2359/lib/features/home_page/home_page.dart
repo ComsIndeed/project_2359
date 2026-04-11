@@ -206,7 +206,7 @@ class _HomePageState extends State<HomePage> {
         body: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            const HomeHeader(),
+            const SliverToBoxAdapter(child: HomeHeader()),
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverList(
