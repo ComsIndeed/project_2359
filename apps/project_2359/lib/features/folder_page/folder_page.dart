@@ -512,11 +512,8 @@ class _FolderPageState extends State<FolderPage> {
                           context.read<AppController>().schedulingService;
 
                       // Get counts for the setup sheet
-                      final dueCount = await schedulingService
-                          .watchDueCount(deckId: id)
-                          .first;
-                      final allCards = await schedulingService
-                          .getAllCardsForDeck(id);
+                      final dueCount = await schedulingService.getDueCount(deckId: id);
+                      final allCards = await schedulingService.getAllCardsForDeck(id);
                       final totalCount = allCards.length;
 
                       if (!mounted) return;
