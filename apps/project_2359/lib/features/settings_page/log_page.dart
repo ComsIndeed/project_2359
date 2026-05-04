@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/utils/logger.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 
 class LogPage extends StatefulWidget {
   const LogPage({super.key});
@@ -40,6 +41,7 @@ class _LogPageState extends State<LogPage> {
       alignment: Alignment.bottomRight,
       body: Scaffold(
         appBar: AppBar(
+          leading: const ProjectBackButton(),
           title: const Text('App Logs'),
           actions: [
             IconButton(

@@ -309,7 +309,7 @@ class _SourcePageLoaderState extends State<_SourcePageLoader> {
 
     if (_blob == null) {
       return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(leading: const ProjectBackButton()),
         body: const Center(child: Text("File data not found")),
       );
     }

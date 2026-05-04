@@ -360,7 +360,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
                     ),
                   ),
                 ),
-                leadingWidth: 120, // accommodate 'Back' text + shortcut
+                leadingWidth: ProjectShortcutManager.isShortcutsEnabled ? 120 : 56, // accommodate 'Back' text + shortcut only on desktop
                 leading: ProjectBackButton(
                   color: Colors.white,
                   onPressed: () {

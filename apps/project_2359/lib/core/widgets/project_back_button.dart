@@ -70,18 +70,21 @@ class _ProjectBackButtonState extends State<ProjectBackButton> {
                 size: 20,
                 color: buttonColor,
               ),
-              const SizedBox(width: 6),
-              Text(
-                'Back',
-                style: GoogleFonts.outfit(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: buttonColor,
-                  letterSpacing: -0.3,
+              if (ProjectShortcutManager.isShortcutsEnabled) ...[
+                const SizedBox(width: 6),
+                Text(
+                  'Back',
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: buttonColor,
+                    letterSpacing: -0.3,
+                  ),
                 ),
-              ),
+              ],
               if (widget.useFullWidth) const Spacer(),
-              const SizedBox(width: 4),
+              if (ProjectShortcutManager.isShortcutsEnabled)
+                const SizedBox(width: 4),
             ],
           ),
         ),

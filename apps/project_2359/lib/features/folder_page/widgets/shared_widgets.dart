@@ -5,6 +5,7 @@ import 'package:project_2359/core/widgets/sensor_reactive_border.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/features/source_page/source_page.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:provider/provider.dart';
 
 class SectionLabel extends StatelessWidget {
@@ -408,7 +409,7 @@ class _SourcePageLoaderState extends State<SourcePageLoader> {
 
     if (_blob == null) {
       return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(leading: const ProjectBackButton()),
         body: const Center(child: Text("File data not found")),
       );
     }
