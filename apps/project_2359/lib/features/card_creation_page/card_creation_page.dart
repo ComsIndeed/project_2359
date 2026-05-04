@@ -296,6 +296,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: ListenableBuilder(
         listenable: labsSettings,
         builder: (context, _) {
@@ -320,6 +321,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
               selectedTextNotifier: _selectedTextNotifier,
             ),
             child: Scaffold(
+              resizeToAvoidBottomInset: false,
               backgroundColor: Colors.black,
               extendBodyBehindAppBar: true,
               appBar: AppBar(

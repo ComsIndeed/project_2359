@@ -108,8 +108,12 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
       children: [
         widget.child,
         SizedBox.expand(
-          child: Padding(
-            padding: widget.boundaryMargins,
+          child: AnimatedPadding(
+            duration: widget.duration,
+            curve: widget.curve,
+            padding: widget.boundaryMargins.add(
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            ),
             child: AnimatedAlign(
               duration: widget.duration,
               alignment: _controller.alignment,
@@ -176,15 +180,21 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
                                 curve: widget.curve,
                                 padding: padding,
                                 child: (_controller.size == null)
-                                    ? widget.builder(context, _controller)
+                                    ? SingleChildScrollView(
+                                        physics: const ClampingScrollPhysics(),
+                                        child: widget.builder(context, _controller),
+                                      )
                                     : AnimatedContainer(
                                         duration: widget.duration,
                                         curve: widget.curve,
                                         width: _controller.size!.$1,
                                         height: _controller.size!.$2,
-                                        child: widget.builder(
-                                          context,
-                                          _controller,
+                                        child: SingleChildScrollView(
+                                          physics: const ClampingScrollPhysics(),
+                                          child: widget.builder(
+                                            context,
+                                            _controller,
+                                          ),
                                         ),
                                       ),
                               ),
