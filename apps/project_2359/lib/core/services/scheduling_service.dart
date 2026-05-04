@@ -92,26 +92,27 @@ class SchedulingService {
   /// Maps a CardItem row to an fsrs.Card
   fsrs.Card _toFsrsCard(CardItem card, StudySessionMode mode) {
     final fCardId = card.id.hashCode;
-    
+    final now = DateTime.now();
+
     if (mode == StudySessionMode.spaced) {
       return fsrs.Card(
         cardId: fCardId,
-        due: card.spacedDue,
-        stability: card.spacedStability,
-        difficulty: card.spacedDifficulty,
-        state: fsrs.State.values[card.spacedState],
-        step: card.spacedStep,
+        due: card.spacedDue ?? now,
+        stability: card.spacedStability ?? 0.0,
+        difficulty: card.spacedDifficulty ?? 0.0,
+        state: fsrs.State.values[card.spacedState ?? 0],
+        step: card.spacedStep ?? 0,
         lastReview: card.spacedLastReview,
       );
     } else {
       // Load from continuous columns
       return fsrs.Card(
         cardId: fCardId,
-        due: card.continuousDue,
-        stability: card.continuousStability,
-        difficulty: card.continuousDifficulty,
-        state: fsrs.State.values[card.continuousState],
-        step: card.continuousStep,
+        due: card.continuousDue ?? now,
+        stability: card.continuousStability ?? 0.0,
+        difficulty: card.continuousDifficulty ?? 0.0,
+        state: fsrs.State.values[card.continuousState ?? 0],
+        step: card.continuousStep ?? 0,
         lastReview: card.continuousLastReview,
       );
     }
@@ -125,7 +126,7 @@ class SchedulingService {
         spacedStability: Value(card.stability),
         spacedDifficulty: Value(card.difficulty),
         spacedState: Value(card.state.index),
-        spacedStep: Value(card.step!),
+        spacedStep: Value(card.step ?? 0),
         spacedLastReview: Value(card.lastReview),
       );
     } else {
@@ -134,7 +135,7 @@ class SchedulingService {
         continuousStability: Value(card.stability),
         continuousDifficulty: Value(card.difficulty),
         continuousState: Value(card.state.index),
-        continuousStep: Value(card.step!),
+        continuousStep: Value(card.step ?? 0),
         continuousLastReview: Value(card.lastReview),
       );
     }

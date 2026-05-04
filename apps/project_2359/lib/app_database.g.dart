@@ -2145,7 +2145,7 @@ class $CardItemsTable extends CardItems
   late final GeneratedColumn<DateTime> spacedDue = GeneratedColumn<DateTime>(
     'spaced_due',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
@@ -2179,7 +2179,7 @@ class $CardItemsTable extends CardItems
   late final GeneratedColumn<int> spacedState = GeneratedColumn<int>(
     'spaced_state',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
@@ -2191,7 +2191,7 @@ class $CardItemsTable extends CardItems
   late final GeneratedColumn<int> spacedStep = GeneratedColumn<int>(
     'spaced_step',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
@@ -2216,7 +2216,7 @@ class $CardItemsTable extends CardItems
       GeneratedColumn<DateTime>(
         'continuous_due',
         aliasedName,
-        false,
+        true,
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
         defaultValue: currentDateAndTime,
@@ -2250,7 +2250,7 @@ class $CardItemsTable extends CardItems
   late final GeneratedColumn<int> continuousState = GeneratedColumn<int>(
     'continuous_state',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
@@ -2262,7 +2262,7 @@ class $CardItemsTable extends CardItems
   late final GeneratedColumn<int> continuousStep = GeneratedColumn<int>(
     'continuous_step',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
@@ -2311,7 +2311,7 @@ class $CardItemsTable extends CardItems
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
     'created_at',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
@@ -2323,7 +2323,7 @@ class $CardItemsTable extends CardItems
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
     'updated_at',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
@@ -2564,7 +2564,7 @@ class $CardItemsTable extends CardItems
       spacedDue: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}spaced_due'],
-      )!,
+      ),
       spacedStability: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}spaced_stability'],
@@ -2576,11 +2576,11 @@ class $CardItemsTable extends CardItems
       spacedState: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}spaced_state'],
-      )!,
+      ),
       spacedStep: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}spaced_step'],
-      )!,
+      ),
       spacedLastReview: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}spaced_last_review'],
@@ -2588,7 +2588,7 @@ class $CardItemsTable extends CardItems
       continuousDue: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}continuous_due'],
-      )!,
+      ),
       continuousStability: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}continuous_stability'],
@@ -2600,11 +2600,11 @@ class $CardItemsTable extends CardItems
       continuousState: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}continuous_state'],
-      )!,
+      ),
       continuousStep: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}continuous_step'],
-      )!,
+      ),
       continuousLastReview: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}continuous_last_review'],
@@ -2620,11 +2620,11 @@ class $CardItemsTable extends CardItems
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
-      )!,
+      ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
-      )!,
+      ),
     );
   }
 
@@ -2646,22 +2646,22 @@ class CardItem extends DataClass implements Insertable<CardItem> {
   final String? frontImageId;
   final String? backImageId;
   final CardOcclusion? occlusionData;
-  final DateTime spacedDue;
+  final DateTime? spacedDue;
   final double? spacedStability;
   final double? spacedDifficulty;
-  final int spacedState;
-  final int spacedStep;
+  final int? spacedState;
+  final int? spacedStep;
   final DateTime? spacedLastReview;
-  final DateTime continuousDue;
+  final DateTime? continuousDue;
   final double? continuousStability;
   final double? continuousDifficulty;
-  final int continuousState;
-  final int continuousStep;
+  final int? continuousState;
+  final int? continuousStep;
   final DateTime? continuousLastReview;
   final String? deckId;
   final String? draftId;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
   const CardItem({
     required this.id,
     this.frontText,
@@ -2669,22 +2669,22 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     this.frontImageId,
     this.backImageId,
     this.occlusionData,
-    required this.spacedDue,
+    this.spacedDue,
     this.spacedStability,
     this.spacedDifficulty,
-    required this.spacedState,
-    required this.spacedStep,
+    this.spacedState,
+    this.spacedStep,
     this.spacedLastReview,
-    required this.continuousDue,
+    this.continuousDue,
     this.continuousStability,
     this.continuousDifficulty,
-    required this.continuousState,
-    required this.continuousStep,
+    this.continuousState,
+    this.continuousStep,
     this.continuousLastReview,
     this.deckId,
     this.draftId,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2707,27 +2707,39 @@ class CardItem extends DataClass implements Insertable<CardItem> {
         $CardItemsTable.$converterocclusionDatan.toSql(occlusionData),
       );
     }
-    map['spaced_due'] = Variable<DateTime>(spacedDue);
+    if (!nullToAbsent || spacedDue != null) {
+      map['spaced_due'] = Variable<DateTime>(spacedDue);
+    }
     if (!nullToAbsent || spacedStability != null) {
       map['spaced_stability'] = Variable<double>(spacedStability);
     }
     if (!nullToAbsent || spacedDifficulty != null) {
       map['spaced_difficulty'] = Variable<double>(spacedDifficulty);
     }
-    map['spaced_state'] = Variable<int>(spacedState);
-    map['spaced_step'] = Variable<int>(spacedStep);
+    if (!nullToAbsent || spacedState != null) {
+      map['spaced_state'] = Variable<int>(spacedState);
+    }
+    if (!nullToAbsent || spacedStep != null) {
+      map['spaced_step'] = Variable<int>(spacedStep);
+    }
     if (!nullToAbsent || spacedLastReview != null) {
       map['spaced_last_review'] = Variable<DateTime>(spacedLastReview);
     }
-    map['continuous_due'] = Variable<DateTime>(continuousDue);
+    if (!nullToAbsent || continuousDue != null) {
+      map['continuous_due'] = Variable<DateTime>(continuousDue);
+    }
     if (!nullToAbsent || continuousStability != null) {
       map['continuous_stability'] = Variable<double>(continuousStability);
     }
     if (!nullToAbsent || continuousDifficulty != null) {
       map['continuous_difficulty'] = Variable<double>(continuousDifficulty);
     }
-    map['continuous_state'] = Variable<int>(continuousState);
-    map['continuous_step'] = Variable<int>(continuousStep);
+    if (!nullToAbsent || continuousState != null) {
+      map['continuous_state'] = Variable<int>(continuousState);
+    }
+    if (!nullToAbsent || continuousStep != null) {
+      map['continuous_step'] = Variable<int>(continuousStep);
+    }
     if (!nullToAbsent || continuousLastReview != null) {
       map['continuous_last_review'] = Variable<DateTime>(continuousLastReview);
     }
@@ -2737,8 +2749,12 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     if (!nullToAbsent || draftId != null) {
       map['draft_id'] = Variable<String>(draftId);
     }
-    map['created_at'] = Variable<DateTime>(createdAt);
-    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
     return map;
   }
 
@@ -2760,27 +2776,39 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       occlusionData: occlusionData == null && nullToAbsent
           ? const Value.absent()
           : Value(occlusionData),
-      spacedDue: Value(spacedDue),
+      spacedDue: spacedDue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(spacedDue),
       spacedStability: spacedStability == null && nullToAbsent
           ? const Value.absent()
           : Value(spacedStability),
       spacedDifficulty: spacedDifficulty == null && nullToAbsent
           ? const Value.absent()
           : Value(spacedDifficulty),
-      spacedState: Value(spacedState),
-      spacedStep: Value(spacedStep),
+      spacedState: spacedState == null && nullToAbsent
+          ? const Value.absent()
+          : Value(spacedState),
+      spacedStep: spacedStep == null && nullToAbsent
+          ? const Value.absent()
+          : Value(spacedStep),
       spacedLastReview: spacedLastReview == null && nullToAbsent
           ? const Value.absent()
           : Value(spacedLastReview),
-      continuousDue: Value(continuousDue),
+      continuousDue: continuousDue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(continuousDue),
       continuousStability: continuousStability == null && nullToAbsent
           ? const Value.absent()
           : Value(continuousStability),
       continuousDifficulty: continuousDifficulty == null && nullToAbsent
           ? const Value.absent()
           : Value(continuousDifficulty),
-      continuousState: Value(continuousState),
-      continuousStep: Value(continuousStep),
+      continuousState: continuousState == null && nullToAbsent
+          ? const Value.absent()
+          : Value(continuousState),
+      continuousStep: continuousStep == null && nullToAbsent
+          ? const Value.absent()
+          : Value(continuousStep),
       continuousLastReview: continuousLastReview == null && nullToAbsent
           ? const Value.absent()
           : Value(continuousLastReview),
@@ -2790,8 +2818,12 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       draftId: draftId == null && nullToAbsent
           ? const Value.absent()
           : Value(draftId),
-      createdAt: Value(createdAt),
-      updatedAt: Value(updatedAt),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
     );
   }
 
@@ -2807,30 +2839,30 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       frontImageId: serializer.fromJson<String?>(json['frontImageId']),
       backImageId: serializer.fromJson<String?>(json['backImageId']),
       occlusionData: serializer.fromJson<CardOcclusion?>(json['occlusionData']),
-      spacedDue: serializer.fromJson<DateTime>(json['spacedDue']),
+      spacedDue: serializer.fromJson<DateTime?>(json['spacedDue']),
       spacedStability: serializer.fromJson<double?>(json['spacedStability']),
       spacedDifficulty: serializer.fromJson<double?>(json['spacedDifficulty']),
-      spacedState: serializer.fromJson<int>(json['spacedState']),
-      spacedStep: serializer.fromJson<int>(json['spacedStep']),
+      spacedState: serializer.fromJson<int?>(json['spacedState']),
+      spacedStep: serializer.fromJson<int?>(json['spacedStep']),
       spacedLastReview: serializer.fromJson<DateTime?>(
         json['spacedLastReview'],
       ),
-      continuousDue: serializer.fromJson<DateTime>(json['continuousDue']),
+      continuousDue: serializer.fromJson<DateTime?>(json['continuousDue']),
       continuousStability: serializer.fromJson<double?>(
         json['continuousStability'],
       ),
       continuousDifficulty: serializer.fromJson<double?>(
         json['continuousDifficulty'],
       ),
-      continuousState: serializer.fromJson<int>(json['continuousState']),
-      continuousStep: serializer.fromJson<int>(json['continuousStep']),
+      continuousState: serializer.fromJson<int?>(json['continuousState']),
+      continuousStep: serializer.fromJson<int?>(json['continuousStep']),
       continuousLastReview: serializer.fromJson<DateTime?>(
         json['continuousLastReview'],
       ),
       deckId: serializer.fromJson<String?>(json['deckId']),
       draftId: serializer.fromJson<String?>(json['draftId']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
     );
   }
   @override
@@ -2843,24 +2875,24 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       'frontImageId': serializer.toJson<String?>(frontImageId),
       'backImageId': serializer.toJson<String?>(backImageId),
       'occlusionData': serializer.toJson<CardOcclusion?>(occlusionData),
-      'spacedDue': serializer.toJson<DateTime>(spacedDue),
+      'spacedDue': serializer.toJson<DateTime?>(spacedDue),
       'spacedStability': serializer.toJson<double?>(spacedStability),
       'spacedDifficulty': serializer.toJson<double?>(spacedDifficulty),
-      'spacedState': serializer.toJson<int>(spacedState),
-      'spacedStep': serializer.toJson<int>(spacedStep),
+      'spacedState': serializer.toJson<int?>(spacedState),
+      'spacedStep': serializer.toJson<int?>(spacedStep),
       'spacedLastReview': serializer.toJson<DateTime?>(spacedLastReview),
-      'continuousDue': serializer.toJson<DateTime>(continuousDue),
+      'continuousDue': serializer.toJson<DateTime?>(continuousDue),
       'continuousStability': serializer.toJson<double?>(continuousStability),
       'continuousDifficulty': serializer.toJson<double?>(continuousDifficulty),
-      'continuousState': serializer.toJson<int>(continuousState),
-      'continuousStep': serializer.toJson<int>(continuousStep),
+      'continuousState': serializer.toJson<int?>(continuousState),
+      'continuousStep': serializer.toJson<int?>(continuousStep),
       'continuousLastReview': serializer.toJson<DateTime?>(
         continuousLastReview,
       ),
       'deckId': serializer.toJson<String?>(deckId),
       'draftId': serializer.toJson<String?>(draftId),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
     };
   }
 
@@ -2871,22 +2903,22 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     Value<String?> frontImageId = const Value.absent(),
     Value<String?> backImageId = const Value.absent(),
     Value<CardOcclusion?> occlusionData = const Value.absent(),
-    DateTime? spacedDue,
+    Value<DateTime?> spacedDue = const Value.absent(),
     Value<double?> spacedStability = const Value.absent(),
     Value<double?> spacedDifficulty = const Value.absent(),
-    int? spacedState,
-    int? spacedStep,
+    Value<int?> spacedState = const Value.absent(),
+    Value<int?> spacedStep = const Value.absent(),
     Value<DateTime?> spacedLastReview = const Value.absent(),
-    DateTime? continuousDue,
+    Value<DateTime?> continuousDue = const Value.absent(),
     Value<double?> continuousStability = const Value.absent(),
     Value<double?> continuousDifficulty = const Value.absent(),
-    int? continuousState,
-    int? continuousStep,
+    Value<int?> continuousState = const Value.absent(),
+    Value<int?> continuousStep = const Value.absent(),
     Value<DateTime?> continuousLastReview = const Value.absent(),
     Value<String?> deckId = const Value.absent(),
     Value<String?> draftId = const Value.absent(),
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    Value<DateTime?> createdAt = const Value.absent(),
+    Value<DateTime?> updatedAt = const Value.absent(),
   }) => CardItem(
     id: id ?? this.id,
     frontText: frontText.present ? frontText.value : this.frontText,
@@ -2896,34 +2928,40 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     occlusionData: occlusionData.present
         ? occlusionData.value
         : this.occlusionData,
-    spacedDue: spacedDue ?? this.spacedDue,
+    spacedDue: spacedDue.present ? spacedDue.value : this.spacedDue,
     spacedStability: spacedStability.present
         ? spacedStability.value
         : this.spacedStability,
     spacedDifficulty: spacedDifficulty.present
         ? spacedDifficulty.value
         : this.spacedDifficulty,
-    spacedState: spacedState ?? this.spacedState,
-    spacedStep: spacedStep ?? this.spacedStep,
+    spacedState: spacedState.present ? spacedState.value : this.spacedState,
+    spacedStep: spacedStep.present ? spacedStep.value : this.spacedStep,
     spacedLastReview: spacedLastReview.present
         ? spacedLastReview.value
         : this.spacedLastReview,
-    continuousDue: continuousDue ?? this.continuousDue,
+    continuousDue: continuousDue.present
+        ? continuousDue.value
+        : this.continuousDue,
     continuousStability: continuousStability.present
         ? continuousStability.value
         : this.continuousStability,
     continuousDifficulty: continuousDifficulty.present
         ? continuousDifficulty.value
         : this.continuousDifficulty,
-    continuousState: continuousState ?? this.continuousState,
-    continuousStep: continuousStep ?? this.continuousStep,
+    continuousState: continuousState.present
+        ? continuousState.value
+        : this.continuousState,
+    continuousStep: continuousStep.present
+        ? continuousStep.value
+        : this.continuousStep,
     continuousLastReview: continuousLastReview.present
         ? continuousLastReview.value
         : this.continuousLastReview,
     deckId: deckId.present ? deckId.value : this.deckId,
     draftId: draftId.present ? draftId.value : this.draftId,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
+    createdAt: createdAt.present ? createdAt.value : this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
   );
   CardItem copyWithCompanion(CardItemsCompanion data) {
     return CardItem(
@@ -3069,22 +3107,22 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
   final Value<String?> frontImageId;
   final Value<String?> backImageId;
   final Value<CardOcclusion?> occlusionData;
-  final Value<DateTime> spacedDue;
+  final Value<DateTime?> spacedDue;
   final Value<double?> spacedStability;
   final Value<double?> spacedDifficulty;
-  final Value<int> spacedState;
-  final Value<int> spacedStep;
+  final Value<int?> spacedState;
+  final Value<int?> spacedStep;
   final Value<DateTime?> spacedLastReview;
-  final Value<DateTime> continuousDue;
+  final Value<DateTime?> continuousDue;
   final Value<double?> continuousStability;
   final Value<double?> continuousDifficulty;
-  final Value<int> continuousState;
-  final Value<int> continuousStep;
+  final Value<int?> continuousState;
+  final Value<int?> continuousStep;
   final Value<DateTime?> continuousLastReview;
   final Value<String?> deckId;
   final Value<String?> draftId;
-  final Value<DateTime> createdAt;
-  final Value<DateTime> updatedAt;
+  final Value<DateTime?> createdAt;
+  final Value<DateTime?> updatedAt;
   final Value<int> rowid;
   const CardItemsCompanion({
     this.id = const Value.absent(),
@@ -3198,22 +3236,22 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Value<String?>? frontImageId,
     Value<String?>? backImageId,
     Value<CardOcclusion?>? occlusionData,
-    Value<DateTime>? spacedDue,
+    Value<DateTime?>? spacedDue,
     Value<double?>? spacedStability,
     Value<double?>? spacedDifficulty,
-    Value<int>? spacedState,
-    Value<int>? spacedStep,
+    Value<int?>? spacedState,
+    Value<int?>? spacedStep,
     Value<DateTime?>? spacedLastReview,
-    Value<DateTime>? continuousDue,
+    Value<DateTime?>? continuousDue,
     Value<double?>? continuousStability,
     Value<double?>? continuousDifficulty,
-    Value<int>? continuousState,
-    Value<int>? continuousStep,
+    Value<int?>? continuousState,
+    Value<int?>? continuousStep,
     Value<DateTime?>? continuousLastReview,
     Value<String?>? deckId,
     Value<String?>? draftId,
-    Value<DateTime>? createdAt,
-    Value<DateTime>? updatedAt,
+    Value<DateTime?>? createdAt,
+    Value<DateTime?>? updatedAt,
     Value<int>? rowid,
   }) {
     return CardItemsCompanion(
@@ -6523,22 +6561,22 @@ typedef $$CardItemsTableCreateCompanionBuilder =
       Value<String?> frontImageId,
       Value<String?> backImageId,
       Value<CardOcclusion?> occlusionData,
-      Value<DateTime> spacedDue,
+      Value<DateTime?> spacedDue,
       Value<double?> spacedStability,
       Value<double?> spacedDifficulty,
-      Value<int> spacedState,
-      Value<int> spacedStep,
+      Value<int?> spacedState,
+      Value<int?> spacedStep,
       Value<DateTime?> spacedLastReview,
-      Value<DateTime> continuousDue,
+      Value<DateTime?> continuousDue,
       Value<double?> continuousStability,
       Value<double?> continuousDifficulty,
-      Value<int> continuousState,
-      Value<int> continuousStep,
+      Value<int?> continuousState,
+      Value<int?> continuousStep,
       Value<DateTime?> continuousLastReview,
       Value<String?> deckId,
       Value<String?> draftId,
-      Value<DateTime> createdAt,
-      Value<DateTime> updatedAt,
+      Value<DateTime?> createdAt,
+      Value<DateTime?> updatedAt,
       Value<int> rowid,
     });
 typedef $$CardItemsTableUpdateCompanionBuilder =
@@ -6549,22 +6587,22 @@ typedef $$CardItemsTableUpdateCompanionBuilder =
       Value<String?> frontImageId,
       Value<String?> backImageId,
       Value<CardOcclusion?> occlusionData,
-      Value<DateTime> spacedDue,
+      Value<DateTime?> spacedDue,
       Value<double?> spacedStability,
       Value<double?> spacedDifficulty,
-      Value<int> spacedState,
-      Value<int> spacedStep,
+      Value<int?> spacedState,
+      Value<int?> spacedStep,
       Value<DateTime?> spacedLastReview,
-      Value<DateTime> continuousDue,
+      Value<DateTime?> continuousDue,
       Value<double?> continuousStability,
       Value<double?> continuousDifficulty,
-      Value<int> continuousState,
-      Value<int> continuousStep,
+      Value<int?> continuousState,
+      Value<int?> continuousStep,
       Value<DateTime?> continuousLastReview,
       Value<String?> deckId,
       Value<String?> draftId,
-      Value<DateTime> createdAt,
-      Value<DateTime> updatedAt,
+      Value<DateTime?> createdAt,
+      Value<DateTime?> updatedAt,
       Value<int> rowid,
     });
 
@@ -7107,22 +7145,22 @@ class $$CardItemsTableTableManager
                 Value<String?> frontImageId = const Value.absent(),
                 Value<String?> backImageId = const Value.absent(),
                 Value<CardOcclusion?> occlusionData = const Value.absent(),
-                Value<DateTime> spacedDue = const Value.absent(),
+                Value<DateTime?> spacedDue = const Value.absent(),
                 Value<double?> spacedStability = const Value.absent(),
                 Value<double?> spacedDifficulty = const Value.absent(),
-                Value<int> spacedState = const Value.absent(),
-                Value<int> spacedStep = const Value.absent(),
+                Value<int?> spacedState = const Value.absent(),
+                Value<int?> spacedStep = const Value.absent(),
                 Value<DateTime?> spacedLastReview = const Value.absent(),
-                Value<DateTime> continuousDue = const Value.absent(),
+                Value<DateTime?> continuousDue = const Value.absent(),
                 Value<double?> continuousStability = const Value.absent(),
                 Value<double?> continuousDifficulty = const Value.absent(),
-                Value<int> continuousState = const Value.absent(),
-                Value<int> continuousStep = const Value.absent(),
+                Value<int?> continuousState = const Value.absent(),
+                Value<int?> continuousStep = const Value.absent(),
                 Value<DateTime?> continuousLastReview = const Value.absent(),
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CardItemsCompanion(
                 id: id,
@@ -7157,22 +7195,22 @@ class $$CardItemsTableTableManager
                 Value<String?> frontImageId = const Value.absent(),
                 Value<String?> backImageId = const Value.absent(),
                 Value<CardOcclusion?> occlusionData = const Value.absent(),
-                Value<DateTime> spacedDue = const Value.absent(),
+                Value<DateTime?> spacedDue = const Value.absent(),
                 Value<double?> spacedStability = const Value.absent(),
                 Value<double?> spacedDifficulty = const Value.absent(),
-                Value<int> spacedState = const Value.absent(),
-                Value<int> spacedStep = const Value.absent(),
+                Value<int?> spacedState = const Value.absent(),
+                Value<int?> spacedStep = const Value.absent(),
                 Value<DateTime?> spacedLastReview = const Value.absent(),
-                Value<DateTime> continuousDue = const Value.absent(),
+                Value<DateTime?> continuousDue = const Value.absent(),
                 Value<double?> continuousStability = const Value.absent(),
                 Value<double?> continuousDifficulty = const Value.absent(),
-                Value<int> continuousState = const Value.absent(),
-                Value<int> continuousStep = const Value.absent(),
+                Value<int?> continuousState = const Value.absent(),
+                Value<int?> continuousStep = const Value.absent(),
                 Value<DateTime?> continuousLastReview = const Value.absent(),
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CardItemsCompanion.insert(
                 id: id,
