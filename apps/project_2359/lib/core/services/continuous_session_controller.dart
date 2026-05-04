@@ -23,12 +23,12 @@ class ContinuousSessionController {
     return sorted;
   }
 
-  /// Calculates the retention for a card based on its spaced repetition stats.
+  /// Calculates the retention for a card based on its continuous repetition stats.
   static double _calculateRetention(CardItem card, DateTime now) {
-    if (card.spacedLastReview == null) return -1.0; // New cards first
+    if (card.continuousLastReview == null) return -1.0; // New cards first
     
-    final t = now.difference(card.spacedLastReview!).inSeconds / (24 * 3600);
-    final s = card.spacedStability ?? 0.0;
+    final t = now.difference(card.continuousLastReview!).inSeconds / (24 * 3600);
+    final s = card.continuousStability ?? 0.0;
     
     if (s <= 0) return 0.0;
     

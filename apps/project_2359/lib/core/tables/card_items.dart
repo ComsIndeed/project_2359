@@ -23,13 +23,13 @@ class CardItems extends Table {
   IntColumn get spacedStep => integer().withDefault(const Constant(0))();
   DateTimeColumn get spacedLastReview => dateTime().nullable()();
 
-  // --- Drill Mode (Standby) ---
-  DateTimeColumn get drillDue => dateTime().withDefault(currentDateAndTime)();
-  RealColumn get drillStability => real().nullable()();
-  RealColumn get drillDifficulty => real().nullable()();
-  IntColumn get drillState => integer().withDefault(const Constant(0))();
-  IntColumn get drillStep => integer().withDefault(const Constant(0))();
-  DateTimeColumn get drillLastReview => dateTime().nullable()();
+  // --- Continuous Mode (Standby) ---
+  DateTimeColumn get continuousDue => dateTime().withDefault(currentDateAndTime)();
+  RealColumn get continuousStability => real().nullable()();
+  RealColumn get continuousDifficulty => real().nullable()();
+  IntColumn get continuousState => integer().withDefault(const Constant(0))();
+  IntColumn get continuousStep => integer().withDefault(const Constant(0))();
+  DateTimeColumn get continuousLastReview => dateTime().nullable()();
 
   TextColumn get deckId => text().nullable().references(DeckItems, #id)();
   TextColumn get draftId =>

@@ -43,16 +43,10 @@ class SchedulingService {
       final nextFsrsCard = result.card;
 
       // 4. Update the card record
-      if (mode == StudySessionMode.spaced) {
-        final companion = _toCompanion(nextFsrsCard, mode);
-        await (_db.update(
-          _db.cardItems,
-        )..where((t) => t.id.equals(cardId))).write(companion);
-      } else {
-        // Continuous mode currently does NOT write back to the DB to keep 
-        // the main FSRS schedule pure.
-        AppLogger.debug('Continuous mode: skipping DB write for card $cardId', tag: _tag);
-      }
+      final companion = _toCompanion(nextFsrsCard, mode);
+      await (_db.update(
+        _db.cardItems,
+      )..where((t) => t.id.equals(cardId))).write(companion);
 
       // 5. Log the session event
       final scheduledDays = nextFsrsCard.due.difference(now).inDays;
@@ -110,15 +104,15 @@ class SchedulingService {
         lastReview: card.spacedLastReview,
       );
     } else {
-      // Even in continuous mode, we load from the drill columns if they exist
+      // Load from continuous columns
       return fsrs.Card(
         cardId: fCardId,
-        due: card.drillDue,
-        stability: card.drillStability,
-        difficulty: card.drillDifficulty,
-        state: fsrs.State.values[card.drillState],
-        step: card.drillStep,
-        lastReview: card.drillLastReview,
+        due: card.continuousDue,
+        stability: card.continuousStability,
+        difficulty: card.continuousDifficulty,
+        state: fsrs.State.values[card.continuousState],
+        step: card.continuousStep,
+        lastReview: card.continuousLastReview,
       );
     }
   }
@@ -136,12 +130,12 @@ class SchedulingService {
       );
     } else {
       return CardItemsCompanion(
-        drillDue: Value(card.due),
-        drillStability: Value(card.stability),
-        drillDifficulty: Value(card.difficulty),
-        drillState: Value(card.state.index),
-        drillStep: Value(card.step!),
-        drillLastReview: Value(card.lastReview),
+        continuousDue: Value(card.due),
+        continuousStability: Value(card.stability),
+        continuousDifficulty: Value(card.difficulty),
+        continuousState: Value(card.state.index),
+        continuousStep: Value(card.step!),
+        continuousLastReview: Value(card.lastReview),
       );
     }
   }
@@ -162,8 +156,8 @@ class SchedulingService {
       query.where((t) => t.spacedDue.isSmallerOrEqualValue(now));
       query.orderBy([(t) => OrderingTerm.asc(t.spacedDue)]);
     } else {
-      query.where((t) => t.drillDue.isSmallerOrEqualValue(now));
-      query.orderBy([(t) => OrderingTerm.asc(t.drillDue)]);
+      query.where((t) => t.continuousDue.isSmallerOrEqualValue(now));
+      query.orderBy([(t) => OrderingTerm.asc(t.continuousDue)]);
     }
 
     return query.watch();
@@ -182,7 +176,7 @@ class SchedulingService {
     if (mode == StudySessionMode.spaced) {
       query.where(_db.cardItems.spacedDue.isSmallerOrEqualValue(now));
     } else {
-      query.where(_db.cardItems.drillDue.isSmallerOrEqualValue(now));
+      query.where(_db.cardItems.continuousDue.isSmallerOrEqualValue(now));
     }
 
     return query
@@ -212,7 +206,7 @@ class SchedulingService {
     if (mode == StudySessionMode.spaced) {
       query.where(_db.cardItems.spacedDue.isSmallerOrEqualValue(now));
     } else {
-      query.where(_db.cardItems.drillDue.isSmallerOrEqualValue(now));
+      query.where(_db.cardItems.continuousDue.isSmallerOrEqualValue(now));
     }
 
     return query.map((row) => row.read(count) ?? 0).watchSingle();
@@ -230,7 +224,7 @@ class SchedulingService {
     if (mode == StudySessionMode.spaced) {
       query.where(_db.cardItems.spacedDue.isSmallerOrEqualValue(now));
     } else {
-      query.where(_db.cardItems.drillDue.isSmallerOrEqualValue(now));
+      query.where(_db.cardItems.continuousDue.isSmallerOrEqualValue(now));
     }
 
     return query
@@ -262,8 +256,8 @@ class SchedulingService {
       query.where(_db.cardItems.spacedDue.isSmallerOrEqualValue(now));
       query.orderBy([OrderingTerm.asc(_db.cardItems.spacedDue)]);
     } else {
-      query.where(_db.cardItems.drillDue.isSmallerOrEqualValue(now));
-      query.orderBy([OrderingTerm.asc(_db.cardItems.drillDue)]);
+      query.where(_db.cardItems.continuousDue.isSmallerOrEqualValue(now));
+      query.orderBy([OrderingTerm.asc(_db.cardItems.continuousDue)]);
     }
 
     return query.watch().map(
@@ -286,8 +280,8 @@ class SchedulingService {
       query.where((t) => t.spacedDue.isSmallerOrEqualValue(now));
       query.orderBy([(t) => OrderingTerm.asc(t.spacedDue)]);
     } else {
-      query.where((t) => t.drillDue.isSmallerOrEqualValue(now));
-      query.orderBy([(t) => OrderingTerm.asc(t.drillDue)]);
+      query.where((t) => t.continuousDue.isSmallerOrEqualValue(now));
+      query.orderBy([(t) => OrderingTerm.asc(t.continuousDue)]);
     }
 
     return query.watch();

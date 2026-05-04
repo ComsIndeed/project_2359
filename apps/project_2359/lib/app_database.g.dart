@@ -2208,71 +2208,71 @@ class $CardItemsTable extends CardItems
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
-  static const VerificationMeta _drillDueMeta = const VerificationMeta(
-    'drillDue',
+  static const VerificationMeta _continuousDueMeta = const VerificationMeta(
+    'continuousDue',
   );
   @override
-  late final GeneratedColumn<DateTime> drillDue = GeneratedColumn<DateTime>(
-    'drill_due',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: currentDateAndTime,
-  );
-  static const VerificationMeta _drillStabilityMeta = const VerificationMeta(
-    'drillStability',
-  );
-  @override
-  late final GeneratedColumn<double> drillStability = GeneratedColumn<double>(
-    'drill_stability',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _drillDifficultyMeta = const VerificationMeta(
-    'drillDifficulty',
-  );
-  @override
-  late final GeneratedColumn<double> drillDifficulty = GeneratedColumn<double>(
-    'drill_difficulty',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _drillStateMeta = const VerificationMeta(
-    'drillState',
-  );
-  @override
-  late final GeneratedColumn<int> drillState = GeneratedColumn<int>(
-    'drill_state',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _drillStepMeta = const VerificationMeta(
-    'drillStep',
-  );
-  @override
-  late final GeneratedColumn<int> drillStep = GeneratedColumn<int>(
-    'drill_step',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _drillLastReviewMeta = const VerificationMeta(
-    'drillLastReview',
-  );
-  @override
-  late final GeneratedColumn<DateTime> drillLastReview =
+  late final GeneratedColumn<DateTime> continuousDue =
       GeneratedColumn<DateTime>(
-        'drill_last_review',
+        'continuous_due',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        defaultValue: currentDateAndTime,
+      );
+  static const VerificationMeta _continuousStabilityMeta =
+      const VerificationMeta('continuousStability');
+  @override
+  late final GeneratedColumn<double> continuousStability =
+      GeneratedColumn<double>(
+        'continuous_stability',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _continuousDifficultyMeta =
+      const VerificationMeta('continuousDifficulty');
+  @override
+  late final GeneratedColumn<double> continuousDifficulty =
+      GeneratedColumn<double>(
+        'continuous_difficulty',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _continuousStateMeta = const VerificationMeta(
+    'continuousState',
+  );
+  @override
+  late final GeneratedColumn<int> continuousState = GeneratedColumn<int>(
+    'continuous_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _continuousStepMeta = const VerificationMeta(
+    'continuousStep',
+  );
+  @override
+  late final GeneratedColumn<int> continuousStep = GeneratedColumn<int>(
+    'continuous_step',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _continuousLastReviewMeta =
+      const VerificationMeta('continuousLastReview');
+  @override
+  late final GeneratedColumn<DateTime> continuousLastReview =
+      GeneratedColumn<DateTime>(
+        'continuous_last_review',
         aliasedName,
         true,
         type: DriftSqlType.dateTime,
@@ -2342,12 +2342,12 @@ class $CardItemsTable extends CardItems
     spacedState,
     spacedStep,
     spacedLastReview,
-    drillDue,
-    drillStability,
-    drillDifficulty,
-    drillState,
-    drillStep,
-    drillLastReview,
+    continuousDue,
+    continuousStability,
+    continuousDifficulty,
+    continuousState,
+    continuousStep,
+    continuousLastReview,
     deckId,
     draftId,
     createdAt,
@@ -2448,48 +2448,57 @@ class $CardItemsTable extends CardItems
         ),
       );
     }
-    if (data.containsKey('drill_due')) {
+    if (data.containsKey('continuous_due')) {
       context.handle(
-        _drillDueMeta,
-        drillDue.isAcceptableOrUnknown(data['drill_due']!, _drillDueMeta),
-      );
-    }
-    if (data.containsKey('drill_stability')) {
-      context.handle(
-        _drillStabilityMeta,
-        drillStability.isAcceptableOrUnknown(
-          data['drill_stability']!,
-          _drillStabilityMeta,
+        _continuousDueMeta,
+        continuousDue.isAcceptableOrUnknown(
+          data['continuous_due']!,
+          _continuousDueMeta,
         ),
       );
     }
-    if (data.containsKey('drill_difficulty')) {
+    if (data.containsKey('continuous_stability')) {
       context.handle(
-        _drillDifficultyMeta,
-        drillDifficulty.isAcceptableOrUnknown(
-          data['drill_difficulty']!,
-          _drillDifficultyMeta,
+        _continuousStabilityMeta,
+        continuousStability.isAcceptableOrUnknown(
+          data['continuous_stability']!,
+          _continuousStabilityMeta,
         ),
       );
     }
-    if (data.containsKey('drill_state')) {
+    if (data.containsKey('continuous_difficulty')) {
       context.handle(
-        _drillStateMeta,
-        drillState.isAcceptableOrUnknown(data['drill_state']!, _drillStateMeta),
+        _continuousDifficultyMeta,
+        continuousDifficulty.isAcceptableOrUnknown(
+          data['continuous_difficulty']!,
+          _continuousDifficultyMeta,
+        ),
       );
     }
-    if (data.containsKey('drill_step')) {
+    if (data.containsKey('continuous_state')) {
       context.handle(
-        _drillStepMeta,
-        drillStep.isAcceptableOrUnknown(data['drill_step']!, _drillStepMeta),
+        _continuousStateMeta,
+        continuousState.isAcceptableOrUnknown(
+          data['continuous_state']!,
+          _continuousStateMeta,
+        ),
       );
     }
-    if (data.containsKey('drill_last_review')) {
+    if (data.containsKey('continuous_step')) {
       context.handle(
-        _drillLastReviewMeta,
-        drillLastReview.isAcceptableOrUnknown(
-          data['drill_last_review']!,
-          _drillLastReviewMeta,
+        _continuousStepMeta,
+        continuousStep.isAcceptableOrUnknown(
+          data['continuous_step']!,
+          _continuousStepMeta,
+        ),
+      );
+    }
+    if (data.containsKey('continuous_last_review')) {
+      context.handle(
+        _continuousLastReviewMeta,
+        continuousLastReview.isAcceptableOrUnknown(
+          data['continuous_last_review']!,
+          _continuousLastReviewMeta,
         ),
       );
     }
@@ -2576,29 +2585,29 @@ class $CardItemsTable extends CardItems
         DriftSqlType.dateTime,
         data['${effectivePrefix}spaced_last_review'],
       ),
-      drillDue: attachedDatabase.typeMapping.read(
+      continuousDue: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
-        data['${effectivePrefix}drill_due'],
+        data['${effectivePrefix}continuous_due'],
       )!,
-      drillStability: attachedDatabase.typeMapping.read(
+      continuousStability: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
-        data['${effectivePrefix}drill_stability'],
+        data['${effectivePrefix}continuous_stability'],
       ),
-      drillDifficulty: attachedDatabase.typeMapping.read(
+      continuousDifficulty: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
-        data['${effectivePrefix}drill_difficulty'],
+        data['${effectivePrefix}continuous_difficulty'],
       ),
-      drillState: attachedDatabase.typeMapping.read(
+      continuousState: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}drill_state'],
+        data['${effectivePrefix}continuous_state'],
       )!,
-      drillStep: attachedDatabase.typeMapping.read(
+      continuousStep: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}drill_step'],
+        data['${effectivePrefix}continuous_step'],
       )!,
-      drillLastReview: attachedDatabase.typeMapping.read(
+      continuousLastReview: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
-        data['${effectivePrefix}drill_last_review'],
+        data['${effectivePrefix}continuous_last_review'],
       ),
       deckId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -2643,12 +2652,12 @@ class CardItem extends DataClass implements Insertable<CardItem> {
   final int spacedState;
   final int spacedStep;
   final DateTime? spacedLastReview;
-  final DateTime drillDue;
-  final double? drillStability;
-  final double? drillDifficulty;
-  final int drillState;
-  final int drillStep;
-  final DateTime? drillLastReview;
+  final DateTime continuousDue;
+  final double? continuousStability;
+  final double? continuousDifficulty;
+  final int continuousState;
+  final int continuousStep;
+  final DateTime? continuousLastReview;
   final String? deckId;
   final String? draftId;
   final DateTime createdAt;
@@ -2666,12 +2675,12 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     required this.spacedState,
     required this.spacedStep,
     this.spacedLastReview,
-    required this.drillDue,
-    this.drillStability,
-    this.drillDifficulty,
-    required this.drillState,
-    required this.drillStep,
-    this.drillLastReview,
+    required this.continuousDue,
+    this.continuousStability,
+    this.continuousDifficulty,
+    required this.continuousState,
+    required this.continuousStep,
+    this.continuousLastReview,
     this.deckId,
     this.draftId,
     required this.createdAt,
@@ -2710,17 +2719,17 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     if (!nullToAbsent || spacedLastReview != null) {
       map['spaced_last_review'] = Variable<DateTime>(spacedLastReview);
     }
-    map['drill_due'] = Variable<DateTime>(drillDue);
-    if (!nullToAbsent || drillStability != null) {
-      map['drill_stability'] = Variable<double>(drillStability);
+    map['continuous_due'] = Variable<DateTime>(continuousDue);
+    if (!nullToAbsent || continuousStability != null) {
+      map['continuous_stability'] = Variable<double>(continuousStability);
     }
-    if (!nullToAbsent || drillDifficulty != null) {
-      map['drill_difficulty'] = Variable<double>(drillDifficulty);
+    if (!nullToAbsent || continuousDifficulty != null) {
+      map['continuous_difficulty'] = Variable<double>(continuousDifficulty);
     }
-    map['drill_state'] = Variable<int>(drillState);
-    map['drill_step'] = Variable<int>(drillStep);
-    if (!nullToAbsent || drillLastReview != null) {
-      map['drill_last_review'] = Variable<DateTime>(drillLastReview);
+    map['continuous_state'] = Variable<int>(continuousState);
+    map['continuous_step'] = Variable<int>(continuousStep);
+    if (!nullToAbsent || continuousLastReview != null) {
+      map['continuous_last_review'] = Variable<DateTime>(continuousLastReview);
     }
     if (!nullToAbsent || deckId != null) {
       map['deck_id'] = Variable<String>(deckId);
@@ -2763,18 +2772,18 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       spacedLastReview: spacedLastReview == null && nullToAbsent
           ? const Value.absent()
           : Value(spacedLastReview),
-      drillDue: Value(drillDue),
-      drillStability: drillStability == null && nullToAbsent
+      continuousDue: Value(continuousDue),
+      continuousStability: continuousStability == null && nullToAbsent
           ? const Value.absent()
-          : Value(drillStability),
-      drillDifficulty: drillDifficulty == null && nullToAbsent
+          : Value(continuousStability),
+      continuousDifficulty: continuousDifficulty == null && nullToAbsent
           ? const Value.absent()
-          : Value(drillDifficulty),
-      drillState: Value(drillState),
-      drillStep: Value(drillStep),
-      drillLastReview: drillLastReview == null && nullToAbsent
+          : Value(continuousDifficulty),
+      continuousState: Value(continuousState),
+      continuousStep: Value(continuousStep),
+      continuousLastReview: continuousLastReview == null && nullToAbsent
           ? const Value.absent()
-          : Value(drillLastReview),
+          : Value(continuousLastReview),
       deckId: deckId == null && nullToAbsent
           ? const Value.absent()
           : Value(deckId),
@@ -2806,12 +2815,18 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       spacedLastReview: serializer.fromJson<DateTime?>(
         json['spacedLastReview'],
       ),
-      drillDue: serializer.fromJson<DateTime>(json['drillDue']),
-      drillStability: serializer.fromJson<double?>(json['drillStability']),
-      drillDifficulty: serializer.fromJson<double?>(json['drillDifficulty']),
-      drillState: serializer.fromJson<int>(json['drillState']),
-      drillStep: serializer.fromJson<int>(json['drillStep']),
-      drillLastReview: serializer.fromJson<DateTime?>(json['drillLastReview']),
+      continuousDue: serializer.fromJson<DateTime>(json['continuousDue']),
+      continuousStability: serializer.fromJson<double?>(
+        json['continuousStability'],
+      ),
+      continuousDifficulty: serializer.fromJson<double?>(
+        json['continuousDifficulty'],
+      ),
+      continuousState: serializer.fromJson<int>(json['continuousState']),
+      continuousStep: serializer.fromJson<int>(json['continuousStep']),
+      continuousLastReview: serializer.fromJson<DateTime?>(
+        json['continuousLastReview'],
+      ),
       deckId: serializer.fromJson<String?>(json['deckId']),
       draftId: serializer.fromJson<String?>(json['draftId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -2834,12 +2849,14 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       'spacedState': serializer.toJson<int>(spacedState),
       'spacedStep': serializer.toJson<int>(spacedStep),
       'spacedLastReview': serializer.toJson<DateTime?>(spacedLastReview),
-      'drillDue': serializer.toJson<DateTime>(drillDue),
-      'drillStability': serializer.toJson<double?>(drillStability),
-      'drillDifficulty': serializer.toJson<double?>(drillDifficulty),
-      'drillState': serializer.toJson<int>(drillState),
-      'drillStep': serializer.toJson<int>(drillStep),
-      'drillLastReview': serializer.toJson<DateTime?>(drillLastReview),
+      'continuousDue': serializer.toJson<DateTime>(continuousDue),
+      'continuousStability': serializer.toJson<double?>(continuousStability),
+      'continuousDifficulty': serializer.toJson<double?>(continuousDifficulty),
+      'continuousState': serializer.toJson<int>(continuousState),
+      'continuousStep': serializer.toJson<int>(continuousStep),
+      'continuousLastReview': serializer.toJson<DateTime?>(
+        continuousLastReview,
+      ),
       'deckId': serializer.toJson<String?>(deckId),
       'draftId': serializer.toJson<String?>(draftId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -2860,12 +2877,12 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     int? spacedState,
     int? spacedStep,
     Value<DateTime?> spacedLastReview = const Value.absent(),
-    DateTime? drillDue,
-    Value<double?> drillStability = const Value.absent(),
-    Value<double?> drillDifficulty = const Value.absent(),
-    int? drillState,
-    int? drillStep,
-    Value<DateTime?> drillLastReview = const Value.absent(),
+    DateTime? continuousDue,
+    Value<double?> continuousStability = const Value.absent(),
+    Value<double?> continuousDifficulty = const Value.absent(),
+    int? continuousState,
+    int? continuousStep,
+    Value<DateTime?> continuousLastReview = const Value.absent(),
     Value<String?> deckId = const Value.absent(),
     Value<String?> draftId = const Value.absent(),
     DateTime? createdAt,
@@ -2891,18 +2908,18 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     spacedLastReview: spacedLastReview.present
         ? spacedLastReview.value
         : this.spacedLastReview,
-    drillDue: drillDue ?? this.drillDue,
-    drillStability: drillStability.present
-        ? drillStability.value
-        : this.drillStability,
-    drillDifficulty: drillDifficulty.present
-        ? drillDifficulty.value
-        : this.drillDifficulty,
-    drillState: drillState ?? this.drillState,
-    drillStep: drillStep ?? this.drillStep,
-    drillLastReview: drillLastReview.present
-        ? drillLastReview.value
-        : this.drillLastReview,
+    continuousDue: continuousDue ?? this.continuousDue,
+    continuousStability: continuousStability.present
+        ? continuousStability.value
+        : this.continuousStability,
+    continuousDifficulty: continuousDifficulty.present
+        ? continuousDifficulty.value
+        : this.continuousDifficulty,
+    continuousState: continuousState ?? this.continuousState,
+    continuousStep: continuousStep ?? this.continuousStep,
+    continuousLastReview: continuousLastReview.present
+        ? continuousLastReview.value
+        : this.continuousLastReview,
     deckId: deckId.present ? deckId.value : this.deckId,
     draftId: draftId.present ? draftId.value : this.draftId,
     createdAt: createdAt ?? this.createdAt,
@@ -2938,20 +2955,24 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       spacedLastReview: data.spacedLastReview.present
           ? data.spacedLastReview.value
           : this.spacedLastReview,
-      drillDue: data.drillDue.present ? data.drillDue.value : this.drillDue,
-      drillStability: data.drillStability.present
-          ? data.drillStability.value
-          : this.drillStability,
-      drillDifficulty: data.drillDifficulty.present
-          ? data.drillDifficulty.value
-          : this.drillDifficulty,
-      drillState: data.drillState.present
-          ? data.drillState.value
-          : this.drillState,
-      drillStep: data.drillStep.present ? data.drillStep.value : this.drillStep,
-      drillLastReview: data.drillLastReview.present
-          ? data.drillLastReview.value
-          : this.drillLastReview,
+      continuousDue: data.continuousDue.present
+          ? data.continuousDue.value
+          : this.continuousDue,
+      continuousStability: data.continuousStability.present
+          ? data.continuousStability.value
+          : this.continuousStability,
+      continuousDifficulty: data.continuousDifficulty.present
+          ? data.continuousDifficulty.value
+          : this.continuousDifficulty,
+      continuousState: data.continuousState.present
+          ? data.continuousState.value
+          : this.continuousState,
+      continuousStep: data.continuousStep.present
+          ? data.continuousStep.value
+          : this.continuousStep,
+      continuousLastReview: data.continuousLastReview.present
+          ? data.continuousLastReview.value
+          : this.continuousLastReview,
       deckId: data.deckId.present ? data.deckId.value : this.deckId,
       draftId: data.draftId.present ? data.draftId.value : this.draftId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -2974,12 +2995,12 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           ..write('spacedState: $spacedState, ')
           ..write('spacedStep: $spacedStep, ')
           ..write('spacedLastReview: $spacedLastReview, ')
-          ..write('drillDue: $drillDue, ')
-          ..write('drillStability: $drillStability, ')
-          ..write('drillDifficulty: $drillDifficulty, ')
-          ..write('drillState: $drillState, ')
-          ..write('drillStep: $drillStep, ')
-          ..write('drillLastReview: $drillLastReview, ')
+          ..write('continuousDue: $continuousDue, ')
+          ..write('continuousStability: $continuousStability, ')
+          ..write('continuousDifficulty: $continuousDifficulty, ')
+          ..write('continuousState: $continuousState, ')
+          ..write('continuousStep: $continuousStep, ')
+          ..write('continuousLastReview: $continuousLastReview, ')
           ..write('deckId: $deckId, ')
           ..write('draftId: $draftId, ')
           ..write('createdAt: $createdAt, ')
@@ -3002,12 +3023,12 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     spacedState,
     spacedStep,
     spacedLastReview,
-    drillDue,
-    drillStability,
-    drillDifficulty,
-    drillState,
-    drillStep,
-    drillLastReview,
+    continuousDue,
+    continuousStability,
+    continuousDifficulty,
+    continuousState,
+    continuousStep,
+    continuousLastReview,
     deckId,
     draftId,
     createdAt,
@@ -3029,12 +3050,12 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           other.spacedState == this.spacedState &&
           other.spacedStep == this.spacedStep &&
           other.spacedLastReview == this.spacedLastReview &&
-          other.drillDue == this.drillDue &&
-          other.drillStability == this.drillStability &&
-          other.drillDifficulty == this.drillDifficulty &&
-          other.drillState == this.drillState &&
-          other.drillStep == this.drillStep &&
-          other.drillLastReview == this.drillLastReview &&
+          other.continuousDue == this.continuousDue &&
+          other.continuousStability == this.continuousStability &&
+          other.continuousDifficulty == this.continuousDifficulty &&
+          other.continuousState == this.continuousState &&
+          other.continuousStep == this.continuousStep &&
+          other.continuousLastReview == this.continuousLastReview &&
           other.deckId == this.deckId &&
           other.draftId == this.draftId &&
           other.createdAt == this.createdAt &&
@@ -3054,12 +3075,12 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
   final Value<int> spacedState;
   final Value<int> spacedStep;
   final Value<DateTime?> spacedLastReview;
-  final Value<DateTime> drillDue;
-  final Value<double?> drillStability;
-  final Value<double?> drillDifficulty;
-  final Value<int> drillState;
-  final Value<int> drillStep;
-  final Value<DateTime?> drillLastReview;
+  final Value<DateTime> continuousDue;
+  final Value<double?> continuousStability;
+  final Value<double?> continuousDifficulty;
+  final Value<int> continuousState;
+  final Value<int> continuousStep;
+  final Value<DateTime?> continuousLastReview;
   final Value<String?> deckId;
   final Value<String?> draftId;
   final Value<DateTime> createdAt;
@@ -3078,12 +3099,12 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     this.spacedState = const Value.absent(),
     this.spacedStep = const Value.absent(),
     this.spacedLastReview = const Value.absent(),
-    this.drillDue = const Value.absent(),
-    this.drillStability = const Value.absent(),
-    this.drillDifficulty = const Value.absent(),
-    this.drillState = const Value.absent(),
-    this.drillStep = const Value.absent(),
-    this.drillLastReview = const Value.absent(),
+    this.continuousDue = const Value.absent(),
+    this.continuousStability = const Value.absent(),
+    this.continuousDifficulty = const Value.absent(),
+    this.continuousState = const Value.absent(),
+    this.continuousStep = const Value.absent(),
+    this.continuousLastReview = const Value.absent(),
     this.deckId = const Value.absent(),
     this.draftId = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -3103,12 +3124,12 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     this.spacedState = const Value.absent(),
     this.spacedStep = const Value.absent(),
     this.spacedLastReview = const Value.absent(),
-    this.drillDue = const Value.absent(),
-    this.drillStability = const Value.absent(),
-    this.drillDifficulty = const Value.absent(),
-    this.drillState = const Value.absent(),
-    this.drillStep = const Value.absent(),
-    this.drillLastReview = const Value.absent(),
+    this.continuousDue = const Value.absent(),
+    this.continuousStability = const Value.absent(),
+    this.continuousDifficulty = const Value.absent(),
+    this.continuousState = const Value.absent(),
+    this.continuousStep = const Value.absent(),
+    this.continuousLastReview = const Value.absent(),
     this.deckId = const Value.absent(),
     this.draftId = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -3128,12 +3149,12 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Expression<int>? spacedState,
     Expression<int>? spacedStep,
     Expression<DateTime>? spacedLastReview,
-    Expression<DateTime>? drillDue,
-    Expression<double>? drillStability,
-    Expression<double>? drillDifficulty,
-    Expression<int>? drillState,
-    Expression<int>? drillStep,
-    Expression<DateTime>? drillLastReview,
+    Expression<DateTime>? continuousDue,
+    Expression<double>? continuousStability,
+    Expression<double>? continuousDifficulty,
+    Expression<int>? continuousState,
+    Expression<int>? continuousStep,
+    Expression<DateTime>? continuousLastReview,
     Expression<String>? deckId,
     Expression<String>? draftId,
     Expression<DateTime>? createdAt,
@@ -3153,12 +3174,15 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
       if (spacedState != null) 'spaced_state': spacedState,
       if (spacedStep != null) 'spaced_step': spacedStep,
       if (spacedLastReview != null) 'spaced_last_review': spacedLastReview,
-      if (drillDue != null) 'drill_due': drillDue,
-      if (drillStability != null) 'drill_stability': drillStability,
-      if (drillDifficulty != null) 'drill_difficulty': drillDifficulty,
-      if (drillState != null) 'drill_state': drillState,
-      if (drillStep != null) 'drill_step': drillStep,
-      if (drillLastReview != null) 'drill_last_review': drillLastReview,
+      if (continuousDue != null) 'continuous_due': continuousDue,
+      if (continuousStability != null)
+        'continuous_stability': continuousStability,
+      if (continuousDifficulty != null)
+        'continuous_difficulty': continuousDifficulty,
+      if (continuousState != null) 'continuous_state': continuousState,
+      if (continuousStep != null) 'continuous_step': continuousStep,
+      if (continuousLastReview != null)
+        'continuous_last_review': continuousLastReview,
       if (deckId != null) 'deck_id': deckId,
       if (draftId != null) 'draft_id': draftId,
       if (createdAt != null) 'created_at': createdAt,
@@ -3180,12 +3204,12 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Value<int>? spacedState,
     Value<int>? spacedStep,
     Value<DateTime?>? spacedLastReview,
-    Value<DateTime>? drillDue,
-    Value<double?>? drillStability,
-    Value<double?>? drillDifficulty,
-    Value<int>? drillState,
-    Value<int>? drillStep,
-    Value<DateTime?>? drillLastReview,
+    Value<DateTime>? continuousDue,
+    Value<double?>? continuousStability,
+    Value<double?>? continuousDifficulty,
+    Value<int>? continuousState,
+    Value<int>? continuousStep,
+    Value<DateTime?>? continuousLastReview,
     Value<String?>? deckId,
     Value<String?>? draftId,
     Value<DateTime>? createdAt,
@@ -3205,12 +3229,12 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
       spacedState: spacedState ?? this.spacedState,
       spacedStep: spacedStep ?? this.spacedStep,
       spacedLastReview: spacedLastReview ?? this.spacedLastReview,
-      drillDue: drillDue ?? this.drillDue,
-      drillStability: drillStability ?? this.drillStability,
-      drillDifficulty: drillDifficulty ?? this.drillDifficulty,
-      drillState: drillState ?? this.drillState,
-      drillStep: drillStep ?? this.drillStep,
-      drillLastReview: drillLastReview ?? this.drillLastReview,
+      continuousDue: continuousDue ?? this.continuousDue,
+      continuousStability: continuousStability ?? this.continuousStability,
+      continuousDifficulty: continuousDifficulty ?? this.continuousDifficulty,
+      continuousState: continuousState ?? this.continuousState,
+      continuousStep: continuousStep ?? this.continuousStep,
+      continuousLastReview: continuousLastReview ?? this.continuousLastReview,
       deckId: deckId ?? this.deckId,
       draftId: draftId ?? this.draftId,
       createdAt: createdAt ?? this.createdAt,
@@ -3260,23 +3284,27 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     if (spacedLastReview.present) {
       map['spaced_last_review'] = Variable<DateTime>(spacedLastReview.value);
     }
-    if (drillDue.present) {
-      map['drill_due'] = Variable<DateTime>(drillDue.value);
+    if (continuousDue.present) {
+      map['continuous_due'] = Variable<DateTime>(continuousDue.value);
     }
-    if (drillStability.present) {
-      map['drill_stability'] = Variable<double>(drillStability.value);
+    if (continuousStability.present) {
+      map['continuous_stability'] = Variable<double>(continuousStability.value);
     }
-    if (drillDifficulty.present) {
-      map['drill_difficulty'] = Variable<double>(drillDifficulty.value);
+    if (continuousDifficulty.present) {
+      map['continuous_difficulty'] = Variable<double>(
+        continuousDifficulty.value,
+      );
     }
-    if (drillState.present) {
-      map['drill_state'] = Variable<int>(drillState.value);
+    if (continuousState.present) {
+      map['continuous_state'] = Variable<int>(continuousState.value);
     }
-    if (drillStep.present) {
-      map['drill_step'] = Variable<int>(drillStep.value);
+    if (continuousStep.present) {
+      map['continuous_step'] = Variable<int>(continuousStep.value);
     }
-    if (drillLastReview.present) {
-      map['drill_last_review'] = Variable<DateTime>(drillLastReview.value);
+    if (continuousLastReview.present) {
+      map['continuous_last_review'] = Variable<DateTime>(
+        continuousLastReview.value,
+      );
     }
     if (deckId.present) {
       map['deck_id'] = Variable<String>(deckId.value);
@@ -3311,12 +3339,12 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
           ..write('spacedState: $spacedState, ')
           ..write('spacedStep: $spacedStep, ')
           ..write('spacedLastReview: $spacedLastReview, ')
-          ..write('drillDue: $drillDue, ')
-          ..write('drillStability: $drillStability, ')
-          ..write('drillDifficulty: $drillDifficulty, ')
-          ..write('drillState: $drillState, ')
-          ..write('drillStep: $drillStep, ')
-          ..write('drillLastReview: $drillLastReview, ')
+          ..write('continuousDue: $continuousDue, ')
+          ..write('continuousStability: $continuousStability, ')
+          ..write('continuousDifficulty: $continuousDifficulty, ')
+          ..write('continuousState: $continuousState, ')
+          ..write('continuousStep: $continuousStep, ')
+          ..write('continuousLastReview: $continuousLastReview, ')
           ..write('deckId: $deckId, ')
           ..write('draftId: $draftId, ')
           ..write('createdAt: $createdAt, ')
@@ -6501,12 +6529,12 @@ typedef $$CardItemsTableCreateCompanionBuilder =
       Value<int> spacedState,
       Value<int> spacedStep,
       Value<DateTime?> spacedLastReview,
-      Value<DateTime> drillDue,
-      Value<double?> drillStability,
-      Value<double?> drillDifficulty,
-      Value<int> drillState,
-      Value<int> drillStep,
-      Value<DateTime?> drillLastReview,
+      Value<DateTime> continuousDue,
+      Value<double?> continuousStability,
+      Value<double?> continuousDifficulty,
+      Value<int> continuousState,
+      Value<int> continuousStep,
+      Value<DateTime?> continuousLastReview,
       Value<String?> deckId,
       Value<String?> draftId,
       Value<DateTime> createdAt,
@@ -6527,12 +6555,12 @@ typedef $$CardItemsTableUpdateCompanionBuilder =
       Value<int> spacedState,
       Value<int> spacedStep,
       Value<DateTime?> spacedLastReview,
-      Value<DateTime> drillDue,
-      Value<double?> drillStability,
-      Value<double?> drillDifficulty,
-      Value<int> drillState,
-      Value<int> drillStep,
-      Value<DateTime?> drillLastReview,
+      Value<DateTime> continuousDue,
+      Value<double?> continuousStability,
+      Value<double?> continuousDifficulty,
+      Value<int> continuousState,
+      Value<int> continuousStep,
+      Value<DateTime?> continuousLastReview,
       Value<String?> deckId,
       Value<String?> draftId,
       Value<DateTime> createdAt,
@@ -6654,33 +6682,33 @@ class $$CardItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get drillDue => $composableBuilder(
-    column: $table.drillDue,
+  ColumnFilters<DateTime> get continuousDue => $composableBuilder(
+    column: $table.continuousDue,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get drillStability => $composableBuilder(
-    column: $table.drillStability,
+  ColumnFilters<double> get continuousStability => $composableBuilder(
+    column: $table.continuousStability,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get drillDifficulty => $composableBuilder(
-    column: $table.drillDifficulty,
+  ColumnFilters<double> get continuousDifficulty => $composableBuilder(
+    column: $table.continuousDifficulty,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get drillState => $composableBuilder(
-    column: $table.drillState,
+  ColumnFilters<int> get continuousState => $composableBuilder(
+    column: $table.continuousState,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get drillStep => $composableBuilder(
-    column: $table.drillStep,
+  ColumnFilters<int> get continuousStep => $composableBuilder(
+    column: $table.continuousStep,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get drillLastReview => $composableBuilder(
-    column: $table.drillLastReview,
+  ColumnFilters<DateTime> get continuousLastReview => $composableBuilder(
+    column: $table.continuousLastReview,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6811,33 +6839,33 @@ class $$CardItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get drillDue => $composableBuilder(
-    column: $table.drillDue,
+  ColumnOrderings<DateTime> get continuousDue => $composableBuilder(
+    column: $table.continuousDue,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get drillStability => $composableBuilder(
-    column: $table.drillStability,
+  ColumnOrderings<double> get continuousStability => $composableBuilder(
+    column: $table.continuousStability,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get drillDifficulty => $composableBuilder(
-    column: $table.drillDifficulty,
+  ColumnOrderings<double> get continuousDifficulty => $composableBuilder(
+    column: $table.continuousDifficulty,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get drillState => $composableBuilder(
-    column: $table.drillState,
+  ColumnOrderings<int> get continuousState => $composableBuilder(
+    column: $table.continuousState,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get drillStep => $composableBuilder(
-    column: $table.drillStep,
+  ColumnOrderings<int> get continuousStep => $composableBuilder(
+    column: $table.continuousStep,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get drillLastReview => $composableBuilder(
-    column: $table.drillLastReview,
+  ColumnOrderings<DateTime> get continuousLastReview => $composableBuilder(
+    column: $table.continuousLastReview,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6961,29 +6989,33 @@ class $$CardItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<DateTime> get drillDue =>
-      $composableBuilder(column: $table.drillDue, builder: (column) => column);
-
-  GeneratedColumn<double> get drillStability => $composableBuilder(
-    column: $table.drillStability,
+  GeneratedColumn<DateTime> get continuousDue => $composableBuilder(
+    column: $table.continuousDue,
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get drillDifficulty => $composableBuilder(
-    column: $table.drillDifficulty,
+  GeneratedColumn<double> get continuousStability => $composableBuilder(
+    column: $table.continuousStability,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get drillState => $composableBuilder(
-    column: $table.drillState,
+  GeneratedColumn<double> get continuousDifficulty => $composableBuilder(
+    column: $table.continuousDifficulty,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get drillStep =>
-      $composableBuilder(column: $table.drillStep, builder: (column) => column);
+  GeneratedColumn<int> get continuousState => $composableBuilder(
+    column: $table.continuousState,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<DateTime> get drillLastReview => $composableBuilder(
-    column: $table.drillLastReview,
+  GeneratedColumn<int> get continuousStep => $composableBuilder(
+    column: $table.continuousStep,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get continuousLastReview => $composableBuilder(
+    column: $table.continuousLastReview,
     builder: (column) => column,
   );
 
@@ -7081,12 +7113,12 @@ class $$CardItemsTableTableManager
                 Value<int> spacedState = const Value.absent(),
                 Value<int> spacedStep = const Value.absent(),
                 Value<DateTime?> spacedLastReview = const Value.absent(),
-                Value<DateTime> drillDue = const Value.absent(),
-                Value<double?> drillStability = const Value.absent(),
-                Value<double?> drillDifficulty = const Value.absent(),
-                Value<int> drillState = const Value.absent(),
-                Value<int> drillStep = const Value.absent(),
-                Value<DateTime?> drillLastReview = const Value.absent(),
+                Value<DateTime> continuousDue = const Value.absent(),
+                Value<double?> continuousStability = const Value.absent(),
+                Value<double?> continuousDifficulty = const Value.absent(),
+                Value<int> continuousState = const Value.absent(),
+                Value<int> continuousStep = const Value.absent(),
+                Value<DateTime?> continuousLastReview = const Value.absent(),
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -7105,12 +7137,12 @@ class $$CardItemsTableTableManager
                 spacedState: spacedState,
                 spacedStep: spacedStep,
                 spacedLastReview: spacedLastReview,
-                drillDue: drillDue,
-                drillStability: drillStability,
-                drillDifficulty: drillDifficulty,
-                drillState: drillState,
-                drillStep: drillStep,
-                drillLastReview: drillLastReview,
+                continuousDue: continuousDue,
+                continuousStability: continuousStability,
+                continuousDifficulty: continuousDifficulty,
+                continuousState: continuousState,
+                continuousStep: continuousStep,
+                continuousLastReview: continuousLastReview,
                 deckId: deckId,
                 draftId: draftId,
                 createdAt: createdAt,
@@ -7131,12 +7163,12 @@ class $$CardItemsTableTableManager
                 Value<int> spacedState = const Value.absent(),
                 Value<int> spacedStep = const Value.absent(),
                 Value<DateTime?> spacedLastReview = const Value.absent(),
-                Value<DateTime> drillDue = const Value.absent(),
-                Value<double?> drillStability = const Value.absent(),
-                Value<double?> drillDifficulty = const Value.absent(),
-                Value<int> drillState = const Value.absent(),
-                Value<int> drillStep = const Value.absent(),
-                Value<DateTime?> drillLastReview = const Value.absent(),
+                Value<DateTime> continuousDue = const Value.absent(),
+                Value<double?> continuousStability = const Value.absent(),
+                Value<double?> continuousDifficulty = const Value.absent(),
+                Value<int> continuousState = const Value.absent(),
+                Value<int> continuousStep = const Value.absent(),
+                Value<DateTime?> continuousLastReview = const Value.absent(),
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -7155,12 +7187,12 @@ class $$CardItemsTableTableManager
                 spacedState: spacedState,
                 spacedStep: spacedStep,
                 spacedLastReview: spacedLastReview,
-                drillDue: drillDue,
-                drillStability: drillStability,
-                drillDifficulty: drillDifficulty,
-                drillState: drillState,
-                drillStep: drillStep,
-                drillLastReview: drillLastReview,
+                continuousDue: continuousDue,
+                continuousStability: continuousStability,
+                continuousDifficulty: continuousDifficulty,
+                continuousState: continuousState,
+                continuousStep: continuousStep,
+                continuousLastReview: continuousLastReview,
                 deckId: deckId,
                 draftId: draftId,
                 createdAt: createdAt,

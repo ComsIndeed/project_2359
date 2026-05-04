@@ -123,13 +123,13 @@ class _StudyPageState extends State<StudyPage> {
 
     final appController = context.read<AppController>();
 
-    if (widget.mode == StudySessionMode.spaced) {
-      await appController.schedulingService.reviewCard(
-        cardId: card.id,
-        rating: rating,
-        mode: widget.mode,
-      );
+    await appController.schedulingService.reviewCard(
+      cardId: card.id,
+      rating: rating,
+      mode: widget.mode,
+    );
 
+    if (widget.mode == StudySessionMode.spaced) {
       if (mounted) {
         if (_currentIndex < _cards!.length - 1) {
           setState(() {
@@ -142,7 +142,7 @@ class _StudyPageState extends State<StudyPage> {
         }
       }
     } else {
-      // Continuous Mode: In-memory only
+      // Continuous Mode: still manage the local queue, but results are now saved to DB
       _continuousController!.submitRating(rating);
       if (mounted) {
         setState(() {
