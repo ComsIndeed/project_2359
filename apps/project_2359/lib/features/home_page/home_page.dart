@@ -167,87 +167,94 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: ExpandableFab(
-        collapsedBuilder: (context, isOpen, expand, close) {
-          if (_isSelecting) {
-            final selectedCount =
-                _selectedFolderIds.length + _selectedDeckIds.length;
-            return SelectionActionBar(
-              selectedCount: selectedCount,
-              onClose: _clearSelection,
-              onPin: () => _handlePinSelected(pin: true),
-              onUnpin: () => _handlePinSelected(pin: false),
-              onDelete: _handleDeleteSelected,
-            );
-          }
-          return InkWell(
-            onTap: expand,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const FaIcon(FontAwesomeIcons.plus, size: 14),
-                  const SizedBox(width: 8),
-                  Text(
-                    "New",
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
+      body: SafeArea(
+        child: ExpandableFab(
+          collapsedBuilder: (context, isOpen, expand, close) {
+            if (_isSelecting) {
+              final selectedCount =
+                  _selectedFolderIds.length + _selectedDeckIds.length;
+              return SelectionActionBar(
+                selectedCount: selectedCount,
+                onClose: _clearSelection,
+                onPin: () => _handlePinSelected(pin: true),
+                onUnpin: () => _handlePinSelected(pin: false),
+                onDelete: _handleDeleteSelected,
+              );
+            }
+            return InkWell(
+              onTap: expand,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const FaIcon(FontAwesomeIcons.plus, size: 14),
+                    const SizedBox(width: 8),
+                    Text(
+                      "New",
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-        expandedBuilder: (context, isOpen, expand, close) {
-          return const NewItemMenu();
-        },
-        body: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            const SliverToBoxAdapter(child: HomeHeader()),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  const SizedBox(height: 16),
-                  _buildSearchBar(),
-                  const SizedBox(height: 16),
-                  const HomeDueCardsTile(),
-                  const SizedBox(height: 32),
-                  PinnedFoldersSection(
-                    stream: _pinnedFoldersStream,
-                    searchQuery: _searchQuery,
-                    selectedIds: _selectedFolderIds,
-                    onToggleSelection: _toggleFolderSelection,
-                    onSelect: _handleFolderSelect,
-                    activeFolderId: _selectedFolderId,
-                    isSelecting: _isSelecting,
-                    onContextMenu: (pos, id, isF) =>
-                        _showCoolContextMenu(context, pos, id, isFolder: isF),
-                  ),
-                  const SizedBox(height: 24),
-                  const SectionHeader(title: "Collections"),
-                  const SizedBox(height: 8),
-                  FolderList(
-                    stream: _foldersStream,
-                    searchQuery: _searchQuery,
-                    selectedIds: _selectedFolderIds,
-                    onToggleSelection: _toggleFolderSelection,
-                    onSelect: _handleFolderSelect,
-                    activeFolderId: _selectedFolderId,
-                    isSelecting: _isSelecting,
-                    onContextMenu: (pos, id, isF) =>
-                        _showCoolContextMenu(context, pos, id, isFolder: isF),
-                  ),
-                  const SizedBox(height: 48),
-                  const _GlitchyDebugTile(),
-                  const SizedBox(height: 100),
-                ]),
+            );
+          },
+          expandedBuilder: (context, isOpen, expand, close) {
+            return const NewItemMenu();
+          },
+          body: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: HomeHeader(),
+                ),
               ),
-            ),
-          ],
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: 16),
+                    _buildSearchBar(),
+                    const SizedBox(height: 16),
+                    const HomeDueCardsTile(),
+                    const SizedBox(height: 32),
+                    PinnedFoldersSection(
+                      stream: _pinnedFoldersStream,
+                      searchQuery: _searchQuery,
+                      selectedIds: _selectedFolderIds,
+                      onToggleSelection: _toggleFolderSelection,
+                      onSelect: _handleFolderSelect,
+                      activeFolderId: _selectedFolderId,
+                      isSelecting: _isSelecting,
+                      onContextMenu: (pos, id, isF) =>
+                          _showCoolContextMenu(context, pos, id, isFolder: isF),
+                    ),
+                    const SizedBox(height: 24),
+                    const SectionHeader(title: "Collections"),
+                    const SizedBox(height: 8),
+                    FolderList(
+                      stream: _foldersStream,
+                      searchQuery: _searchQuery,
+                      selectedIds: _selectedFolderIds,
+                      onToggleSelection: _toggleFolderSelection,
+                      onSelect: _handleFolderSelect,
+                      activeFolderId: _selectedFolderId,
+                      isSelecting: _isSelecting,
+                      onContextMenu: (pos, id, isF) =>
+                          _showCoolContextMenu(context, pos, id, isFolder: isF),
+                    ),
+                    const SizedBox(height: 48),
+                    const _GlitchyDebugTile(),
+                    const SizedBox(height: 100),
+                  ]),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
