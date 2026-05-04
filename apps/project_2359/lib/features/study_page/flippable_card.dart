@@ -62,7 +62,7 @@ class FlippableCard extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    theme.colorScheme.primary.withValues(alpha: 0.08),
+                    theme.colorScheme.primary.withValues(alpha: 0.04),
                     theme.colorScheme.surface,
                   ],
                 ),
@@ -80,7 +80,7 @@ class FlippableCard extends StatelessWidget {
                     child: Text(
                       "ANSWER",
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
                         letterSpacing: 2,
                         fontWeight: FontWeight.bold,
                       ),
@@ -92,7 +92,7 @@ class FlippableCard extends StatelessWidget {
                     fontSize: 24,
                     fontWeight: isBack ? FontWeight.w600 : FontWeight.w500,
                     color: isBack
-                        ? theme.colorScheme.primary.withValues(alpha: 0.9)
+                        ? theme.colorScheme.primary.withValues(alpha: 0.8)
                         : null,
                   ),
                   textAlign: TextAlign.center,
