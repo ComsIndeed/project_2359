@@ -1300,6 +1300,11 @@ class _DecksList extends StatelessWidget {
                       isSelected:
                           selectedIds.contains(decks[i].id) ||
                           (selectedDeckId == decks[i].id),
+                      title: Text(
+                        decks[i].name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       leading: const WizardFlashcardPreview(),
                       trailing: StreamBuilder<int>(
                         stream: context
