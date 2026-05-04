@@ -41,6 +41,8 @@ class ContinuousSessionController {
   int get queueLength => _queue.length;
   int get totalReviews => _totalReviews;
 
+  CardItem? get peekNextCard => _queue.length > 1 ? _queue[1] : null;
+
   /// Process user rating for the current card.
   void submitRating(fsrs.Rating rating) {
     if (_queue.isEmpty) return;

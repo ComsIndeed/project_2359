@@ -22,7 +22,7 @@ class FlippableCard extends StatelessWidget {
       onTap: onTap,
       child: TweenAnimationBuilder<double>(
         tween: Tween<double>(begin: 0, end: isFlipped ? 180 : 0),
-        duration: const Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOutBack,
         builder: (context, value, child) {
           final isBack = value > 90;
@@ -56,16 +56,48 @@ class FlippableCard extends StatelessWidget {
       child: Container(
         width: double.infinity,
         height: double.infinity,
+        decoration: isBack
+            ? BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.primary.withValues(alpha: 0.08),
+                    theme.colorScheme.surface,
+                  ],
+                ),
+              )
+            : null,
         padding: const EdgeInsets.all(32),
         child: Center(
           child: SingleChildScrollView(
-            child: Text(
-              text,
-              style: theme.textTheme.displaySmall?.copyWith(
-                fontSize: 24,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isBack)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Text(
+                      "ANSWER",
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                        letterSpacing: 2,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                Text(
+                  text,
+                  style: theme.textTheme.displaySmall?.copyWith(
+                    fontSize: 24,
+                    fontWeight: isBack ? FontWeight.w600 : FontWeight.w500,
+                    color: isBack
+                        ? theme.colorScheme.primary.withValues(alpha: 0.9)
+                        : null,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ),

@@ -31,9 +31,11 @@ class StudyPage extends StatefulWidget {
 class _StudyPageState extends State<StudyPage> {
   int _currentIndex = 0;
   bool _isFlipped = false;
+  bool _isTransitioning = false;
   List<CardItem>? _cards;
   ContinuousSessionController? _continuousController;
   final FocusNode _focusNode = FocusNode();
+  final GlobalKey<_SwipeableCardWrapperState> _swipeKey = GlobalKey();
   Map<fsrs.Rating, String> _previews = {};
 
   @override
@@ -81,12 +83,20 @@ class _StudyPageState extends State<StudyPage> {
     return _cards![_currentIndex];
   }
 
+  CardItem? get _nextCard {
+    if (widget.mode == StudySessionMode.continuous) {
+      return _continuousController?.peekNextCard;
+    }
+    if (_cards == null || _currentIndex + 1 >= _cards!.length) return null;
+    return _cards![_currentIndex + 1];
+  }
+
   Future<void> _updatePreviews() async {
     if (widget.mode != StudySessionMode.spaced || _currentCard == null) return;
-    
+
     final schedulingService = context.read<AppController>().schedulingService;
     final Map<fsrs.Rating, String> newPreviews = {};
-    
+
     for (final rating in fsrs.Rating.values) {
       final nextDue = await schedulingService.getPreviewNextDue(
         cardId: _currentCard!.id,
@@ -95,7 +105,7 @@ class _StudyPageState extends State<StudyPage> {
       );
       newPreviews[rating] = _formatInterval(nextDue);
     }
-    
+
     if (mounted) {
       setState(() => _previews = newPreviews);
     }
@@ -118,16 +128,41 @@ class _StudyPageState extends State<StudyPage> {
   }
 
   void _rateCard(fsrs.Rating rating) async {
+    if (_isTransitioning) return;
     final card = _currentCard;
     if (card == null) return;
 
-    final appController = context.read<AppController>();
+    setState(() => _isTransitioning = true);
 
-    await appController.schedulingService.reviewCard(
+    // Determine throw direction based on screen size to ensure it clears
+    final size = MediaQuery.of(context).size;
+    Offset direction;
+    switch (rating) {
+      case fsrs.Rating.again:
+        direction = Offset(-size.width * 1.5, 0);
+        break;
+      case fsrs.Rating.good:
+        direction = Offset(size.width * 1.5, 0);
+        break;
+      case fsrs.Rating.easy:
+        direction = Offset(0, -size.height * 1.5);
+        break;
+      case fsrs.Rating.hard:
+        direction = Offset(0, size.height * 1.5);
+        break;
+    }
+
+    // Start animation and DB update in parallel
+    final throwFuture = _swipeKey.currentState?.throwOut(direction);
+    final appController = context.read<AppController>();
+    final dbFuture = appController.schedulingService.reviewCard(
       cardId: card.id,
       rating: rating,
       mode: widget.mode,
     );
+
+    // Wait for the animation to finish before switching cards
+    await throwFuture;
 
     if (widget.mode == StudySessionMode.spaced) {
       if (mounted) {
@@ -135,21 +170,27 @@ class _StudyPageState extends State<StudyPage> {
           setState(() {
             _currentIndex++;
             _isFlipped = false;
+            _isTransitioning = false;
           });
+          _swipeKey.currentState?.resetImmediate();
           _updatePreviews();
         } else {
           Navigator.pop(context);
         }
       }
     } else {
-      // Continuous Mode: still manage the local queue, but results are now saved to DB
       _continuousController!.submitRating(rating);
       if (mounted) {
         setState(() {
           _isFlipped = false;
+          _isTransitioning = false;
         });
+        _swipeKey.currentState?.resetImmediate();
       }
     }
+
+    // Ensure DB update is also finished eventually
+    await dbFuture;
   }
 
   @override
@@ -167,12 +208,13 @@ class _StudyPageState extends State<StudyPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.check_circle_outline, size: 64, color: Colors.green),
-              const SizedBox(height: 16),
-              Text(
-                "Deck Finished!",
-                style: theme.textTheme.headlineSmall,
+              const Icon(
+                Icons.check_circle_outline,
+                size: 64,
+                color: Colors.green,
               ),
+              const SizedBox(height: 16),
+              Text("Deck Finished!", style: theme.textTheme.headlineSmall),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
@@ -195,10 +237,14 @@ class _StudyPageState extends State<StudyPage> {
               _flipCard();
             }
           } else if (_isFlipped) {
-            if (event.logicalKey == LogicalKeyboardKey.digit1) _rateCard(fsrs.Rating.again);
-            if (event.logicalKey == LogicalKeyboardKey.digit2) _rateCard(fsrs.Rating.hard);
-            if (event.logicalKey == LogicalKeyboardKey.digit3) _rateCard(fsrs.Rating.good);
-            if (event.logicalKey == LogicalKeyboardKey.digit4) _rateCard(fsrs.Rating.easy);
+            if (event.logicalKey == LogicalKeyboardKey.digit1)
+              _rateCard(fsrs.Rating.again);
+            if (event.logicalKey == LogicalKeyboardKey.digit2)
+              _rateCard(fsrs.Rating.hard);
+            if (event.logicalKey == LogicalKeyboardKey.digit3)
+              _rateCard(fsrs.Rating.good);
+            if (event.logicalKey == LogicalKeyboardKey.digit4)
+              _rateCard(fsrs.Rating.easy);
           }
         }
       },
@@ -226,16 +272,18 @@ class _StudyPageState extends State<StudyPage> {
                               ? "Scheduled Review"
                               : "Continuous Mode",
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
                   Text(
-                    widget.mode == StudySessionMode.spaced 
-                      ? "${_currentIndex + 1} / ${_cards!.length}"
-                      : "Reviewed: ${_continuousController?.totalReviews}",
+                    widget.mode == StudySessionMode.spaced
+                        ? "${_currentIndex + 1} / ${_cards!.length}"
+                        : "Reviewed: ${_continuousController?.totalReviews}",
                     style: theme.textTheme.labelMedium,
                   ),
                 ],
@@ -252,19 +300,53 @@ class _StudyPageState extends State<StudyPage> {
             Expanded(
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                  child: _SwipeableCardWrapper(
-                    isFlipped: _isFlipped,
-                    onSwipeLeft: () => _rateCard(fsrs.Rating.again),
-                    onSwipeRight: () => _rateCard(fsrs.Rating.good),
-                    onSwipeUp: () => _rateCard(fsrs.Rating.easy),
-                    onSwipeDown: () => _rateCard(fsrs.Rating.hard),
-                    child: FlippableCard(
-                      isFlipped: _isFlipped,
-                      frontText: card.frontText ?? '',
-                      backText: card.backText ?? '',
-                      onTap: _flipCard,
-                    ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 32,
+                  ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      if (_nextCard != null)
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOutCubic,
+                          transform: Matrix4.identity()
+                            ..translate(0.0, _isTransitioning ? 0.0 : 12.0),
+                          child: AnimatedScale(
+                            scale: _isTransitioning ? 1.0 : 0.94,
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeOutCubic,
+                            child: AnimatedOpacity(
+                              opacity: _isTransitioning ? 1.0 : 0.4,
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOutCubic,
+                              child: FlippableCard(
+                                key: ValueKey('bg_${_nextCard!.id}'),
+                                isFlipped: false,
+                                frontText: _nextCard!.frontText ?? '',
+                                backText: _nextCard!.backText ?? '',
+                                onTap: () {},
+                              ),
+                            ),
+                          ),
+                        ),
+                      _SwipeableCardWrapper(
+                        key: _swipeKey,
+                        isFlipped: _isFlipped,
+                        onSwipeLeft: () => _rateCard(fsrs.Rating.again),
+                        onSwipeRight: () => _rateCard(fsrs.Rating.good),
+                        onSwipeUp: () => _rateCard(fsrs.Rating.easy),
+                        onSwipeDown: () => _rateCard(fsrs.Rating.hard),
+                        child: FlippableCard(
+                          key: ValueKey('top_${card.id}'),
+                          isFlipped: _isFlipped,
+                          frontText: card.frontText ?? '',
+                          backText: card.backText ?? '',
+                          onTap: _flipCard,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -417,6 +499,7 @@ class _SwipeableCardWrapper extends StatefulWidget {
   final VoidCallback onSwipeDown;
 
   const _SwipeableCardWrapper({
+    super.key,
     required this.child,
     required this.isFlipped,
     required this.onSwipeLeft,
@@ -430,7 +513,7 @@ class _SwipeableCardWrapper extends StatefulWidget {
 }
 
 class _SwipeableCardWrapperState extends State<_SwipeableCardWrapper>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   Offset _offset = Offset.zero;
   Offset _anchor = Offset.zero;
   double _rotation = 0.0;
@@ -443,7 +526,7 @@ class _SwipeableCardWrapperState extends State<_SwipeableCardWrapper>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 200),
     );
   }
 
@@ -467,7 +550,6 @@ class _SwipeableCardWrapperState extends State<_SwipeableCardWrapper>
     setState(() {
       _offset += details.delta;
       // Realistic swing: rotate more if dragging further from the center
-      // 300x400 normalized card size
       final center = const Offset(150, 200);
       final distFromCenter = _anchor - center;
       _rotation = (_offset.dx / 300) * (distFromCenter.dy / 200).clamp(-1, 1);
@@ -486,16 +568,49 @@ class _SwipeableCardWrapperState extends State<_SwipeableCardWrapper>
       widget.onSwipeUp();
     } else if (_offset.dy > threshold) {
       widget.onSwipeDown();
+    } else {
+      _resetPosition();
+    }
+  }
+
+  Future<void> throwOut(Offset direction) async {
+    final animation = Tween<Offset>(
+      begin: _offset,
+      end: direction,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+
+    _controller.reset();
+    void listener() {
+      setState(() {
+        _offset = animation.value;
+        _rotation = (_offset.dx / 300) * 0.2;
+      });
     }
 
-    _resetPosition();
+    _controller.addListener(listener);
+    try {
+      await _controller.forward().orCancel;
+    } catch (e) {
+      // Animation was cancelled, which is fine
+    } finally {
+      _controller.removeListener(listener);
+    }
+  }
+
+  void resetImmediate() {
+    setState(() {
+      _offset = Offset.zero;
+      _rotation = 0.0;
+      _isDragging = false;
+    });
+    _controller.reset();
   }
 
   void _resetPosition() {
     _backAnimation = Tween<Offset>(
       begin: _offset,
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _controller.reset();
     _controller.forward();
