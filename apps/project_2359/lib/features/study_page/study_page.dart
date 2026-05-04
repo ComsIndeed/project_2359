@@ -9,6 +9,9 @@ import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/features/study_page/flippable_card.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
 import 'package:project_2359/core/services/continuous_session_controller.dart';
+import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/features/study_page/widgets/source_preview_sheet.dart';
+import 'package:provider/provider.dart';
 
 class StudyPage extends StatefulWidget {
   final String deckId;
@@ -193,6 +196,36 @@ class _StudyPageState extends State<StudyPage> {
     await dbFuture;
   }
 
+  void _onViewSourcePressed() async {
+    final card = _currentCard;
+    if (card == null || card.citationId == null) return;
+
+    final appController = context.read<AppController>();
+    final sourceService = context.read<SourceService>();
+
+    final citation = await appController.studyDatabaseService.getCitationById(
+      card.citationId!,
+    );
+    if (citation == null || citation.sourceIds?.isEmpty == true) return;
+
+    final sourceId = citation.sourceIds!.first;
+    final sourceBlob = await sourceService.getSourceBlobBySourceId(sourceId);
+    if (sourceBlob == null) return;
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => SourcePreviewSheet(
+            pdfBytes: sourceBlob.bytes,
+            citation: citation,
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -324,6 +357,10 @@ class _StudyPageState extends State<StudyPage> {
                       frontText: _nextCard!.frontText ?? '',
                       backText: _nextCard!.backText ?? '',
                       onTap: () {},
+                      onViewSource:
+                          _nextCard!.citationId != null
+                              ? _onViewSourcePressed
+                              : null,
                     ),
               overlay: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
@@ -370,6 +407,8 @@ class _StudyPageState extends State<StudyPage> {
                 frontText: card.frontText ?? '',
                 backText: card.backText ?? '',
                 onTap: _flipCard,
+                onViewSource:
+                    card.citationId != null ? _onViewSourcePressed : null,
               ),
             ),
           ],

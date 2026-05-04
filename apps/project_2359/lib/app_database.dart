@@ -70,7 +70,7 @@ class AppDatabase extends _$AppDatabase {
     return driftDatabase(
       /// Rename this everytime we make schema changes until the app is fully released.
       /// We wont do migration rules for now.
-      name: 'project_2359_database_v7_20260411_0120',
+      name: 'project_2359_database_v8_20260505_0155',
       web: DriftWebOptions(
         sqlite3Wasm: Uri.parse('sqlite3.wasm'),
         driftWorker: Uri.parse('drift_worker.js'),

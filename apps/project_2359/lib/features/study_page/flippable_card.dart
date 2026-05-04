@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
 
 class FlippableCard extends StatelessWidget {
@@ -7,6 +8,7 @@ class FlippableCard extends StatelessWidget {
   final String backText;
   final bool isFlipped;
   final VoidCallback onTap;
+  final VoidCallback? onViewSource;
 
   const FlippableCard({
     super.key,
@@ -14,6 +16,7 @@ class FlippableCard extends StatelessWidget {
     required this.backText,
     required this.isFlipped,
     required this.onTap,
+    this.onViewSource,
   });
 
   @override
@@ -69,38 +72,68 @@ class FlippableCard extends StatelessWidget {
               )
             : null,
         padding: const EdgeInsets.all(32),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            child: Stack(
               children: [
-                if (isBack)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Text(
-                      "ANSWER",
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                        letterSpacing: 2,
-                        fontWeight: FontWeight.bold,
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isBack)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: Text(
+                            "ANSWER",
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.3,
+                              ),
+                              letterSpacing: 2,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      Text(
+                        text,
+                        style: theme.textTheme.displaySmall?.copyWith(
+                          fontSize: 24,
+                          fontWeight:
+                              isBack ? FontWeight.w600 : FontWeight.w500,
+                          color:
+                              isBack
+                                  ? theme.colorScheme.primary.withValues(
+                                    alpha: 0.8,
+                                  )
+                                  : null,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                if (onViewSource != null && !isBack)
+                  Positioned(
+                    top: -12,
+                    right: -12,
+                    child: IconButton(
+                      onPressed: onViewSource,
+                      icon: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: FaIcon(
+                          FontAwesomeIcons.fileLines,
+                          size: 14,
+                          color: theme.colorScheme.primary,
+                        ),
                       ),
                     ),
                   ),
-                Text(
-                  text,
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    fontSize: 24,
-                    fontWeight: isBack ? FontWeight.w600 : FontWeight.w500,
-                    color: isBack
-                        ? theme.colorScheme.primary.withValues(alpha: 0.8)
-                        : null,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
               ],
             ),
-          ),
-        ),
       ),
     );
   }

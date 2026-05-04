@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
 import 'package:project_2359/core/services/draft_service.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:drift/drift.dart';
 import 'package:project_2359/core/widgets/widget_stage.dart';
+import 'package:project_2359/core/models/project_rect.dart';
+import 'package:uuid/uuid.dart';
 
 class CardCreationToolbarController extends ChangeNotifier {
   final DraftService? _draftService;
@@ -29,6 +30,11 @@ class CardCreationToolbarController extends ChangeNotifier {
   // Image Occlusion State
   Rect? _occlusionRect;
   Uint8List? _capturedOcclusionImage;
+
+  // Citation Metadata
+  String? _sourceId;
+  List<int>? _pageNumbers;
+  List<ProjectRect>? _rects;
 
   // List State
   String _searchQuery = '';
@@ -67,6 +73,10 @@ class CardCreationToolbarController extends ChangeNotifier {
   String? get requestedSourceId => _requestedSourceId;
   String? get requestedCardId => _requestedCardId;
 
+  String? get sourceId => _sourceId;
+  List<int>? get pageNumbers => _pageNumbers;
+  List<ProjectRect>? get rects => _rects;
+
   /// Initializes the drafting identities for this session.
   void setDraftDetails({
     required String draftId,
@@ -88,7 +98,27 @@ class CardCreationToolbarController extends ChangeNotifier {
 
   /// Adds a new card to the draft and triggers an automatic sync.
   Future<void> addCard(CardItemsCompanion card) async {
-    _cards.add(card);
+    CardItemsCompanion cardToInsert = card;
+
+    // Handle Citation if metadata exists
+    if (_sourceId != null && (_pageNumbers != null || _rects != null)) {
+      final citationId = const Uuid().v4();
+      final citation = CitationItemsCompanion.insert(
+        id: citationId,
+        sourceIds: Value([_sourceId!]),
+        pageNumbers: Value(_pageNumbers ?? []),
+        rects: Value(_rects ?? []),
+        citedText: Value(_selectedText),
+      );
+
+      // Insert citation first
+      if (_draftService != null) {
+        await _draftService.insertCitation(citation);
+      }
+      cardToInsert = cardToInsert.copyWith(citationId: Value(citationId));
+    }
+
+    _cards.add(cardToInsert);
     notifyListeners();
     _feedbackText = "Saved Card!";
     stageController.flash(
@@ -164,6 +194,17 @@ class CardCreationToolbarController extends ChangeNotifier {
 
   void setBackText(String text) {
     _backText = text;
+    notifyListeners();
+  }
+
+  void updateCitationMetadata({
+    String? sourceId,
+    List<int>? pageNumbers,
+    List<ProjectRect>? rects,
+  }) {
+    _sourceId = sourceId ?? _sourceId;
+    _pageNumbers = pageNumbers;
+    _rects = rects;
     notifyListeners();
   }
 

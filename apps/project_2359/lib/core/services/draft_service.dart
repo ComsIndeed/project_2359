@@ -214,4 +214,8 @@ class DraftService {
           ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
         .watch();
   }
+
+  Future<void> insertCitation(CitationItemsCompanion citation) async {
+    await _db.into(_db.citationItems).insert(citation);
+  }
 }

@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pdfrx/pdfrx.dart' as pdfrx;
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/core/models/project_rect.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -50,11 +51,15 @@ class SourcePage extends StatefulWidget {
     required this.fileBytes,
     this.title,
     this.showBackButton = true,
+    this.initialPage,
+    this.highlightRects,
   });
 
   final Uint8List fileBytes;
   final String? title;
   final bool showBackButton;
+  final int? initialPage;
+  final List<ProjectRect>? highlightRects;
 
   @override
   State<SourcePage> createState() => _SourcePageState();
@@ -413,6 +418,31 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                         backgroundColor: isDark
                             ? cs.surfaceContainer
                             : cs.surfaceContainerHighest,
+                        calculateInitialPageNumber: (document, controller) =>
+                            widget.initialPage ?? 1,
+                        pagePaintCallbacks: [
+                          (canvas, pageRect, page) {
+                            if (widget.highlightRects != null &&
+                                (widget.initialPage == null ||
+                                    page.pageNumber == widget.initialPage)) {
+                              final paint = Paint()
+                                ..color = cs.primary.withValues(alpha: 0.3)
+                                ..style = PaintingStyle.fill;
+
+                              for (final rect in widget.highlightRects!) {
+                                canvas.drawRect(
+                                  Rect.fromLTRB(
+                                    rect.left,
+                                    rect.top,
+                                    rect.right,
+                                    rect.bottom,
+                                  ),
+                                  paint,
+                                );
+                              }
+                            }
+                          },
+                        ],
                       ),
                     )
                   : Center(

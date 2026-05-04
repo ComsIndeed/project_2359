@@ -252,4 +252,11 @@ class StudyDatabaseService {
       });
     });
   }
+
+  // --- Citations ---
+
+  Future<CitationItem?> getCitationById(String id) async {
+    return await (_db.select(_db.citationItems)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+  }
 }

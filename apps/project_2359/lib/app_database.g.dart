@@ -2070,6 +2070,449 @@ class CardCreationDraftItemsCompanion
   }
 }
 
+class $CitationItemsTable extends CitationItems
+    with TableInfo<$CitationItemsTable, CitationItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CitationItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _citedTextMeta = const VerificationMeta(
+    'citedText',
+  );
+  @override
+  late final GeneratedColumn<String> citedText = GeneratedColumn<String>(
+    'cited_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> sourceIds =
+      GeneratedColumn<String>(
+        'source_ids',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<List<String>?>($CitationItemsTable.$convertersourceIdsn);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<int>?, String> pageNumbers =
+      GeneratedColumn<String>(
+        'page_numbers',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<List<int>?>($CitationItemsTable.$converterpageNumbersn);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<ProjectTimeRange>?, String>
+  timeRanges =
+      GeneratedColumn<String>(
+        'time_ranges',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<List<ProjectTimeRange>?>(
+        $CitationItemsTable.$convertertimeRangesn,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<ProjectRect>?, String>
+  rects = GeneratedColumn<String>(
+    'rects',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<List<ProjectRect>?>($CitationItemsTable.$converterrectsn);
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    citedText,
+    sourceIds,
+    pageNumbers,
+    timeRanges,
+    rects,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'citation_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CitationItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('cited_text')) {
+      context.handle(
+        _citedTextMeta,
+        citedText.isAcceptableOrUnknown(data['cited_text']!, _citedTextMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CitationItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CitationItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      citedText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cited_text'],
+      ),
+      sourceIds: $CitationItemsTable.$convertersourceIdsn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}source_ids'],
+        ),
+      ),
+      pageNumbers: $CitationItemsTable.$converterpageNumbersn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}page_numbers'],
+        ),
+      ),
+      timeRanges: $CitationItemsTable.$convertertimeRangesn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}time_ranges'],
+        ),
+      ),
+      rects: $CitationItemsTable.$converterrectsn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}rects'],
+        ),
+      ),
+    );
+  }
+
+  @override
+  $CitationItemsTable createAlias(String alias) {
+    return $CitationItemsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<String>, String> $convertersourceIds =
+      const JsonListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertersourceIdsn =
+      NullAwareTypeConverter.wrap($convertersourceIds);
+  static TypeConverter<List<int>, String> $converterpageNumbers =
+      const JsonListConverter<int>();
+  static TypeConverter<List<int>?, String?> $converterpageNumbersn =
+      NullAwareTypeConverter.wrap($converterpageNumbers);
+  static TypeConverter<List<ProjectTimeRange>, String> $convertertimeRanges =
+      const ProjectTimeRangeListConverter();
+  static TypeConverter<List<ProjectTimeRange>?, String?> $convertertimeRangesn =
+      NullAwareTypeConverter.wrap($convertertimeRanges);
+  static TypeConverter<List<ProjectRect>, String> $converterrects =
+      const ProjectRectListConverter();
+  static TypeConverter<List<ProjectRect>?, String?> $converterrectsn =
+      NullAwareTypeConverter.wrap($converterrects);
+}
+
+class CitationItem extends DataClass implements Insertable<CitationItem> {
+  final String id;
+
+  /// The actual cited text or content summary.
+  final String? citedText;
+
+  /// References one or more sources (e.g. multiple PDF files).
+  final List<String>? sourceIds;
+
+  /// One or more page numbers (e.g. non-contiguous pages like "4, 7, 12").
+  final List<int>? pageNumbers;
+
+  /// One or more time segments (e.g. for video timestamps).
+  final List<ProjectTimeRange>? timeRanges;
+
+  /// One or more bounding boxes (e.g. for multi-line text selections in a PDF).
+  final List<ProjectRect>? rects;
+  const CitationItem({
+    required this.id,
+    this.citedText,
+    this.sourceIds,
+    this.pageNumbers,
+    this.timeRanges,
+    this.rects,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || citedText != null) {
+      map['cited_text'] = Variable<String>(citedText);
+    }
+    if (!nullToAbsent || sourceIds != null) {
+      map['source_ids'] = Variable<String>(
+        $CitationItemsTable.$convertersourceIdsn.toSql(sourceIds),
+      );
+    }
+    if (!nullToAbsent || pageNumbers != null) {
+      map['page_numbers'] = Variable<String>(
+        $CitationItemsTable.$converterpageNumbersn.toSql(pageNumbers),
+      );
+    }
+    if (!nullToAbsent || timeRanges != null) {
+      map['time_ranges'] = Variable<String>(
+        $CitationItemsTable.$convertertimeRangesn.toSql(timeRanges),
+      );
+    }
+    if (!nullToAbsent || rects != null) {
+      map['rects'] = Variable<String>(
+        $CitationItemsTable.$converterrectsn.toSql(rects),
+      );
+    }
+    return map;
+  }
+
+  CitationItemsCompanion toCompanion(bool nullToAbsent) {
+    return CitationItemsCompanion(
+      id: Value(id),
+      citedText: citedText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(citedText),
+      sourceIds: sourceIds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceIds),
+      pageNumbers: pageNumbers == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pageNumbers),
+      timeRanges: timeRanges == null && nullToAbsent
+          ? const Value.absent()
+          : Value(timeRanges),
+      rects: rects == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rects),
+    );
+  }
+
+  factory CitationItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CitationItem(
+      id: serializer.fromJson<String>(json['id']),
+      citedText: serializer.fromJson<String?>(json['citedText']),
+      sourceIds: serializer.fromJson<List<String>?>(json['sourceIds']),
+      pageNumbers: serializer.fromJson<List<int>?>(json['pageNumbers']),
+      timeRanges: serializer.fromJson<List<ProjectTimeRange>?>(
+        json['timeRanges'],
+      ),
+      rects: serializer.fromJson<List<ProjectRect>?>(json['rects']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'citedText': serializer.toJson<String?>(citedText),
+      'sourceIds': serializer.toJson<List<String>?>(sourceIds),
+      'pageNumbers': serializer.toJson<List<int>?>(pageNumbers),
+      'timeRanges': serializer.toJson<List<ProjectTimeRange>?>(timeRanges),
+      'rects': serializer.toJson<List<ProjectRect>?>(rects),
+    };
+  }
+
+  CitationItem copyWith({
+    String? id,
+    Value<String?> citedText = const Value.absent(),
+    Value<List<String>?> sourceIds = const Value.absent(),
+    Value<List<int>?> pageNumbers = const Value.absent(),
+    Value<List<ProjectTimeRange>?> timeRanges = const Value.absent(),
+    Value<List<ProjectRect>?> rects = const Value.absent(),
+  }) => CitationItem(
+    id: id ?? this.id,
+    citedText: citedText.present ? citedText.value : this.citedText,
+    sourceIds: sourceIds.present ? sourceIds.value : this.sourceIds,
+    pageNumbers: pageNumbers.present ? pageNumbers.value : this.pageNumbers,
+    timeRanges: timeRanges.present ? timeRanges.value : this.timeRanges,
+    rects: rects.present ? rects.value : this.rects,
+  );
+  CitationItem copyWithCompanion(CitationItemsCompanion data) {
+    return CitationItem(
+      id: data.id.present ? data.id.value : this.id,
+      citedText: data.citedText.present ? data.citedText.value : this.citedText,
+      sourceIds: data.sourceIds.present ? data.sourceIds.value : this.sourceIds,
+      pageNumbers: data.pageNumbers.present
+          ? data.pageNumbers.value
+          : this.pageNumbers,
+      timeRanges: data.timeRanges.present
+          ? data.timeRanges.value
+          : this.timeRanges,
+      rects: data.rects.present ? data.rects.value : this.rects,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CitationItem(')
+          ..write('id: $id, ')
+          ..write('citedText: $citedText, ')
+          ..write('sourceIds: $sourceIds, ')
+          ..write('pageNumbers: $pageNumbers, ')
+          ..write('timeRanges: $timeRanges, ')
+          ..write('rects: $rects')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, citedText, sourceIds, pageNumbers, timeRanges, rects);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CitationItem &&
+          other.id == this.id &&
+          other.citedText == this.citedText &&
+          other.sourceIds == this.sourceIds &&
+          other.pageNumbers == this.pageNumbers &&
+          other.timeRanges == this.timeRanges &&
+          other.rects == this.rects);
+}
+
+class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
+  final Value<String> id;
+  final Value<String?> citedText;
+  final Value<List<String>?> sourceIds;
+  final Value<List<int>?> pageNumbers;
+  final Value<List<ProjectTimeRange>?> timeRanges;
+  final Value<List<ProjectRect>?> rects;
+  final Value<int> rowid;
+  const CitationItemsCompanion({
+    this.id = const Value.absent(),
+    this.citedText = const Value.absent(),
+    this.sourceIds = const Value.absent(),
+    this.pageNumbers = const Value.absent(),
+    this.timeRanges = const Value.absent(),
+    this.rects = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CitationItemsCompanion.insert({
+    required String id,
+    this.citedText = const Value.absent(),
+    this.sourceIds = const Value.absent(),
+    this.pageNumbers = const Value.absent(),
+    this.timeRanges = const Value.absent(),
+    this.rects = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id);
+  static Insertable<CitationItem> custom({
+    Expression<String>? id,
+    Expression<String>? citedText,
+    Expression<String>? sourceIds,
+    Expression<String>? pageNumbers,
+    Expression<String>? timeRanges,
+    Expression<String>? rects,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (citedText != null) 'cited_text': citedText,
+      if (sourceIds != null) 'source_ids': sourceIds,
+      if (pageNumbers != null) 'page_numbers': pageNumbers,
+      if (timeRanges != null) 'time_ranges': timeRanges,
+      if (rects != null) 'rects': rects,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CitationItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? citedText,
+    Value<List<String>?>? sourceIds,
+    Value<List<int>?>? pageNumbers,
+    Value<List<ProjectTimeRange>?>? timeRanges,
+    Value<List<ProjectRect>?>? rects,
+    Value<int>? rowid,
+  }) {
+    return CitationItemsCompanion(
+      id: id ?? this.id,
+      citedText: citedText ?? this.citedText,
+      sourceIds: sourceIds ?? this.sourceIds,
+      pageNumbers: pageNumbers ?? this.pageNumbers,
+      timeRanges: timeRanges ?? this.timeRanges,
+      rects: rects ?? this.rects,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (citedText.present) {
+      map['cited_text'] = Variable<String>(citedText.value);
+    }
+    if (sourceIds.present) {
+      map['source_ids'] = Variable<String>(
+        $CitationItemsTable.$convertersourceIdsn.toSql(sourceIds.value),
+      );
+    }
+    if (pageNumbers.present) {
+      map['page_numbers'] = Variable<String>(
+        $CitationItemsTable.$converterpageNumbersn.toSql(pageNumbers.value),
+      );
+    }
+    if (timeRanges.present) {
+      map['time_ranges'] = Variable<String>(
+        $CitationItemsTable.$convertertimeRangesn.toSql(timeRanges.value),
+      );
+    }
+    if (rects.present) {
+      map['rects'] = Variable<String>(
+        $CitationItemsTable.$converterrectsn.toSql(rects.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CitationItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('citedText: $citedText, ')
+          ..write('sourceIds: $sourceIds, ')
+          ..write('pageNumbers: $pageNumbers, ')
+          ..write('timeRanges: $timeRanges, ')
+          ..write('rects: $rects, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $CardItemsTable extends CardItems
     with TableInfo<$CardItemsTable, CardItem> {
   @override
@@ -2304,6 +2747,20 @@ class $CardItemsTable extends CardItems
       'REFERENCES card_creation_draft_items (id)',
     ),
   );
+  static const VerificationMeta _citationIdMeta = const VerificationMeta(
+    'citationId',
+  );
+  @override
+  late final GeneratedColumn<String> citationId = GeneratedColumn<String>(
+    'citation_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES citation_items (id)',
+    ),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -2350,6 +2807,7 @@ class $CardItemsTable extends CardItems
     continuousLastReview,
     deckId,
     draftId,
+    citationId,
     createdAt,
     updatedAt,
   ];
@@ -2514,6 +2972,12 @@ class $CardItemsTable extends CardItems
         draftId.isAcceptableOrUnknown(data['draft_id']!, _draftIdMeta),
       );
     }
+    if (data.containsKey('citation_id')) {
+      context.handle(
+        _citationIdMeta,
+        citationId.isAcceptableOrUnknown(data['citation_id']!, _citationIdMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -2617,6 +3081,10 @@ class $CardItemsTable extends CardItems
         DriftSqlType.string,
         data['${effectivePrefix}draft_id'],
       ),
+      citationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}citation_id'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -2660,6 +3128,7 @@ class CardItem extends DataClass implements Insertable<CardItem> {
   final DateTime? continuousLastReview;
   final String? deckId;
   final String? draftId;
+  final String? citationId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   const CardItem({
@@ -2683,6 +3152,7 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     this.continuousLastReview,
     this.deckId,
     this.draftId,
+    this.citationId,
     this.createdAt,
     this.updatedAt,
   });
@@ -2748,6 +3218,9 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     }
     if (!nullToAbsent || draftId != null) {
       map['draft_id'] = Variable<String>(draftId);
+    }
+    if (!nullToAbsent || citationId != null) {
+      map['citation_id'] = Variable<String>(citationId);
     }
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<DateTime>(createdAt);
@@ -2818,6 +3291,9 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       draftId: draftId == null && nullToAbsent
           ? const Value.absent()
           : Value(draftId),
+      citationId: citationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(citationId),
       createdAt: createdAt == null && nullToAbsent
           ? const Value.absent()
           : Value(createdAt),
@@ -2861,6 +3337,7 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       ),
       deckId: serializer.fromJson<String?>(json['deckId']),
       draftId: serializer.fromJson<String?>(json['draftId']),
+      citationId: serializer.fromJson<String?>(json['citationId']),
       createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
     );
@@ -2891,6 +3368,7 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       ),
       'deckId': serializer.toJson<String?>(deckId),
       'draftId': serializer.toJson<String?>(draftId),
+      'citationId': serializer.toJson<String?>(citationId),
       'createdAt': serializer.toJson<DateTime?>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
     };
@@ -2917,6 +3395,7 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     Value<DateTime?> continuousLastReview = const Value.absent(),
     Value<String?> deckId = const Value.absent(),
     Value<String?> draftId = const Value.absent(),
+    Value<String?> citationId = const Value.absent(),
     Value<DateTime?> createdAt = const Value.absent(),
     Value<DateTime?> updatedAt = const Value.absent(),
   }) => CardItem(
@@ -2960,6 +3439,7 @@ class CardItem extends DataClass implements Insertable<CardItem> {
         : this.continuousLastReview,
     deckId: deckId.present ? deckId.value : this.deckId,
     draftId: draftId.present ? draftId.value : this.draftId,
+    citationId: citationId.present ? citationId.value : this.citationId,
     createdAt: createdAt.present ? createdAt.value : this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
   );
@@ -3013,6 +3493,9 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           : this.continuousLastReview,
       deckId: data.deckId.present ? data.deckId.value : this.deckId,
       draftId: data.draftId.present ? data.draftId.value : this.draftId,
+      citationId: data.citationId.present
+          ? data.citationId.value
+          : this.citationId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -3041,6 +3524,7 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           ..write('continuousLastReview: $continuousLastReview, ')
           ..write('deckId: $deckId, ')
           ..write('draftId: $draftId, ')
+          ..write('citationId: $citationId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -3069,6 +3553,7 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     continuousLastReview,
     deckId,
     draftId,
+    citationId,
     createdAt,
     updatedAt,
   ]);
@@ -3096,6 +3581,7 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           other.continuousLastReview == this.continuousLastReview &&
           other.deckId == this.deckId &&
           other.draftId == this.draftId &&
+          other.citationId == this.citationId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -3121,6 +3607,7 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
   final Value<DateTime?> continuousLastReview;
   final Value<String?> deckId;
   final Value<String?> draftId;
+  final Value<String?> citationId;
   final Value<DateTime?> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<int> rowid;
@@ -3145,6 +3632,7 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     this.continuousLastReview = const Value.absent(),
     this.deckId = const Value.absent(),
     this.draftId = const Value.absent(),
+    this.citationId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3170,6 +3658,7 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     this.continuousLastReview = const Value.absent(),
     this.deckId = const Value.absent(),
     this.draftId = const Value.absent(),
+    this.citationId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3195,6 +3684,7 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Expression<DateTime>? continuousLastReview,
     Expression<String>? deckId,
     Expression<String>? draftId,
+    Expression<String>? citationId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -3223,6 +3713,7 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
         'continuous_last_review': continuousLastReview,
       if (deckId != null) 'deck_id': deckId,
       if (draftId != null) 'draft_id': draftId,
+      if (citationId != null) 'citation_id': citationId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -3250,6 +3741,7 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Value<DateTime?>? continuousLastReview,
     Value<String?>? deckId,
     Value<String?>? draftId,
+    Value<String?>? citationId,
     Value<DateTime?>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<int>? rowid,
@@ -3275,6 +3767,7 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
       continuousLastReview: continuousLastReview ?? this.continuousLastReview,
       deckId: deckId ?? this.deckId,
       draftId: draftId ?? this.draftId,
+      citationId: citationId ?? this.citationId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -3350,6 +3843,9 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     if (draftId.present) {
       map['draft_id'] = Variable<String>(draftId.value);
     }
+    if (citationId.present) {
+      map['citation_id'] = Variable<String>(citationId.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -3385,6 +3881,7 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
           ..write('continuousLastReview: $continuousLastReview, ')
           ..write('deckId: $deckId, ')
           ..write('draftId: $draftId, ')
+          ..write('citationId: $citationId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -3853,449 +4350,6 @@ class StudySessionEventsCompanion extends UpdateCompanion<StudySessionEvent> {
           ..write('reviewedAt: $reviewedAt, ')
           ..write('scheduledDays: $scheduledDays, ')
           ..write('mode: $mode, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $CitationItemsTable extends CitationItems
-    with TableInfo<$CitationItemsTable, CitationItem> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $CitationItemsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _citedTextMeta = const VerificationMeta(
-    'citedText',
-  );
-  @override
-  late final GeneratedColumn<String> citedText = GeneratedColumn<String>(
-    'cited_text',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String> sourceIds =
-      GeneratedColumn<String>(
-        'source_ids',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      ).withConverter<List<String>?>($CitationItemsTable.$convertersourceIdsn);
-  @override
-  late final GeneratedColumnWithTypeConverter<List<int>?, String> pageNumbers =
-      GeneratedColumn<String>(
-        'page_numbers',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      ).withConverter<List<int>?>($CitationItemsTable.$converterpageNumbersn);
-  @override
-  late final GeneratedColumnWithTypeConverter<List<ProjectTimeRange>?, String>
-  timeRanges =
-      GeneratedColumn<String>(
-        'time_ranges',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      ).withConverter<List<ProjectTimeRange>?>(
-        $CitationItemsTable.$convertertimeRangesn,
-      );
-  @override
-  late final GeneratedColumnWithTypeConverter<List<ProjectRect>?, String>
-  rects = GeneratedColumn<String>(
-    'rects',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  ).withConverter<List<ProjectRect>?>($CitationItemsTable.$converterrectsn);
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    citedText,
-    sourceIds,
-    pageNumbers,
-    timeRanges,
-    rects,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'citation_items';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<CitationItem> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('cited_text')) {
-      context.handle(
-        _citedTextMeta,
-        citedText.isAcceptableOrUnknown(data['cited_text']!, _citedTextMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  CitationItem map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return CitationItem(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      citedText: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}cited_text'],
-      ),
-      sourceIds: $CitationItemsTable.$convertersourceIdsn.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}source_ids'],
-        ),
-      ),
-      pageNumbers: $CitationItemsTable.$converterpageNumbersn.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}page_numbers'],
-        ),
-      ),
-      timeRanges: $CitationItemsTable.$convertertimeRangesn.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}time_ranges'],
-        ),
-      ),
-      rects: $CitationItemsTable.$converterrectsn.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}rects'],
-        ),
-      ),
-    );
-  }
-
-  @override
-  $CitationItemsTable createAlias(String alias) {
-    return $CitationItemsTable(attachedDatabase, alias);
-  }
-
-  static TypeConverter<List<String>, String> $convertersourceIds =
-      const JsonListConverter<String>();
-  static TypeConverter<List<String>?, String?> $convertersourceIdsn =
-      NullAwareTypeConverter.wrap($convertersourceIds);
-  static TypeConverter<List<int>, String> $converterpageNumbers =
-      const JsonListConverter<int>();
-  static TypeConverter<List<int>?, String?> $converterpageNumbersn =
-      NullAwareTypeConverter.wrap($converterpageNumbers);
-  static TypeConverter<List<ProjectTimeRange>, String> $convertertimeRanges =
-      const ProjectTimeRangeListConverter();
-  static TypeConverter<List<ProjectTimeRange>?, String?> $convertertimeRangesn =
-      NullAwareTypeConverter.wrap($convertertimeRanges);
-  static TypeConverter<List<ProjectRect>, String> $converterrects =
-      const ProjectRectListConverter();
-  static TypeConverter<List<ProjectRect>?, String?> $converterrectsn =
-      NullAwareTypeConverter.wrap($converterrects);
-}
-
-class CitationItem extends DataClass implements Insertable<CitationItem> {
-  final String id;
-
-  /// The actual cited text or content summary.
-  final String? citedText;
-
-  /// References one or more sources (e.g. multiple PDF files).
-  final List<String>? sourceIds;
-
-  /// One or more page numbers (e.g. non-contiguous pages like "4, 7, 12").
-  final List<int>? pageNumbers;
-
-  /// One or more time segments (e.g. for video timestamps).
-  final List<ProjectTimeRange>? timeRanges;
-
-  /// One or more bounding boxes (e.g. for multi-line text selections in a PDF).
-  final List<ProjectRect>? rects;
-  const CitationItem({
-    required this.id,
-    this.citedText,
-    this.sourceIds,
-    this.pageNumbers,
-    this.timeRanges,
-    this.rects,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    if (!nullToAbsent || citedText != null) {
-      map['cited_text'] = Variable<String>(citedText);
-    }
-    if (!nullToAbsent || sourceIds != null) {
-      map['source_ids'] = Variable<String>(
-        $CitationItemsTable.$convertersourceIdsn.toSql(sourceIds),
-      );
-    }
-    if (!nullToAbsent || pageNumbers != null) {
-      map['page_numbers'] = Variable<String>(
-        $CitationItemsTable.$converterpageNumbersn.toSql(pageNumbers),
-      );
-    }
-    if (!nullToAbsent || timeRanges != null) {
-      map['time_ranges'] = Variable<String>(
-        $CitationItemsTable.$convertertimeRangesn.toSql(timeRanges),
-      );
-    }
-    if (!nullToAbsent || rects != null) {
-      map['rects'] = Variable<String>(
-        $CitationItemsTable.$converterrectsn.toSql(rects),
-      );
-    }
-    return map;
-  }
-
-  CitationItemsCompanion toCompanion(bool nullToAbsent) {
-    return CitationItemsCompanion(
-      id: Value(id),
-      citedText: citedText == null && nullToAbsent
-          ? const Value.absent()
-          : Value(citedText),
-      sourceIds: sourceIds == null && nullToAbsent
-          ? const Value.absent()
-          : Value(sourceIds),
-      pageNumbers: pageNumbers == null && nullToAbsent
-          ? const Value.absent()
-          : Value(pageNumbers),
-      timeRanges: timeRanges == null && nullToAbsent
-          ? const Value.absent()
-          : Value(timeRanges),
-      rects: rects == null && nullToAbsent
-          ? const Value.absent()
-          : Value(rects),
-    );
-  }
-
-  factory CitationItem.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return CitationItem(
-      id: serializer.fromJson<String>(json['id']),
-      citedText: serializer.fromJson<String?>(json['citedText']),
-      sourceIds: serializer.fromJson<List<String>?>(json['sourceIds']),
-      pageNumbers: serializer.fromJson<List<int>?>(json['pageNumbers']),
-      timeRanges: serializer.fromJson<List<ProjectTimeRange>?>(
-        json['timeRanges'],
-      ),
-      rects: serializer.fromJson<List<ProjectRect>?>(json['rects']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'citedText': serializer.toJson<String?>(citedText),
-      'sourceIds': serializer.toJson<List<String>?>(sourceIds),
-      'pageNumbers': serializer.toJson<List<int>?>(pageNumbers),
-      'timeRanges': serializer.toJson<List<ProjectTimeRange>?>(timeRanges),
-      'rects': serializer.toJson<List<ProjectRect>?>(rects),
-    };
-  }
-
-  CitationItem copyWith({
-    String? id,
-    Value<String?> citedText = const Value.absent(),
-    Value<List<String>?> sourceIds = const Value.absent(),
-    Value<List<int>?> pageNumbers = const Value.absent(),
-    Value<List<ProjectTimeRange>?> timeRanges = const Value.absent(),
-    Value<List<ProjectRect>?> rects = const Value.absent(),
-  }) => CitationItem(
-    id: id ?? this.id,
-    citedText: citedText.present ? citedText.value : this.citedText,
-    sourceIds: sourceIds.present ? sourceIds.value : this.sourceIds,
-    pageNumbers: pageNumbers.present ? pageNumbers.value : this.pageNumbers,
-    timeRanges: timeRanges.present ? timeRanges.value : this.timeRanges,
-    rects: rects.present ? rects.value : this.rects,
-  );
-  CitationItem copyWithCompanion(CitationItemsCompanion data) {
-    return CitationItem(
-      id: data.id.present ? data.id.value : this.id,
-      citedText: data.citedText.present ? data.citedText.value : this.citedText,
-      sourceIds: data.sourceIds.present ? data.sourceIds.value : this.sourceIds,
-      pageNumbers: data.pageNumbers.present
-          ? data.pageNumbers.value
-          : this.pageNumbers,
-      timeRanges: data.timeRanges.present
-          ? data.timeRanges.value
-          : this.timeRanges,
-      rects: data.rects.present ? data.rects.value : this.rects,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CitationItem(')
-          ..write('id: $id, ')
-          ..write('citedText: $citedText, ')
-          ..write('sourceIds: $sourceIds, ')
-          ..write('pageNumbers: $pageNumbers, ')
-          ..write('timeRanges: $timeRanges, ')
-          ..write('rects: $rects')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(id, citedText, sourceIds, pageNumbers, timeRanges, rects);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is CitationItem &&
-          other.id == this.id &&
-          other.citedText == this.citedText &&
-          other.sourceIds == this.sourceIds &&
-          other.pageNumbers == this.pageNumbers &&
-          other.timeRanges == this.timeRanges &&
-          other.rects == this.rects);
-}
-
-class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
-  final Value<String> id;
-  final Value<String?> citedText;
-  final Value<List<String>?> sourceIds;
-  final Value<List<int>?> pageNumbers;
-  final Value<List<ProjectTimeRange>?> timeRanges;
-  final Value<List<ProjectRect>?> rects;
-  final Value<int> rowid;
-  const CitationItemsCompanion({
-    this.id = const Value.absent(),
-    this.citedText = const Value.absent(),
-    this.sourceIds = const Value.absent(),
-    this.pageNumbers = const Value.absent(),
-    this.timeRanges = const Value.absent(),
-    this.rects = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  CitationItemsCompanion.insert({
-    required String id,
-    this.citedText = const Value.absent(),
-    this.sourceIds = const Value.absent(),
-    this.pageNumbers = const Value.absent(),
-    this.timeRanges = const Value.absent(),
-    this.rects = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : id = Value(id);
-  static Insertable<CitationItem> custom({
-    Expression<String>? id,
-    Expression<String>? citedText,
-    Expression<String>? sourceIds,
-    Expression<String>? pageNumbers,
-    Expression<String>? timeRanges,
-    Expression<String>? rects,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (citedText != null) 'cited_text': citedText,
-      if (sourceIds != null) 'source_ids': sourceIds,
-      if (pageNumbers != null) 'page_numbers': pageNumbers,
-      if (timeRanges != null) 'time_ranges': timeRanges,
-      if (rects != null) 'rects': rects,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  CitationItemsCompanion copyWith({
-    Value<String>? id,
-    Value<String?>? citedText,
-    Value<List<String>?>? sourceIds,
-    Value<List<int>?>? pageNumbers,
-    Value<List<ProjectTimeRange>?>? timeRanges,
-    Value<List<ProjectRect>?>? rects,
-    Value<int>? rowid,
-  }) {
-    return CitationItemsCompanion(
-      id: id ?? this.id,
-      citedText: citedText ?? this.citedText,
-      sourceIds: sourceIds ?? this.sourceIds,
-      pageNumbers: pageNumbers ?? this.pageNumbers,
-      timeRanges: timeRanges ?? this.timeRanges,
-      rects: rects ?? this.rects,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (citedText.present) {
-      map['cited_text'] = Variable<String>(citedText.value);
-    }
-    if (sourceIds.present) {
-      map['source_ids'] = Variable<String>(
-        $CitationItemsTable.$convertersourceIdsn.toSql(sourceIds.value),
-      );
-    }
-    if (pageNumbers.present) {
-      map['page_numbers'] = Variable<String>(
-        $CitationItemsTable.$converterpageNumbersn.toSql(pageNumbers.value),
-      );
-    }
-    if (timeRanges.present) {
-      map['time_ranges'] = Variable<String>(
-        $CitationItemsTable.$convertertimeRangesn.toSql(timeRanges.value),
-      );
-    }
-    if (rects.present) {
-      map['rects'] = Variable<String>(
-        $CitationItemsTable.$converterrectsn.toSql(rects.value),
-      );
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CitationItemsCompanion(')
-          ..write('id: $id, ')
-          ..write('citedText: $citedText, ')
-          ..write('sourceIds: $sourceIds, ')
-          ..write('pageNumbers: $pageNumbers, ')
-          ..write('timeRanges: $timeRanges, ')
-          ..write('rects: $rects, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4776,10 +4830,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $CardCreationDraftItemsTable cardCreationDraftItems =
       $CardCreationDraftItemsTable(this);
+  late final $CitationItemsTable citationItems = $CitationItemsTable(this);
   late final $CardItemsTable cardItems = $CardItemsTable(this);
   late final $StudySessionEventsTable studySessionEvents =
       $StudySessionEventsTable(this);
-  late final $CitationItemsTable citationItems = $CitationItemsTable(this);
   late final $AssetItemsTable assetItems = $AssetItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -4791,9 +4845,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     deckItems,
     sourceItemBlobs,
     cardCreationDraftItems,
+    citationItems,
     cardItems,
     studySessionEvents,
-    citationItems,
     assetItems,
   ];
 }
@@ -6553,6 +6607,349 @@ typedef $$CardCreationDraftItemsTableProcessedTableManager =
       CardCreationDraftItem,
       PrefetchHooks Function({bool cardItemsRefs})
     >;
+typedef $$CitationItemsTableCreateCompanionBuilder =
+    CitationItemsCompanion Function({
+      required String id,
+      Value<String?> citedText,
+      Value<List<String>?> sourceIds,
+      Value<List<int>?> pageNumbers,
+      Value<List<ProjectTimeRange>?> timeRanges,
+      Value<List<ProjectRect>?> rects,
+      Value<int> rowid,
+    });
+typedef $$CitationItemsTableUpdateCompanionBuilder =
+    CitationItemsCompanion Function({
+      Value<String> id,
+      Value<String?> citedText,
+      Value<List<String>?> sourceIds,
+      Value<List<int>?> pageNumbers,
+      Value<List<ProjectTimeRange>?> timeRanges,
+      Value<List<ProjectRect>?> rects,
+      Value<int> rowid,
+    });
+
+final class $$CitationItemsTableReferences
+    extends BaseReferences<_$AppDatabase, $CitationItemsTable, CitationItem> {
+  $$CitationItemsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$CardItemsTable, List<CardItem>>
+  _cardItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.cardItems,
+    aliasName: $_aliasNameGenerator(
+      db.citationItems.id,
+      db.cardItems.citationId,
+    ),
+  );
+
+  $$CardItemsTableProcessedTableManager get cardItemsRefs {
+    final manager = $$CardItemsTableTableManager(
+      $_db,
+      $_db.cardItems,
+    ).filter((f) => f.citationId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_cardItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$CitationItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $CitationItemsTable> {
+  $$CitationItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get citedText => $composableBuilder(
+    column: $table.citedText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+  get sourceIds => $composableBuilder(
+    column: $table.sourceIds,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<int>?, List<int>, String>
+  get pageNumbers => $composableBuilder(
+    column: $table.pageNumbers,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    List<ProjectTimeRange>?,
+    List<ProjectTimeRange>,
+    String
+  >
+  get timeRanges => $composableBuilder(
+    column: $table.timeRanges,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<ProjectRect>?, List<ProjectRect>, String>
+  get rects => $composableBuilder(
+    column: $table.rects,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  Expression<bool> cardItemsRefs(
+    Expression<bool> Function($$CardItemsTableFilterComposer f) f,
+  ) {
+    final $$CardItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cardItems,
+      getReferencedColumn: (t) => t.citationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CardItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.cardItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$CitationItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CitationItemsTable> {
+  $$CitationItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get citedText => $composableBuilder(
+    column: $table.citedText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceIds => $composableBuilder(
+    column: $table.sourceIds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pageNumbers => $composableBuilder(
+    column: $table.pageNumbers,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get timeRanges => $composableBuilder(
+    column: $table.timeRanges,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rects => $composableBuilder(
+    column: $table.rects,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CitationItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CitationItemsTable> {
+  $$CitationItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get citedText =>
+      $composableBuilder(column: $table.citedText, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get sourceIds =>
+      $composableBuilder(column: $table.sourceIds, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<int>?, String> get pageNumbers =>
+      $composableBuilder(
+        column: $table.pageNumbers,
+        builder: (column) => column,
+      );
+
+  GeneratedColumnWithTypeConverter<List<ProjectTimeRange>?, String>
+  get timeRanges => $composableBuilder(
+    column: $table.timeRanges,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<ProjectRect>?, String> get rects =>
+      $composableBuilder(column: $table.rects, builder: (column) => column);
+
+  Expression<T> cardItemsRefs<T extends Object>(
+    Expression<T> Function($$CardItemsTableAnnotationComposer a) f,
+  ) {
+    final $$CardItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cardItems,
+      getReferencedColumn: (t) => t.citationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CardItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.cardItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$CitationItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CitationItemsTable,
+          CitationItem,
+          $$CitationItemsTableFilterComposer,
+          $$CitationItemsTableOrderingComposer,
+          $$CitationItemsTableAnnotationComposer,
+          $$CitationItemsTableCreateCompanionBuilder,
+          $$CitationItemsTableUpdateCompanionBuilder,
+          (CitationItem, $$CitationItemsTableReferences),
+          CitationItem,
+          PrefetchHooks Function({bool cardItemsRefs})
+        > {
+  $$CitationItemsTableTableManager(_$AppDatabase db, $CitationItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CitationItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CitationItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CitationItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> citedText = const Value.absent(),
+                Value<List<String>?> sourceIds = const Value.absent(),
+                Value<List<int>?> pageNumbers = const Value.absent(),
+                Value<List<ProjectTimeRange>?> timeRanges =
+                    const Value.absent(),
+                Value<List<ProjectRect>?> rects = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CitationItemsCompanion(
+                id: id,
+                citedText: citedText,
+                sourceIds: sourceIds,
+                pageNumbers: pageNumbers,
+                timeRanges: timeRanges,
+                rects: rects,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> citedText = const Value.absent(),
+                Value<List<String>?> sourceIds = const Value.absent(),
+                Value<List<int>?> pageNumbers = const Value.absent(),
+                Value<List<ProjectTimeRange>?> timeRanges =
+                    const Value.absent(),
+                Value<List<ProjectRect>?> rects = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CitationItemsCompanion.insert(
+                id: id,
+                citedText: citedText,
+                sourceIds: sourceIds,
+                pageNumbers: pageNumbers,
+                timeRanges: timeRanges,
+                rects: rects,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CitationItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({cardItemsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (cardItemsRefs) db.cardItems],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (cardItemsRefs)
+                    await $_getPrefetchedData<
+                      CitationItem,
+                      $CitationItemsTable,
+                      CardItem
+                    >(
+                      currentTable: table,
+                      referencedTable: $$CitationItemsTableReferences
+                          ._cardItemsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$CitationItemsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).cardItemsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.citationId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CitationItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CitationItemsTable,
+      CitationItem,
+      $$CitationItemsTableFilterComposer,
+      $$CitationItemsTableOrderingComposer,
+      $$CitationItemsTableAnnotationComposer,
+      $$CitationItemsTableCreateCompanionBuilder,
+      $$CitationItemsTableUpdateCompanionBuilder,
+      (CitationItem, $$CitationItemsTableReferences),
+      CitationItem,
+      PrefetchHooks Function({bool cardItemsRefs})
+    >;
 typedef $$CardItemsTableCreateCompanionBuilder =
     CardItemsCompanion Function({
       required String id,
@@ -6575,6 +6972,7 @@ typedef $$CardItemsTableCreateCompanionBuilder =
       Value<DateTime?> continuousLastReview,
       Value<String?> deckId,
       Value<String?> draftId,
+      Value<String?> citationId,
       Value<DateTime?> createdAt,
       Value<DateTime?> updatedAt,
       Value<int> rowid,
@@ -6601,6 +6999,7 @@ typedef $$CardItemsTableUpdateCompanionBuilder =
       Value<DateTime?> continuousLastReview,
       Value<String?> deckId,
       Value<String?> draftId,
+      Value<String?> citationId,
       Value<DateTime?> createdAt,
       Value<DateTime?> updatedAt,
       Value<int> rowid,
@@ -6643,6 +7042,25 @@ final class $$CardItemsTableReferences
       $_db.cardCreationDraftItems,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_draftIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CitationItemsTable _citationIdTable(_$AppDatabase db) =>
+      db.citationItems.createAlias(
+        $_aliasNameGenerator(db.cardItems.citationId, db.citationItems.id),
+      );
+
+  $$CitationItemsTableProcessedTableManager? get citationId {
+    final $_column = $_itemColumn<String>('citation_id');
+    if ($_column == null) return null;
+    final manager = $$CitationItemsTableTableManager(
+      $_db,
+      $_db.citationItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_citationIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -6806,6 +7224,29 @@ class $$CardItemsTableFilterComposer
         );
     return composer;
   }
+
+  $$CitationItemsTableFilterComposer get citationId {
+    final $$CitationItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.citationId,
+      referencedTable: $db.citationItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$CardItemsTableOrderingComposer
@@ -6963,6 +7404,29 @@ class $$CardItemsTableOrderingComposer
         );
     return composer;
   }
+
+  $$CitationItemsTableOrderingComposer get citationId {
+    final $$CitationItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.citationId,
+      referencedTable: $db.citationItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$CardItemsTableAnnotationComposer
@@ -7109,6 +7573,29 @@ class $$CardItemsTableAnnotationComposer
         );
     return composer;
   }
+
+  $$CitationItemsTableAnnotationComposer get citationId {
+    final $$CitationItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.citationId,
+      referencedTable: $db.citationItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$CardItemsTableTableManager
@@ -7124,7 +7611,7 @@ class $$CardItemsTableTableManager
           $$CardItemsTableUpdateCompanionBuilder,
           (CardItem, $$CardItemsTableReferences),
           CardItem,
-          PrefetchHooks Function({bool deckId, bool draftId})
+          PrefetchHooks Function({bool deckId, bool draftId, bool citationId})
         > {
   $$CardItemsTableTableManager(_$AppDatabase db, $CardItemsTable table)
     : super(
@@ -7159,6 +7646,7 @@ class $$CardItemsTableTableManager
                 Value<DateTime?> continuousLastReview = const Value.absent(),
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
+                Value<String?> citationId = const Value.absent(),
                 Value<DateTime?> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -7183,6 +7671,7 @@ class $$CardItemsTableTableManager
                 continuousLastReview: continuousLastReview,
                 deckId: deckId,
                 draftId: draftId,
+                citationId: citationId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -7209,6 +7698,7 @@ class $$CardItemsTableTableManager
                 Value<DateTime?> continuousLastReview = const Value.absent(),
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
+                Value<String?> citationId = const Value.absent(),
                 Value<DateTime?> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -7233,6 +7723,7 @@ class $$CardItemsTableTableManager
                 continuousLastReview: continuousLastReview,
                 deckId: deckId,
                 draftId: draftId,
+                citationId: citationId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -7245,60 +7736,74 @@ class $$CardItemsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({deckId = false, draftId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (deckId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.deckId,
-                                referencedTable: $$CardItemsTableReferences
-                                    ._deckIdTable(db),
-                                referencedColumn: $$CardItemsTableReferences
-                                    ._deckIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-                    if (draftId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.draftId,
-                                referencedTable: $$CardItemsTableReferences
-                                    ._draftIdTable(db),
-                                referencedColumn: $$CardItemsTableReferences
-                                    ._draftIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({deckId = false, draftId = false, citationId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (deckId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.deckId,
+                                    referencedTable: $$CardItemsTableReferences
+                                        ._deckIdTable(db),
+                                    referencedColumn: $$CardItemsTableReferences
+                                        ._deckIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+                        if (draftId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.draftId,
+                                    referencedTable: $$CardItemsTableReferences
+                                        ._draftIdTable(db),
+                                    referencedColumn: $$CardItemsTableReferences
+                                        ._draftIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+                        if (citationId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.citationId,
+                                    referencedTable: $$CardItemsTableReferences
+                                        ._citationIdTable(db),
+                                    referencedColumn: $$CardItemsTableReferences
+                                        ._citationIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -7315,7 +7820,7 @@ typedef $$CardItemsTableProcessedTableManager =
       $$CardItemsTableUpdateCompanionBuilder,
       (CardItem, $$CardItemsTableReferences),
       CardItem,
-      PrefetchHooks Function({bool deckId, bool draftId})
+      PrefetchHooks Function({bool deckId, bool draftId, bool citationId})
     >;
 typedef $$StudySessionEventsTableCreateCompanionBuilder =
     StudySessionEventsCompanion Function({
@@ -7573,241 +8078,6 @@ typedef $$StudySessionEventsTableProcessedTableManager =
       StudySessionEvent,
       PrefetchHooks Function()
     >;
-typedef $$CitationItemsTableCreateCompanionBuilder =
-    CitationItemsCompanion Function({
-      required String id,
-      Value<String?> citedText,
-      Value<List<String>?> sourceIds,
-      Value<List<int>?> pageNumbers,
-      Value<List<ProjectTimeRange>?> timeRanges,
-      Value<List<ProjectRect>?> rects,
-      Value<int> rowid,
-    });
-typedef $$CitationItemsTableUpdateCompanionBuilder =
-    CitationItemsCompanion Function({
-      Value<String> id,
-      Value<String?> citedText,
-      Value<List<String>?> sourceIds,
-      Value<List<int>?> pageNumbers,
-      Value<List<ProjectTimeRange>?> timeRanges,
-      Value<List<ProjectRect>?> rects,
-      Value<int> rowid,
-    });
-
-class $$CitationItemsTableFilterComposer
-    extends Composer<_$AppDatabase, $CitationItemsTable> {
-  $$CitationItemsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get citedText => $composableBuilder(
-    column: $table.citedText,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
-  get sourceIds => $composableBuilder(
-    column: $table.sourceIds,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<List<int>?, List<int>, String>
-  get pageNumbers => $composableBuilder(
-    column: $table.pageNumbers,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<
-    List<ProjectTimeRange>?,
-    List<ProjectTimeRange>,
-    String
-  >
-  get timeRanges => $composableBuilder(
-    column: $table.timeRanges,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<List<ProjectRect>?, List<ProjectRect>, String>
-  get rects => $composableBuilder(
-    column: $table.rects,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-}
-
-class $$CitationItemsTableOrderingComposer
-    extends Composer<_$AppDatabase, $CitationItemsTable> {
-  $$CitationItemsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get citedText => $composableBuilder(
-    column: $table.citedText,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get sourceIds => $composableBuilder(
-    column: $table.sourceIds,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get pageNumbers => $composableBuilder(
-    column: $table.pageNumbers,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get timeRanges => $composableBuilder(
-    column: $table.timeRanges,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get rects => $composableBuilder(
-    column: $table.rects,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$CitationItemsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $CitationItemsTable> {
-  $$CitationItemsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get citedText =>
-      $composableBuilder(column: $table.citedText, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<List<String>?, String> get sourceIds =>
-      $composableBuilder(column: $table.sourceIds, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<List<int>?, String> get pageNumbers =>
-      $composableBuilder(
-        column: $table.pageNumbers,
-        builder: (column) => column,
-      );
-
-  GeneratedColumnWithTypeConverter<List<ProjectTimeRange>?, String>
-  get timeRanges => $composableBuilder(
-    column: $table.timeRanges,
-    builder: (column) => column,
-  );
-
-  GeneratedColumnWithTypeConverter<List<ProjectRect>?, String> get rects =>
-      $composableBuilder(column: $table.rects, builder: (column) => column);
-}
-
-class $$CitationItemsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $CitationItemsTable,
-          CitationItem,
-          $$CitationItemsTableFilterComposer,
-          $$CitationItemsTableOrderingComposer,
-          $$CitationItemsTableAnnotationComposer,
-          $$CitationItemsTableCreateCompanionBuilder,
-          $$CitationItemsTableUpdateCompanionBuilder,
-          (
-            CitationItem,
-            BaseReferences<_$AppDatabase, $CitationItemsTable, CitationItem>,
-          ),
-          CitationItem,
-          PrefetchHooks Function()
-        > {
-  $$CitationItemsTableTableManager(_$AppDatabase db, $CitationItemsTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$CitationItemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$CitationItemsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$CitationItemsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String?> citedText = const Value.absent(),
-                Value<List<String>?> sourceIds = const Value.absent(),
-                Value<List<int>?> pageNumbers = const Value.absent(),
-                Value<List<ProjectTimeRange>?> timeRanges =
-                    const Value.absent(),
-                Value<List<ProjectRect>?> rects = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => CitationItemsCompanion(
-                id: id,
-                citedText: citedText,
-                sourceIds: sourceIds,
-                pageNumbers: pageNumbers,
-                timeRanges: timeRanges,
-                rects: rects,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String id,
-                Value<String?> citedText = const Value.absent(),
-                Value<List<String>?> sourceIds = const Value.absent(),
-                Value<List<int>?> pageNumbers = const Value.absent(),
-                Value<List<ProjectTimeRange>?> timeRanges =
-                    const Value.absent(),
-                Value<List<ProjectRect>?> rects = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => CitationItemsCompanion.insert(
-                id: id,
-                citedText: citedText,
-                sourceIds: sourceIds,
-                pageNumbers: pageNumbers,
-                timeRanges: timeRanges,
-                rects: rects,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$CitationItemsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $CitationItemsTable,
-      CitationItem,
-      $$CitationItemsTableFilterComposer,
-      $$CitationItemsTableOrderingComposer,
-      $$CitationItemsTableAnnotationComposer,
-      $$CitationItemsTableCreateCompanionBuilder,
-      $$CitationItemsTableUpdateCompanionBuilder,
-      (
-        CitationItem,
-        BaseReferences<_$AppDatabase, $CitationItemsTable, CitationItem>,
-      ),
-      CitationItem,
-      PrefetchHooks Function()
-    >;
 typedef $$AssetItemsTableCreateCompanionBuilder =
     AssetItemsCompanion Function({
       required String id,
@@ -8061,12 +8331,12 @@ class $AppDatabaseManager {
         _db,
         _db.cardCreationDraftItems,
       );
+  $$CitationItemsTableTableManager get citationItems =>
+      $$CitationItemsTableTableManager(_db, _db.citationItems);
   $$CardItemsTableTableManager get cardItems =>
       $$CardItemsTableTableManager(_db, _db.cardItems);
   $$StudySessionEventsTableTableManager get studySessionEvents =>
       $$StudySessionEventsTableTableManager(_db, _db.studySessionEvents);
-  $$CitationItemsTableTableManager get citationItems =>
-      $$CitationItemsTableTableManager(_db, _db.citationItems);
   $$AssetItemsTableTableManager get assetItems =>
       $$AssetItemsTableTableManager(_db, _db.assetItems);
 }

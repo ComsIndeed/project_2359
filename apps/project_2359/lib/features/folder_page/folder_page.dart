@@ -50,7 +50,7 @@ class _FolderPageState extends State<FolderPage> {
   late String folderName;
   final Set<String> _selectedDeckIds = {};
   String? _selectedDeckId;
-  StudySessionMode _currentMode = StudySessionMode.spaced;
+  final StudySessionMode _currentMode = StudySessionMode.spaced;
   List<DeckItem> _allDecks = [];
   List<CardCreationDraftItem> _allDrafts = [];
   StreamSubscription? _deckSub;
