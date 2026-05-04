@@ -24,53 +24,37 @@ class StudyDatabaseService {
   }
 
   Stream<List<(StudyFolderItem, int)>> watchPinnedFoldersWithStats() {
-    AppLogger.debug('Watching pinned folders with stats', tag: _tag);
-    final count = _db.cardItems.id.count();
-    final query =
-        _db.select(_db.studyFolderItems).join([
-            leftOuterJoin(
-              _db.deckItems,
-              _db.deckItems.folderId.equalsExp(_db.studyFolderItems.id),
-            ),
-            leftOuterJoin(
-              _db.cardItems,
-              _db.cardItems.deckId.equalsExp(_db.deckItems.id),
-            ),
-          ])
-          ..where(_db.studyFolderItems.isPinned.equals(true))
-          ..addColumns([count])
-          ..groupBy([_db.studyFolderItems.id])
-          ..orderBy([OrderingTerm.desc(_db.studyFolderItems.updatedAt)]);
+    final cardsCount = CustomExpression<int>(
+      '(SELECT COUNT(*) FROM card_items c JOIN deck_items d ON c.deck_id = d.id WHERE d.folder_id = study_folder_items.id)',
+    );
+
+    final query = _db.select(_db.studyFolderItems).addColumns([cardsCount])
+      ..where(_db.studyFolderItems.isPinned.equals(true))
+      ..orderBy([OrderingTerm.desc(_db.studyFolderItems.updatedAt)]);
 
     return query.watch().map((rows) {
       return rows.map((row) {
-        return (row.readTable(_db.studyFolderItems), row.read(count) ?? 0);
+        final folder = row.readTable(_db.studyFolderItems);
+        final count = row.read(cardsCount) ?? 0;
+        return (folder, count);
       }).toList();
     });
   }
 
   Stream<List<(StudyFolderItem, int)>> watchUnpinnedFoldersWithStats() {
-    AppLogger.debug('Watching unpinned folders with stats', tag: _tag);
-    final count = _db.cardItems.id.count();
-    final query =
-        _db.select(_db.studyFolderItems).join([
-            leftOuterJoin(
-              _db.deckItems,
-              _db.deckItems.folderId.equalsExp(_db.studyFolderItems.id),
-            ),
-            leftOuterJoin(
-              _db.cardItems,
-              _db.cardItems.deckId.equalsExp(_db.deckItems.id),
-            ),
-          ])
-          ..where(_db.studyFolderItems.isPinned.equals(false))
-          ..addColumns([count])
-          ..groupBy([_db.studyFolderItems.id])
-          ..orderBy([OrderingTerm.desc(_db.studyFolderItems.updatedAt)]);
+    final cardsCount = CustomExpression<int>(
+      '(SELECT COUNT(*) FROM card_items c JOIN deck_items d ON c.deck_id = d.id WHERE d.folder_id = study_folder_items.id)',
+    );
+
+    final query = _db.select(_db.studyFolderItems).addColumns([cardsCount])
+      ..where(_db.studyFolderItems.isPinned.equals(false))
+      ..orderBy([OrderingTerm.desc(_db.studyFolderItems.updatedAt)]);
 
     return query.watch().map((rows) {
       return rows.map((row) {
-        return (row.readTable(_db.studyFolderItems), row.read(count) ?? 0);
+        final folder = row.readTable(_db.studyFolderItems);
+        final count = row.read(cardsCount) ?? 0;
+        return (folder, count);
       }).toList();
     });
   }
