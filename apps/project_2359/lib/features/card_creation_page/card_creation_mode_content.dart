@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:project_2359/app_database.dart';
-import 'package:project_2359/core/tables/card_items.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/shortcut_widgets.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
