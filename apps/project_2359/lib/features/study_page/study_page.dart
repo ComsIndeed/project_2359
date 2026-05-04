@@ -35,7 +35,7 @@ class _StudyPageState extends State<StudyPage> {
   List<CardItem>? _cards;
   ContinuousSessionController? _continuousController;
   final FocusNode _focusNode = FocusNode();
-  final GlobalKey<_SwipeableCardWrapperState> _swipeKey = GlobalKey();
+  final GlobalKey<_SwipeableCardStackState> _swipeKey = GlobalKey();
   Map<fsrs.Rating, String> _previews = {};
 
   @override
@@ -298,56 +298,29 @@ class _StudyPageState extends State<StudyPage> {
                 ),
               ),
             Expanded(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 32,
-                  ),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      if (_nextCard != null)
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          curve: Curves.easeOutCubic,
-                          transform: Matrix4.identity()
-                            ..translate(0.0, _isTransitioning ? 0.0 : 12.0),
-                          child: AnimatedScale(
-                            scale: _isTransitioning ? 1.0 : 0.94,
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeOutCubic,
-                            child: AnimatedOpacity(
-                              opacity: _isTransitioning ? 1.0 : 0.4,
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeOutCubic,
-                              child: FlippableCard(
-                                key: ValueKey('bg_${_nextCard!.id}'),
-                                isFlipped: false,
-                                frontText: _nextCard!.frontText ?? '',
-                                backText: _nextCard!.backText ?? '',
-                                onTap: () {},
-                              ),
-                            ),
-                          ),
-                        ),
-                      _SwipeableCardWrapper(
-                        key: _swipeKey,
-                        isFlipped: _isFlipped,
-                        onSwipeLeft: () => _rateCard(fsrs.Rating.again),
-                        onSwipeRight: () => _rateCard(fsrs.Rating.good),
-                        onSwipeUp: () => _rateCard(fsrs.Rating.easy),
-                        onSwipeDown: () => _rateCard(fsrs.Rating.hard),
-                        child: FlippableCard(
-                          key: ValueKey('top_${card.id}'),
-                          isFlipped: _isFlipped,
-                          frontText: card.frontText ?? '',
-                          backText: card.backText ?? '',
-                          onTap: _flipCard,
-                        ),
+              child: _SwipeableCardStack(
+                key: _swipeKey,
+                isFlipped: _isFlipped,
+                isTransitioning: _isTransitioning,
+                onSwipeLeft: () => _rateCard(fsrs.Rating.again),
+                onSwipeRight: () => _rateCard(fsrs.Rating.good),
+                onSwipeUp: () => _rateCard(fsrs.Rating.easy),
+                onSwipeDown: () => _rateCard(fsrs.Rating.hard),
+                backgroundCard: _nextCard == null
+                    ? null
+                    : FlippableCard(
+                        key: ValueKey('bg_${_nextCard!.id}'),
+                        isFlipped: false,
+                        frontText: _nextCard!.frontText ?? '',
+                        backText: _nextCard!.backText ?? '',
+                        onTap: () {},
                       ),
-                    ],
-                  ),
+                child: FlippableCard(
+                  key: ValueKey('top_${card.id}'),
+                  isFlipped: _isFlipped,
+                  frontText: card.frontText ?? '',
+                  backText: card.backText ?? '',
+                  onTap: _flipCard,
                 ),
               ),
             ),
@@ -490,18 +463,22 @@ class _FsrsButton extends StatelessWidget {
   }
 }
 
-class _SwipeableCardWrapper extends StatefulWidget {
+class _SwipeableCardStack extends StatefulWidget {
   final Widget child;
+  final Widget? backgroundCard;
   final bool isFlipped;
+  final bool isTransitioning;
   final VoidCallback onSwipeLeft;
   final VoidCallback onSwipeRight;
   final VoidCallback onSwipeUp;
   final VoidCallback onSwipeDown;
 
-  const _SwipeableCardWrapper({
+  const _SwipeableCardStack({
     super.key,
     required this.child,
+    this.backgroundCard,
     required this.isFlipped,
+    required this.isTransitioning,
     required this.onSwipeLeft,
     required this.onSwipeRight,
     required this.onSwipeUp,
@@ -509,17 +486,16 @@ class _SwipeableCardWrapper extends StatefulWidget {
   });
 
   @override
-  State<_SwipeableCardWrapper> createState() => _SwipeableCardWrapperState();
+  State<_SwipeableCardStack> createState() => _SwipeableCardStackState();
 }
 
-class _SwipeableCardWrapperState extends State<_SwipeableCardWrapper>
+class _SwipeableCardStackState extends State<_SwipeableCardStack>
     with TickerProviderStateMixin {
   Offset _offset = Offset.zero;
   Offset _anchor = Offset.zero;
   double _rotation = 0.0;
   bool _isDragging = false;
   late AnimationController _controller;
-  late Animation<Offset> _backAnimation;
 
   @override
   void initState() {
@@ -537,7 +513,7 @@ class _SwipeableCardWrapperState extends State<_SwipeableCardWrapper>
   }
 
   void _onPanStart(DragStartDetails details) {
-    if (!widget.isFlipped) return;
+    if (!widget.isFlipped || widget.isTransitioning) return;
     setState(() {
       _isDragging = true;
       _anchor = details.localPosition;
@@ -546,10 +522,9 @@ class _SwipeableCardWrapperState extends State<_SwipeableCardWrapper>
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    if (!widget.isFlipped) return;
+    if (!widget.isFlipped || widget.isTransitioning) return;
     setState(() {
       _offset += details.delta;
-      // Realistic swing: rotate more if dragging further from the center
       final center = const Offset(150, 200);
       final distFromCenter = _anchor - center;
       _rotation = (_offset.dx / 300) * (distFromCenter.dy / 200).clamp(-1, 1);
@@ -557,7 +532,7 @@ class _SwipeableCardWrapperState extends State<_SwipeableCardWrapper>
   }
 
   void _onPanEnd(DragEndDetails details) {
-    if (!widget.isFlipped) return;
+    if (!widget.isFlipped || widget.isTransitioning) return;
     final threshold = 120.0;
 
     if (_offset.dx < -threshold) {
@@ -591,7 +566,6 @@ class _SwipeableCardWrapperState extends State<_SwipeableCardWrapper>
     try {
       await _controller.forward().orCancel;
     } catch (e) {
-      // Animation was cancelled, which is fine
     } finally {
       _controller.removeListener(listener);
     }
@@ -607,95 +581,137 @@ class _SwipeableCardWrapperState extends State<_SwipeableCardWrapper>
   }
 
   void _resetPosition() {
-    _backAnimation = Tween<Offset>(
-      begin: _offset,
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    final beginOffset = _offset;
+    final beginRotation = _rotation;
+    final animation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
 
     _controller.reset();
-    _controller.forward();
-
-    _controller.addListener(() {
+    void listener() {
       setState(() {
-        _offset = _backAnimation.value;
-        _rotation = _rotation * (1 - _controller.value);
-        if (_controller.isCompleted) _isDragging = false;
+        _offset = Offset.lerp(beginOffset, Offset.zero, animation.value)!;
+        _rotation = beginRotation * (1 - animation.value);
       });
+    }
+
+    _controller.addListener(listener);
+    _controller.forward().then((_) {
+      _controller.removeListener(listener);
+      setState(() => _isDragging = false);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final opacity = (_offset.distance / 100).clamp(0.0, 1.0);
+    final threshold = 100.0;
+    final leftIntensity = (-_offset.dx / threshold).clamp(0.0, 1.0);
+    final rightIntensity = (_offset.dx / threshold).clamp(0.0, 1.0);
+    final upIntensity = (-_offset.dy / threshold).clamp(0.0, 1.0);
+    final downIntensity = (_offset.dy / threshold).clamp(0.0, 1.0);
+
+    fsrs.Rating? activeRating;
+    if (leftIntensity >= 1.0) activeRating = fsrs.Rating.again;
+    else if (rightIntensity >= 1.0) activeRating = fsrs.Rating.good;
+    else if (upIntensity >= 1.0) activeRating = fsrs.Rating.easy;
+    else if (downIntensity >= 1.0) activeRating = fsrs.Rating.hard;
 
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // Rating Overlays (only visible while dragging)
-        _RatingOverlay(
-          label: 'Again',
+        // Edge Gradients
+        _EdgeGradient(
           direction: Alignment.centerLeft,
           color: Colors.red.shade400,
-          isActive: _offset.dx < -100,
-          opacity: _isDragging ? opacity : 0,
+          intensity: leftIntensity,
+          isVisible: _isDragging,
         ),
-        _RatingOverlay(
-          label: 'Good',
+        _EdgeGradient(
           direction: Alignment.centerRight,
           color: Colors.green.shade400,
-          isActive: _offset.dx > 100,
-          opacity: _isDragging ? opacity : 0,
+          intensity: rightIntensity,
+          isVisible: _isDragging,
         ),
-        _RatingOverlay(
-          label: 'Easy',
+        _EdgeGradient(
           direction: Alignment.topCenter,
           color: Colors.blue.shade400,
-          isActive: _offset.dy < -100,
-          opacity: _isDragging ? opacity : 0,
+          intensity: upIntensity,
+          isVisible: _isDragging,
         ),
-        _RatingOverlay(
-          label: 'Hard',
+        _EdgeGradient(
           direction: Alignment.bottomCenter,
           color: Colors.orange.shade400,
-          isActive: _offset.dy > 100,
-          opacity: _isDragging ? opacity : 0,
+          intensity: downIntensity,
+          isVisible: _isDragging,
         ),
 
-        // The Card
-        GestureDetector(
-          onPanStart: _onPanStart,
-          onPanUpdate: _onPanUpdate,
-          onPanEnd: _onPanEnd,
-          child: Transform.translate(
-            offset: _offset,
-            child: Transform.rotate(
-              angle: _rotation,
-              alignment: Alignment(
-                (_anchor.dx / 150) - 1, // Normalized anchor
-                (_anchor.dy / 200) - 1,
-              ),
-              child: widget.child,
+        // Background Card Area
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                if (widget.backgroundCard != null)
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+                    transform: Matrix4.identity()
+                      ..translate(0.0, widget.isTransitioning ? 0.0 : 12.0),
+                    child: AnimatedScale(
+                      scale: widget.isTransitioning ? 1.0 : 0.94,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      child: AnimatedOpacity(
+                        opacity: widget.isTransitioning ? 1.0 : 0.4,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOutCubic,
+                        child: widget.backgroundCard!,
+                      ),
+                    ),
+                  ),
+                
+                // Top Card (Draggable)
+                GestureDetector(
+                  onPanStart: _onPanStart,
+                  onPanUpdate: _onPanUpdate,
+                  onPanEnd: _onPanEnd,
+                  child: Transform.translate(
+                    offset: _offset,
+                    child: Transform.rotate(
+                      angle: _rotation,
+                      alignment: Alignment(
+                        (_anchor.dx / 150) - 1,
+                        (_anchor.dy / 200) - 1,
+                      ),
+                      child: widget.child,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
+
+        // Top Selection Indicator
+        if (_isDragging && activeRating != null)
+          _TopSelectionOverlay(rating: activeRating),
       ],
     );
   }
 }
 
-class _RatingOverlay extends StatelessWidget {
-  final String label;
+class _EdgeGradient extends StatelessWidget {
   final Alignment direction;
   final Color color;
-  final bool isActive;
-  final double opacity;
+  final double intensity;
+  final bool isVisible;
 
-  const _RatingOverlay({
-    required this.label,
+  const _EdgeGradient({
     required this.direction,
     required this.color,
-    required this.isActive,
-    required this.opacity,
+    required this.intensity,
+    required this.isVisible,
   });
 
   @override
@@ -703,41 +719,17 @@ class _RatingOverlay extends StatelessWidget {
     return Positioned.fill(
       child: IgnorePointer(
         child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 200),
-          opacity: opacity * 0.8,
-          child: Align(
-            alignment: direction,
-            child: Padding(
-              padding: const EdgeInsets.all(40.0),
-              child: AnimatedScale(
-                duration: const Duration(milliseconds: 200),
-                scale: isActive ? 1.5 : 1.0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: isActive ? 0.9 : 0.4),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      if (isActive)
-                        BoxShadow(
-                          color: color.withValues(alpha: 0.5),
-                          blurRadius: 20,
-                          spreadRadius: 5,
-                        ),
-                    ],
-                  ),
-                  child: Text(
-                    label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                ),
+          duration: const Duration(milliseconds: 100),
+          opacity: isVisible ? (intensity * 0.3).clamp(0.0, 0.3) : 0,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: direction,
+                end: Alignment.center,
+                colors: [
+                  color.withValues(alpha: 0.8),
+                  color.withValues(alpha: 0.0),
+                ],
               ),
             ),
           ),
@@ -746,3 +738,56 @@ class _RatingOverlay extends StatelessWidget {
     );
   }
 }
+
+class _TopSelectionOverlay extends StatelessWidget {
+  final fsrs.Rating rating;
+
+  const _TopSelectionOverlay({required this.rating});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    String label = '';
+    Color color = Colors.grey;
+
+    switch (rating) {
+      case fsrs.Rating.again: label = 'AGAIN'; color = Colors.red.shade400; break;
+      case fsrs.Rating.hard: label = 'HARD'; color = Colors.orange.shade400; break;
+      case fsrs.Rating.good: label = 'GOOD'; color = Colors.green.shade400; break;
+      case fsrs.Rating.easy: label = 'EASY'; color = Colors.blue.shade400; break;
+    }
+
+    return Positioned(
+      top: 20,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: IgnorePointer(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.4),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
