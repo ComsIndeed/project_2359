@@ -184,6 +184,26 @@ class SchedulingService {
         .watchSingle();
   }
 
+  /// Direct fetch for the due count
+  Future<int> getDueCount({
+    required String deckId,
+    StudySessionMode mode = StudySessionMode.spaced,
+  }) async {
+    final now = DateTime.now();
+    final query = _db.selectOnly(_db.cardItems)
+      ..addColumns([_db.cardItems.id.count()])
+      ..where(_db.cardItems.deckId.equals(deckId));
+
+    if (mode == StudySessionMode.spaced) {
+      query.where(_db.cardItems.spacedDue.isSmallerOrEqualValue(now));
+    } else {
+      query.where(_db.cardItems.continuousDue.isSmallerOrEqualValue(now));
+    }
+
+    final row = await query.getSingle();
+    return row.read<int>(_db.cardItems.id.count()) ?? 0;
+  }
+
   /// Watch due count for an entire folder (joins decks and cards)
   Stream<int> watchDueCountForFolder({
     required String folderId,
