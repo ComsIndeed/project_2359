@@ -27,6 +27,8 @@ import 'package:project_2359/core/enums/media_type.dart';
 import 'package:project_2359/core/tables/source_item_blobs.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_page.dart';
 import 'package:project_2359/features/study_page/study_page.dart';
+import 'package:project_2359/features/study_page/widgets/study_session_setup_sheet.dart';
+import 'package:project_2359/core/tables/study_session_events.dart';
 
 class FolderPage extends StatefulWidget {
   final String folderId;
@@ -48,6 +50,7 @@ class _FolderPageState extends State<FolderPage> {
   late String folderName;
   final Set<String> _selectedDeckIds = {};
   String? _selectedDeckId;
+  StudySessionMode _currentMode = StudySessionMode.spaced;
   List<DeckItem> _allDecks = [];
   List<CardCreationDraftItem> _allDrafts = [];
   StreamSubscription? _deckSub;
@@ -502,19 +505,43 @@ class _FolderPageState extends State<FolderPage> {
                     onToggleSelection: _toggleDeckSelection,
                     isSelecting: _isSelecting,
                     selectedDeckId: _selectedDeckId,
-                    onDeckTap: (id) {
+                    onDeckTap: (id) async {
                       setState(() => _selectedDeckId = id);
-                      // If on mobile, push. Else, we already updated state for detail pane.
+                      final deck = _allDecks.firstWhere((d) => d.id == id);
+                      final schedulingService =
+                          context.read<AppController>().schedulingService;
+
+                      // Get counts for the setup sheet
+                      final dueCount = await schedulingService
+                          .watchDueCount(deckId: id)
+                          .first;
+                      final allCards = await schedulingService
+                          .getAllCardsForDeck(id);
+                      final totalCount = allCards.length;
+
+                      if (!mounted) return;
+
+                      // If on mobile, push the setup sheet.
                       if (!ResponsiveBreakpoints.of(
                         context,
                       ).largerThan(MOBILE)) {
-                        final deck = _allDecks.firstWhere((d) => d.id == id);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                StudyPage(deckId: id, deckName: deck.name),
-                          ),
+                        StudySessionSetupSheet.show(
+                          context: context,
+                          deckName: deck.name,
+                          dueCount: dueCount,
+                          totalCount: totalCount,
+                          onStart: (mode) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StudyPage(
+                                  deckId: id,
+                                  deckName: deck.name,
+                                  mode: mode,
+                                ),
+                              ),
+                            );
+                          },
                         );
                       }
                     },
@@ -538,7 +565,12 @@ class _FolderPageState extends State<FolderPage> {
 
   Widget _buildDetailView() {
     final deck = _allDecks.firstWhere((d) => d.id == _selectedDeckId);
-    return StudyPage(deckId: deck.id, deckName: deck.name, isNested: true);
+    return StudyPage(
+      deckId: deck.id,
+      deckName: deck.name,
+      isNested: true,
+      mode: _currentMode,
+    );
   }
 
   Widget _buildEmptyDetail() {
@@ -1269,6 +1301,33 @@ class _DecksList extends StatelessWidget {
                           selectedIds.contains(decks[i].id) ||
                           (selectedDeckId == decks[i].id),
                       leading: const WizardFlashcardPreview(),
+                      trailing: StreamBuilder<int>(
+                        stream: context
+                            .read<AppController>()
+                            .schedulingService
+                            .watchDueCount(deckId: decks[i].id),
+                        builder: (context, snapshot) {
+                          final count = snapshot.data ?? 0;
+                          if (count == 0) return const SizedBox.shrink();
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              count.toString(),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                       onTap: isSelecting
                           ? () => onToggleSelection(decks[i].id)
                           : () {
@@ -1281,6 +1340,7 @@ class _DecksList extends StatelessWidget {
                                     builder: (context) => StudyPage(
                                       deckId: decks[i].id,
                                       deckName: decks[i].name,
+                                      mode: StudySessionMode.spaced,
                                     ),
                                   ),
                                 );

@@ -5,21 +5,23 @@ import 'package:fsrs/fsrs.dart' as fsrs;
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/app_controller.dart';
-import 'package:project_2359/core/settings/labs_settings.dart';
-import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/features/study_page/flippable_card.dart';
+import 'package:project_2359/core/tables/study_session_events.dart';
+import 'package:project_2359/core/services/continuous_session_controller.dart';
 
 class StudyPage extends StatefulWidget {
   final String deckId;
   final String deckName;
   final bool isNested;
+  final StudySessionMode mode;
 
   const StudyPage({
     super.key,
     required this.deckId,
     required this.deckName,
     this.isNested = false,
+    this.mode = StudySessionMode.spaced,
   });
 
   @override
@@ -30,7 +32,9 @@ class _StudyPageState extends State<StudyPage> {
   int _currentIndex = 0;
   bool _isFlipped = false;
   List<CardItem>? _cards;
+  ContinuousSessionController? _continuousController;
   final FocusNode _focusNode = FocusNode();
+  Map<fsrs.Rating, String> _previews = {};
 
   @override
   void initState() {
@@ -45,40 +49,105 @@ class _StudyPageState extends State<StudyPage> {
   }
 
   Future<void> _loadCards() async {
-    final studyService = context.read<StudyDatabaseService>();
-    final cards = await studyService.getCardsByDeckId(widget.deckId);
-    if (mounted) {
-      setState(() {
-        _cards = cards;
-      });
+    final appController = context.read<AppController>();
+    final schedulingService = appController.schedulingService;
+
+    if (widget.mode == StudySessionMode.spaced) {
+      final cards = await schedulingService
+          .watchDueCards(deckId: widget.deckId)
+          .first;
+      if (mounted) {
+        setState(() {
+          _cards = cards;
+        });
+        _updatePreviews();
+      }
+    } else {
+      final cards = await schedulingService.getAllCardsForDeck(widget.deckId);
+      if (mounted) {
+        setState(() {
+          _cards = cards;
+          _continuousController = ContinuousSessionController(cards);
+        });
+      }
     }
   }
 
+  CardItem? get _currentCard {
+    if (widget.mode == StudySessionMode.continuous) {
+      return _continuousController?.nextCard;
+    }
+    if (_cards == null || _currentIndex >= _cards!.length) return null;
+    return _cards![_currentIndex];
+  }
+
+  Future<void> _updatePreviews() async {
+    if (widget.mode != StudySessionMode.spaced || _currentCard == null) return;
+    
+    final schedulingService = context.read<AppController>().schedulingService;
+    final Map<fsrs.Rating, String> newPreviews = {};
+    
+    for (final rating in fsrs.Rating.values) {
+      final nextDue = await schedulingService.getPreviewNextDue(
+        cardId: _currentCard!.id,
+        rating: rating,
+        mode: widget.mode,
+      );
+      newPreviews[rating] = _formatInterval(nextDue);
+    }
+    
+    if (mounted) {
+      setState(() => _previews = newPreviews);
+    }
+  }
+
+  String _formatInterval(DateTime due) {
+    final diff = due.difference(DateTime.now());
+    if (diff.inDays >= 365) return '${(diff.inDays / 365).toStringAsFixed(1)}y';
+    if (diff.inDays >= 30) return '${(diff.inDays / 30).round()}mo';
+    if (diff.inDays >= 1) return '${diff.inDays}d';
+    if (diff.inHours >= 1) return '${diff.inHours}h';
+    return '${diff.inMinutes}m';
+  }
+
   void _flipCard() {
+    if (_currentCard == null) return;
     setState(() {
       _isFlipped = !_isFlipped;
     });
   }
 
   void _rateCard(fsrs.Rating rating) async {
+    final card = _currentCard;
+    if (card == null) return;
+
     final appController = context.read<AppController>();
-    final cardId = _cards![_currentIndex].id;
 
-    // Await the update
-    await appController.schedulingService.reviewCard(
-      cardId: cardId,
-      rating: rating,
-    );
+    if (widget.mode == StudySessionMode.spaced) {
+      await appController.schedulingService.reviewCard(
+        cardId: card.id,
+        rating: rating,
+        mode: widget.mode,
+      );
 
-    if (mounted) {
-      if (_currentIndex < _cards!.length - 1) {
+      if (mounted) {
+        if (_currentIndex < _cards!.length - 1) {
+          setState(() {
+            _currentIndex++;
+            _isFlipped = false;
+          });
+          _updatePreviews();
+        } else {
+          Navigator.pop(context);
+        }
+      }
+    } else {
+      // Continuous Mode: In-memory only
+      _continuousController!.submitRating(rating);
+      if (mounted) {
         setState(() {
-          _currentIndex++;
           _isFlipped = false;
         });
-      } else {
-        // Deck finished
-        Navigator.pop(context);
       }
     }
   }
@@ -86,6 +155,34 @@ class _StudyPageState extends State<StudyPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final card = _currentCard;
+
+    if (_cards == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (card == null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check_circle_outline, size: 64, color: Colors.green),
+              const SizedBox(height: 16),
+              Text(
+                "Deck Finished!",
+                style: theme.textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Back to Folder"),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     final content = KeyboardListener(
       focusNode: _focusNode,
@@ -94,7 +191,14 @@ class _StudyPageState extends State<StudyPage> {
         if (event is KeyDownEvent) {
           if (event.logicalKey == LogicalKeyboardKey.space ||
               event.logicalKey == LogicalKeyboardKey.enter) {
-            _flipCard();
+            if (!_isFlipped) {
+              _flipCard();
+            }
+          } else if (_isFlipped) {
+            if (event.logicalKey == LogicalKeyboardKey.digit1) _rateCard(fsrs.Rating.again);
+            if (event.logicalKey == LogicalKeyboardKey.digit2) _rateCard(fsrs.Rating.hard);
+            if (event.logicalKey == LogicalKeyboardKey.digit3) _rateCard(fsrs.Rating.good);
+            if (event.logicalKey == LogicalKeyboardKey.digit4) _rateCard(fsrs.Rating.easy);
           }
         }
       },
@@ -102,121 +206,101 @@ class _StudyPageState extends State<StudyPage> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  if (!widget.isNested) ...[
-                    ProjectBackButton(onPressed: () => Navigator.pop(context)),
-                    const SizedBox(width: 16),
-                  ],
+                  const ProjectBackButton(),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.deckName,
-                          style: theme.textTheme.displaySmall,
-                        ),
-                        if (_cards != null)
-                          Text(
-                            '${_currentIndex + 1} of ${_cards!.length} cards',
-                            style: theme.textTheme.bodyMedium,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
+                        ),
+                        Text(
+                          widget.mode == StudySessionMode.spaced
+                              ? "Scheduled Review"
+                              : "Continuous Mode",
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
                       ],
                     ),
+                  ),
+                  Text(
+                    widget.mode == StudySessionMode.spaced 
+                      ? "${_currentIndex + 1} / ${_cards!.length}"
+                      : "Reviewed: ${_continuousController?.totalReviews}",
+                    style: theme.textTheme.labelMedium,
                   ),
                 ],
               ),
             ),
-            if (_cards != null && _cards!.isNotEmpty)
+            if (widget.mode == StudySessionMode.spaced)
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
-                ),
-                child: ClipRRect(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: LinearProgressIndicator(
+                  value: (_currentIndex + 1) / _cards!.length,
                   borderRadius: BorderRadius.circular(2),
-                  child: LinearProgressIndicator(
-                    value: (_currentIndex + 1) / _cards!.length,
-                    backgroundColor: theme.colorScheme.onSurface.withValues(
-                      alpha: 0.05,
-                    ),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      theme.colorScheme.primary,
-                    ),
-                    minHeight: 3,
-                  ),
                 ),
               ),
             Expanded(
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: _cards == null
-                      ? const CircularProgressIndicator()
-                      : ListenableBuilder(
-                          listenable: labsSettings,
-                          builder: (context, _) {
-                            final cardContent = ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 600),
-                              child: AspectRatio(
-                                aspectRatio: 3 / 4,
-                                child: FlippableCard(
-                                  frontText:
-                                      _cards![_currentIndex].frontText ?? '',
-                                  backText:
-                                      _cards![_currentIndex].backText ?? '',
-                                  isFlipped: _isFlipped,
-                                  onTap: _flipCard,
-                                ),
-                              ),
-                            );
-
-                            if (!labsSettings.swipeToRateEnabled) {
-                              return cardContent;
-                            }
-
-                            return _SwipeableCardWrapper(
-                              isFlipped: _isFlipped,
-                              onSwipeLeft: () {}, // TODO
-                              onSwipeRight: () {}, // TODO
-                              onSwipeUp: () {}, // TODO
-                              onSwipeDown: () {}, // TODO
-                              child: cardContent,
-                            );
-                          },
-                        ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                  child: _SwipeableCardWrapper(
+                    isFlipped: _isFlipped,
+                    onSwipeLeft: () => _rateCard(fsrs.Rating.again),
+                    onSwipeRight: () => _rateCard(fsrs.Rating.good),
+                    onSwipeUp: () => _rateCard(fsrs.Rating.easy),
+                    onSwipeDown: () => _rateCard(fsrs.Rating.hard),
+                    child: FlippableCard(
+                      isFlipped: _isFlipped,
+                      frontText: card.frontText ?? '',
+                      backText: card.backText ?? '',
+                      onTap: _flipCard,
+                    ),
+                  ),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(32, 0, 32, 48),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
                 child: !_isFlipped
                     ? _FlipButton(label: 'Show Answer', onPressed: _flipCard)
                     : Row(
                         children: [
                           _FsrsButton(
                             label: 'Again',
+                            subtitle: _previews[fsrs.Rating.again],
                             color: Colors.red.shade400,
                             onPressed: () => _rateCard(fsrs.Rating.again),
                           ),
                           const SizedBox(width: 8),
                           _FsrsButton(
                             label: 'Hard',
+                            subtitle: _previews[fsrs.Rating.hard],
                             color: Colors.orange.shade400,
                             onPressed: () => _rateCard(fsrs.Rating.hard),
                           ),
                           const SizedBox(width: 8),
                           _FsrsButton(
                             label: 'Good',
+                            subtitle: _previews[fsrs.Rating.good],
                             color: Colors.green.shade400,
                             onPressed: () => _rateCard(fsrs.Rating.good),
                           ),
                           const SizedBox(width: 8),
                           _FsrsButton(
                             label: 'Easy',
+                            subtitle: _previews[fsrs.Rating.easy],
                             color: Colors.blue.shade400,
                             onPressed: () => _rateCard(fsrs.Rating.easy),
                           ),
@@ -270,11 +354,13 @@ class _FlipButton extends StatelessWidget {
 
 class _FsrsButton extends StatelessWidget {
   final String label;
+  final String? subtitle;
   final Color color;
   final VoidCallback onPressed;
 
   const _FsrsButton({
     required this.label,
+    this.subtitle,
     required this.color,
     required this.onPressed,
   });
@@ -296,12 +382,24 @@ class _FsrsButton extends StatelessWidget {
         child: InkWell(
           onTap: onPressed,
           child: Center(
-            child: Text(
-              label,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (subtitle != null)
+                  Text(
+                    subtitle!,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: color.withValues(alpha: 0.7),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),

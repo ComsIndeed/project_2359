@@ -33,21 +33,28 @@ class SchedulingService {
       )..where((t) => t.id.equals(cardId))).getSingle();
 
       // 2. Map row data to FSRS Card object based on mode
+      // NOTE: For Continuous mode, we don't actually call this from SchedulingService 
+      // if we follow the in-memory only rule. But we keep it for backward compatibility 
+      // with existing DB columns if needed.
       final fsrsCard = _toFsrsCard(card, mode);
 
       // 3. Compute next state
-      // fsrs 2.0.1 Scheduler.reviewCard takes 2 arguments (Card, Rating).
       final result = _scheduler.reviewCard(fsrsCard, rating);
       final nextFsrsCard = result.card;
 
       // 4. Update the card record
-      final companion = _toCompanion(nextFsrsCard, mode);
-      await (_db.update(
-        _db.cardItems,
-      )..where((t) => t.id.equals(cardId))).write(companion);
+      if (mode == StudySessionMode.spaced) {
+        final companion = _toCompanion(nextFsrsCard, mode);
+        await (_db.update(
+          _db.cardItems,
+        )..where((t) => t.id.equals(cardId))).write(companion);
+      } else {
+        // Continuous mode currently does NOT write back to the DB to keep 
+        // the main FSRS schedule pure.
+        AppLogger.debug('Continuous mode: skipping DB write for card $cardId', tag: _tag);
+      }
 
       // 5. Log the session event
-      // Calculate scheduled days manually as next due - now
       final scheduledDays = nextFsrsCard.due.difference(now).inDays;
 
       await _db
@@ -90,11 +97,9 @@ class SchedulingService {
 
   /// Maps a CardItem row to an fsrs.Card
   fsrs.Card _toFsrsCard(CardItem card, StudySessionMode mode) {
-    // Note: fsrs.Card uses named parameters in this version.
     final fCardId = card.id.hashCode;
-    final isSpaced = mode == StudySessionMode.spaced;
-
-    if (isSpaced) {
+    
+    if (mode == StudySessionMode.spaced) {
       return fsrs.Card(
         cardId: fCardId,
         due: card.spacedDue,
@@ -105,6 +110,7 @@ class SchedulingService {
         lastReview: card.spacedLastReview,
       );
     } else {
+      // Even in continuous mode, we load from the drill columns if they exist
       return fsrs.Card(
         cardId: fCardId,
         due: card.drillDue,
@@ -286,4 +292,10 @@ class SchedulingService {
 
     return query.watch();
   }
+
+  /// Fetches all cards for a specific deck.
+  Future<List<CardItem>> getAllCardsForDeck(String deckId) async {
+    return await (_db.select(_db.cardItems)..where((t) => t.deckId.equals(deckId))).get();
+  }
+
 }

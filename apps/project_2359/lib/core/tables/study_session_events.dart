@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-enum StudySessionMode { spaced, drill }
+enum StudySessionMode { spaced, continuous }
 
 class StudySessionEvents extends Table {
   TextColumn get id => text()();
