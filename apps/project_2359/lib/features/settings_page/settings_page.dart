@@ -363,14 +363,14 @@ class SettingsPage extends StatelessWidget {
                         _SettingsTile(
                           icon: FontAwesomeIcons.vial,
                           title: 'Inject Mock Data',
-                          subtitle: 'Download ~15MB of PDF study material',
+                          subtitle: 'Create 200+ cards (~16MB download)',
                           onTap: () async {
                             final confirmed = await showDialog<bool>(
                               context: context,
                               builder: (context) => AlertDialog(
                                 title: const Text('Inject Mock Data?'),
                                 content: const Text(
-                                  'This will download biology seed files from GitHub and create 3 test decks with 20 cards total.',
+                                  'This will download ~16MB of PDF study materials and create 200+ cards across two collections.',
                                 ),
                                 actions: [
                                   TextButton(

@@ -526,7 +526,7 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
           ],
         ),
         content: const Text(
-          'INJECTION_REQUESTED: This will download ~15MB of study materials from GitHub.\n\nPROCEED?',
+          'INJECTION_REQUESTED: This will download ~16MB of study materials from GitHub.\n\nPROCEED?',
           style: TextStyle(color: Colors.white70, fontFamily: 'Courier', fontSize: 13),
         ),
         actions: [
@@ -627,7 +627,7 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Internal tool: Seed biology data',
+                            'Internal tool: Seed ~16MB of cards',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                               fontFamily: 'Courier',

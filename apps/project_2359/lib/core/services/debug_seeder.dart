@@ -5,6 +5,7 @@ import 'package:project_2359/core/utils/logger.dart';
 import 'package:uuid/uuid.dart';
 import 'package:project_2359/core/enums/media_type.dart';
 import 'package:project_2359/core/tables/source_item_blobs.dart';
+import 'package:project_2359/core/services/biology_citation_seeder.dart';
 
 class DebugSeeder {
   static const String _baseUrl =
@@ -17,6 +18,9 @@ class DebugSeeder {
 
   static Future<void> seed(AppDatabase db) async {
     final uuid = const Uuid();
+
+    // 0. Seed the new Biology Citation Demo (180 cards + 7 PDFs)
+    await BiologyCitationSeeder.seed(db);
 
     // 1. Create a Demo Folder
     final folderId = uuid.v4();
