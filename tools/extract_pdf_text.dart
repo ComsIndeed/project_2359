@@ -57,8 +57,8 @@ Future<void> main(List<String> args) async {
   _dumpSample = args.contains('--dump-sample');
 
   final inputPath =
-      filteredArgs.isNotEmpty ? filteredArgs[0] : p(repoRoot, 'seeds', 'biology');
-  final outputDir = Directory(p(repoRoot, 'tools', 'extracted'));
+      filteredArgs.isNotEmpty ? filteredArgs[0] : p(repoRoot, 'tools', 'input');
+  final outputDir = Directory(p(repoRoot, 'tools', 'output'));
 
   await outputDir.create(recursive: true);
 
