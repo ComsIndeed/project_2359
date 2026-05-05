@@ -285,7 +285,7 @@ class _HomePageState extends State<HomePage> {
       return StudyPage(
         key: ValueKey(_selectedDeckId),
         deckId: _selectedDeckId!,
-        deckName: _selectedDeckName ?? "Study",
+        title: _selectedDeckName ?? "Study",
         isNested: true,
       );
     }

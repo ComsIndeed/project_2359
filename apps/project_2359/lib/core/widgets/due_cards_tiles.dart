@@ -6,6 +6,7 @@ import 'package:project_2359/core/app_controller.dart';
 import 'package:project_2359/core/widgets/project_important_tile.dart';
 import 'package:project_2359/features/home_page/widgets/due_cards_overview.dart';
 import 'package:project_2359/core/widgets/sensor_reactive_border.dart';
+import 'package:project_2359/features/study_page/study_page.dart';
 
 class HomeDueCardsTile extends StatelessWidget {
   const HomeDueCardsTile({super.key});
@@ -61,7 +62,14 @@ class HomeDueCardsTile extends StatelessWidget {
                         color: Colors.white,
                       ),
                       onPressed: () {
-                        // Study all due cards
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const StudyPage(
+                              title: "Global Review",
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -160,7 +168,15 @@ class FolderDueCardsTile extends StatelessWidget {
                         color: Colors.white,
                       ),
                       onPressed: () {
-                        // Study all due cards in folder
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StudyPage(
+                              folderId: folderId,
+                              title: "Folder Review",
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ),

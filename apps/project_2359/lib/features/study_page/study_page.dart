@@ -14,15 +14,17 @@ import 'package:project_2359/features/study_page/widgets/source_preview_sheet.da
 import 'package:provider/provider.dart';
 
 class StudyPage extends StatefulWidget {
-  final String deckId;
-  final String deckName;
+  final String? deckId;
+  final String? folderId;
+  final String title;
   final bool isNested;
   final StudySessionMode mode;
 
   const StudyPage({
     super.key,
-    required this.deckId,
-    required this.deckName,
+    this.deckId,
+    this.folderId,
+    required this.title,
     this.isNested = false,
     this.mode = StudySessionMode.spaced,
   });
@@ -57,24 +59,38 @@ class _StudyPageState extends State<StudyPage> {
     final appController = context.read<AppController>();
     final schedulingService = appController.schedulingService;
 
+    List<CardItem> cards;
+
     if (widget.mode == StudySessionMode.spaced) {
-      final cards = await schedulingService
-          .watchDueCards(deckId: widget.deckId)
-          .first;
-      if (mounted) {
-        setState(() {
-          _cards = cards;
-        });
-        _updatePreviews();
+      if (widget.deckId != null) {
+        cards = await schedulingService
+            .watchDueCards(deckId: widget.deckId!)
+            .first;
+      } else if (widget.folderId != null) {
+        cards = await schedulingService
+            .watchDueCardItemsForFolder(folderId: widget.folderId!)
+            .first;
+      } else {
+        cards = await schedulingService.watchTotalDueCardItems().first;
       }
     } else {
-      final cards = await schedulingService.getAllCardsForDeck(widget.deckId);
-      if (mounted) {
-        setState(() {
-          _cards = cards;
-          _continuousController = ContinuousSessionController(cards);
-        });
+      // Continuous mode currently only supports single decks in this implementation
+      // but we could extend it if needed.
+      if (widget.deckId != null) {
+        cards = await schedulingService.getAllCardsForDeck(widget.deckId!);
+      } else {
+        cards = [];
       }
+    }
+
+    if (mounted) {
+      setState(() {
+        _cards = cards;
+        if (widget.mode == StudySessionMode.continuous) {
+          _continuousController = ContinuousSessionController(cards);
+        }
+      });
+      _updatePreviews();
     }
   }
 
@@ -302,7 +318,7 @@ class _StudyPageState extends State<StudyPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.deckName,
+                              widget.title,
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),

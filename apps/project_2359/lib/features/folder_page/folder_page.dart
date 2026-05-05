@@ -509,12 +509,16 @@ class _FolderPageState extends State<FolderPage> {
                     onDeckTap: (id) async {
                       setState(() => _selectedDeckId = id);
                       final deck = _allDecks.firstWhere((d) => d.id == id);
-                      final schedulingService =
-                          context.read<AppController>().schedulingService;
+                      final schedulingService = context
+                          .read<AppController>()
+                          .schedulingService;
 
                       // Get counts for the setup sheet
-                      final dueCount = await schedulingService.getDueCount(deckId: id);
-                      final allCards = await schedulingService.getAllCardsForDeck(id);
+                      final dueCount = await schedulingService.getDueCount(
+                        deckId: id,
+                      );
+                      final allCards = await schedulingService
+                          .getAllCardsForDeck(id);
                       final totalCount = allCards.length;
 
                       if (!mounted) return;
@@ -534,7 +538,7 @@ class _FolderPageState extends State<FolderPage> {
                               MaterialPageRoute(
                                 builder: (context) => StudyPage(
                                   deckId: id,
-                                  deckName: deck.name,
+                                  title: deck.name,
                                   mode: mode,
                                 ),
                               ),
@@ -565,7 +569,7 @@ class _FolderPageState extends State<FolderPage> {
     final deck = _allDecks.firstWhere((d) => d.id == _selectedDeckId);
     return StudyPage(
       deckId: deck.id,
-      deckName: deck.name,
+      title: deck.name,
       isNested: true,
       mode: _currentMode,
     );
@@ -1332,7 +1336,7 @@ class _DecksList extends StatelessWidget {
                                   MaterialPageRoute(
                                     builder: (context) => StudyPage(
                                       deckId: decks[i].id,
-                                      deckName: decks[i].name,
+                                      title: decks[i].name,
                                       mode: StudySessionMode.spaced,
                                     ),
                                   ),
