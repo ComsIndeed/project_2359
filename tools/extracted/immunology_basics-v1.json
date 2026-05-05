@@ -1,0 +1,1977 @@
+{
+  "source_filename": "immunology_basics-v1.pdf",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "Immunology Basics",
+          "lines": [
+            {
+              "text": "Immunology Basics",
+              "words": [
+                {
+                  "text": "Immunology",
+                  "rect": {
+                    "left": 147.4944,
+                    "top": 252.1802,
+                    "right": 461.7204,
+                    "bottom": 306.1262
+                  }
+                },
+                {
+                  "text": "Basics",
+                  "rect": {
+                    "left": 475.3284,
+                    "top": 252.1802,
+                    "right": 646.0224,
+                    "bottom": 306.1262
+                  }
+                }
+              ],
+              "rect": {
+                "left": 147.4944,
+                "top": 252.1802,
+                "right": 646.0224,
+                "bottom": 306.1262
+              }
+            }
+          ],
+          "rect": {
+            "left": 147.4944,
+            "top": 252.1802,
+            "right": 646.0224,
+            "bottom": 306.1262
+          }
+        },
+        {
+          "text": "Rich Content Visual Test Deck",
+          "lines": [
+            {
+              "text": "Rich Content Visual Test Deck",
+              "words": [
+                {
+                  "text": "Rich",
+                  "rect": {
+                    "left": 221.2533,
+                    "top": 321.1803,
+                    "right": 273.2533,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Content",
+                  "rect": {
+                    "left": 280.4813,
+                    "top": 321.1803,
+                    "right": 371.1433,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Visual",
+                  "rect": {
+                    "left": 378.3713,
+                    "top": 321.1803,
+                    "right": 449.0653,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Test",
+                  "rect": {
+                    "left": 456.2933,
+                    "top": 321.1803,
+                    "right": 504.3153,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Deck",
+                  "rect": {
+                    "left": 511.5433,
+                    "top": 321.1803,
+                    "right": 570.8493,
+                    "bottom": 347.1543
+                  }
+                }
+              ],
+              "rect": {
+                "left": 221.2533,
+                "top": 321.1803,
+                "right": 570.8493,
+                "bottom": 347.1543
+              }
+            }
+          ],
+          "rect": {
+            "left": 221.2533,
+            "top": 321.1803,
+            "right": 570.8493,
+            "bottom": 347.1543
+          }
+        },
+        {
+          "text": "Optimized for data extraction testing",
+          "lines": [
+            {
+              "text": "Optimized for data extraction testing",
+              "words": [
+                {
+                  "text": "Optimized",
+                  "rect": {
+                    "left": 253.1082,
+                    "top": 373.1803,
+                    "right": 333.4062,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "for",
+                  "rect": {
+                    "left": 338.4102,
+                    "top": 373.1803,
+                    "right": 359.2362,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "data",
+                  "rect": {
+                    "left": 364.2402,
+                    "top": 373.1803,
+                    "right": 399.0162,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "extraction",
+                  "rect": {
+                    "left": 404.0202,
+                    "top": 373.1803,
+                    "right": 481.4382,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "testing",
+                  "rect": {
+                    "left": 486.4422,
+                    "top": 373.1803,
+                    "right": 539.0202,
+                    "bottom": 391.1623
+                  }
+                }
+              ],
+              "rect": {
+                "left": 253.1082,
+                "top": 373.1803,
+                "right": 539.0202,
+                "bottom": 391.1623
+              }
+            }
+          ],
+          "rect": {
+            "left": 253.1082,
+            "top": 373.1803,
+            "right": 539.0202,
+            "bottom": 391.1623
+          }
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "1. Innate vs. Adaptive Immunity",
+          "lines": [
+            {
+              "text": "1. Innate vs. Adaptive Immunity",
+              "words": [
+                {
+                  "text": "1.",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 44.9999,
+                    "right": 73.356,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Innate",
+                  "rect": {
+                    "left": 82.808,
+                    "top": 44.9999,
+                    "right": 182.734,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "vs.",
+                  "rect": {
+                    "left": 192.186,
+                    "top": 44.9999,
+                    "right": 238.97,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Adaptive",
+                  "rect": {
+                    "left": 248.422,
+                    "top": 44.9999,
+                    "right": 390.542,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Immunity",
+                  "rect": {
+                    "left": 399.994,
+                    "top": 44.9999,
+                    "right": 551.566,
+                    "bottom": 78.9659
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 44.9999,
+                "right": 551.566,
+                "bottom": 78.9659
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 44.9999,
+            "right": 551.566,
+            "bottom": 78.9659
+          }
+        },
+        {
+          "text": "Feature",
+          "lines": [
+            {
+              "text": "Feature",
+              "words": [
+                {
+                  "text": "Feature",
+                  "rect": {
+                    "left": 57.0,
+                    "top": 132.2498,
+                    "right": 121.926,
+                    "bottom": 150.2318
+                  }
+                }
+              ],
+              "rect": {
+                "left": 57.0,
+                "top": 132.2498,
+                "right": 121.926,
+                "bottom": 150.2318
+              }
+            }
+          ],
+          "rect": {
+            "left": 57.0,
+            "top": 132.2498,
+            "right": 121.926,
+            "bottom": 150.2318
+          }
+        },
+        {
+          "text": "Innate Immune System",
+          "lines": [
+            {
+              "text": "Innate Immune System",
+              "words": [
+                {
+                  "text": "Innate",
+                  "rect": {
+                    "left": 209.2928,
+                    "top": 132.2498,
+                    "right": 262.1948,
+                    "bottom": 150.2318
+                  }
+                },
+                {
+                  "text": "Immune",
+                  "rect": {
+                    "left": 267.1988,
+                    "top": 132.2498,
+                    "right": 336.2108,
+                    "bottom": 150.2318
+                  }
+                },
+                {
+                  "text": "System",
+                  "rect": {
+                    "left": 341.2148,
+                    "top": 132.2498,
+                    "right": 404.8628,
+                    "bottom": 150.2318
+                  }
+                }
+              ],
+              "rect": {
+                "left": 209.2928,
+                "top": 132.2498,
+                "right": 404.8628,
+                "bottom": 150.2318
+              }
+            }
+          ],
+          "rect": {
+            "left": 209.2928,
+            "top": 132.2498,
+            "right": 404.8628,
+            "bottom": 150.2318
+          }
+        },
+        {
+          "text": "Adaptive Immune System",
+          "lines": [
+            {
+              "text": "Adaptive Immune System",
+              "words": [
+                {
+                  "text": "Adaptive",
+                  "rect": {
+                    "left": 504.9308,
+                    "top": 132.2498,
+                    "right": 580.2248,
+                    "bottom": 150.2318
+                  }
+                },
+                {
+                  "text": "Immune",
+                  "rect": {
+                    "left": 585.2288,
+                    "top": 132.2498,
+                    "right": 654.2408,
+                    "bottom": 150.2318
+                  }
+                },
+                {
+                  "text": "System",
+                  "rect": {
+                    "left": 659.2448,
+                    "top": 132.2498,
+                    "right": 722.8928,
+                    "bottom": 150.2318
+                  }
+                }
+              ],
+              "rect": {
+                "left": 504.9308,
+                "top": 132.2498,
+                "right": 722.8928,
+                "bottom": 150.2318
+              }
+            }
+          ],
+          "rect": {
+            "left": 504.9308,
+            "top": 132.2498,
+            "right": 722.8928,
+            "bottom": 150.2318
+          }
+        },
+        {
+          "text": "Response Time",
+          "lines": [
+            {
+              "text": "Response",
+              "words": [
+                {
+                  "text": "Response",
+                  "rect": {
+                    "left": 57.0,
+                    "top": 182.4998,
+                    "right": 143.094,
+                    "bottom": 200.4818
+                  }
+                }
+              ],
+              "rect": {
+                "left": 57.0,
+                "top": 182.4998,
+                "right": 143.094,
+                "bottom": 200.4818
+              }
+            },
+            {
+              "text": "Time",
+              "words": [
+                {
+                  "text": "Time",
+                  "rect": {
+                    "left": 57.0,
+                    "top": 209.4998,
+                    "right": 98.994,
+                    "bottom": 227.4818
+                  }
+                }
+              ],
+              "rect": {
+                "left": 57.0,
+                "top": 209.4998,
+                "right": 98.994,
+                "bottom": 227.4818
+              }
+            }
+          ],
+          "rect": {
+            "left": 57.0,
+            "top": 182.4998,
+            "right": 143.094,
+            "bottom": 227.4818
+          }
+        },
+        {
+          "text": "Immediate (Minutes/Hours)",
+          "lines": [
+            {
+              "text": "Immediate (Minutes/Hours)",
+              "words": [
+                {
+                  "text": "Immediate",
+                  "rect": {
+                    "left": 209.2928,
+                    "top": 195.9998,
+                    "right": 292.8848,
+                    "bottom": 213.9818
+                  }
+                },
+                {
+                  "text": "(Minutes/Hours)",
+                  "rect": {
+                    "left": 297.8888,
+                    "top": 195.9998,
+                    "right": 426.3368,
+                    "bottom": 213.9818
+                  }
+                }
+              ],
+              "rect": {
+                "left": 209.2928,
+                "top": 195.9998,
+                "right": 426.3368,
+                "bottom": 213.9818
+              }
+            }
+          ],
+          "rect": {
+            "left": 209.2928,
+            "top": 195.9998,
+            "right": 426.3368,
+            "bottom": 213.9818
+          }
+        },
+        {
+          "text": "Delayed (Days)",
+          "lines": [
+            {
+              "text": "Delayed (Days)",
+              "words": [
+                {
+                  "text": "Delayed",
+                  "rect": {
+                    "left": 504.9308,
+                    "top": 195.9998,
+                    "right": 569.9288,
+                    "bottom": 213.9818
+                  }
+                },
+                {
+                  "text": "(Days)",
+                  "rect": {
+                    "left": 574.9328,
+                    "top": 195.9998,
+                    "right": 626.9888,
+                    "bottom": 213.9818
+                  }
+                }
+              ],
+              "rect": {
+                "left": 504.9308,
+                "top": 195.9998,
+                "right": 626.9888,
+                "bottom": 213.9818
+              }
+            }
+          ],
+          "rect": {
+            "left": 504.9308,
+            "top": 195.9998,
+            "right": 626.9888,
+            "bottom": 213.9818
+          }
+        },
+        {
+          "text": "Specificity",
+          "lines": [
+            {
+              "text": "Specificity",
+              "words": [
+                {
+                  "text": "Specificity",
+                  "rect": {
+                    "left": 57.0,
+                    "top": 273.2498,
+                    "right": 147.288,
+                    "bottom": 291.2318
+                  }
+                }
+              ],
+              "rect": {
+                "left": 57.0,
+                "top": 273.2498,
+                "right": 147.288,
+                "bottom": 291.2318
+              }
+            }
+          ],
+          "rect": {
+            "left": 57.0,
+            "top": 273.2498,
+            "right": 147.288,
+            "bottom": 291.2318
+          }
+        },
+        {
+          "text": "Non-specific (pattern recognition)",
+          "lines": [
+            {
+              "text": "Non-specific (pattern recognition)",
+              "words": [
+                {
+                  "text": "Non-specific",
+                  "rect": {
+                    "left": 209.2928,
+                    "top": 273.2498,
+                    "right": 308.3108,
+                    "bottom": 291.2318
+                  }
+                },
+                {
+                  "text": "(pattern",
+                  "rect": {
+                    "left": 313.3148,
+                    "top": 273.2498,
+                    "right": 375.4508,
+                    "bottom": 291.2318
+                  }
+                },
+                {
+                  "text": "recognition)",
+                  "rect": {
+                    "left": 380.4548,
+                    "top": 273.2498,
+                    "right": 474.3608,
+                    "bottom": 291.2318
+                  }
+                }
+              ],
+              "rect": {
+                "left": 209.2928,
+                "top": 273.2498,
+                "right": 474.3608,
+                "bottom": 291.2318
+              }
+            }
+          ],
+          "rect": {
+            "left": 209.2928,
+            "top": 273.2498,
+            "right": 474.3608,
+            "bottom": 291.2318
+          }
+        },
+        {
+          "text": "Memory",
+          "lines": [
+            {
+              "text": "Memory",
+              "words": [
+                {
+                  "text": "Memory",
+                  "rect": {
+                    "left": 57.0,
+                    "top": 350.4998,
+                    "right": 126.408,
+                    "bottom": 368.4818
+                  }
+                }
+              ],
+              "rect": {
+                "left": 57.0,
+                "top": 350.4998,
+                "right": 126.408,
+                "bottom": 368.4818
+              }
+            }
+          ],
+          "rect": {
+            "left": 57.0,
+            "top": 350.4998,
+            "right": 126.408,
+            "bottom": 368.4818
+          }
+        },
+        {
+          "text": "None",
+          "lines": [
+            {
+              "text": "None",
+              "words": [
+                {
+                  "text": "None",
+                  "rect": {
+                    "left": 209.2928,
+                    "top": 350.4998,
+                    "right": 252.3668,
+                    "bottom": 368.4818
+                  }
+                }
+              ],
+              "rect": {
+                "left": 209.2928,
+                "top": 350.4998,
+                "right": 252.3668,
+                "bottom": 368.4818
+              }
+            }
+          ],
+          "rect": {
+            "left": 209.2928,
+            "top": 350.4998,
+            "right": 252.3668,
+            "bottom": 368.4818
+          }
+        },
+        {
+          "text": "Long-term memory generation",
+          "lines": [
+            {
+              "text": "Long-term memory",
+              "words": [
+                {
+                  "text": "Long-term",
+                  "rect": {
+                    "left": 504.9308,
+                    "top": 336.9998,
+                    "right": 586.4708,
+                    "bottom": 354.9818
+                  }
+                },
+                {
+                  "text": "memory",
+                  "rect": {
+                    "left": 591.4748,
+                    "top": 336.9998,
+                    "right": 656.8688,
+                    "bottom": 354.9818
+                  }
+                }
+              ],
+              "rect": {
+                "left": 504.9308,
+                "top": 336.9998,
+                "right": 656.8688,
+                "bottom": 354.9818
+              }
+            },
+            {
+              "text": "generation",
+              "words": [
+                {
+                  "text": "generation",
+                  "rect": {
+                    "left": 504.9308,
+                    "top": 363.9998,
+                    "right": 589.5668,
+                    "bottom": 381.9818
+                  }
+                }
+              ],
+              "rect": {
+                "left": 504.9308,
+                "top": 363.9998,
+                "right": 589.5668,
+                "bottom": 381.9818
+              }
+            }
+          ],
+          "rect": {
+            "left": 504.9308,
+            "top": 336.9998,
+            "right": 656.8688,
+            "bottom": 381.9818
+          }
+        },
+        {
+          "text": "Key Cells",
+          "lines": [
+            {
+              "text": "Key Cells",
+              "words": [
+                {
+                  "text": "Key",
+                  "rect": {
+                    "left": 57.0,
+                    "top": 427.7498,
+                    "right": 89.256,
+                    "bottom": 445.7318
+                  }
+                },
+                {
+                  "text": "Cells",
+                  "rect": {
+                    "left": 94.26,
+                    "top": 427.7498,
+                    "right": 137.442,
+                    "bottom": 445.7318
+                  }
+                }
+              ],
+              "rect": {
+                "left": 57.0,
+                "top": 427.7498,
+                "right": 137.442,
+                "bottom": 445.7318
+              }
+            }
+          ],
+          "rect": {
+            "left": 57.0,
+            "top": 427.7498,
+            "right": 137.442,
+            "bottom": 445.7318
+          }
+        },
+        {
+          "text": "Macrophages, Neutrophils, NK Cells",
+          "lines": [
+            {
+              "text": "Macrophages, Neutrophils, NK",
+              "words": [
+                {
+                  "text": "Macrophages,",
+                  "rect": {
+                    "left": 209.2928,
+                    "top": 414.2498,
+                    "right": 322.8008,
+                    "bottom": 432.2318
+                  }
+                },
+                {
+                  "text": "Neutrophils,",
+                  "rect": {
+                    "left": 327.8048,
+                    "top": 414.2498,
+                    "right": 423.4748,
+                    "bottom": 432.2318
+                  }
+                },
+                {
+                  "text": "NK",
+                  "rect": {
+                    "left": 428.4788,
+                    "top": 414.2498,
+                    "right": 453.4808,
+                    "bottom": 432.2318
+                  }
+                }
+              ],
+              "rect": {
+                "left": 209.2928,
+                "top": 414.2498,
+                "right": 453.4808,
+                "bottom": 432.2318
+              }
+            },
+            {
+              "text": "Cells",
+              "words": [
+                {
+                  "text": "Cells",
+                  "rect": {
+                    "left": 209.2928,
+                    "top": 441.2498,
+                    "right": 249.1808,
+                    "bottom": 459.2318
+                  }
+                }
+              ],
+              "rect": {
+                "left": 209.2928,
+                "top": 441.2498,
+                "right": 249.1808,
+                "bottom": 459.2318
+              }
+            }
+          ],
+          "rect": {
+            "left": 209.2928,
+            "top": 414.2498,
+            "right": 453.4808,
+            "bottom": 459.2318
+          }
+        },
+        {
+          "text": "T-Cells, B-Cells",
+          "lines": [
+            {
+              "text": "T-Cells, B-Cells",
+              "words": [
+                {
+                  "text": "T-Cells,",
+                  "rect": {
+                    "left": 504.9308,
+                    "top": 427.7498,
+                    "right": 565.6988,
+                    "bottom": 445.7318
+                  }
+                },
+                {
+                  "text": "B-Cells",
+                  "rect": {
+                    "left": 570.7028,
+                    "top": 427.7498,
+                    "right": 628.9868,
+                    "bottom": 445.7318
+                  }
+                }
+              ],
+              "rect": {
+                "left": 504.9308,
+                "top": 427.7498,
+                "right": 628.9868,
+                "bottom": 445.7318
+              }
+            }
+          ],
+          "rect": {
+            "left": 504.9308,
+            "top": 427.7498,
+            "right": 628.9868,
+            "bottom": 445.7318
+          }
+        },
+        {
+          "text": "Highly specific (antigen-",
+          "lines": [
+            {
+              "text": "Highly specific (antigen-",
+              "words": [
+                {
+                  "text": "Highly",
+                  "rect": {
+                    "left": 504.9308,
+                    "top": 259.7498,
+                    "right": 554.7188,
+                    "bottom": 277.7318
+                  }
+                },
+                {
+                  "text": "specific",
+                  "rect": {
+                    "left": 559.7228,
+                    "top": 259.7498,
+                    "right": 619.7348,
+                    "bottom": 277.7318
+                  }
+                },
+                {
+                  "text": "(antigen-",
+                  "rect": {
+                    "left": 624.7388,
+                    "top": 259.7498,
+                    "right": 695.5688,
+                    "bottom": 277.7318
+                  }
+                }
+              ],
+              "rect": {
+                "left": 504.9308,
+                "top": 259.7498,
+                "right": 695.5688,
+                "bottom": 277.7318
+              }
+            }
+          ],
+          "rect": {
+            "left": 504.9308,
+            "top": 259.7498,
+            "right": 695.5688,
+            "bottom": 277.7318
+          }
+        },
+        {
+          "text": "driven)",
+          "lines": [
+            {
+              "text": "driven)",
+              "words": [
+                {
+                  "text": "driven)",
+                  "rect": {
+                    "left": 504.9308,
+                    "top": 286.7498,
+                    "right": 559.5788,
+                    "bottom": 304.7318
+                  }
+                }
+              ],
+              "rect": {
+                "left": 504.9308,
+                "top": 286.7498,
+                "right": 559.5788,
+                "bottom": 304.7318
+              }
+            }
+          ],
+          "rect": {
+            "left": 504.9308,
+            "top": 286.7498,
+            "right": 559.5788,
+            "bottom": 304.7318
+          }
+        },
+        {
+          "text": "[Cite: \"Janeway's Immunobiology, 9th Edition\"]",
+          "lines": [
+            {
+              "text": "[Cite: \"Janeway's Immunobiology, 9th Edition\"]",
+              "words": [
+                {
+                  "text": "[Cite:",
+                  "rect": {
+                    "left": 348.5933,
+                    "top": 556.9317,
+                    "right": 398.9933,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "\"Janeway's",
+                  "rect": {
+                    "left": 407.3933,
+                    "top": 556.9317,
+                    "right": 491.3933,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Immunobiology,",
+                  "rect": {
+                    "left": 499.7933,
+                    "top": 556.9317,
+                    "right": 617.3933,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "9th",
+                  "rect": {
+                    "left": 625.7933,
+                    "top": 556.9317,
+                    "right": 650.9933,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Edition\"]",
+                  "rect": {
+                    "left": 659.3933,
+                    "top": 556.9317,
+                    "right": 734.9933,
+                    "bottom": 575.9997
+                  }
+                }
+              ],
+              "rect": {
+                "left": 348.5933,
+                "top": 556.9317,
+                "right": 734.9933,
+                "bottom": 575.9997
+              }
+            }
+          ],
+          "rect": {
+            "left": 348.5933,
+            "top": 556.9317,
+            "right": 734.9933,
+            "bottom": 575.9997
+          }
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "2. Antibody Structure",
+          "lines": [
+            {
+              "text": "2. Antibody Structure",
+              "words": [
+                {
+                  "text": "2.",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 44.9999,
+                    "right": 73.356,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Antibody",
+                  "rect": {
+                    "left": 82.808,
+                    "top": 44.9999,
+                    "right": 230.062,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Structure",
+                  "rect": {
+                    "left": 239.514,
+                    "top": 44.9999,
+                    "right": 390.712,
+                    "bottom": 78.9659
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 44.9999,
+                "right": 390.712,
+                "bottom": 78.9659
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 44.9999,
+            "right": 390.712,
+            "bottom": 78.9659
+          }
+        },
+        {
+          "text": "Antibodies (immunoglobulins) are Y- shaped proteins produced by B cells.",
+          "lines": [
+            {
+              "text": "Antibodies (immunoglobulins) are Y-",
+              "words": [
+                {
+                  "text": "Antibodies",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 140.75,
+                    "right": 138.22,
+                    "bottom": 160.73
+                  }
+                },
+                {
+                  "text": "(immunoglobulins)",
+                  "rect": {
+                    "left": 143.78,
+                    "top": 140.75,
+                    "right": 307.14,
+                    "bottom": 160.73
+                  }
+                },
+                {
+                  "text": "are",
+                  "rect": {
+                    "left": 312.7,
+                    "top": 140.75,
+                    "right": 341.4,
+                    "bottom": 160.73
+                  }
+                },
+                {
+                  "text": "Y-",
+                  "rect": {
+                    "left": 346.96,
+                    "top": 140.75,
+                    "right": 365.4,
+                    "bottom": 160.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 140.75,
+                "right": 365.4,
+                "bottom": 160.73
+              }
+            },
+            {
+              "text": "shaped proteins produced by B cells.",
+              "words": [
+                {
+                  "text": "shaped",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 170.75,
+                    "right": 110.6,
+                    "bottom": 190.73
+                  }
+                },
+                {
+                  "text": "proteins",
+                  "rect": {
+                    "left": 116.16,
+                    "top": 170.75,
+                    "right": 186.76,
+                    "bottom": 190.73
+                  }
+                },
+                {
+                  "text": "produced",
+                  "rect": {
+                    "left": 192.32,
+                    "top": 170.75,
+                    "right": 275.68,
+                    "bottom": 190.73
+                  }
+                },
+                {
+                  "text": "by",
+                  "rect": {
+                    "left": 281.24,
+                    "top": 170.75,
+                    "right": 302.04,
+                    "bottom": 190.73
+                  }
+                },
+                {
+                  "text": "B",
+                  "rect": {
+                    "left": 307.6,
+                    "top": 170.75,
+                    "right": 320.94,
+                    "bottom": 190.73
+                  }
+                },
+                {
+                  "text": "cells.",
+                  "rect": {
+                    "left": 326.5,
+                    "top": 170.75,
+                    "right": 371.9,
+                    "bottom": 190.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 170.75,
+                "right": 371.9,
+                "bottom": 190.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 140.75,
+            "right": 371.9,
+            "bottom": 190.73
+          }
+        },
+        {
+          "text": "Antigen Binding Sites Variable Region",
+          "lines": [
+            {
+              "text": "Antigen Binding Sites",
+              "words": [
+                {
+                  "text": "Antigen",
+                  "rect": {
+                    "left": 526.02,
+                    "top": 151.0358,
+                    "right": 564.5876,
+                    "bottom": 165.3158
+                  }
+                },
+                {
+                  "text": "Binding",
+                  "rect": {
+                    "left": 567.3176,
+                    "top": 151.0358,
+                    "right": 605.4546,
+                    "bottom": 165.3158
+                  }
+                },
+                {
+                  "text": "Sites",
+                  "rect": {
+                    "left": 608.1846,
+                    "top": 151.0358,
+                    "right": 631.4001,
+                    "bottom": 165.3158
+                  }
+                }
+              ],
+              "rect": {
+                "left": 526.02,
+                "top": 151.0358,
+                "right": 631.4001,
+                "bottom": 165.3158
+              }
+            },
+            {
+              "text": "Variable Region",
+              "words": [
+                {
+                  "text": "Variable",
+                  "rect": {
+                    "left": 623.52,
+                    "top": 151.0358,
+                    "right": 663.7355,
+                    "bottom": 165.3158
+                  }
+                },
+                {
+                  "text": "Region",
+                  "rect": {
+                    "left": 666.4656,
+                    "top": 151.0358,
+                    "right": 700.9272,
+                    "bottom": 165.3158
+                  }
+                }
+              ],
+              "rect": {
+                "left": 623.52,
+                "top": 151.0358,
+                "right": 700.9272,
+                "bottom": 165.3158
+              }
+            }
+          ],
+          "rect": {
+            "left": 526.02,
+            "top": 151.0358,
+            "right": 700.9272,
+            "bottom": 165.3158
+          }
+        },
+        {
+          "text": "• Heavy Chains: Two identical long polypeptide chains.",
+          "lines": [
+            {
+              "text": "• Heavy Chains: Two identical long",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 220.75,
+                    "right": 61.9404,
+                    "bottom": 240.73
+                  }
+                },
+                {
+                  "text": "Heavy",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 220.75,
+                    "right": 126.56,
+                    "bottom": 240.73
+                  }
+                },
+                {
+                  "text": "Chains:",
+                  "rect": {
+                    "left": 132.12,
+                    "top": 220.75,
+                    "right": 205.72,
+                    "bottom": 240.73
+                  }
+                },
+                {
+                  "text": "Two",
+                  "rect": {
+                    "left": 211.2636,
+                    "top": 220.75,
+                    "right": 247.0036,
+                    "bottom": 240.73
+                  }
+                },
+                {
+                  "text": "identical",
+                  "rect": {
+                    "left": 252.5636,
+                    "top": 220.75,
+                    "right": 325.9436,
+                    "bottom": 240.73
+                  }
+                },
+                {
+                  "text": "long",
+                  "rect": {
+                    "left": 331.5036,
+                    "top": 220.75,
+                    "right": 369.3036,
+                    "bottom": 240.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 220.75,
+                "right": 369.3036,
+                "bottom": 240.73
+              }
+            },
+            {
+              "text": "polypeptide chains.",
+              "words": [
+                {
+                  "text": "polypeptide",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 250.75,
+                    "right": 169.54,
+                    "bottom": 270.73
+                  }
+                },
+                {
+                  "text": "chains.",
+                  "rect": {
+                    "left": 175.1,
+                    "top": 250.75,
+                    "right": 238.26,
+                    "bottom": 270.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 250.75,
+                "right": 238.26,
+                "bottom": 270.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 220.75,
+            "right": 369.3036,
+            "bottom": 270.73
+          }
+        },
+        {
+          "text": "• Light Chains: Two identical short chains.",
+          "lines": [
+            {
+              "text": "• Light Chains: Two identical short",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 294.25,
+                    "right": 61.9404,
+                    "bottom": 314.23
+                  }
+                },
+                {
+                  "text": "Light",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 294.25,
+                    "right": 115.96,
+                    "bottom": 314.23
+                  }
+                },
+                {
+                  "text": "Chains:",
+                  "rect": {
+                    "left": 121.52,
+                    "top": 294.25,
+                    "right": 195.12,
+                    "bottom": 314.23
+                  }
+                },
+                {
+                  "text": "Two",
+                  "rect": {
+                    "left": 200.6435,
+                    "top": 294.25,
+                    "right": 236.3835,
+                    "bottom": 314.23
+                  }
+                },
+                {
+                  "text": "identical",
+                  "rect": {
+                    "left": 241.9435,
+                    "top": 294.25,
+                    "right": 315.3235,
+                    "bottom": 314.23
+                  }
+                },
+                {
+                  "text": "short",
+                  "rect": {
+                    "left": 320.8835,
+                    "top": 294.25,
+                    "right": 365.8635,
+                    "bottom": 314.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 294.25,
+                "right": 365.8635,
+                "bottom": 314.23
+              }
+            },
+            {
+              "text": "chains.",
+              "words": [
+                {
+                  "text": "chains.",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 324.25,
+                    "right": 130.66,
+                    "bottom": 344.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 324.25,
+                "right": 130.66,
+                "bottom": 344.23
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 294.25,
+            "right": 365.8635,
+            "bottom": 344.23
+          }
+        },
+        {
+          "text": "Fc Region (Constant)",
+          "lines": [
+            {
+              "text": "Fc Region (Constant)",
+              "words": [
+                {
+                  "text": "Fc",
+                  "rect": {
+                    "left": 616.02,
+                    "top": 308.5358,
+                    "right": 626.5092,
+                    "bottom": 322.8158
+                  }
+                },
+                {
+                  "text": "Region",
+                  "rect": {
+                    "left": 629.2387,
+                    "top": 308.5358,
+                    "right": 663.7004,
+                    "bottom": 322.8158
+                  }
+                },
+                {
+                  "text": "(Constant)",
+                  "rect": {
+                    "left": 666.4304,
+                    "top": 308.5358,
+                    "right": 717.1973,
+                    "bottom": 322.8158
+                  }
+                }
+              ],
+              "rect": {
+                "left": 616.02,
+                "top": 308.5358,
+                "right": 717.1973,
+                "bottom": 322.8158
+              }
+            }
+          ],
+          "rect": {
+            "left": 616.02,
+            "top": 308.5358,
+            "right": 717.1973,
+            "bottom": 322.8158
+          }
+        },
+        {
+          "text": "• Variable Region (Fab): The tips of the Y, responsible for antigen binding (highly specific).",
+          "lines": [
+            {
+              "text": "• Variable Region (Fab): The tips of",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 367.75,
+                    "right": 61.9404,
+                    "bottom": 387.73
+                  }
+                },
+                {
+                  "text": "Variable",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 367.75,
+                    "right": 144.3,
+                    "bottom": 387.73
+                  }
+                },
+                {
+                  "text": "Region",
+                  "rect": {
+                    "left": 149.86,
+                    "top": 367.75,
+                    "right": 217.66,
+                    "bottom": 387.73
+                  }
+                },
+                {
+                  "text": "(Fab):",
+                  "rect": {
+                    "left": 223.22,
+                    "top": 367.75,
+                    "right": 278.46,
+                    "bottom": 387.73
+                  }
+                },
+                {
+                  "text": "The",
+                  "rect": {
+                    "left": 283.9836,
+                    "top": 367.75,
+                    "right": 318.3636,
+                    "bottom": 387.73
+                  }
+                },
+                {
+                  "text": "tips",
+                  "rect": {
+                    "left": 323.9236,
+                    "top": 367.75,
+                    "right": 354.9436,
+                    "bottom": 387.73
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 360.5036,
+                    "top": 367.75,
+                    "right": 377.1836,
+                    "bottom": 387.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 367.75,
+                "right": 377.1836,
+                "bottom": 387.73
+              }
+            },
+            {
+              "text": "the Y, responsible for antigen",
+              "words": [
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 397.75,
+                    "right": 95.18,
+                    "bottom": 417.73
+                  }
+                },
+                {
+                  "text": "Y,",
+                  "rect": {
+                    "left": 100.74,
+                    "top": 397.75,
+                    "right": 117.46,
+                    "bottom": 417.73
+                  }
+                },
+                {
+                  "text": "responsible",
+                  "rect": {
+                    "left": 123.02,
+                    "top": 397.75,
+                    "right": 225.02,
+                    "bottom": 417.73
+                  }
+                },
+                {
+                  "text": "for",
+                  "rect": {
+                    "left": 230.58,
+                    "top": 397.75,
+                    "right": 253.72,
+                    "bottom": 417.73
+                  }
+                },
+                {
+                  "text": "antigen",
+                  "rect": {
+                    "left": 259.28,
+                    "top": 397.75,
+                    "right": 324.7,
+                    "bottom": 417.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 397.75,
+                "right": 324.7,
+                "bottom": 417.73
+              }
+            },
+            {
+              "text": "binding (highly specific).",
+              "words": [
+                {
+                  "text": "binding",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 427.75,
+                    "right": 131.98,
+                    "bottom": 447.73
+                  }
+                },
+                {
+                  "text": "(highly",
+                  "rect": {
+                    "left": 137.54,
+                    "top": 427.75,
+                    "right": 196.26,
+                    "bottom": 447.73
+                  }
+                },
+                {
+                  "text": "specific).",
+                  "rect": {
+                    "left": 201.82,
+                    "top": 427.75,
+                    "right": 280.72,
+                    "bottom": 447.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 427.75,
+                "right": 280.72,
+                "bottom": 447.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 367.75,
+            "right": 377.1836,
+            "bottom": 447.73
+          }
+        },
+        {
+          "text": "• Constant Region (Fc): The stem, dictates the antibody's isotype (IgG, IgA, IgM, etc.) and immune [Cite: \"Cellular and Molecular Immunology, Abbas\"] function.",
+          "lines": [
+            {
+              "text": "• Constant Region (Fc): The stem,",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 471.25,
+                    "right": 61.9404,
+                    "bottom": 491.23
+                  }
+                },
+                {
+                  "text": "Constant",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 471.25,
+                    "right": 154.28,
+                    "bottom": 491.23
+                  }
+                },
+                {
+                  "text": "Region",
+                  "rect": {
+                    "left": 159.84,
+                    "top": 471.25,
+                    "right": 227.64,
+                    "bottom": 491.23
+                  }
+                },
+                {
+                  "text": "(Fc):",
+                  "rect": {
+                    "left": 233.2,
+                    "top": 471.25,
+                    "right": 276.52,
+                    "bottom": 491.23
+                  }
+                },
+                {
+                  "text": "The",
+                  "rect": {
+                    "left": 282.0646,
+                    "top": 471.25,
+                    "right": 316.4446,
+                    "bottom": 491.23
+                  }
+                },
+                {
+                  "text": "stem,",
+                  "rect": {
+                    "left": 322.0046,
+                    "top": 471.25,
+                    "right": 370.5846,
+                    "bottom": 491.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 471.25,
+                "right": 370.5846,
+                "bottom": 491.23
+              }
+            },
+            {
+              "text": "dictates the antibody's isotype",
+              "words": [
+                {
+                  "text": "dictates",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 501.25,
+                    "right": 136.0,
+                    "bottom": 521.23
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 141.56,
+                    "top": 501.25,
+                    "right": 169.24,
+                    "bottom": 521.23
+                  }
+                },
+                {
+                  "text": "antibody's",
+                  "rect": {
+                    "left": 174.8,
+                    "top": 501.25,
+                    "right": 264.06,
+                    "bottom": 521.23
+                  }
+                },
+                {
+                  "text": "isotype",
+                  "rect": {
+                    "left": 269.62,
+                    "top": 501.25,
+                    "right": 333.12,
+                    "bottom": 521.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 501.25,
+                "right": 333.12,
+                "bottom": 521.23
+              }
+            },
+            {
+              "text": "(IgG, IgA, IgM, etc.) and immune",
+              "words": [
+                {
+                  "text": "(IgG,",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 531.25,
+                    "right": 111.86,
+                    "bottom": 551.23
+                  }
+                },
+                {
+                  "text": "IgA,",
+                  "rect": {
+                    "left": 117.42,
+                    "top": 531.25,
+                    "right": 153.1,
+                    "bottom": 551.23
+                  }
+                },
+                {
+                  "text": "IgM,",
+                  "rect": {
+                    "left": 158.66,
+                    "top": 531.25,
+                    "right": 197.56,
+                    "bottom": 551.23
+                  }
+                },
+                {
+                  "text": "etc.)",
+                  "rect": {
+                    "left": 203.12,
+                    "top": 531.25,
+                    "right": 241.54,
+                    "bottom": 551.23
+                  }
+                },
+                {
+                  "text": "and",
+                  "rect": {
+                    "left": 247.1,
+                    "top": 531.25,
+                    "right": 280.46,
+                    "bottom": 551.23
+                  }
+                },
+                {
+                  "text": "immune",
+                  "rect": {
+                    "left": 286.02,
+                    "top": 531.25,
+                    "right": 357.14,
+                    "bottom": 551.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 531.25,
+                "right": 357.14,
+                "bottom": 551.23
+              }
+            },
+            {
+              "text": "[Cite: \"Cellular and Molecular Immunology, Abbas\"]",
+              "words": [
+                {
+                  "text": "[Cite:",
+                  "rect": {
+                    "left": 314.9927,
+                    "top": 556.9317,
+                    "right": 365.3927,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "\"Cellular",
+                  "rect": {
+                    "left": 373.7927,
+                    "top": 556.9317,
+                    "right": 449.3927,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "and",
+                  "rect": {
+                    "left": 457.7927,
+                    "top": 556.9317,
+                    "right": 482.9927,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Molecular",
+                  "rect": {
+                    "left": 491.3927,
+                    "top": 556.9317,
+                    "right": 566.9927,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Immunology,",
+                  "rect": {
+                    "left": 575.3927,
+                    "top": 556.9317,
+                    "right": 667.7927,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Abbas\"]",
+                  "rect": {
+                    "left": 676.1927,
+                    "top": 556.9317,
+                    "right": 734.9927,
+                    "bottom": 575.9997
+                  }
+                }
+              ],
+              "rect": {
+                "left": 314.9927,
+                "top": 556.9317,
+                "right": 734.9927,
+                "bottom": 575.9997
+              }
+            },
+            {
+              "text": "function.",
+              "words": [
+                {
+                  "text": "function.",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 561.25,
+                    "right": 143.1,
+                    "bottom": 581.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 561.25,
+                "right": 143.1,
+                "bottom": 581.23
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 471.25,
+            "right": 734.9927,
+            "bottom": 581.23
+          }
+        }
+      ]
+    }
+  ]
+}

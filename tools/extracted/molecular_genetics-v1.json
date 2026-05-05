@@ -1,0 +1,1799 @@
+{
+  "source_filename": "molecular_genetics-v1.pdf",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "Molecular Genetics",
+          "lines": [
+            {
+              "text": "Molecular Genetics",
+              "words": [
+                {
+                  "text": "Molecular",
+                  "rect": {
+                    "left": 155.0251,
+                    "top": 252.1802,
+                    "right": 401.4271,
+                    "bottom": 306.1262
+                  }
+                },
+                {
+                  "text": "Genetics",
+                  "rect": {
+                    "left": 415.0351,
+                    "top": 252.1802,
+                    "right": 638.5411,
+                    "bottom": 306.1262
+                  }
+                }
+              ],
+              "rect": {
+                "left": 155.0251,
+                "top": 252.1802,
+                "right": 638.5411,
+                "bottom": 306.1262
+              }
+            }
+          ],
+          "rect": {
+            "left": 155.0251,
+            "top": 252.1802,
+            "right": 638.5411,
+            "bottom": 306.1262
+          }
+        },
+        {
+          "text": "Rich Content Visual Test Deck",
+          "lines": [
+            {
+              "text": "Rich Content Visual Test Deck",
+              "words": [
+                {
+                  "text": "Rich",
+                  "rect": {
+                    "left": 221.2533,
+                    "top": 321.1803,
+                    "right": 273.2533,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Content",
+                  "rect": {
+                    "left": 280.4813,
+                    "top": 321.1803,
+                    "right": 371.1433,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Visual",
+                  "rect": {
+                    "left": 378.3713,
+                    "top": 321.1803,
+                    "right": 449.0653,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Test",
+                  "rect": {
+                    "left": 456.2933,
+                    "top": 321.1803,
+                    "right": 504.3153,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Deck",
+                  "rect": {
+                    "left": 511.5433,
+                    "top": 321.1803,
+                    "right": 570.8493,
+                    "bottom": 347.1543
+                  }
+                }
+              ],
+              "rect": {
+                "left": 221.2533,
+                "top": 321.1803,
+                "right": 570.8493,
+                "bottom": 347.1543
+              }
+            }
+          ],
+          "rect": {
+            "left": 221.2533,
+            "top": 321.1803,
+            "right": 570.8493,
+            "bottom": 347.1543
+          }
+        },
+        {
+          "text": "Optimized for data extraction testing",
+          "lines": [
+            {
+              "text": "Optimized for data extraction testing",
+              "words": [
+                {
+                  "text": "Optimized",
+                  "rect": {
+                    "left": 253.1082,
+                    "top": 373.1803,
+                    "right": 333.4062,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "for",
+                  "rect": {
+                    "left": 338.4102,
+                    "top": 373.1803,
+                    "right": 359.2362,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "data",
+                  "rect": {
+                    "left": 364.2402,
+                    "top": 373.1803,
+                    "right": 399.0162,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "extraction",
+                  "rect": {
+                    "left": 404.0202,
+                    "top": 373.1803,
+                    "right": 481.4382,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "testing",
+                  "rect": {
+                    "left": 486.4422,
+                    "top": 373.1803,
+                    "right": 539.0202,
+                    "bottom": 391.1623
+                  }
+                }
+              ],
+              "rect": {
+                "left": 253.1082,
+                "top": 373.1803,
+                "right": 539.0202,
+                "bottom": 391.1623
+              }
+            }
+          ],
+          "rect": {
+            "left": 253.1082,
+            "top": 373.1803,
+            "right": 539.0202,
+            "bottom": 391.1623
+          }
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "1. The Central Dogma",
+          "lines": [
+            {
+              "text": "1. The Central Dogma",
+              "words": [
+                {
+                  "text": "1.",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 44.9999,
+                    "right": 73.356,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "The",
+                  "rect": {
+                    "left": 82.808,
+                    "top": 44.9999,
+                    "right": 143.192,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Central",
+                  "rect": {
+                    "left": 152.644,
+                    "top": 44.9999,
+                    "right": 270.148,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Dogma",
+                  "rect": {
+                    "left": 279.6,
+                    "top": 44.9999,
+                    "right": 394.758,
+                    "bottom": 78.9659
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 44.9999,
+                "right": 394.758,
+                "bottom": 78.9659
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 44.9999,
+            "right": 394.758,
+            "bottom": 78.9659
+          }
+        },
+        {
+          "text": "The Central Dogma of molecular biology explains the flow of genetic information, from DNA to RNA, to make a functional product, a protein.",
+          "lines": [
+            {
+              "text": "The Central Dogma of molecular biology explains the flow of genetic",
+              "words": [
+                {
+                  "text": "The",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 132.0,
+                    "right": 94.38,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "Central",
+                  "rect": {
+                    "left": 99.94,
+                    "top": 132.0,
+                    "right": 164.18,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "Dogma",
+                  "rect": {
+                    "left": 169.74,
+                    "top": 132.0,
+                    "right": 234.2,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 239.76,
+                    "top": 132.0,
+                    "right": 256.44,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "molecular",
+                  "rect": {
+                    "left": 262.0,
+                    "top": 132.0,
+                    "right": 348.68,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "biology",
+                  "rect": {
+                    "left": 354.24,
+                    "top": 132.0,
+                    "right": 417.46,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "explains",
+                  "rect": {
+                    "left": 423.02,
+                    "top": 132.0,
+                    "right": 495.82,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 501.38,
+                    "top": 132.0,
+                    "right": 529.06,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "flow",
+                  "rect": {
+                    "left": 534.62,
+                    "top": 132.0,
+                    "right": 569.96,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 575.52,
+                    "top": 132.0,
+                    "right": 592.2,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "genetic",
+                  "rect": {
+                    "left": 597.76,
+                    "top": 132.0,
+                    "right": 661.9,
+                    "bottom": 151.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 132.0,
+                "right": 661.9,
+                "bottom": 151.98
+              }
+            },
+            {
+              "text": "information, from DNA to RNA, to make a functional product, a protein.",
+              "words": [
+                {
+                  "text": "information,",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 162.0,
+                    "right": 163.98,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "from",
+                  "rect": {
+                    "left": 169.54,
+                    "top": 162.0,
+                    "right": 209.42,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "DNA",
+                  "rect": {
+                    "left": 214.98,
+                    "top": 162.0,
+                    "right": 257.02,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "to",
+                  "rect": {
+                    "left": 262.58,
+                    "top": 162.0,
+                    "right": 279.02,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "RNA,",
+                  "rect": {
+                    "left": 284.58,
+                    "top": 162.0,
+                    "right": 332.2,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "to",
+                  "rect": {
+                    "left": 337.76,
+                    "top": 162.0,
+                    "right": 354.2,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "make",
+                  "rect": {
+                    "left": 359.76,
+                    "top": 162.0,
+                    "right": 408.26,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "a",
+                  "rect": {
+                    "left": 413.82,
+                    "top": 162.0,
+                    "right": 424.94,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "functional",
+                  "rect": {
+                    "left": 430.5,
+                    "top": 162.0,
+                    "right": 516.1,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "product,",
+                  "rect": {
+                    "left": 521.66,
+                    "top": 162.0,
+                    "right": 593.62,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "a",
+                  "rect": {
+                    "left": 599.18,
+                    "top": 162.0,
+                    "right": 610.3,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "protein.",
+                  "rect": {
+                    "left": 615.86,
+                    "top": 162.0,
+                    "right": 682.02,
+                    "bottom": 181.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 162.0,
+                "right": 682.02,
+                "bottom": 181.98
+              }
+            }
+          ],
+          "rect": {
+            "left": 60.0,
+            "top": 132.0,
+            "right": 682.02,
+            "bottom": 181.98
+          }
+        },
+        {
+          "text": "DNA",
+          "lines": [
+            {
+              "text": "DNA",
+              "words": [
+                {
+                  "text": "DNA",
+                  "rect": {
+                    "left": 172.9277,
+                    "top": 292.4798,
+                    "right": 206.5724,
+                    "bottom": 312.8948
+                  }
+                }
+              ],
+              "rect": {
+                "left": 172.9277,
+                "top": 292.4798,
+                "right": 206.5724,
+                "bottom": 312.8948
+              }
+            }
+          ],
+          "rect": {
+            "left": 172.9277,
+            "top": 292.4798,
+            "right": 206.5724,
+            "bottom": 312.8948
+          }
+        },
+        {
+          "text": "• Transcription: Synthesizing RNA from a DNA template (in nucleus).",
+          "lines": [
+            {
+              "text": "• Transcription: Synthesizing RNA from a DNA template (in nucleus).",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 434.1698,
+                    "right": 61.9404,
+                    "bottom": 454.1498
+                  }
+                },
+                {
+                  "text": "Transcription:",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 434.1698,
+                    "right": 200.38,
+                    "bottom": 454.1498
+                  }
+                },
+                {
+                  "text": "Synthesizing",
+                  "rect": {
+                    "left": 205.9016,
+                    "top": 434.1698,
+                    "right": 318.3816,
+                    "bottom": 454.1498
+                  }
+                },
+                {
+                  "text": "RNA",
+                  "rect": {
+                    "left": 323.9416,
+                    "top": 434.1698,
+                    "right": 365.9016,
+                    "bottom": 454.1498
+                  }
+                },
+                {
+                  "text": "from",
+                  "rect": {
+                    "left": 371.4616,
+                    "top": 434.1698,
+                    "right": 411.3416,
+                    "bottom": 454.1498
+                  }
+                },
+                {
+                  "text": "a",
+                  "rect": {
+                    "left": 416.9016,
+                    "top": 434.1698,
+                    "right": 428.0216,
+                    "bottom": 454.1498
+                  }
+                },
+                {
+                  "text": "DNA",
+                  "rect": {
+                    "left": 433.5816,
+                    "top": 434.1698,
+                    "right": 475.6216,
+                    "bottom": 454.1498
+                  }
+                },
+                {
+                  "text": "template",
+                  "rect": {
+                    "left": 481.1816,
+                    "top": 434.1698,
+                    "right": 557.1816,
+                    "bottom": 454.1498
+                  }
+                },
+                {
+                  "text": "(in",
+                  "rect": {
+                    "left": 562.7416,
+                    "top": 434.1698,
+                    "right": 585.0616,
+                    "bottom": 454.1498
+                  }
+                },
+                {
+                  "text": "nucleus).",
+                  "rect": {
+                    "left": 590.6216,
+                    "top": 434.1698,
+                    "right": 671.7616,
+                    "bottom": 454.1498
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 434.1698,
+                "right": 671.7616,
+                "bottom": 454.1498
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 434.1698,
+            "right": 671.7616,
+            "bottom": 454.1498
+          }
+        },
+        {
+          "text": "• Translation: Synthesizing an amino acid sequence from an mRNA template (in ribosomes).",
+          "lines": [
+            {
+              "text": "• Translation: Synthesizing an amino acid sequence from an mRNA template",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 477.6698,
+                    "right": 61.9404,
+                    "bottom": 497.6498
+                  }
+                },
+                {
+                  "text": "Translation:",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 477.6698,
+                    "right": 180.52,
+                    "bottom": 497.6498
+                  }
+                },
+                {
+                  "text": "Synthesizing",
+                  "rect": {
+                    "left": 186.0419,
+                    "top": 477.6698,
+                    "right": 298.5219,
+                    "bottom": 497.6498
+                  }
+                },
+                {
+                  "text": "an",
+                  "rect": {
+                    "left": 304.0819,
+                    "top": 477.6698,
+                    "right": 326.3219,
+                    "bottom": 497.6498
+                  }
+                },
+                {
+                  "text": "amino",
+                  "rect": {
+                    "left": 331.8819,
+                    "top": 477.6698,
+                    "right": 386.3419,
+                    "bottom": 497.6498
+                  }
+                },
+                {
+                  "text": "acid",
+                  "rect": {
+                    "left": 391.9019,
+                    "top": 477.6698,
+                    "right": 428.5819,
+                    "bottom": 497.6498
+                  }
+                },
+                {
+                  "text": "sequence",
+                  "rect": {
+                    "left": 434.1419,
+                    "top": 477.6698,
+                    "right": 520.9619,
+                    "bottom": 497.6498
+                  }
+                },
+                {
+                  "text": "from",
+                  "rect": {
+                    "left": 526.5219,
+                    "top": 477.6698,
+                    "right": 566.4019,
+                    "bottom": 497.6498
+                  }
+                },
+                {
+                  "text": "an",
+                  "rect": {
+                    "left": 571.9619,
+                    "top": 477.6698,
+                    "right": 594.2019,
+                    "bottom": 497.6498
+                  }
+                },
+                {
+                  "text": "mRNA",
+                  "rect": {
+                    "left": 599.7619,
+                    "top": 477.6698,
+                    "right": 658.3819,
+                    "bottom": 497.6498
+                  }
+                },
+                {
+                  "text": "template",
+                  "rect": {
+                    "left": 663.9419,
+                    "top": 477.6698,
+                    "right": 739.9419,
+                    "bottom": 497.6498
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 477.6698,
+                "right": 739.9419,
+                "bottom": 497.6498
+              }
+            },
+            {
+              "text": "(in ribosomes).",
+              "words": [
+                {
+                  "text": "(in",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 507.6698,
+                    "right": 89.82,
+                    "bottom": 527.6498
+                  }
+                },
+                {
+                  "text": "ribosomes).",
+                  "rect": {
+                    "left": 95.38,
+                    "top": 507.6698,
+                    "right": 199.78,
+                    "bottom": 527.6498
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 507.6698,
+                "right": 199.78,
+                "bottom": 527.6498
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 477.6698,
+            "right": 739.9419,
+            "bottom": 527.6498
+          }
+        },
+        {
+          "text": "[Cite: \"Molecular Biology of the Cell, Alberts et al.\"]",
+          "lines": [
+            {
+              "text": "[Cite: \"Molecular Biology of the Cell, Alberts et al.\"]",
+              "words": [
+                {
+                  "text": "[Cite:",
+                  "rect": {
+                    "left": 272.9919,
+                    "top": 556.9317,
+                    "right": 323.3919,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "\"Molecular",
+                  "rect": {
+                    "left": 331.7919,
+                    "top": 556.9317,
+                    "right": 415.7919,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Biology",
+                  "rect": {
+                    "left": 424.1919,
+                    "top": 556.9317,
+                    "right": 482.9919,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 491.3919,
+                    "top": 556.9317,
+                    "right": 508.1919,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 516.5919,
+                    "top": 556.9317,
+                    "right": 541.7919,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Cell,",
+                  "rect": {
+                    "left": 550.1919,
+                    "top": 556.9317,
+                    "right": 592.1919,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Alberts",
+                  "rect": {
+                    "left": 600.5919,
+                    "top": 556.9317,
+                    "right": 659.3919,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "et",
+                  "rect": {
+                    "left": 667.792,
+                    "top": 556.9317,
+                    "right": 684.592,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "al.\"]",
+                  "rect": {
+                    "left": 692.992,
+                    "top": 556.9317,
+                    "right": 734.992,
+                    "bottom": 575.9997
+                  }
+                }
+              ],
+              "rect": {
+                "left": 272.9919,
+                "top": 556.9317,
+                "right": 734.992,
+                "bottom": 575.9997
+              }
+            }
+          ],
+          "rect": {
+            "left": 272.9919,
+            "top": 556.9317,
+            "right": 734.992,
+            "bottom": 575.9997
+          }
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "2. Mendelian Inheritance",
+          "lines": [
+            {
+              "text": "2. Mendelian Inheritance",
+              "words": [
+                {
+                  "text": "2.",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 44.9999,
+                    "right": 73.356,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Mendelian",
+                  "rect": {
+                    "left": 82.808,
+                    "top": 44.9999,
+                    "right": 249.068,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Inheritance",
+                  "rect": {
+                    "left": 258.52,
+                    "top": 44.9999,
+                    "right": 440.114,
+                    "bottom": 78.9659
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 44.9999,
+                "right": 440.114,
+                "bottom": 78.9659
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 44.9999,
+            "right": 440.114,
+            "bottom": 78.9659
+          }
+        },
+        {
+          "text": "Law of Segregation: Allele pairs separate during gamete formation, and randomly unite at fertilization.",
+          "lines": [
+            {
+              "text": "Law of Segregation: Allele pairs",
+              "words": [
+                {
+                  "text": "Law",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 140.75,
+                    "right": 83.9,
+                    "bottom": 160.73
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 89.46,
+                    "top": 140.75,
+                    "right": 108.34,
+                    "bottom": 160.73
+                  }
+                },
+                {
+                  "text": "Segregation:",
+                  "rect": {
+                    "left": 113.9,
+                    "top": 140.75,
+                    "right": 236.24,
+                    "bottom": 160.73
+                  }
+                },
+                {
+                  "text": "Allele",
+                  "rect": {
+                    "left": 241.7426,
+                    "top": 140.75,
+                    "right": 290.5826,
+                    "bottom": 160.73
+                  }
+                },
+                {
+                  "text": "pairs",
+                  "rect": {
+                    "left": 296.1426,
+                    "top": 140.75,
+                    "right": 339.5826,
+                    "bottom": 160.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 140.75,
+                "right": 339.5826,
+                "bottom": 160.73
+              }
+            },
+            {
+              "text": "separate during gamete formation,",
+              "words": [
+                {
+                  "text": "separate",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 170.75,
+                    "right": 122.3,
+                    "bottom": 190.73
+                  }
+                },
+                {
+                  "text": "during",
+                  "rect": {
+                    "left": 127.86,
+                    "top": 170.75,
+                    "right": 183.44,
+                    "bottom": 190.73
+                  }
+                },
+                {
+                  "text": "gamete",
+                  "rect": {
+                    "left": 189.0,
+                    "top": 170.75,
+                    "right": 255.08,
+                    "bottom": 190.73
+                  }
+                },
+                {
+                  "text": "formation,",
+                  "rect": {
+                    "left": 260.64,
+                    "top": 170.75,
+                    "right": 349.06,
+                    "bottom": 190.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 170.75,
+                "right": 349.06,
+                "bottom": 190.73
+              }
+            },
+            {
+              "text": "and randomly unite at fertilization.",
+              "words": [
+                {
+                  "text": "and",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 200.75,
+                    "right": 78.36,
+                    "bottom": 220.73
+                  }
+                },
+                {
+                  "text": "randomly",
+                  "rect": {
+                    "left": 83.92,
+                    "top": 200.75,
+                    "right": 166.0,
+                    "bottom": 220.73
+                  }
+                },
+                {
+                  "text": "unite",
+                  "rect": {
+                    "left": 171.56,
+                    "top": 200.75,
+                    "right": 214.66,
+                    "bottom": 220.73
+                  }
+                },
+                {
+                  "text": "at",
+                  "rect": {
+                    "left": 220.22,
+                    "top": 200.75,
+                    "right": 236.7,
+                    "bottom": 220.73
+                  }
+                },
+                {
+                  "text": "fertilization.",
+                  "rect": {
+                    "left": 242.26,
+                    "top": 200.75,
+                    "right": 342.92,
+                    "bottom": 220.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 200.75,
+                "right": 342.92,
+                "bottom": 220.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 140.75,
+            "right": 349.06,
+            "bottom": 220.73
+          }
+        },
+        {
+          "text": "Law of Independent Assortment: Alleles of two (or more) different genes get sorted into gametes independently of one another.",
+          "lines": [
+            {
+              "text": "Law of Independent Assortment:",
+              "words": [
+                {
+                  "text": "Law",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 250.75,
+                    "right": 83.9,
+                    "bottom": 270.73
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 89.46,
+                    "top": 250.75,
+                    "right": 108.34,
+                    "bottom": 270.73
+                  }
+                },
+                {
+                  "text": "Independent",
+                  "rect": {
+                    "left": 113.9,
+                    "top": 250.75,
+                    "right": 232.8,
+                    "bottom": 270.73
+                  }
+                },
+                {
+                  "text": "Assortment:",
+                  "rect": {
+                    "left": 238.36,
+                    "top": 250.75,
+                    "right": 356.84,
+                    "bottom": 270.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 250.75,
+                "right": 356.84,
+                "bottom": 270.73
+              }
+            },
+            {
+              "text": "Alleles of two (or more) different",
+              "words": [
+                {
+                  "text": "Alleles",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 280.75,
+                    "right": 103.78,
+                    "bottom": 300.73
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 109.34,
+                    "top": 280.75,
+                    "right": 126.02,
+                    "bottom": 300.73
+                  }
+                },
+                {
+                  "text": "two",
+                  "rect": {
+                    "left": 131.58,
+                    "top": 280.75,
+                    "right": 163.0,
+                    "bottom": 300.73
+                  }
+                },
+                {
+                  "text": "(or",
+                  "rect": {
+                    "left": 168.56,
+                    "top": 280.75,
+                    "right": 193.0,
+                    "bottom": 300.73
+                  }
+                },
+                {
+                  "text": "more)",
+                  "rect": {
+                    "left": 198.56,
+                    "top": 280.75,
+                    "right": 250.58,
+                    "bottom": 300.73
+                  }
+                },
+                {
+                  "text": "different",
+                  "rect": {
+                    "left": 256.14,
+                    "top": 280.75,
+                    "right": 328.2,
+                    "bottom": 300.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 280.75,
+                "right": 328.2,
+                "bottom": 300.73
+              }
+            },
+            {
+              "text": "genes get sorted into gametes",
+              "words": [
+                {
+                  "text": "genes",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 310.75,
+                    "right": 99.34,
+                    "bottom": 330.73
+                  }
+                },
+                {
+                  "text": "get",
+                  "rect": {
+                    "left": 104.9,
+                    "top": 310.75,
+                    "right": 132.46,
+                    "bottom": 330.73
+                  }
+                },
+                {
+                  "text": "sorted",
+                  "rect": {
+                    "left": 138.02,
+                    "top": 310.75,
+                    "right": 193.86,
+                    "bottom": 330.73
+                  }
+                },
+                {
+                  "text": "into",
+                  "rect": {
+                    "left": 199.42,
+                    "top": 310.75,
+                    "right": 231.42,
+                    "bottom": 330.73
+                  }
+                },
+                {
+                  "text": "gametes",
+                  "rect": {
+                    "left": 236.98,
+                    "top": 310.75,
+                    "right": 313.0,
+                    "bottom": 330.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 310.75,
+                "right": 313.0,
+                "bottom": 330.73
+              }
+            },
+            {
+              "text": "independently of one another.",
+              "words": [
+                {
+                  "text": "independently",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 340.75,
+                    "right": 169.42,
+                    "bottom": 360.73
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 174.98,
+                    "top": 340.75,
+                    "right": 191.66,
+                    "bottom": 360.73
+                  }
+                },
+                {
+                  "text": "one",
+                  "rect": {
+                    "left": 197.22,
+                    "top": 340.75,
+                    "right": 230.58,
+                    "bottom": 360.73
+                  }
+                },
+                {
+                  "text": "another.",
+                  "rect": {
+                    "left": 236.14,
+                    "top": 340.75,
+                    "right": 307.86,
+                    "bottom": 360.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 340.75,
+                "right": 307.86,
+                "bottom": 360.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 250.75,
+            "right": 356.84,
+            "bottom": 360.73
+          }
+        },
+        {
+          "text": "Monohybrid Cross (Rr x Rr)",
+          "lines": [
+            {
+              "text": "Monohybrid Cross (Rr x",
+              "words": [
+                {
+                  "text": "Monohybrid",
+                  "rect": {
+                    "left": 445.5477,
+                    "top": 161.4999,
+                    "right": 578.7873,
+                    "bottom": 184.8765
+                  }
+                },
+                {
+                  "text": "Cross",
+                  "rect": {
+                    "left": 585.2925,
+                    "top": 161.4999,
+                    "right": 651.7017,
+                    "bottom": 184.8765
+                  }
+                },
+                {
+                  "text": "(Rr",
+                  "rect": {
+                    "left": 658.2069,
+                    "top": 161.4999,
+                    "right": 691.9965,
+                    "bottom": 184.8765
+                  }
+                },
+                {
+                  "text": "x",
+                  "rect": {
+                    "left": 698.5017,
+                    "top": 161.4999,
+                    "right": 711.5121,
+                    "bottom": 184.8765
+                  }
+                }
+              ],
+              "rect": {
+                "left": 445.5477,
+                "top": 161.4999,
+                "right": 711.5121,
+                "bottom": 184.8765
+              }
+            },
+            {
+              "text": "Rr)",
+              "words": [
+                {
+                  "text": "Rr)",
+                  "rect": {
+                    "left": 561.6252,
+                    "top": 196.5999,
+                    "right": 595.4148,
+                    "bottom": 219.9765
+                  }
+                }
+              ],
+              "rect": {
+                "left": 561.6252,
+                "top": 196.5999,
+                "right": 595.4148,
+                "bottom": 219.9765
+              }
+            }
+          ],
+          "rect": {
+            "left": 445.5477,
+            "top": 161.4999,
+            "right": 711.5121,
+            "bottom": 219.9765
+          }
+        },
+        {
+          "text": "R",
+          "lines": [
+            {
+              "text": "R",
+              "words": [
+                {
+                  "text": "R",
+                  "rect": {
+                    "left": 560.3009,
+                    "top": 264.2498,
+                    "right": 577.6289,
+                    "bottom": 288.2258
+                  }
+                }
+              ],
+              "rect": {
+                "left": 560.3009,
+                "top": 264.2498,
+                "right": 577.6289,
+                "bottom": 288.2258
+              }
+            }
+          ],
+          "rect": {
+            "left": 560.3009,
+            "top": 264.2498,
+            "right": 577.6289,
+            "bottom": 288.2258
+          }
+        },
+        {
+          "text": "r",
+          "lines": [
+            {
+              "text": "r",
+              "words": [
+                {
+                  "text": "r",
+                  "rect": {
+                    "left": 675.0829,
+                    "top": 264.2498,
+                    "right": 684.4189,
+                    "bottom": 288.2258
+                  }
+                }
+              ],
+              "rect": {
+                "left": 675.0829,
+                "top": 264.2498,
+                "right": 684.4189,
+                "bottom": 288.2258
+              }
+            }
+          ],
+          "rect": {
+            "left": 675.0829,
+            "top": 264.2498,
+            "right": 684.4189,
+            "bottom": 288.2258
+          }
+        },
+        {
+          "text": "R",
+          "lines": [
+            {
+              "text": "R",
+              "words": [
+                {
+                  "text": "R",
+                  "rect": {
+                    "left": 459.0699,
+                    "top": 316.7498,
+                    "right": 476.3979,
+                    "bottom": 340.7258
+                  }
+                }
+              ],
+              "rect": {
+                "left": 459.0699,
+                "top": 316.7498,
+                "right": 476.3979,
+                "bottom": 340.7258
+              }
+            }
+          ],
+          "rect": {
+            "left": 459.0699,
+            "top": 316.7498,
+            "right": 476.3979,
+            "bottom": 340.7258
+          }
+        },
+        {
+          "text": "RR",
+          "lines": [
+            {
+              "text": "RR",
+              "words": [
+                {
+                  "text": "RR",
+                  "rect": {
+                    "left": 551.7931,
+                    "top": 316.7498,
+                    "right": 586.1371,
+                    "bottom": 340.7258
+                  }
+                }
+              ],
+              "rect": {
+                "left": 551.7931,
+                "top": 316.7498,
+                "right": 586.1371,
+                "bottom": 340.7258
+              }
+            }
+          ],
+          "rect": {
+            "left": 551.7931,
+            "top": 316.7498,
+            "right": 586.1371,
+            "bottom": 340.7258
+          }
+        },
+        {
+          "text": "Rr",
+          "lines": [
+            {
+              "text": "Rr",
+              "words": [
+                {
+                  "text": "Rr",
+                  "rect": {
+                    "left": 667.0911,
+                    "top": 316.7498,
+                    "right": 692.4111,
+                    "bottom": 340.7258
+                  }
+                }
+              ],
+              "rect": {
+                "left": 667.0911,
+                "top": 316.7498,
+                "right": 692.4111,
+                "bottom": 340.7258
+              }
+            }
+          ],
+          "rect": {
+            "left": 667.0911,
+            "top": 316.7498,
+            "right": 692.4111,
+            "bottom": 340.7258
+          }
+        },
+        {
+          "text": "r",
+          "lines": [
+            {
+              "text": "r",
+              "words": [
+                {
+                  "text": "r",
+                  "rect": {
+                    "left": 463.0656,
+                    "top": 369.2498,
+                    "right": 472.4016,
+                    "bottom": 393.2258
+                  }
+                }
+              ],
+              "rect": {
+                "left": 463.0656,
+                "top": 369.2498,
+                "right": 472.4016,
+                "bottom": 393.2258
+              }
+            }
+          ],
+          "rect": {
+            "left": 463.0656,
+            "top": 369.2498,
+            "right": 472.4016,
+            "bottom": 393.2258
+          }
+        },
+        {
+          "text": "Rr",
+          "lines": [
+            {
+              "text": "Rr",
+              "words": [
+                {
+                  "text": "Rr",
+                  "rect": {
+                    "left": 556.3048,
+                    "top": 369.2498,
+                    "right": 581.6248,
+                    "bottom": 393.2258
+                  }
+                }
+              ],
+              "rect": {
+                "left": 556.3048,
+                "top": 369.2498,
+                "right": 581.6248,
+                "bottom": 393.2258
+              }
+            }
+          ],
+          "rect": {
+            "left": 556.3048,
+            "top": 369.2498,
+            "right": 581.6248,
+            "bottom": 393.2258
+          }
+        },
+        {
+          "text": "rr",
+          "lines": [
+            {
+              "text": "rr",
+              "words": [
+                {
+                  "text": "rr",
+                  "rect": {
+                    "left": 671.7588,
+                    "top": 369.2498,
+                    "right": 687.7428,
+                    "bottom": 393.2258
+                  }
+                }
+              ],
+              "rect": {
+                "left": 671.7588,
+                "top": 369.2498,
+                "right": 687.7428,
+                "bottom": 393.2258
+              }
+            }
+          ],
+          "rect": {
+            "left": 671.7588,
+            "top": 369.2498,
+            "right": 687.7428,
+            "bottom": 393.2258
+          }
+        },
+        {
+          "text": "Genotypic Ratio = 1:2:1",
+          "lines": [
+            {
+              "text": "Genotypic Ratio = 1:2:1",
+              "words": [
+                {
+                  "text": "Genotypic",
+                  "rect": {
+                    "left": 494.8727,
+                    "top": 428.2497,
+                    "right": 567.0167,
+                    "bottom": 444.2337
+                  }
+                },
+                {
+                  "text": "Ratio",
+                  "rect": {
+                    "left": 571.4647,
+                    "top": 428.2497,
+                    "right": 608.3767,
+                    "bottom": 444.2337
+                  }
+                },
+                {
+                  "text": "=",
+                  "rect": {
+                    "left": 612.8247,
+                    "top": 428.2497,
+                    "right": 622.1687,
+                    "bottom": 444.2337
+                  }
+                },
+                {
+                  "text": "1:2:1",
+                  "rect": {
+                    "left": 626.6167,
+                    "top": 428.2497,
+                    "right": 662.2007,
+                    "bottom": 444.2337
+                  }
+                }
+              ],
+              "rect": {
+                "left": 494.8727,
+                "top": 428.2497,
+                "right": 662.2007,
+                "bottom": 444.2337
+              }
+            }
+          ],
+          "rect": {
+            "left": 494.8727,
+            "top": 428.2497,
+            "right": 662.2007,
+            "bottom": 444.2337
+          }
+        },
+        {
+          "text": "[Cite: \"Genetics: Analysis and Principles, Brooker\"]",
+          "lines": [
+            {
+              "text": "[Cite: \"Genetics: Analysis and Principles, Brooker\"]",
+              "words": [
+                {
+                  "text": "[Cite:",
+                  "rect": {
+                    "left": 298.1924,
+                    "top": 556.9317,
+                    "right": 348.5924,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "\"Genetics:",
+                  "rect": {
+                    "left": 356.9924,
+                    "top": 556.9317,
+                    "right": 440.9924,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Analysis",
+                  "rect": {
+                    "left": 449.3924,
+                    "top": 556.9317,
+                    "right": 516.5924,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "and",
+                  "rect": {
+                    "left": 524.9924,
+                    "top": 556.9317,
+                    "right": 550.1924,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Principles,",
+                  "rect": {
+                    "left": 558.5924,
+                    "top": 556.9317,
+                    "right": 650.9924,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Brooker\"]",
+                  "rect": {
+                    "left": 659.3924,
+                    "top": 556.9317,
+                    "right": 734.9924,
+                    "bottom": 575.9997
+                  }
+                }
+              ],
+              "rect": {
+                "left": 298.1924,
+                "top": 556.9317,
+                "right": 734.9924,
+                "bottom": 575.9997
+              }
+            }
+          ],
+          "rect": {
+            "left": 298.1924,
+            "top": 556.9317,
+            "right": 734.9924,
+            "bottom": 575.9997
+          }
+        }
+      ]
+    }
+  ]
+}

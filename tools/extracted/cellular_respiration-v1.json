@@ -1,0 +1,1701 @@
+{
+  "source_filename": "cellular_respiration-v1.pdf",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "Cellular Respiration",
+          "lines": [
+            {
+              "text": "Cellular Respiration",
+              "words": [
+                {
+                  "text": "Cellular",
+                  "rect": {
+                    "left": 148.0525,
+                    "top": 252.1802,
+                    "right": 341.6965,
+                    "bottom": 306.1262
+                  }
+                },
+                {
+                  "text": "Respiration",
+                  "rect": {
+                    "left": 355.3045,
+                    "top": 252.1802,
+                    "right": 645.6085,
+                    "bottom": 306.1262
+                  }
+                }
+              ],
+              "rect": {
+                "left": 148.0525,
+                "top": 252.1802,
+                "right": 645.6085,
+                "bottom": 306.1262
+              }
+            }
+          ],
+          "rect": {
+            "left": 148.0525,
+            "top": 252.1802,
+            "right": 645.6085,
+            "bottom": 306.1262
+          }
+        },
+        {
+          "text": "Rich Content Visual Test Deck",
+          "lines": [
+            {
+              "text": "Rich Content Visual Test Deck",
+              "words": [
+                {
+                  "text": "Rich",
+                  "rect": {
+                    "left": 221.2533,
+                    "top": 321.1803,
+                    "right": 273.2533,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Content",
+                  "rect": {
+                    "left": 280.4813,
+                    "top": 321.1803,
+                    "right": 371.1433,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Visual",
+                  "rect": {
+                    "left": 378.3713,
+                    "top": 321.1803,
+                    "right": 449.0653,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Test",
+                  "rect": {
+                    "left": 456.2933,
+                    "top": 321.1803,
+                    "right": 504.3153,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Deck",
+                  "rect": {
+                    "left": 511.5433,
+                    "top": 321.1803,
+                    "right": 570.8493,
+                    "bottom": 347.1543
+                  }
+                }
+              ],
+              "rect": {
+                "left": 221.2533,
+                "top": 321.1803,
+                "right": 570.8493,
+                "bottom": 347.1543
+              }
+            }
+          ],
+          "rect": {
+            "left": 221.2533,
+            "top": 321.1803,
+            "right": 570.8493,
+            "bottom": 347.1543
+          }
+        },
+        {
+          "text": "Optimized for data extraction testing",
+          "lines": [
+            {
+              "text": "Optimized for data extraction testing",
+              "words": [
+                {
+                  "text": "Optimized",
+                  "rect": {
+                    "left": 253.1082,
+                    "top": 373.1803,
+                    "right": 333.4062,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "for",
+                  "rect": {
+                    "left": 338.4102,
+                    "top": 373.1803,
+                    "right": 359.2362,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "data",
+                  "rect": {
+                    "left": 364.2402,
+                    "top": 373.1803,
+                    "right": 399.0162,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "extraction",
+                  "rect": {
+                    "left": 404.0202,
+                    "top": 373.1803,
+                    "right": 481.4382,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "testing",
+                  "rect": {
+                    "left": 486.4422,
+                    "top": 373.1803,
+                    "right": 539.0202,
+                    "bottom": 391.1623
+                  }
+                }
+              ],
+              "rect": {
+                "left": 253.1082,
+                "top": 373.1803,
+                "right": 539.0202,
+                "bottom": 391.1623
+              }
+            }
+          ],
+          "rect": {
+            "left": 253.1082,
+            "top": 373.1803,
+            "right": 539.0202,
+            "bottom": 391.1623
+          }
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "1. The Glycolysis Pathway",
+          "lines": [
+            {
+              "text": "1. The Glycolysis Pathway",
+              "words": [
+                {
+                  "text": "1.",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 44.9999,
+                    "right": 73.356,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "The",
+                  "rect": {
+                    "left": 82.808,
+                    "top": 44.9999,
+                    "right": 143.192,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Glycolysis",
+                  "rect": {
+                    "left": 152.644,
+                    "top": 44.9999,
+                    "right": 321.284,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Pathway",
+                  "rect": {
+                    "left": 330.736,
+                    "top": 44.9999,
+                    "right": 467.416,
+                    "bottom": 78.9659
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 44.9999,
+                "right": 467.416,
+                "bottom": 78.9659
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 44.9999,
+            "right": 467.416,
+            "bottom": 78.9659
+          }
+        },
+        {
+          "text": "Definition: Glycolysis is the metabolic pathway that converts glucose (C6H12O6) into pyruvate (CH3COCOO-), generating free energy used to form ATP and NADH.",
+          "lines": [
+            {
+              "text": "Definition: Glycolysis is the",
+              "words": [
+                {
+                  "text": "Definition:",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 132.0,
+                    "right": 159.06,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "Glycolysis",
+                  "rect": {
+                    "left": 164.6215,
+                    "top": 132.0,
+                    "right": 253.9015,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "is",
+                  "rect": {
+                    "left": 259.4615,
+                    "top": 132.0,
+                    "right": 273.9015,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 279.4615,
+                    "top": 132.0,
+                    "right": 307.1415,
+                    "bottom": 151.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 132.0,
+                "right": 307.1415,
+                "bottom": 151.98
+              }
+            },
+            {
+              "text": "metabolic pathway that converts",
+              "words": [
+                {
+                  "text": "metabolic",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 162.0,
+                    "right": 145.38,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "pathway",
+                  "rect": {
+                    "left": 150.94,
+                    "top": 162.0,
+                    "right": 224.32,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "that",
+                  "rect": {
+                    "left": 229.88,
+                    "top": 162.0,
+                    "right": 262.92,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "converts",
+                  "rect": {
+                    "left": 268.48,
+                    "top": 162.0,
+                    "right": 344.08,
+                    "bottom": 181.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 162.0,
+                "right": 344.08,
+                "bottom": 181.98
+              }
+            },
+            {
+              "text": "glucose (C6H12O6) into pyruvate",
+              "words": [
+                {
+                  "text": "glucose",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 192.0,
+                    "right": 128.96,
+                    "bottom": 211.98
+                  }
+                },
+                {
+                  "text": "(C6H12O6)",
+                  "rect": {
+                    "left": 134.52,
+                    "top": 192.0,
+                    "right": 236.76,
+                    "bottom": 211.98
+                  }
+                },
+                {
+                  "text": "into",
+                  "rect": {
+                    "left": 242.32,
+                    "top": 192.0,
+                    "right": 274.32,
+                    "bottom": 211.98
+                  }
+                },
+                {
+                  "text": "pyruvate",
+                  "rect": {
+                    "left": 279.88,
+                    "top": 192.0,
+                    "right": 355.46,
+                    "bottom": 211.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 192.0,
+                "right": 355.46,
+                "bottom": 211.98
+              }
+            },
+            {
+              "text": "(CH3COCOO-), generating free",
+              "words": [
+                {
+                  "text": "(CH3COCOO-),",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 222.0,
+                    "right": 201.16,
+                    "bottom": 241.98
+                  }
+                },
+                {
+                  "text": "generating",
+                  "rect": {
+                    "left": 206.72,
+                    "top": 222.0,
+                    "right": 300.78,
+                    "bottom": 241.98
+                  }
+                },
+                {
+                  "text": "free",
+                  "rect": {
+                    "left": 306.34,
+                    "top": 222.0,
+                    "right": 340.6,
+                    "bottom": 241.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 222.0,
+                "right": 340.6,
+                "bottom": 241.98
+              }
+            },
+            {
+              "text": "energy used to form ATP and",
+              "words": [
+                {
+                  "text": "energy",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 252.0,
+                    "right": 120.94,
+                    "bottom": 271.98
+                  }
+                },
+                {
+                  "text": "used",
+                  "rect": {
+                    "left": 126.5,
+                    "top": 252.0,
+                    "right": 169.86,
+                    "bottom": 271.98
+                  }
+                },
+                {
+                  "text": "to",
+                  "rect": {
+                    "left": 175.42,
+                    "top": 252.0,
+                    "right": 191.86,
+                    "bottom": 271.98
+                  }
+                },
+                {
+                  "text": "form",
+                  "rect": {
+                    "left": 197.42,
+                    "top": 252.0,
+                    "right": 237.22,
+                    "bottom": 271.98
+                  }
+                },
+                {
+                  "text": "ATP",
+                  "rect": {
+                    "left": 242.78,
+                    "top": 252.0,
+                    "right": 279.48,
+                    "bottom": 271.98
+                  }
+                },
+                {
+                  "text": "and",
+                  "rect": {
+                    "left": 285.04,
+                    "top": 252.0,
+                    "right": 318.4,
+                    "bottom": 271.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 252.0,
+                "right": 318.4,
+                "bottom": 271.98
+              }
+            },
+            {
+              "text": "NADH.",
+              "words": [
+                {
+                  "text": "NADH.",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 282.0,
+                    "right": 122.04,
+                    "bottom": 301.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 282.0,
+                "right": 122.04,
+                "bottom": 301.98
+              }
+            }
+          ],
+          "rect": {
+            "left": 60.0,
+            "top": 132.0,
+            "right": 355.46,
+            "bottom": 301.98
+          }
+        },
+        {
+          "text": "Glucose (6C)",
+          "lines": [
+            {
+              "text": "Glucose (6C)",
+              "words": [
+                {
+                  "text": "Glucose",
+                  "rect": {
+                    "left": 539.3973,
+                    "top": 155.3183,
+                    "right": 589.7782,
+                    "bottom": 173.7053
+                  }
+                },
+                {
+                  "text": "(6C)",
+                  "rect": {
+                    "left": 593.2882,
+                    "top": 155.3183,
+                    "right": 617.6424,
+                    "bottom": 173.7053
+                  }
+                }
+              ],
+              "rect": {
+                "left": 539.3973,
+                "top": 155.3183,
+                "right": 617.6424,
+                "bottom": 173.7053
+              }
+            }
+          ],
+          "rect": {
+            "left": 539.3973,
+            "top": 155.3183,
+            "right": 617.6424,
+            "bottom": 173.7053
+          }
+        },
+        {
+          "text": "• Occurs in the cytoplasm of the cell.",
+          "lines": [
+            {
+              "text": "• Occurs in the cytoplasm of the cell.",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 338.25,
+                    "right": 61.9404,
+                    "bottom": 358.23
+                  }
+                },
+                {
+                  "text": "Occurs",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 338.25,
+                    "right": 131.14,
+                    "bottom": 358.23
+                  }
+                },
+                {
+                  "text": "in",
+                  "rect": {
+                    "left": 136.7,
+                    "top": 338.25,
+                    "right": 152.26,
+                    "bottom": 358.23
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 157.82,
+                    "top": 338.25,
+                    "right": 185.5,
+                    "bottom": 358.23
+                  }
+                },
+                {
+                  "text": "cytoplasm",
+                  "rect": {
+                    "left": 191.06,
+                    "top": 338.25,
+                    "right": 280.72,
+                    "bottom": 358.23
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 286.28,
+                    "top": 338.25,
+                    "right": 302.96,
+                    "bottom": 358.23
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 308.52,
+                    "top": 338.25,
+                    "right": 336.2,
+                    "bottom": 358.23
+                  }
+                },
+                {
+                  "text": "cell.",
+                  "rect": {
+                    "left": 341.76,
+                    "top": 338.25,
+                    "right": 377.04,
+                    "bottom": 358.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 338.25,
+                "right": 377.04,
+                "bottom": 358.23
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 338.25,
+            "right": 377.04,
+            "bottom": 358.23
+          }
+        },
+        {
+          "text": "• Anaerobic process (does not require oxygen).",
+          "lines": [
+            {
+              "text": "• Anaerobic process (does not",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 381.75,
+                    "right": 61.9404,
+                    "bottom": 401.73
+                  }
+                },
+                {
+                  "text": "Anaerobic",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 381.75,
+                    "right": 157.42,
+                    "bottom": 401.73
+                  }
+                },
+                {
+                  "text": "process",
+                  "rect": {
+                    "left": 162.98,
+                    "top": 381.75,
+                    "right": 232.96,
+                    "bottom": 401.73
+                  }
+                },
+                {
+                  "text": "(does",
+                  "rect": {
+                    "left": 238.52,
+                    "top": 381.75,
+                    "right": 288.48,
+                    "bottom": 401.73
+                  }
+                },
+                {
+                  "text": "not",
+                  "rect": {
+                    "left": 294.04,
+                    "top": 381.75,
+                    "right": 321.68,
+                    "bottom": 401.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 381.75,
+                "right": 321.68,
+                "bottom": 401.73
+              }
+            },
+            {
+              "text": "require oxygen).",
+              "words": [
+                {
+                  "text": "require",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 411.75,
+                    "right": 129.34,
+                    "bottom": 431.73
+                  }
+                },
+                {
+                  "text": "oxygen).",
+                  "rect": {
+                    "left": 134.9,
+                    "top": 411.75,
+                    "right": 210.82,
+                    "bottom": 431.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 411.75,
+                "right": 210.82,
+                "bottom": 431.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 381.75,
+            "right": 321.68,
+            "bottom": 431.73
+          }
+        },
+        {
+          "text": "• Net yield: 2 ATP, 2 NADH, 2 Pyruvate molecules per glucose.",
+          "lines": [
+            {
+              "text": "• Net yield: 2 ATP, 2 NADH, 2",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 455.25,
+                    "right": 61.9404,
+                    "bottom": 475.23
+                  }
+                },
+                {
+                  "text": "Net",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 455.25,
+                    "right": 98.46,
+                    "bottom": 475.23
+                  }
+                },
+                {
+                  "text": "yield:",
+                  "rect": {
+                    "left": 104.02,
+                    "top": 455.25,
+                    "right": 150.64,
+                    "bottom": 475.23
+                  }
+                },
+                {
+                  "text": "2",
+                  "rect": {
+                    "left": 156.2,
+                    "top": 455.25,
+                    "right": 167.32,
+                    "bottom": 475.23
+                  }
+                },
+                {
+                  "text": "ATP,",
+                  "rect": {
+                    "left": 172.88,
+                    "top": 455.25,
+                    "right": 212.5,
+                    "bottom": 475.23
+                  }
+                },
+                {
+                  "text": "2",
+                  "rect": {
+                    "left": 218.06,
+                    "top": 455.25,
+                    "right": 229.18,
+                    "bottom": 475.23
+                  }
+                },
+                {
+                  "text": "NADH,",
+                  "rect": {
+                    "left": 234.74,
+                    "top": 455.25,
+                    "right": 296.78,
+                    "bottom": 475.23
+                  }
+                },
+                {
+                  "text": "2",
+                  "rect": {
+                    "left": 302.34,
+                    "top": 455.25,
+                    "right": 313.46,
+                    "bottom": 475.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 455.25,
+                "right": 313.46,
+                "bottom": 475.23
+              }
+            },
+            {
+              "text": "Pyruvate molecules per glucose.",
+              "words": [
+                {
+                  "text": "Pyruvate",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 485.25,
+                    "right": 145.68,
+                    "bottom": 505.23
+                  }
+                },
+                {
+                  "text": "molecules",
+                  "rect": {
+                    "left": 151.24,
+                    "top": 485.25,
+                    "right": 241.2,
+                    "bottom": 505.23
+                  }
+                },
+                {
+                  "text": "per",
+                  "rect": {
+                    "left": 246.76,
+                    "top": 485.25,
+                    "right": 275.66,
+                    "bottom": 505.23
+                  }
+                },
+                {
+                  "text": "glucose.",
+                  "rect": {
+                    "left": 281.22,
+                    "top": 485.25,
+                    "right": 355.3,
+                    "bottom": 505.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 485.25,
+                "right": 355.3,
+                "bottom": 505.23
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 455.25,
+            "right": 355.3,
+            "bottom": 505.23
+          }
+        },
+        {
+          "text": "• Key regulatory enzyme: [Cite: \"Principles of Biochemistry, 8th Ed., Ch. 14\"] Phosphofructokinase (PFK).",
+          "lines": [
+            {
+              "text": "• Key regulatory enzyme:",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 528.75,
+                    "right": 61.9404,
+                    "bottom": 548.73
+                  }
+                },
+                {
+                  "text": "Key",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 528.75,
+                    "right": 100.98,
+                    "bottom": 548.73
+                  }
+                },
+                {
+                  "text": "regulatory",
+                  "rect": {
+                    "left": 106.54,
+                    "top": 528.75,
+                    "right": 195.28,
+                    "bottom": 548.73
+                  }
+                },
+                {
+                  "text": "enzyme:",
+                  "rect": {
+                    "left": 200.84,
+                    "top": 528.75,
+                    "right": 276.12,
+                    "bottom": 548.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 528.75,
+                "right": 276.12,
+                "bottom": 548.73
+              }
+            },
+            {
+              "text": "[Cite: \"Principles of Biochemistry, 8th Ed., Ch. 14\"]",
+              "words": [
+                {
+                  "text": "[Cite:",
+                  "rect": {
+                    "left": 289.7922,
+                    "top": 556.9317,
+                    "right": 340.1922,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "\"Principles",
+                  "rect": {
+                    "left": 348.5922,
+                    "top": 556.9317,
+                    "right": 440.9922,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 449.3922,
+                    "top": 556.9317,
+                    "right": 466.1922,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Biochemistry,",
+                  "rect": {
+                    "left": 474.5922,
+                    "top": 556.9317,
+                    "right": 583.7922,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "8th",
+                  "rect": {
+                    "left": 592.1922,
+                    "top": 556.9317,
+                    "right": 617.3922,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Ed.,",
+                  "rect": {
+                    "left": 625.7922,
+                    "top": 556.9317,
+                    "right": 659.3922,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Ch.",
+                  "rect": {
+                    "left": 667.7922,
+                    "top": 556.9317,
+                    "right": 692.9922,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "14\"]",
+                  "rect": {
+                    "left": 701.3922,
+                    "top": 556.9317,
+                    "right": 734.9922,
+                    "bottom": 575.9997
+                  }
+                }
+              ],
+              "rect": {
+                "left": 289.7922,
+                "top": 556.9317,
+                "right": 734.9922,
+                "bottom": 575.9997
+              }
+            },
+            {
+              "text": "Phosphofructokinase (PFK).",
+              "words": [
+                {
+                  "text": "Phosphofructokinase",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 558.75,
+                    "right": 253.9,
+                    "bottom": 578.73
+                  }
+                },
+                {
+                  "text": "(PFK).",
+                  "rect": {
+                    "left": 259.46,
+                    "top": 558.75,
+                    "right": 316.8,
+                    "bottom": 578.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 558.75,
+                "right": 316.8,
+                "bottom": 578.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 528.75,
+            "right": 734.9922,
+            "bottom": 578.73
+          }
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "2. The Krebs Cycle (Citric Acid Cycle)",
+          "lines": [
+            {
+              "text": "2. The Krebs Cycle (Citric Acid Cycle)",
+              "words": [
+                {
+                  "text": "2.",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 44.9999,
+                    "right": 73.356,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "The",
+                  "rect": {
+                    "left": 82.808,
+                    "top": 44.9999,
+                    "right": 143.192,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Krebs",
+                  "rect": {
+                    "left": 152.644,
+                    "top": 44.9999,
+                    "right": 249.272,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Cycle",
+                  "rect": {
+                    "left": 258.724,
+                    "top": 44.9999,
+                    "right": 348.892,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "(Citric",
+                  "rect": {
+                    "left": 358.344,
+                    "top": 44.9999,
+                    "right": 456.434,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Acid",
+                  "rect": {
+                    "left": 465.886,
+                    "top": 44.9999,
+                    "right": 539.088,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Cycle)",
+                  "rect": {
+                    "left": 548.54,
+                    "top": 44.9999,
+                    "right": 650.03,
+                    "bottom": 78.9659
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 44.9999,
+                "right": 650.03,
+                "bottom": 78.9659
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 44.9999,
+            "right": 650.03,
+            "bottom": 78.9659
+          }
+        },
+        {
+          "text": "A series of chemical reactions to release stored energy through the oxidation of acetyl-CoA derived from carbohydrates, fats, and proteins.",
+          "lines": [
+            {
+              "text": "A series of chemical reactions to release stored energy through the oxidation of",
+              "words": [
+                {
+                  "text": "A",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 120.75,
+                    "right": 58.34,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "series",
+                  "rect": {
+                    "left": 63.9,
+                    "top": 120.75,
+                    "right": 117.18,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 122.74,
+                    "top": 120.75,
+                    "right": 139.42,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "chemical",
+                  "rect": {
+                    "left": 144.98,
+                    "top": 120.75,
+                    "right": 224.0,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "reactions",
+                  "rect": {
+                    "left": 229.56,
+                    "top": 120.75,
+                    "right": 310.42,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "to",
+                  "rect": {
+                    "left": 315.98,
+                    "top": 120.75,
+                    "right": 332.42,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "release",
+                  "rect": {
+                    "left": 337.98,
+                    "top": 120.75,
+                    "right": 403.18,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "stored",
+                  "rect": {
+                    "left": 408.74,
+                    "top": 120.75,
+                    "right": 463.82,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "energy",
+                  "rect": {
+                    "left": 469.38,
+                    "top": 120.75,
+                    "right": 530.32,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "through",
+                  "rect": {
+                    "left": 535.88,
+                    "top": 120.75,
+                    "right": 603.34,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 608.9,
+                    "top": 120.75,
+                    "right": 636.58,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "oxidation",
+                  "rect": {
+                    "left": 642.14,
+                    "top": 120.75,
+                    "right": 721.3,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 726.86,
+                    "top": 120.75,
+                    "right": 743.54,
+                    "bottom": 140.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 120.75,
+                "right": 743.54,
+                "bottom": 140.73
+              }
+            },
+            {
+              "text": "acetyl-CoA derived from carbohydrates, fats, and proteins.",
+              "words": [
+                {
+                  "text": "acetyl-CoA",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 150.75,
+                    "right": 143.38,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "derived",
+                  "rect": {
+                    "left": 148.94,
+                    "top": 150.75,
+                    "right": 214.12,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "from",
+                  "rect": {
+                    "left": 219.68,
+                    "top": 150.75,
+                    "right": 259.56,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "carbohydrates,",
+                  "rect": {
+                    "left": 265.12,
+                    "top": 150.75,
+                    "right": 396.48,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "fats,",
+                  "rect": {
+                    "left": 402.04,
+                    "top": 150.75,
+                    "right": 439.3,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "and",
+                  "rect": {
+                    "left": 444.86,
+                    "top": 150.75,
+                    "right": 478.22,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "proteins.",
+                  "rect": {
+                    "left": 483.78,
+                    "top": 150.75,
+                    "right": 559.74,
+                    "bottom": 170.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 150.75,
+                "right": 559.74,
+                "bottom": 170.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 120.75,
+            "right": 743.54,
+            "bottom": 170.73
+          }
+        },
+        {
+          "text": "Citrate",
+          "lines": [
+            {
+              "text": "Citrate",
+              "words": [
+                {
+                  "text": "Citrate",
+                  "rect": {
+                    "left": 379.4626,
+                    "top": 244.7753,
+                    "right": 412.537,
+                    "bottom": 259.0763
+                  }
+                }
+              ],
+              "rect": {
+                "left": 379.4626,
+                "top": 244.7753,
+                "right": 412.537,
+                "bottom": 259.0763
+              }
+            }
+          ],
+          "rect": {
+            "left": 379.4626,
+            "top": 244.7753,
+            "right": 412.537,
+            "bottom": 259.0763
+          }
+        },
+        {
+          "text": "CO2, NADH",
+          "lines": [
+            {
+              "text": "CO2, NADH",
+              "words": [
+                {
+                  "text": "CO2,",
+                  "rect": {
+                    "left": 471.0,
+                    "top": 261.9338,
+                    "right": 498.4808,
+                    "bottom": 278.2658
+                  }
+                },
+                {
+                  "text": "NADH",
+                  "rect": {
+                    "left": 501.6006,
+                    "top": 261.9338,
+                    "right": 537.6964,
+                    "bottom": 278.2658
+                  }
+                }
+              ],
+              "rect": {
+                "left": 471.0,
+                "top": 261.9338,
+                "right": 537.6964,
+                "bottom": 278.2658
+              }
+            }
+          ],
+          "rect": {
+            "left": 471.0,
+            "top": 261.9338,
+            "right": 537.6964,
+            "bottom": 278.2658
+          }
+        },
+        {
+          "text": "Oxaloacetate",
+          "lines": [
+            {
+              "text": "Oxaloacetate",
+              "words": [
+                {
+                  "text": "Oxaloacetate",
+                  "rect": {
+                    "left": 293.1632,
+                    "top": 321.3788,
+                    "right": 348.8371,
+                    "bottom": 333.6368
+                  }
+                }
+              ],
+              "rect": {
+                "left": 293.1632,
+                "top": 321.3788,
+                "right": 348.8371,
+                "bottom": 333.6368
+              }
+            }
+          ],
+          "rect": {
+            "left": 293.1632,
+            "top": 321.3788,
+            "right": 348.8371,
+            "bottom": 333.6368
+          }
+        },
+        {
+          "text": "alpha-KG",
+          "lines": [
+            {
+              "text": "alpha-KG",
+              "words": [
+                {
+                  "text": "alpha-KG",
+                  "rect": {
+                    "left": 451.7307,
+                    "top": 321.3788,
+                    "right": 490.269,
+                    "bottom": 333.6368
+                  }
+                }
+              ],
+              "rect": {
+                "left": 451.7307,
+                "top": 321.3788,
+                "right": 490.269,
+                "bottom": 333.6368
+              }
+            }
+          ],
+          "rect": {
+            "left": 451.7307,
+            "top": 321.3788,
+            "right": 490.269,
+            "bottom": 333.6368
+          }
+        },
+        {
+          "text": "FADH2",
+          "lines": [
+            {
+              "text": "FADH2",
+              "words": [
+                {
+                  "text": "FADH2",
+                  "rect": {
+                    "left": 306.0,
+                    "top": 374.4338,
+                    "right": 345.7922,
+                    "bottom": 390.7658
+                  }
+                }
+              ],
+              "rect": {
+                "left": 306.0,
+                "top": 374.4338,
+                "right": 345.7922,
+                "bottom": 390.7658
+              }
+            }
+          ],
+          "rect": {
+            "left": 306.0,
+            "top": 374.4338,
+            "right": 345.7922,
+            "bottom": 390.7658
+          }
+        },
+        {
+          "text": "ATP, NADH",
+          "lines": [
+            {
+              "text": "ATP, NADH",
+              "words": [
+                {
+                  "text": "ATP,",
+                  "rect": {
+                    "left": 433.5,
+                    "top": 374.4338,
+                    "right": 459.6837,
+                    "bottom": 390.7658
+                  }
+                },
+                {
+                  "text": "NADH",
+                  "rect": {
+                    "left": 462.8035,
+                    "top": 374.4338,
+                    "right": 498.8992,
+                    "bottom": 390.7658
+                  }
+                }
+              ],
+              "rect": {
+                "left": 433.5,
+                "top": 374.4338,
+                "right": 498.8992,
+                "bottom": 390.7658
+              }
+            }
+          ],
+          "rect": {
+            "left": 433.5,
+            "top": 374.4338,
+            "right": 498.8992,
+            "bottom": 390.7658
+          }
+        },
+        {
+          "text": "Succinate",
+          "lines": [
+            {
+              "text": "Succinate",
+              "words": [
+                {
+                  "text": "Succinate",
+                  "rect": {
+                    "left": 372.4329,
+                    "top": 394.7753,
+                    "right": 419.5668,
+                    "bottom": 409.0763
+                  }
+                }
+              ],
+              "rect": {
+                "left": 372.4329,
+                "top": 394.7753,
+                "right": 419.5668,
+                "bottom": 409.0763
+              }
+            }
+          ],
+          "rect": {
+            "left": 372.4329,
+            "top": 394.7753,
+            "right": 419.5668,
+            "bottom": 409.0763
+          }
+        },
+        {
+          "text": "[Cite: \"Journal of Metabolic Studies, Vol 4. 2023\"]",
+          "lines": [
+            {
+              "text": "[Cite: \"Journal of Metabolic Studies, Vol 4. 2023\"]",
+              "words": [
+                {
+                  "text": "[Cite:",
+                  "rect": {
+                    "left": 306.5925,
+                    "top": 556.9317,
+                    "right": 356.9925,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "\"Journal",
+                  "rect": {
+                    "left": 365.3925,
+                    "top": 556.9317,
+                    "right": 432.5925,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 440.9925,
+                    "top": 556.9317,
+                    "right": 457.7925,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Metabolic",
+                  "rect": {
+                    "left": 466.1925,
+                    "top": 556.9317,
+                    "right": 541.7925,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Studies,",
+                  "rect": {
+                    "left": 550.1925,
+                    "top": 556.9317,
+                    "right": 617.3925,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Vol",
+                  "rect": {
+                    "left": 625.7925,
+                    "top": 556.9317,
+                    "right": 650.9925,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "4.",
+                  "rect": {
+                    "left": 659.3925,
+                    "top": 556.9317,
+                    "right": 676.1925,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "2023\"]",
+                  "rect": {
+                    "left": 684.5925,
+                    "top": 556.9317,
+                    "right": 734.9925,
+                    "bottom": 575.9997
+                  }
+                }
+              ],
+              "rect": {
+                "left": 306.5925,
+                "top": 556.9317,
+                "right": 734.9925,
+                "bottom": 575.9997
+              }
+            }
+          ],
+          "rect": {
+            "left": 306.5925,
+            "top": 556.9317,
+            "right": 734.9925,
+            "bottom": 575.9997
+          }
+        }
+      ]
+    }
+  ]
+}

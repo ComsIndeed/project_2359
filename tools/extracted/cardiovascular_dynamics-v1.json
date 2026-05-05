@@ -1,0 +1,2007 @@
+{
+  "source_filename": "cardiovascular_dynamics-v1.pdf",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "Cardiovascular Dynamics",
+          "lines": [
+            {
+              "text": "Cardiovascular Dynamics",
+              "words": [
+                {
+                  "text": "Cardiovascular",
+                  "rect": {
+                    "left": 75.575,
+                    "top": 252.1802,
+                    "right": 454.331,
+                    "bottom": 306.1262
+                  }
+                },
+                {
+                  "text": "Dynamics",
+                  "rect": {
+                    "left": 467.939,
+                    "top": 252.1802,
+                    "right": 718.229,
+                    "bottom": 306.1262
+                  }
+                }
+              ],
+              "rect": {
+                "left": 75.575,
+                "top": 252.1802,
+                "right": 718.229,
+                "bottom": 306.1262
+              }
+            }
+          ],
+          "rect": {
+            "left": 75.575,
+            "top": 252.1802,
+            "right": 718.229,
+            "bottom": 306.1262
+          }
+        },
+        {
+          "text": "Rich Content Visual Test Deck",
+          "lines": [
+            {
+              "text": "Rich Content Visual Test Deck",
+              "words": [
+                {
+                  "text": "Rich",
+                  "rect": {
+                    "left": 221.2533,
+                    "top": 321.1803,
+                    "right": 273.2533,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Content",
+                  "rect": {
+                    "left": 280.4813,
+                    "top": 321.1803,
+                    "right": 371.1433,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Visual",
+                  "rect": {
+                    "left": 378.3713,
+                    "top": 321.1803,
+                    "right": 449.0653,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Test",
+                  "rect": {
+                    "left": 456.2933,
+                    "top": 321.1803,
+                    "right": 504.3153,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Deck",
+                  "rect": {
+                    "left": 511.5433,
+                    "top": 321.1803,
+                    "right": 570.8493,
+                    "bottom": 347.1543
+                  }
+                }
+              ],
+              "rect": {
+                "left": 221.2533,
+                "top": 321.1803,
+                "right": 570.8493,
+                "bottom": 347.1543
+              }
+            }
+          ],
+          "rect": {
+            "left": 221.2533,
+            "top": 321.1803,
+            "right": 570.8493,
+            "bottom": 347.1543
+          }
+        },
+        {
+          "text": "Optimized for data extraction testing",
+          "lines": [
+            {
+              "text": "Optimized for data extraction testing",
+              "words": [
+                {
+                  "text": "Optimized",
+                  "rect": {
+                    "left": 253.1082,
+                    "top": 373.1803,
+                    "right": 333.4062,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "for",
+                  "rect": {
+                    "left": 338.4102,
+                    "top": 373.1803,
+                    "right": 359.2362,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "data",
+                  "rect": {
+                    "left": 364.2402,
+                    "top": 373.1803,
+                    "right": 399.0162,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "extraction",
+                  "rect": {
+                    "left": 404.0202,
+                    "top": 373.1803,
+                    "right": 481.4382,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "testing",
+                  "rect": {
+                    "left": 486.4422,
+                    "top": 373.1803,
+                    "right": 539.0202,
+                    "bottom": 391.1623
+                  }
+                }
+              ],
+              "rect": {
+                "left": 253.1082,
+                "top": 373.1803,
+                "right": 539.0202,
+                "bottom": 391.1623
+              }
+            }
+          ],
+          "rect": {
+            "left": 253.1082,
+            "top": 373.1803,
+            "right": 539.0202,
+            "bottom": 391.1623
+          }
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "1. Hemodynamics & Blood Pressure",
+          "lines": [
+            {
+              "text": "1. Hemodynamics & Blood Pressure",
+              "words": [
+                {
+                  "text": "1.",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 44.9999,
+                    "right": 73.356,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Hemodynamics",
+                  "rect": {
+                    "left": 82.808,
+                    "top": 44.9999,
+                    "right": 334.17,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "&",
+                  "rect": {
+                    "left": 343.622,
+                    "top": 44.9999,
+                    "right": 368.17,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Blood",
+                  "rect": {
+                    "left": 377.622,
+                    "top": 44.9999,
+                    "right": 473.944,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Pressure",
+                  "rect": {
+                    "left": 483.396,
+                    "top": 44.9999,
+                    "right": 629.46,
+                    "bottom": 78.9659
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 44.9999,
+                "right": 629.46,
+                "bottom": 78.9659
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 44.9999,
+            "right": 629.46,
+            "bottom": 78.9659
+          }
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "• Systolic Pressure: Peak pressure in the arteries during the cardiac cycle.",
+          "lines": [
+            {
+              "text": "• Systolic Pressure: Peak pressure",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 5.0002,
+                    "right": 61.9404,
+                    "bottom": 24.9802
+                  }
+                },
+                {
+                  "text": "Systolic",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 5.0002,
+                    "right": 143.66,
+                    "bottom": 24.9802
+                  }
+                },
+                {
+                  "text": "Pressure:",
+                  "rect": {
+                    "left": 149.22,
+                    "top": 5.0002,
+                    "right": 242.1,
+                    "bottom": 24.9802
+                  }
+                },
+                {
+                  "text": "Peak",
+                  "rect": {
+                    "left": 247.6628,
+                    "top": 5.0002,
+                    "right": 292.5428,
+                    "bottom": 24.9802
+                  }
+                },
+                {
+                  "text": "pressure",
+                  "rect": {
+                    "left": 298.1028,
+                    "top": 5.0002,
+                    "right": 375.4828,
+                    "bottom": 24.9802
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 5.0002,
+                "right": 375.4828,
+                "bottom": 24.9802
+              }
+            },
+            {
+              "text": "in the arteries during the cardiac",
+              "words": [
+                {
+                  "text": "in",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 35.0002,
+                    "right": 83.06,
+                    "bottom": 54.9802
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 88.62,
+                    "top": 35.0002,
+                    "right": 116.3,
+                    "bottom": 54.9802
+                  }
+                },
+                {
+                  "text": "arteries",
+                  "rect": {
+                    "left": 121.86,
+                    "top": 35.0002,
+                    "right": 188.74,
+                    "bottom": 54.9802
+                  }
+                },
+                {
+                  "text": "during",
+                  "rect": {
+                    "left": 194.3,
+                    "top": 35.0002,
+                    "right": 249.88,
+                    "bottom": 54.9802
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 255.44,
+                    "top": 35.0002,
+                    "right": 283.12,
+                    "bottom": 54.9802
+                  }
+                },
+                {
+                  "text": "cardiac",
+                  "rect": {
+                    "left": 288.68,
+                    "top": 35.0002,
+                    "right": 353.26,
+                    "bottom": 54.9802
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 35.0002,
+                "right": 353.26,
+                "bottom": 54.9802
+              }
+            },
+            {
+              "text": "cycle.",
+              "words": [
+                {
+                  "text": "cycle.",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 65.0002,
+                    "right": 117.66,
+                    "bottom": 84.9802
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 65.0002,
+                "right": 117.66,
+                "bottom": 84.9802
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 5.0002,
+            "right": 375.4828,
+            "bottom": 84.9802
+          }
+        },
+        {
+          "text": "• Diastolic Pressure: Lowest pressure at the resting phase of the cardiac cycle.",
+          "lines": [
+            {
+              "text": "• Diastolic Pressure: Lowest",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 108.5002,
+                    "right": 61.9404,
+                    "bottom": 128.4802
+                  }
+                },
+                {
+                  "text": "Diastolic",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 108.5002,
+                    "right": 150.64,
+                    "bottom": 128.4802
+                  }
+                },
+                {
+                  "text": "Pressure:",
+                  "rect": {
+                    "left": 156.2,
+                    "top": 108.5002,
+                    "right": 249.08,
+                    "bottom": 128.4802
+                  }
+                },
+                {
+                  "text": "Lowest",
+                  "rect": {
+                    "left": 254.6428,
+                    "top": 108.5002,
+                    "right": 317.2428,
+                    "bottom": 128.4802
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 108.5002,
+                "right": 317.2428,
+                "bottom": 128.4802
+              }
+            },
+            {
+              "text": "pressure at the resting phase of the",
+              "words": [
+                {
+                  "text": "pressure",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 138.5002,
+                    "right": 144.88,
+                    "bottom": 158.4802
+                  }
+                },
+                {
+                  "text": "at",
+                  "rect": {
+                    "left": 150.44,
+                    "top": 138.5002,
+                    "right": 166.92,
+                    "bottom": 158.4802
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 172.48,
+                    "top": 138.5002,
+                    "right": 200.16,
+                    "bottom": 158.4802
+                  }
+                },
+                {
+                  "text": "resting",
+                  "rect": {
+                    "left": 205.72,
+                    "top": 138.5002,
+                    "right": 265.32,
+                    "bottom": 158.4802
+                  }
+                },
+                {
+                  "text": "phase",
+                  "rect": {
+                    "left": 270.88,
+                    "top": 138.5002,
+                    "right": 325.36,
+                    "bottom": 158.4802
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 330.92,
+                    "top": 138.5002,
+                    "right": 347.6,
+                    "bottom": 158.4802
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 353.16,
+                    "top": 138.5002,
+                    "right": 380.84,
+                    "bottom": 158.4802
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 138.5002,
+                "right": 380.84,
+                "bottom": 158.4802
+              }
+            },
+            {
+              "text": "cardiac cycle.",
+              "words": [
+                {
+                  "text": "cardiac",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 168.5002,
+                    "right": 132.08,
+                    "bottom": 188.4802
+                  }
+                },
+                {
+                  "text": "cycle.",
+                  "rect": {
+                    "left": 137.64,
+                    "top": 168.5002,
+                    "right": 187.8,
+                    "bottom": 188.4802
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 168.5002,
+                "right": 187.8,
+                "bottom": 188.4802
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 108.5002,
+            "right": 380.84,
+            "bottom": 188.4802
+          }
+        },
+        {
+          "text": "• Mean Arterial Pressure (MAP): Average pressure driving blood into tissues.",
+          "lines": [
+            {
+              "text": "• Mean Arterial Pressure (MAP):",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 212.0002,
+                    "right": 61.9404,
+                    "bottom": 231.9802
+                  }
+                },
+                {
+                  "text": "Mean",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 212.0002,
+                    "right": 118.72,
+                    "bottom": 231.9802
+                  }
+                },
+                {
+                  "text": "Arterial",
+                  "rect": {
+                    "left": 124.28,
+                    "top": 212.0002,
+                    "right": 194.54,
+                    "bottom": 231.9802
+                  }
+                },
+                {
+                  "text": "Pressure",
+                  "rect": {
+                    "left": 200.1,
+                    "top": 212.0002,
+                    "right": 286.0,
+                    "bottom": 231.9802
+                  }
+                },
+                {
+                  "text": "(MAP):",
+                  "rect": {
+                    "left": 291.56,
+                    "top": 212.0002,
+                    "right": 355.92,
+                    "bottom": 231.9802
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 212.0002,
+                "right": 355.92,
+                "bottom": 231.9802
+              }
+            },
+            {
+              "text": "Average pressure driving blood into",
+              "words": [
+                {
+                  "text": "Average",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 242.0002,
+                    "right": 140.74,
+                    "bottom": 261.9802
+                  }
+                },
+                {
+                  "text": "pressure",
+                  "rect": {
+                    "left": 146.3,
+                    "top": 242.0002,
+                    "right": 223.68,
+                    "bottom": 261.9802
+                  }
+                },
+                {
+                  "text": "driving",
+                  "rect": {
+                    "left": 229.24,
+                    "top": 242.0002,
+                    "right": 288.14,
+                    "bottom": 261.9802
+                  }
+                },
+                {
+                  "text": "blood",
+                  "rect": {
+                    "left": 293.7,
+                    "top": 242.0002,
+                    "right": 342.62,
+                    "bottom": 261.9802
+                  }
+                },
+                {
+                  "text": "into",
+                  "rect": {
+                    "left": 348.18,
+                    "top": 242.0002,
+                    "right": 380.18,
+                    "bottom": 261.9802
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 242.0002,
+                "right": 380.18,
+                "bottom": 261.9802
+              }
+            },
+            {
+              "text": "tissues.",
+              "words": [
+                {
+                  "text": "tissues.",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 272.0002,
+                    "right": 134.98,
+                    "bottom": 291.9802
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 272.0002,
+                "right": 134.98,
+                "bottom": 291.9802
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 212.0002,
+            "right": 380.18,
+            "bottom": 291.9802
+          }
+        },
+        {
+          "text": "Wiggers Diagram (Simplified)",
+          "lines": [
+            {
+              "text": "Wiggers Diagram",
+              "words": [
+                {
+                  "text": "Wiggers",
+                  "rect": {
+                    "left": 482.4266,
+                    "top": 22.3502,
+                    "right": 574.5992,
+                    "bottom": 45.7268
+                  }
+                },
+                {
+                  "text": "Diagram",
+                  "rect": {
+                    "left": 581.1044,
+                    "top": 22.3502,
+                    "right": 674.681,
+                    "bottom": 45.7268
+                  }
+                }
+              ],
+              "rect": {
+                "left": 482.4266,
+                "top": 22.3502,
+                "right": 674.681,
+                "bottom": 45.7268
+              }
+            },
+            {
+              "text": "(Simplified)",
+              "words": [
+                {
+                  "text": "(Simplified)",
+                  "rect": {
+                    "left": 514.6136,
+                    "top": 57.4502,
+                    "right": 642.4244,
+                    "bottom": 80.8268
+                  }
+                }
+              ],
+              "rect": {
+                "left": 514.6136,
+                "top": 57.4502,
+                "right": 642.4244,
+                "bottom": 80.8268
+              }
+            }
+          ],
+          "rect": {
+            "left": 482.4266,
+            "top": 22.3502,
+            "right": 674.681,
+            "bottom": 80.8268
+          }
+        },
+        {
+          "text": "Aortic Pres.",
+          "lines": [
+            {
+              "text": "Aortic Pres.",
+              "words": [
+                {
+                  "text": "Aortic",
+                  "rect": {
+                    "left": 634.77,
+                    "top": 134.784,
+                    "right": 667.842,
+                    "bottom": 151.116
+                  }
+                },
+                {
+                  "text": "Pres.",
+                  "rect": {
+                    "left": 670.9619,
+                    "top": 134.784,
+                    "right": 698.9103,
+                    "bottom": 151.116
+                  }
+                }
+              ],
+              "rect": {
+                "left": 634.77,
+                "top": 134.784,
+                "right": 698.9103,
+                "bottom": 151.116
+              }
+            }
+          ],
+          "rect": {
+            "left": 634.77,
+            "top": 134.784,
+            "right": 698.9103,
+            "bottom": 151.116
+          }
+        },
+        {
+          "text": "Ventricular Pres.",
+          "lines": [
+            {
+              "text": "Ventricular Pres.",
+              "words": [
+                {
+                  "text": "Ventricular",
+                  "rect": {
+                    "left": 612.27,
+                    "top": 224.784,
+                    "right": 673.9975,
+                    "bottom": 241.116
+                  }
+                },
+                {
+                  "text": "Pres.",
+                  "rect": {
+                    "left": 677.1179,
+                    "top": 224.784,
+                    "right": 705.0663,
+                    "bottom": 241.116
+                  }
+                }
+              ],
+              "rect": {
+                "left": 612.27,
+                "top": 224.784,
+                "right": 705.0663,
+                "bottom": 241.116
+              }
+            }
+          ],
+          "rect": {
+            "left": 612.27,
+            "top": 224.784,
+            "right": 705.0663,
+            "bottom": 241.116
+          }
+        },
+        {
+          "text": "MAP ≈ DP + 1/3(SP - DP)",
+          "lines": [
+            {
+              "text": "MAP ≈ DP + 1/3(SP - DP)",
+              "words": [
+                {
+                  "text": "MAP",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 300.5199,
+                    "right": 110.52,
+                    "bottom": 323.4999
+                  }
+                },
+                {
+                  "text": "≈",
+                  "rect": {
+                    "left": 116.08,
+                    "top": 300.5199,
+                    "right": 127.06,
+                    "bottom": 323.4999
+                  }
+                },
+                {
+                  "text": "DP",
+                  "rect": {
+                    "left": 132.62,
+                    "top": 300.5199,
+                    "right": 160.4,
+                    "bottom": 323.4999
+                  }
+                },
+                {
+                  "text": "+",
+                  "rect": {
+                    "left": 165.96,
+                    "top": 300.5199,
+                    "right": 177.64,
+                    "bottom": 323.4999
+                  }
+                },
+                {
+                  "text": "1/3(SP",
+                  "rect": {
+                    "left": 183.2,
+                    "top": 300.5199,
+                    "right": 244.34,
+                    "bottom": 323.4999
+                  }
+                },
+                {
+                  "text": "-",
+                  "rect": {
+                    "left": 249.9,
+                    "top": 300.5199,
+                    "right": 256.56,
+                    "bottom": 323.4999
+                  }
+                },
+                {
+                  "text": "DP)",
+                  "rect": {
+                    "left": 262.12,
+                    "top": 300.5199,
+                    "right": 296.56,
+                    "bottom": 323.4999
+                  }
+                }
+              ],
+              "rect": {
+                "left": 67.5,
+                "top": 300.5199,
+                "right": 296.56,
+                "bottom": 323.4999
+              }
+            }
+          ],
+          "rect": {
+            "left": 67.5,
+            "top": 300.5199,
+            "right": 296.56,
+            "bottom": 323.4999
+          }
+        },
+        {
+          "text": "Key Concept: Blood flow velocity is inversely proportional to total cross-sectional area of the vessels (slowest in capillaries).",
+          "lines": [
+            {
+              "text": "Key Concept: Blood flow velocity",
+              "words": [
+                {
+                  "text": "Key",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 365.1699,
+                    "right": 95.84,
+                    "bottom": 385.1499
+                  }
+                },
+                {
+                  "text": "Concept:",
+                  "rect": {
+                    "left": 101.4,
+                    "top": 365.1699,
+                    "right": 188.44,
+                    "bottom": 385.1499
+                  }
+                },
+                {
+                  "text": "Blood",
+                  "rect": {
+                    "left": 193.9426,
+                    "top": 365.1699,
+                    "right": 245.0826,
+                    "bottom": 385.1499
+                  }
+                },
+                {
+                  "text": "flow",
+                  "rect": {
+                    "left": 250.6426,
+                    "top": 365.1699,
+                    "right": 285.9826,
+                    "bottom": 385.1499
+                  }
+                },
+                {
+                  "text": "velocity",
+                  "rect": {
+                    "left": 291.5426,
+                    "top": 365.1699,
+                    "right": 358.0626,
+                    "bottom": 385.1499
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 365.1699,
+                "right": 358.0626,
+                "bottom": 385.1499
+              }
+            },
+            {
+              "text": "is inversely proportional to total",
+              "words": [
+                {
+                  "text": "is",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 395.1699,
+                    "right": 74.44,
+                    "bottom": 415.1499
+                  }
+                },
+                {
+                  "text": "inversely",
+                  "rect": {
+                    "left": 80.0,
+                    "top": 395.1699,
+                    "right": 158.2,
+                    "bottom": 415.1499
+                  }
+                },
+                {
+                  "text": "proportional",
+                  "rect": {
+                    "left": 163.76,
+                    "top": 395.1699,
+                    "right": 269.66,
+                    "bottom": 415.1499
+                  }
+                },
+                {
+                  "text": "to",
+                  "rect": {
+                    "left": 275.22,
+                    "top": 395.1699,
+                    "right": 291.66,
+                    "bottom": 415.1499
+                  }
+                },
+                {
+                  "text": "total",
+                  "rect": {
+                    "left": 297.22,
+                    "top": 395.1699,
+                    "right": 334.58,
+                    "bottom": 415.1499
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 395.1699,
+                "right": 334.58,
+                "bottom": 415.1499
+              }
+            },
+            {
+              "text": "cross-sectional area of the vessels",
+              "words": [
+                {
+                  "text": "cross-sectional",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 425.1699,
+                    "right": 193.06,
+                    "bottom": 445.1499
+                  }
+                },
+                {
+                  "text": "area",
+                  "rect": {
+                    "left": 198.62,
+                    "top": 425.1699,
+                    "right": 238.32,
+                    "bottom": 445.1499
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 243.88,
+                    "top": 425.1699,
+                    "right": 260.56,
+                    "bottom": 445.1499
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 266.12,
+                    "top": 425.1699,
+                    "right": 293.8,
+                    "bottom": 445.1499
+                  }
+                },
+                {
+                  "text": "vessels",
+                  "rect": {
+                    "left": 299.36,
+                    "top": 425.1699,
+                    "right": 365.56,
+                    "bottom": 445.1499
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 425.1699,
+                "right": 365.56,
+                "bottom": 445.1499
+              }
+            },
+            {
+              "text": "(slowest in capillaries).",
+              "words": [
+                {
+                  "text": "(slowest",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 455.1699,
+                    "right": 132.76,
+                    "bottom": 475.1499
+                  }
+                },
+                {
+                  "text": "in",
+                  "rect": {
+                    "left": 138.32,
+                    "top": 455.1699,
+                    "right": 153.88,
+                    "bottom": 475.1499
+                  }
+                },
+                {
+                  "text": "capillaries).",
+                  "rect": {
+                    "left": 159.44,
+                    "top": 455.1699,
+                    "right": 260.62,
+                    "bottom": 475.1499
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 455.1699,
+                "right": 260.62,
+                "bottom": 475.1499
+              }
+            }
+          ],
+          "rect": {
+            "left": 60.0,
+            "top": 365.1699,
+            "right": 365.56,
+            "bottom": 475.1499
+          }
+        },
+        {
+          "text": "[Cite: \"Cardiovascular Physiology Concepts, Richard E. Klabunde\"]",
+          "lines": [
+            {
+              "text": "[Cite: \"Cardiovascular Physiology Concepts, Richard E. Klabunde\"]",
+              "words": [
+                {
+                  "text": "[Cite:",
+                  "rect": {
+                    "left": 188.9905,
+                    "top": 511.9317,
+                    "right": 239.3905,
+                    "bottom": 530.9997
+                  }
+                },
+                {
+                  "text": "\"Cardiovascular",
+                  "rect": {
+                    "left": 247.7905,
+                    "top": 511.9317,
+                    "right": 373.7905,
+                    "bottom": 530.9997
+                  }
+                },
+                {
+                  "text": "Physiology",
+                  "rect": {
+                    "left": 382.1905,
+                    "top": 511.9317,
+                    "right": 466.1905,
+                    "bottom": 530.9997
+                  }
+                },
+                {
+                  "text": "Concepts,",
+                  "rect": {
+                    "left": 474.5905,
+                    "top": 511.9317,
+                    "right": 550.1905,
+                    "bottom": 530.9997
+                  }
+                },
+                {
+                  "text": "Richard",
+                  "rect": {
+                    "left": 558.5905,
+                    "top": 511.9317,
+                    "right": 617.3905,
+                    "bottom": 530.9997
+                  }
+                },
+                {
+                  "text": "E.",
+                  "rect": {
+                    "left": 625.7905,
+                    "top": 511.9317,
+                    "right": 642.5905,
+                    "bottom": 530.9997
+                  }
+                },
+                {
+                  "text": "Klabunde\"]",
+                  "rect": {
+                    "left": 650.9905,
+                    "top": 511.9317,
+                    "right": 734.9905,
+                    "bottom": 530.9997
+                  }
+                }
+              ],
+              "rect": {
+                "left": 188.9905,
+                "top": 511.9317,
+                "right": 734.9905,
+                "bottom": 530.9997
+              }
+            }
+          ],
+          "rect": {
+            "left": 188.9905,
+            "top": 511.9317,
+            "right": 734.9905,
+            "bottom": 530.9997
+          }
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "2. The Electrical Conduction System",
+          "lines": [
+            {
+              "text": "2. The Electrical Conduction System",
+              "words": [
+                {
+                  "text": "2.",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 44.9999,
+                    "right": 73.356,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "The",
+                  "rect": {
+                    "left": 82.808,
+                    "top": 44.9999,
+                    "right": 143.192,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Electrical",
+                  "rect": {
+                    "left": 152.644,
+                    "top": 44.9999,
+                    "right": 303.536,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Conduction",
+                  "rect": {
+                    "left": 312.988,
+                    "top": 44.9999,
+                    "right": 501.79,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "System",
+                  "rect": {
+                    "left": 511.242,
+                    "top": 44.9999,
+                    "right": 631.432,
+                    "bottom": 78.9659
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 44.9999,
+                "right": 631.432,
+                "bottom": 78.9659
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 44.9999,
+            "right": 631.432,
+            "bottom": 78.9659
+          }
+        },
+        {
+          "text": "The heart acts as a functional syncytium. The electrical signal propagates through specific pathways to ensure coordinated contraction.",
+          "lines": [
+            {
+              "text": "The heart acts as a functional syncytium. The electrical signal propagates",
+              "words": [
+                {
+                  "text": "The",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 120.75,
+                    "right": 79.38,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "heart",
+                  "rect": {
+                    "left": 84.94,
+                    "top": 120.75,
+                    "right": 130.92,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "acts",
+                  "rect": {
+                    "left": 136.48,
+                    "top": 120.75,
+                    "right": 173.3,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "as",
+                  "rect": {
+                    "left": 178.86,
+                    "top": 120.75,
+                    "right": 199.98,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "a",
+                  "rect": {
+                    "left": 205.54,
+                    "top": 120.75,
+                    "right": 216.66,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "functional",
+                  "rect": {
+                    "left": 222.22,
+                    "top": 120.75,
+                    "right": 307.82,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "syncytium.",
+                  "rect": {
+                    "left": 313.38,
+                    "top": 120.75,
+                    "right": 407.16,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "The",
+                  "rect": {
+                    "left": 412.72,
+                    "top": 120.75,
+                    "right": 447.1,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "electrical",
+                  "rect": {
+                    "left": 452.66,
+                    "top": 120.75,
+                    "right": 531.66,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "signal",
+                  "rect": {
+                    "left": 537.22,
+                    "top": 120.75,
+                    "right": 589.46,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "propagates",
+                  "rect": {
+                    "left": 595.02,
+                    "top": 120.75,
+                    "right": 694.12,
+                    "bottom": 140.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 120.75,
+                "right": 694.12,
+                "bottom": 140.73
+              }
+            },
+            {
+              "text": "through specific pathways to ensure coordinated contraction.",
+              "words": [
+                {
+                  "text": "through",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 150.75,
+                    "right": 112.46,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "specific",
+                  "rect": {
+                    "left": 118.02,
+                    "top": 150.75,
+                    "right": 184.7,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "pathways",
+                  "rect": {
+                    "left": 190.26,
+                    "top": 150.75,
+                    "right": 273.38,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "to",
+                  "rect": {
+                    "left": 278.94,
+                    "top": 150.75,
+                    "right": 295.38,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "ensure",
+                  "rect": {
+                    "left": 300.94,
+                    "top": 150.75,
+                    "right": 361.88,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "coordinated",
+                  "rect": {
+                    "left": 367.44,
+                    "top": 150.75,
+                    "right": 471.62,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "contraction.",
+                  "rect": {
+                    "left": 477.18,
+                    "top": 150.75,
+                    "right": 580.58,
+                    "bottom": 170.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 150.75,
+                "right": 580.58,
+                "bottom": 170.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 120.75,
+            "right": 694.12,
+            "bottom": 170.73
+          }
+        },
+        {
+          "text": "1. SA Node: The pacemaker (60-100 bpm).",
+          "lines": [
+            {
+              "text": "1. SA Node: The pacemaker (60-100 bpm).",
+              "words": [
+                {
+                  "text": "1.",
+                  "rect": {
+                    "left": 52.76,
+                    "top": 200.75,
+                    "right": 69.44,
+                    "bottom": 220.73
+                  }
+                },
+                {
+                  "text": "SA",
+                  "rect": {
+                    "left": 75.0,
+                    "top": 200.75,
+                    "right": 102.4,
+                    "bottom": 220.73
+                  }
+                },
+                {
+                  "text": "Node:",
+                  "rect": {
+                    "left": 107.96,
+                    "top": 200.75,
+                    "right": 165.08,
+                    "bottom": 220.73
+                  }
+                },
+                {
+                  "text": "The",
+                  "rect": {
+                    "left": 170.6223,
+                    "top": 200.75,
+                    "right": 205.0023,
+                    "bottom": 220.73
+                  }
+                },
+                {
+                  "text": "pacemaker",
+                  "rect": {
+                    "left": 210.5623,
+                    "top": 200.75,
+                    "right": 309.1823,
+                    "bottom": 220.73
+                  }
+                },
+                {
+                  "text": "(60-100",
+                  "rect": {
+                    "left": 314.7423,
+                    "top": 200.75,
+                    "right": 383.6623,
+                    "bottom": 220.73
+                  }
+                },
+                {
+                  "text": "bpm).",
+                  "rect": {
+                    "left": 389.2223,
+                    "top": 200.75,
+                    "right": 440.3423,
+                    "bottom": 220.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 52.76,
+                "top": 200.75,
+                "right": 440.3423,
+                "bottom": 220.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 52.76,
+            "top": 200.75,
+            "right": 440.3423,
+            "bottom": 220.73
+          }
+        },
+        {
+          "text": "2. AV Node: Delays the signal to allow ventricular filling.",
+          "lines": [
+            {
+              "text": "2. AV Node: Delays the signal to allow ventricular filling.",
+              "words": [
+                {
+                  "text": "2.",
+                  "rect": {
+                    "left": 52.76,
+                    "top": 244.25,
+                    "right": 69.44,
+                    "bottom": 264.23
+                  }
+                },
+                {
+                  "text": "AV",
+                  "rect": {
+                    "left": 75.0,
+                    "top": 244.25,
+                    "right": 101.46,
+                    "bottom": 264.23
+                  }
+                },
+                {
+                  "text": "Node:",
+                  "rect": {
+                    "left": 107.02,
+                    "top": 244.25,
+                    "right": 164.14,
+                    "bottom": 264.23
+                  }
+                },
+                {
+                  "text": "Delays",
+                  "rect": {
+                    "left": 169.6818,
+                    "top": 244.25,
+                    "right": 229.9218,
+                    "bottom": 264.23
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 235.4818,
+                    "top": 244.25,
+                    "right": 263.1618,
+                    "bottom": 264.23
+                  }
+                },
+                {
+                  "text": "signal",
+                  "rect": {
+                    "left": 268.7218,
+                    "top": 244.25,
+                    "right": 320.9618,
+                    "bottom": 264.23
+                  }
+                },
+                {
+                  "text": "to",
+                  "rect": {
+                    "left": 326.5218,
+                    "top": 244.25,
+                    "right": 342.9618,
+                    "bottom": 264.23
+                  }
+                },
+                {
+                  "text": "allow",
+                  "rect": {
+                    "left": 348.5218,
+                    "top": 244.25,
+                    "right": 393.8618,
+                    "bottom": 264.23
+                  }
+                },
+                {
+                  "text": "ventricular",
+                  "rect": {
+                    "left": 399.4218,
+                    "top": 244.25,
+                    "right": 491.1618,
+                    "bottom": 264.23
+                  }
+                },
+                {
+                  "text": "filling.",
+                  "rect": {
+                    "left": 496.7218,
+                    "top": 244.25,
+                    "right": 547.4818,
+                    "bottom": 264.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 52.76,
+                "top": 244.25,
+                "right": 547.4818,
+                "bottom": 264.23
+              }
+            }
+          ],
+          "rect": {
+            "left": 52.76,
+            "top": 244.25,
+            "right": 547.4818,
+            "bottom": 264.23
+          }
+        },
+        {
+          "text": "3. Bundle of His: Conducts impulse to the septum.",
+          "lines": [
+            {
+              "text": "3. Bundle of His: Conducts impulse to the septum.",
+              "words": [
+                {
+                  "text": "3.",
+                  "rect": {
+                    "left": 52.76,
+                    "top": 287.75,
+                    "right": 69.44,
+                    "bottom": 307.73
+                  }
+                },
+                {
+                  "text": "Bundle",
+                  "rect": {
+                    "left": 75.0,
+                    "top": 287.75,
+                    "right": 142.78,
+                    "bottom": 307.73
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 148.34,
+                    "top": 287.75,
+                    "right": 167.22,
+                    "bottom": 307.73
+                  }
+                },
+                {
+                  "text": "His:",
+                  "rect": {
+                    "left": 172.78,
+                    "top": 287.75,
+                    "right": 210.82,
+                    "bottom": 307.73
+                  }
+                },
+                {
+                  "text": "Conducts",
+                  "rect": {
+                    "left": 216.3825,
+                    "top": 287.75,
+                    "right": 300.9825,
+                    "bottom": 307.73
+                  }
+                },
+                {
+                  "text": "impulse",
+                  "rect": {
+                    "left": 306.5425,
+                    "top": 287.75,
+                    "right": 375.4625,
+                    "bottom": 307.73
+                  }
+                },
+                {
+                  "text": "to",
+                  "rect": {
+                    "left": 381.0225,
+                    "top": 287.75,
+                    "right": 397.4625,
+                    "bottom": 307.73
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 403.0225,
+                    "top": 287.75,
+                    "right": 430.7025,
+                    "bottom": 307.73
+                  }
+                },
+                {
+                  "text": "septum.",
+                  "rect": {
+                    "left": 436.2625,
+                    "top": 287.75,
+                    "right": 507.2825,
+                    "bottom": 307.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 52.76,
+                "top": 287.75,
+                "right": 507.2825,
+                "bottom": 307.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 52.76,
+            "top": 287.75,
+            "right": 507.2825,
+            "bottom": 307.73
+          }
+        },
+        {
+          "text": "4. Purkinje Fibers: Rapidly distributes impulse through ventricular muscle.",
+          "lines": [
+            {
+              "text": "4. Purkinje Fibers: Rapidly distributes impulse through ventricular muscle.",
+              "words": [
+                {
+                  "text": "4.",
+                  "rect": {
+                    "left": 52.76,
+                    "top": 331.25,
+                    "right": 69.44,
+                    "bottom": 351.23
+                  }
+                },
+                {
+                  "text": "Purkinje",
+                  "rect": {
+                    "left": 75.0,
+                    "top": 331.25,
+                    "right": 153.82,
+                    "bottom": 351.23
+                  }
+                },
+                {
+                  "text": "Fibers:",
+                  "rect": {
+                    "left": 159.38,
+                    "top": 331.25,
+                    "right": 226.22,
+                    "bottom": 351.23
+                  }
+                },
+                {
+                  "text": "Rapidly",
+                  "rect": {
+                    "left": 231.7033,
+                    "top": 331.25,
+                    "right": 298.0433,
+                    "bottom": 351.23
+                  }
+                },
+                {
+                  "text": "distributes",
+                  "rect": {
+                    "left": 303.6033,
+                    "top": 331.25,
+                    "right": 394.2633,
+                    "bottom": 351.23
+                  }
+                },
+                {
+                  "text": "impulse",
+                  "rect": {
+                    "left": 399.8233,
+                    "top": 331.25,
+                    "right": 468.7433,
+                    "bottom": 351.23
+                  }
+                },
+                {
+                  "text": "through",
+                  "rect": {
+                    "left": 474.3033,
+                    "top": 331.25,
+                    "right": 541.7633,
+                    "bottom": 351.23
+                  }
+                },
+                {
+                  "text": "ventricular",
+                  "rect": {
+                    "left": 547.3233,
+                    "top": 331.25,
+                    "right": 639.0633,
+                    "bottom": 351.23
+                  }
+                },
+                {
+                  "text": "muscle.",
+                  "rect": {
+                    "left": 644.6233,
+                    "top": 331.25,
+                    "right": 713.0833,
+                    "bottom": 351.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 52.76,
+                "top": 331.25,
+                "right": 713.0833,
+                "bottom": 351.23
+              }
+            }
+          ],
+          "rect": {
+            "left": 52.76,
+            "top": 331.25,
+            "right": 713.0833,
+            "bottom": 351.23
+          }
+        },
+        {
+          "text": "[Cite: \"Gray's Anatomy for Students, pg. 192\"]",
+          "lines": [
+            {
+              "text": "[Cite: \"Gray's Anatomy for Students, pg. 192\"]",
+              "words": [
+                {
+                  "text": "[Cite:",
+                  "rect": {
+                    "left": 348.5933,
+                    "top": 556.9317,
+                    "right": 398.9933,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "\"Gray's",
+                  "rect": {
+                    "left": 407.3933,
+                    "top": 556.9317,
+                    "right": 466.1933,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Anatomy",
+                  "rect": {
+                    "left": 474.5933,
+                    "top": 556.9317,
+                    "right": 533.3933,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "for",
+                  "rect": {
+                    "left": 541.7933,
+                    "top": 556.9317,
+                    "right": 566.9933,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Students,",
+                  "rect": {
+                    "left": 575.3933,
+                    "top": 556.9317,
+                    "right": 650.9933,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "pg.",
+                  "rect": {
+                    "left": 659.3933,
+                    "top": 556.9317,
+                    "right": 684.5933,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "192\"]",
+                  "rect": {
+                    "left": 692.9933,
+                    "top": 556.9317,
+                    "right": 734.9933,
+                    "bottom": 575.9997
+                  }
+                }
+              ],
+              "rect": {
+                "left": 348.5933,
+                "top": 556.9317,
+                "right": 734.9933,
+                "bottom": 575.9997
+              }
+            }
+          ],
+          "rect": {
+            "left": 348.5933,
+            "top": 556.9317,
+            "right": 734.9933,
+            "bottom": 575.9997
+          }
+        }
+      ]
+    }
+  ]
+}

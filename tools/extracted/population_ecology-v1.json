@@ -1,0 +1,1617 @@
+{
+  "source_filename": "population_ecology-v1.pdf",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "Population Ecology",
+          "lines": [
+            {
+              "text": "Population Ecology",
+              "words": [
+                {
+                  "text": "Population",
+                  "rect": {
+                    "left": 151.7842,
+                    "top": 252.1802,
+                    "right": 423.4582,
+                    "bottom": 306.1262
+                  }
+                },
+                {
+                  "text": "Ecology",
+                  "rect": {
+                    "left": 437.0662,
+                    "top": 252.1802,
+                    "right": 641.7802,
+                    "bottom": 306.1262
+                  }
+                }
+              ],
+              "rect": {
+                "left": 151.7842,
+                "top": 252.1802,
+                "right": 641.7802,
+                "bottom": 306.1262
+              }
+            }
+          ],
+          "rect": {
+            "left": 151.7842,
+            "top": 252.1802,
+            "right": 641.7802,
+            "bottom": 306.1262
+          }
+        },
+        {
+          "text": "Rich Content Visual Test Deck",
+          "lines": [
+            {
+              "text": "Rich Content Visual Test Deck",
+              "words": [
+                {
+                  "text": "Rich",
+                  "rect": {
+                    "left": 221.2533,
+                    "top": 321.1803,
+                    "right": 273.2533,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Content",
+                  "rect": {
+                    "left": 280.4813,
+                    "top": 321.1803,
+                    "right": 371.1433,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Visual",
+                  "rect": {
+                    "left": 378.3713,
+                    "top": 321.1803,
+                    "right": 449.0653,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Test",
+                  "rect": {
+                    "left": 456.2933,
+                    "top": 321.1803,
+                    "right": 504.3153,
+                    "bottom": 347.1543
+                  }
+                },
+                {
+                  "text": "Deck",
+                  "rect": {
+                    "left": 511.5433,
+                    "top": 321.1803,
+                    "right": 570.8493,
+                    "bottom": 347.1543
+                  }
+                }
+              ],
+              "rect": {
+                "left": 221.2533,
+                "top": 321.1803,
+                "right": 570.8493,
+                "bottom": 347.1543
+              }
+            }
+          ],
+          "rect": {
+            "left": 221.2533,
+            "top": 321.1803,
+            "right": 570.8493,
+            "bottom": 347.1543
+          }
+        },
+        {
+          "text": "Optimized for data extraction testing",
+          "lines": [
+            {
+              "text": "Optimized for data extraction testing",
+              "words": [
+                {
+                  "text": "Optimized",
+                  "rect": {
+                    "left": 253.1082,
+                    "top": 373.1803,
+                    "right": 333.4062,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "for",
+                  "rect": {
+                    "left": 338.4102,
+                    "top": 373.1803,
+                    "right": 359.2362,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "data",
+                  "rect": {
+                    "left": 364.2402,
+                    "top": 373.1803,
+                    "right": 399.0162,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "extraction",
+                  "rect": {
+                    "left": 404.0202,
+                    "top": 373.1803,
+                    "right": 481.4382,
+                    "bottom": 391.1623
+                  }
+                },
+                {
+                  "text": "testing",
+                  "rect": {
+                    "left": 486.4422,
+                    "top": 373.1803,
+                    "right": 539.0202,
+                    "bottom": 391.1623
+                  }
+                }
+              ],
+              "rect": {
+                "left": 253.1082,
+                "top": 373.1803,
+                "right": 539.0202,
+                "bottom": 391.1623
+              }
+            }
+          ],
+          "rect": {
+            "left": 253.1082,
+            "top": 373.1803,
+            "right": 539.0202,
+            "bottom": 391.1623
+          }
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "1. Population Growth Models",
+          "lines": [
+            {
+              "text": "1. Population Growth Models",
+              "words": [
+                {
+                  "text": "1.",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 44.9999,
+                    "right": 73.356,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Population",
+                  "rect": {
+                    "left": 82.808,
+                    "top": 44.9999,
+                    "right": 257.874,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Growth",
+                  "rect": {
+                    "left": 267.326,
+                    "top": 44.9999,
+                    "right": 386.666,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Models",
+                  "rect": {
+                    "left": 396.118,
+                    "top": 44.9999,
+                    "right": 513.248,
+                    "bottom": 78.9659
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 44.9999,
+                "right": 513.248,
+                "bottom": 78.9659
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 44.9999,
+            "right": 513.248,
+            "bottom": 78.9659
+          }
+        },
+        {
+          "text": "Carrying Capacity (K)",
+          "lines": [
+            {
+              "text": "Carrying Capacity (K)",
+              "words": [
+                {
+                  "text": "Carrying",
+                  "rect": {
+                    "left": 634.77,
+                    "top": 156.9338,
+                    "right": 683.0104,
+                    "bottom": 173.2658
+                  }
+                },
+                {
+                  "text": "Capacity",
+                  "rect": {
+                    "left": 686.1304,
+                    "top": 156.9338,
+                    "right": 733.8658,
+                    "bottom": 173.2658
+                  }
+                },
+                {
+                  "text": "(K)",
+                  "rect": {
+                    "left": 736.9861,
+                    "top": 156.9338,
+                    "right": 751.6141,
+                    "bottom": 173.2658
+                  }
+                }
+              ],
+              "rect": {
+                "left": 634.77,
+                "top": 156.9338,
+                "right": 751.6141,
+                "bottom": 173.2658
+              }
+            }
+          ],
+          "rect": {
+            "left": 634.77,
+            "top": 156.9338,
+            "right": 751.6141,
+            "bottom": 173.2658
+          }
+        },
+        {
+          "text": "Pop. Size (N)",
+          "lines": [
+            {
+              "text": "Pop. Size (N)",
+              "words": [
+                {
+                  "text": "Pop.",
+                  "rect": {
+                    "left": 449.454,
+                    "top": 227.1343,
+                    "right": 465.786,
+                    "bottom": 252.2498
+                  }
+                },
+                {
+                  "text": "Size",
+                  "rect": {
+                    "left": 449.454,
+                    "top": 201.9224,
+                    "right": 465.786,
+                    "bottom": 224.0142
+                  }
+                },
+                {
+                  "text": "(N)",
+                  "rect": {
+                    "left": 449.454,
+                    "top": 182.482,
+                    "right": 465.786,
+                    "bottom": 198.802
+                  }
+                }
+              ],
+              "rect": {
+                "left": 449.454,
+                "top": 182.482,
+                "right": 465.786,
+                "bottom": 252.2498
+              }
+            }
+          ],
+          "rect": {
+            "left": 449.454,
+            "top": 182.482,
+            "right": 465.786,
+            "bottom": 252.2498
+          }
+        },
+        {
+          "text": "Logistic Growth (S-Curve): Population expansion decreases as resources become scarce, leveling off when the carrying capacity (K) of the environment is reached.",
+          "lines": [
+            {
+              "text": "Logistic Growth (S-Curve):",
+              "words": [
+                {
+                  "text": "Logistic",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 132.0,
+                    "right": 136.46,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "Growth",
+                  "rect": {
+                    "left": 142.02,
+                    "top": 132.0,
+                    "right": 212.22,
+                    "bottom": 151.98
+                  }
+                },
+                {
+                  "text": "(S-Curve):",
+                  "rect": {
+                    "left": 217.78,
+                    "top": 132.0,
+                    "right": 315.78,
+                    "bottom": 151.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 132.0,
+                "right": 315.78,
+                "bottom": 151.98
+              }
+            },
+            {
+              "text": "Population expansion decreases",
+              "words": [
+                {
+                  "text": "Population",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 162.0,
+                    "right": 153.7,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "expansion",
+                  "rect": {
+                    "left": 159.26,
+                    "top": 162.0,
+                    "right": 249.86,
+                    "bottom": 181.98
+                  }
+                },
+                {
+                  "text": "decreases",
+                  "rect": {
+                    "left": 255.42,
+                    "top": 162.0,
+                    "right": 347.3,
+                    "bottom": 181.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 162.0,
+                "right": 347.3,
+                "bottom": 181.98
+              }
+            },
+            {
+              "text": "as resources become scarce,",
+              "words": [
+                {
+                  "text": "as",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 192.0,
+                    "right": 81.12,
+                    "bottom": 211.98
+                  }
+                },
+                {
+                  "text": "resources",
+                  "rect": {
+                    "left": 86.68,
+                    "top": 192.0,
+                    "right": 174.2,
+                    "bottom": 211.98
+                  }
+                },
+                {
+                  "text": "become",
+                  "rect": {
+                    "left": 179.76,
+                    "top": 192.0,
+                    "right": 251.04,
+                    "bottom": 211.98
+                  }
+                },
+                {
+                  "text": "scarce,",
+                  "rect": {
+                    "left": 256.6,
+                    "top": 192.0,
+                    "right": 320.78,
+                    "bottom": 211.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 192.0,
+                "right": 320.78,
+                "bottom": 211.98
+              }
+            },
+            {
+              "text": "leveling off when the carrying",
+              "words": [
+                {
+                  "text": "leveling",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 222.0,
+                    "right": 127.06,
+                    "bottom": 241.98
+                  }
+                },
+                {
+                  "text": "off",
+                  "rect": {
+                    "left": 132.62,
+                    "top": 222.0,
+                    "right": 154.86,
+                    "bottom": 241.98
+                  }
+                },
+                {
+                  "text": "when",
+                  "rect": {
+                    "left": 160.42,
+                    "top": 222.0,
+                    "right": 208.22,
+                    "bottom": 241.98
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 213.78,
+                    "top": 222.0,
+                    "right": 241.46,
+                    "bottom": 241.98
+                  }
+                },
+                {
+                  "text": "carrying",
+                  "rect": {
+                    "left": 247.02,
+                    "top": 222.0,
+                    "right": 318.7,
+                    "bottom": 241.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 222.0,
+                "right": 318.7,
+                "bottom": 241.98
+              }
+            },
+            {
+              "text": "capacity (K) of the environment is",
+              "words": [
+                {
+                  "text": "capacity",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 252.0,
+                    "right": 133.78,
+                    "bottom": 271.98
+                  }
+                },
+                {
+                  "text": "(K)",
+                  "rect": {
+                    "left": 139.34,
+                    "top": 252.0,
+                    "right": 166.2,
+                    "bottom": 271.98
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 171.76,
+                    "top": 252.0,
+                    "right": 188.44,
+                    "bottom": 271.98
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 194.0,
+                    "top": 252.0,
+                    "right": 221.68,
+                    "bottom": 271.98
+                  }
+                },
+                {
+                  "text": "environment",
+                  "rect": {
+                    "left": 227.24,
+                    "top": 252.0,
+                    "right": 336.92,
+                    "bottom": 271.98
+                  }
+                },
+                {
+                  "text": "is",
+                  "rect": {
+                    "left": 342.48,
+                    "top": 252.0,
+                    "right": 356.92,
+                    "bottom": 271.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 252.0,
+                "right": 356.92,
+                "bottom": 271.98
+              }
+            },
+            {
+              "text": "reached.",
+              "words": [
+                {
+                  "text": "reached.",
+                  "rect": {
+                    "left": 60.0,
+                    "top": 282.0,
+                    "right": 137.28,
+                    "bottom": 301.98
+                  }
+                }
+              ],
+              "rect": {
+                "left": 60.0,
+                "top": 282.0,
+                "right": 137.28,
+                "bottom": 301.98
+              }
+            }
+          ],
+          "rect": {
+            "left": 60.0,
+            "top": 132.0,
+            "right": 356.92,
+            "bottom": 301.98
+          }
+        },
+        {
+          "text": "Time (t)",
+          "lines": [
+            {
+              "text": "Time (t)",
+              "words": [
+                {
+                  "text": "Time",
+                  "rect": {
+                    "left": 559.77,
+                    "top": 291.9338,
+                    "right": 587.5255,
+                    "bottom": 308.2658
+                  }
+                },
+                {
+                  "text": "(t)",
+                  "rect": {
+                    "left": 590.646,
+                    "top": 291.9338,
+                    "right": 602.1781,
+                    "bottom": 308.2658
+                  }
+                }
+              ],
+              "rect": {
+                "left": 559.77,
+                "top": 291.9338,
+                "right": 602.1781,
+                "bottom": 308.2658
+              }
+            }
+          ],
+          "rect": {
+            "left": 559.77,
+            "top": 291.9338,
+            "right": 602.1781,
+            "bottom": 308.2658
+          }
+        },
+        {
+          "text": "• Equation: dN/dt = rN((K-N)/K)",
+          "lines": [
+            {
+              "text": "• Equation: dN/dt = rN((K-N)/K)",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 338.25,
+                    "right": 61.9404,
+                    "bottom": 358.23
+                  }
+                },
+                {
+                  "text": "Equation:",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 338.25,
+                    "right": 159.48,
+                    "bottom": 358.23
+                  }
+                },
+                {
+                  "text": "dN/dt",
+                  "rect": {
+                    "left": 165.0017,
+                    "top": 338.25,
+                    "right": 212.8017,
+                    "bottom": 358.23
+                  }
+                },
+                {
+                  "text": "=",
+                  "rect": {
+                    "left": 218.3617,
+                    "top": 338.25,
+                    "right": 230.0417,
+                    "bottom": 358.23
+                  }
+                },
+                {
+                  "text": "rN((K-N)/K)",
+                  "rect": {
+                    "left": 235.6017,
+                    "top": 338.25,
+                    "right": 336.7617,
+                    "bottom": 358.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 338.25,
+                "right": 336.7617,
+                "bottom": 358.23
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 338.25,
+            "right": 336.7617,
+            "bottom": 358.23
+          }
+        },
+        {
+          "text": "• r: Maximum per capita growth rate.",
+          "lines": [
+            {
+              "text": "• r: Maximum per capita growth rate.",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 381.75,
+                    "right": 61.9404,
+                    "bottom": 401.73
+                  }
+                },
+                {
+                  "text": "r:",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 381.75,
+                    "right": 81.76,
+                    "bottom": 401.73
+                  }
+                },
+                {
+                  "text": "Maximum",
+                  "rect": {
+                    "left": 87.3195,
+                    "top": 381.75,
+                    "right": 174.3995,
+                    "bottom": 401.73
+                  }
+                },
+                {
+                  "text": "per",
+                  "rect": {
+                    "left": 179.9595,
+                    "top": 381.75,
+                    "right": 208.8595,
+                    "bottom": 401.73
+                  }
+                },
+                {
+                  "text": "capita",
+                  "rect": {
+                    "left": 214.4195,
+                    "top": 381.75,
+                    "right": 267.8595,
+                    "bottom": 401.73
+                  }
+                },
+                {
+                  "text": "growth",
+                  "rect": {
+                    "left": 273.4195,
+                    "top": 381.75,
+                    "right": 333.3795,
+                    "bottom": 401.73
+                  }
+                },
+                {
+                  "text": "rate.",
+                  "rect": {
+                    "left": 338.9395,
+                    "top": 381.75,
+                    "right": 377.9995,
+                    "bottom": 401.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 381.75,
+                "right": 377.9995,
+                "bottom": 401.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 381.75,
+            "right": 377.9995,
+            "bottom": 401.73
+          }
+        },
+        {
+          "text": "• N: Population size.",
+          "lines": [
+            {
+              "text": "• N: Population size.",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 425.25,
+                    "right": 61.9404,
+                    "bottom": 445.23
+                  }
+                },
+                {
+                  "text": "N:",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 425.25,
+                    "right": 88.6,
+                    "bottom": 445.23
+                  }
+                },
+                {
+                  "text": "Population",
+                  "rect": {
+                    "left": 94.1603,
+                    "top": 425.25,
+                    "right": 187.8603,
+                    "bottom": 445.23
+                  }
+                },
+                {
+                  "text": "size.",
+                  "rect": {
+                    "left": 193.4203,
+                    "top": 425.25,
+                    "right": 233.4403,
+                    "bottom": 445.23
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 425.25,
+                "right": 233.4403,
+                "bottom": 445.23
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 425.25,
+            "right": 233.4403,
+            "bottom": 445.23
+          }
+        },
+        {
+          "text": "• K: Carrying capacity.",
+          "lines": [
+            {
+              "text": "• K: Carrying capacity.",
+              "words": [
+                {
+                  "text": "•",
+                  "rect": {
+                    "left": 54.9404,
+                    "top": 468.75,
+                    "right": 61.9404,
+                    "bottom": 488.73
+                  }
+                },
+                {
+                  "text": "K:",
+                  "rect": {
+                    "left": 67.5,
+                    "top": 468.75,
+                    "right": 88.6,
+                    "bottom": 488.73
+                  }
+                },
+                {
+                  "text": "Carrying",
+                  "rect": {
+                    "left": 94.1603,
+                    "top": 468.75,
+                    "right": 169.8803,
+                    "bottom": 488.73
+                  }
+                },
+                {
+                  "text": "capacity.",
+                  "rect": {
+                    "left": 175.4403,
+                    "top": 468.75,
+                    "right": 253.3603,
+                    "bottom": 488.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 54.9404,
+                "top": 468.75,
+                "right": 253.3603,
+                "bottom": 488.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 54.9404,
+            "top": 468.75,
+            "right": 253.3603,
+            "bottom": 488.73
+          }
+        },
+        {
+          "text": "[Cite: \"Ecology: The Economy of Nature, Ricklefs\"]",
+          "lines": [
+            {
+              "text": "[Cite: \"Ecology: The Economy of Nature, Ricklefs\"]",
+              "words": [
+                {
+                  "text": "[Cite:",
+                  "rect": {
+                    "left": 314.9927,
+                    "top": 556.9317,
+                    "right": 365.3927,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "\"Ecology:",
+                  "rect": {
+                    "left": 373.7927,
+                    "top": 556.9317,
+                    "right": 449.3927,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "The",
+                  "rect": {
+                    "left": 457.7927,
+                    "top": 556.9317,
+                    "right": 482.9927,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Economy",
+                  "rect": {
+                    "left": 491.3927,
+                    "top": 556.9317,
+                    "right": 550.1927,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 558.5927,
+                    "top": 556.9317,
+                    "right": 575.3927,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Nature,",
+                  "rect": {
+                    "left": 583.7927,
+                    "top": 556.9317,
+                    "right": 642.5927,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Ricklefs\"]",
+                  "rect": {
+                    "left": 650.9927,
+                    "top": 556.9317,
+                    "right": 734.9927,
+                    "bottom": 575.9997
+                  }
+                }
+              ],
+              "rect": {
+                "left": 314.9927,
+                "top": 556.9317,
+                "right": 734.9927,
+                "bottom": 575.9997
+              }
+            }
+          ],
+          "rect": {
+            "left": 314.9927,
+            "top": 556.9317,
+            "right": 734.9927,
+            "bottom": 575.9997
+          }
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "width": 792.0,
+      "height": 612.0,
+      "blocks": [
+        {
+          "text": "2. Trophic Levels & Energy Flow",
+          "lines": [
+            {
+              "text": "2. Trophic Levels & Energy Flow",
+              "words": [
+                {
+                  "text": "2.",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 44.9999,
+                    "right": 73.356,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Trophic",
+                  "rect": {
+                    "left": 82.808,
+                    "top": 44.9999,
+                    "right": 204.97,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Levels",
+                  "rect": {
+                    "left": 214.422,
+                    "top": 44.9999,
+                    "right": 319.04,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "&",
+                  "rect": {
+                    "left": 328.492,
+                    "top": 44.9999,
+                    "right": 353.04,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Energy",
+                  "rect": {
+                    "left": 362.492,
+                    "top": 44.9999,
+                    "right": 477.48,
+                    "bottom": 78.9659
+                  }
+                },
+                {
+                  "text": "Flow",
+                  "rect": {
+                    "left": 486.932,
+                    "top": 44.9999,
+                    "right": 563.704,
+                    "bottom": 78.9659
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 44.9999,
+                "right": 563.704,
+                "bottom": 78.9659
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 44.9999,
+            "right": 563.704,
+            "bottom": 78.9659
+          }
+        },
+        {
+          "text": "Energy flow through an ecosystem is fundamentally inefficient. Only about 10% of the energy stored as biomass in a trophic level is passed to the next.",
+          "lines": [
+            {
+              "text": "Energy flow through an ecosystem is fundamentally inefficient. Only about 10%",
+              "words": [
+                {
+                  "text": "Energy",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 120.75,
+                    "right": 108.16,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "flow",
+                  "rect": {
+                    "left": 113.72,
+                    "top": 120.75,
+                    "right": 149.06,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "through",
+                  "rect": {
+                    "left": 154.62,
+                    "top": 120.75,
+                    "right": 222.08,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "an",
+                  "rect": {
+                    "left": 227.64,
+                    "top": 120.75,
+                    "right": 249.88,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "ecosystem",
+                  "rect": {
+                    "left": 255.44,
+                    "top": 120.75,
+                    "right": 350.22,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "is",
+                  "rect": {
+                    "left": 355.78,
+                    "top": 120.75,
+                    "right": 370.22,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "fundamentally",
+                  "rect": {
+                    "left": 375.78,
+                    "top": 120.75,
+                    "right": 500.04,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "inefficient.",
+                  "rect": {
+                    "left": 505.6,
+                    "top": 120.75,
+                    "right": 595.32,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "Only",
+                  "rect": {
+                    "left": 600.88,
+                    "top": 120.75,
+                    "right": 641.9,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "about",
+                  "rect": {
+                    "left": 647.46,
+                    "top": 120.75,
+                    "right": 697.5,
+                    "bottom": 140.73
+                  }
+                },
+                {
+                  "text": "10%",
+                  "rect": {
+                    "left": 703.06,
+                    "top": 120.75,
+                    "right": 743.08,
+                    "bottom": 140.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 120.75,
+                "right": 743.08,
+                "bottom": 140.73
+              }
+            },
+            {
+              "text": "of the energy stored as biomass in a trophic level is passed to the next.",
+              "words": [
+                {
+                  "text": "of",
+                  "rect": {
+                    "left": 45.0,
+                    "top": 150.75,
+                    "right": 61.68,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 67.24,
+                    "top": 150.75,
+                    "right": 94.92,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "energy",
+                  "rect": {
+                    "left": 100.48,
+                    "top": 150.75,
+                    "right": 161.42,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "stored",
+                  "rect": {
+                    "left": 166.98,
+                    "top": 150.75,
+                    "right": 222.06,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "as",
+                  "rect": {
+                    "left": 227.62,
+                    "top": 150.75,
+                    "right": 248.74,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "biomass",
+                  "rect": {
+                    "left": 254.3,
+                    "top": 150.75,
+                    "right": 328.8,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "in",
+                  "rect": {
+                    "left": 334.36,
+                    "top": 150.75,
+                    "right": 349.92,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "a",
+                  "rect": {
+                    "left": 355.48,
+                    "top": 150.75,
+                    "right": 366.6,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "trophic",
+                  "rect": {
+                    "left": 372.16,
+                    "top": 150.75,
+                    "right": 431.96,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "level",
+                  "rect": {
+                    "left": 437.52,
+                    "top": 150.75,
+                    "right": 477.9,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "is",
+                  "rect": {
+                    "left": 483.46,
+                    "top": 150.75,
+                    "right": 497.9,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "passed",
+                  "rect": {
+                    "left": 503.46,
+                    "top": 150.75,
+                    "right": 567.98,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "to",
+                  "rect": {
+                    "left": 573.54,
+                    "top": 150.75,
+                    "right": 589.98,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "the",
+                  "rect": {
+                    "left": 595.54,
+                    "top": 150.75,
+                    "right": 623.22,
+                    "bottom": 170.73
+                  }
+                },
+                {
+                  "text": "next.",
+                  "rect": {
+                    "left": 628.78,
+                    "top": 150.75,
+                    "right": 671.26,
+                    "bottom": 170.73
+                  }
+                }
+              ],
+              "rect": {
+                "left": 45.0,
+                "top": 150.75,
+                "right": 671.26,
+                "bottom": 170.73
+              }
+            }
+          ],
+          "rect": {
+            "left": 45.0,
+            "top": 120.75,
+            "right": 743.08,
+            "bottom": 170.73
+          }
+        },
+        {
+          "text": "Tertiary (10 J)",
+          "lines": [
+            {
+              "text": "Tertiary (10 J)",
+              "words": [
+                {
+                  "text": "Tertiary",
+                  "rect": {
+                    "left": 356.0222,
+                    "top": 261.9338,
+                    "right": 403.9017,
+                    "bottom": 278.2658
+                  }
+                },
+                {
+                  "text": "(10",
+                  "rect": {
+                    "left": 407.0215,
+                    "top": 261.9338,
+                    "right": 424.8176,
+                    "bottom": 278.2658
+                  }
+                },
+                {
+                  "text": "J)",
+                  "rect": {
+                    "left": 427.938,
+                    "top": 261.9338,
+                    "right": 435.9779,
+                    "bottom": 278.2658
+                  }
+                }
+              ],
+              "rect": {
+                "left": 356.0222,
+                "top": 261.9338,
+                "right": 435.9779,
+                "bottom": 278.2658
+              }
+            }
+          ],
+          "rect": {
+            "left": 356.0222,
+            "top": 261.9338,
+            "right": 435.9779,
+            "bottom": 278.2658
+          }
+        },
+        {
+          "text": "Secondary Consumers (100 J)",
+          "lines": [
+            {
+              "text": "Secondary Consumers (100 J)",
+              "words": [
+                {
+                  "text": "Secondary",
+                  "rect": {
+                    "left": 310.2719,
+                    "top": 314.4338,
+                    "right": 372.5757,
+                    "bottom": 330.7658
+                  }
+                },
+                {
+                  "text": "Consumers",
+                  "rect": {
+                    "left": 375.6954,
+                    "top": 314.4338,
+                    "right": 442.7874,
+                    "bottom": 330.7658
+                  }
+                },
+                {
+                  "text": "(100",
+                  "rect": {
+                    "left": 445.9076,
+                    "top": 314.4338,
+                    "right": 470.568,
+                    "bottom": 330.7658
+                  }
+                },
+                {
+                  "text": "J)",
+                  "rect": {
+                    "left": 473.6884,
+                    "top": 314.4338,
+                    "right": 481.7283,
+                    "bottom": 330.7658
+                  }
+                }
+              ],
+              "rect": {
+                "left": 310.2719,
+                "top": 314.4338,
+                "right": 481.7283,
+                "bottom": 330.7658
+              }
+            }
+          ],
+          "rect": {
+            "left": 310.2719,
+            "top": 314.4338,
+            "right": 481.7283,
+            "bottom": 330.7658
+          }
+        },
+        {
+          "text": "Primary Producers (1,000 J)",
+          "lines": [
+            {
+              "text": "Primary Producers (1,000 J)",
+              "words": [
+                {
+                  "text": "Primary",
+                  "rect": {
+                    "left": 315.5706,
+                    "top": 381.9338,
+                    "right": 363.5218,
+                    "bottom": 398.2658
+                  }
+                },
+                {
+                  "text": "Producers",
+                  "rect": {
+                    "left": 366.6416,
+                    "top": 381.9338,
+                    "right": 427.2047,
+                    "bottom": 398.2658
+                  }
+                },
+                {
+                  "text": "(1,000",
+                  "rect": {
+                    "left": 430.325,
+                    "top": 381.9338,
+                    "right": 465.2693,
+                    "bottom": 398.2658
+                  }
+                },
+                {
+                  "text": "J)",
+                  "rect": {
+                    "left": 468.3896,
+                    "top": 381.9338,
+                    "right": 476.4296,
+                    "bottom": 398.2658
+                  }
+                }
+              ],
+              "rect": {
+                "left": 315.5706,
+                "top": 381.9338,
+                "right": 476.4296,
+                "bottom": 398.2658
+              }
+            }
+          ],
+          "rect": {
+            "left": 315.5706,
+            "top": 381.9338,
+            "right": 476.4296,
+            "bottom": 398.2658
+          }
+        },
+        {
+          "text": "[Cite: \"Campbell Biology 12th Ed., Unit 8\"]",
+          "lines": [
+            {
+              "text": "[Cite: \"Campbell Biology 12th Ed., Unit 8\"]",
+              "words": [
+                {
+                  "text": "[Cite:",
+                  "rect": {
+                    "left": 373.7937,
+                    "top": 556.9317,
+                    "right": 424.1937,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "\"Campbell",
+                  "rect": {
+                    "left": 432.5937,
+                    "top": 556.9317,
+                    "right": 508.1937,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Biology",
+                  "rect": {
+                    "left": 516.5937,
+                    "top": 556.9317,
+                    "right": 575.3937,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "12th",
+                  "rect": {
+                    "left": 583.7937,
+                    "top": 556.9317,
+                    "right": 617.3937,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Ed.,",
+                  "rect": {
+                    "left": 625.7937,
+                    "top": 556.9317,
+                    "right": 659.3937,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "Unit",
+                  "rect": {
+                    "left": 667.7937,
+                    "top": 556.9317,
+                    "right": 701.3937,
+                    "bottom": 575.9997
+                  }
+                },
+                {
+                  "text": "8\"]",
+                  "rect": {
+                    "left": 709.7937,
+                    "top": 556.9317,
+                    "right": 734.9937,
+                    "bottom": 575.9997
+                  }
+                }
+              ],
+              "rect": {
+                "left": 373.7937,
+                "top": 556.9317,
+                "right": 734.9937,
+                "bottom": 575.9997
+              }
+            }
+          ],
+          "rect": {
+            "left": 373.7937,
+            "top": 556.9317,
+            "right": 734.9937,
+            "bottom": 575.9997
+          }
+        }
+      ]
+    }
+  ]
+}
