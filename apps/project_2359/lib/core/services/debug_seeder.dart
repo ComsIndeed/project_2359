@@ -18,14 +18,14 @@ class DebugSeeder {
   static Future<void> seed(AppDatabase db) async {
     final uuid = const Uuid();
 
-    // 1. Create a Debug Folder
+    // 1. Create a Demo Folder
     final folderId = uuid.v4();
     await db
         .into(db.studyFolderItems)
         .insert(
           StudyFolderItemsCompanion(
             id: Value(folderId),
-            name: const Value('🧪 Debug Playground'),
+            name: const Value('Biology & Medicine (DEMO)'),
             isPinned: const Value(true),
             createdAt: Value(DateTime.now().toIso8601String()),
             updatedAt: Value(DateTime.now().toIso8601String()),
@@ -81,7 +81,7 @@ class DebugSeeder {
         DeckItemsCompanion(
           id: Value(deck1Id),
           folderId: Value(folderId),
-          name: const Value('🧬 Cell Bio & Pathology'),
+          name: const Value('Cell Bio & Pathology'),
           description: const Value(
             'Cellular mechanisms and basic pathology hallmarks.',
           ),
@@ -89,7 +89,7 @@ class DebugSeeder {
         DeckItemsCompanion(
           id: Value(deck2Id),
           folderId: Value(folderId),
-          name: const Value('🧫 High-Yield Micro'),
+          name: const Value('High-Yield Micro'),
           description: const Value(
             'Key pathogens, virulence factors, and clinical markers.',
           ),
@@ -97,7 +97,7 @@ class DebugSeeder {
         DeckItemsCompanion(
           id: Value(deck3Id),
           folderId: Value(folderId),
-          name: const Value('🧪 Master Biochemistry'),
+          name: const Value('Master Biochemistry'),
           description: const Value(
             'Metabolic pathways, enzymes, and clinical correlations.',
           ),
@@ -105,7 +105,7 @@ class DebugSeeder {
         DeckItemsCompanion(
           id: Value(deck4Id),
           folderId: Value(folderId),
-          name: const Value('🚑 Comprehensive Rapid Review'),
+          name: const Value('Comprehensive Rapid Review'),
           description: const Value(
             'Mixed high-yield facts from Anatomy, Pharm, and Physio.',
           ),

@@ -248,7 +248,7 @@ class _HomePageState extends State<HomePage> {
                           _showCoolContextMenu(context, pos, id, isFolder: isF),
                     ),
                     const SizedBox(height: 48),
-                    const _GlitchyDebugTile(),
+                    const _DevInjectionTile(),
                     const SizedBox(height: 100),
                   ]),
                 ),
@@ -491,43 +491,57 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class _GlitchyDebugTile extends StatefulWidget {
-  const _GlitchyDebugTile();
+class _DevInjectionTile extends StatefulWidget {
+  const _DevInjectionTile();
 
   @override
-  State<_GlitchyDebugTile> createState() => _GlitchyDebugTileState();
+  State<_DevInjectionTile> createState() => _DevInjectionTileState();
 }
 
-class _GlitchyDebugTileState extends State<_GlitchyDebugTile> {
+class _DevInjectionTileState extends State<_DevInjectionTile> {
   bool _isSeeding = false;
 
   Future<void> _handleSeed() async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.black,
-        title: const Text(
-          '[SYSTEM_WARNING]: DATA_INJECTION',
-          style: TextStyle(
-            color: Colors.pinkAccent,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Courier',
-          ),
+        backgroundColor: const Color(0xFF1A1A1A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Colors.deepPurpleAccent, width: 0.5),
+        ),
+        title: Row(
+          children: [
+            const Icon(FontAwesomeIcons.terminal, color: Colors.deepPurpleAccent, size: 18),
+            const SizedBox(width: 12),
+            const Text(
+              'DEVELOPER_INJECTION',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                fontFamily: 'Courier',
+              ),
+            ),
+          ],
         ),
         content: const Text(
-          'INJECTION REQUIRES ~15MB NETWORK RETRIEVAL FROM GITHUB_RAW.\n\nPROCEED WITH MOCK_DATA_OVERRIDE?',
-          style: TextStyle(color: Colors.white70, fontFamily: 'Courier'),
+          'INJECTION_REQUESTED: This will download ~15MB of study materials from GitHub.\n\nPROCEED?',
+          style: TextStyle(color: Colors.white70, fontFamily: 'Courier', fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('ABORT', style: TextStyle(color: Colors.white24)),
+            child: Text(
+              'CANCEL',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontFamily: 'Courier'),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: const Text(
-              'PROCEED',
-              style: TextStyle(color: Colors.cyanAccent),
+              'EXECUTE',
+              style: TextStyle(color: Colors.deepPurpleAccent, fontWeight: FontWeight.bold, fontFamily: 'Courier'),
             ),
           ),
         ],
@@ -559,92 +573,91 @@ class _GlitchyDebugTileState extends State<_GlitchyDebugTile> {
   Widget build(BuildContext context) {
     if (!kDebugMode) return const SizedBox.shrink();
 
-    final theme = Theme.of(context);
+    return StreamBuilder<bool>(
+      stream: context.read<StudyDatabaseService>().watchHasMockData(),
+      builder: (context, snapshot) {
+        final hasData = snapshot.data ?? false;
+        if (hasData) return const SizedBox.shrink();
 
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: _isSeeding ? null : _handleSeed,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.pinkAccent.withValues(alpha: 0.3)),
-            gradient: LinearGradient(
-              colors: [
-                Colors.pinkAccent.withValues(alpha: 0.05),
-                Colors.cyanAccent.withValues(alpha: 0.05),
-              ],
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Stack(
+        final theme = Theme.of(context);
+
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: _isSeeding ? null : _handleSeed,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
+                border: Border.all(
+                  color: Colors.deepPurpleAccent.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
                   children: [
-                    const Icon(
-                          FontAwesomeIcons.bug,
-                          color: Colors.pinkAccent,
-                          size: 20,
-                        )
-                        .animate(onPlay: (controller) => controller.repeat())
-                        .shake(hz: 4, curve: Curves.easeInOut),
-                    Positioned(
-                      left: 2,
-                      top: 2,
-                      child:
-                          const Icon(
-                                FontAwesomeIcons.bug,
-                                color: Colors.cyanAccent,
-                                size: 20,
-                              )
-                              .animate(
-                                onPlay: (controller) => controller.repeat(),
-                              )
-                              .shake(hz: 3, curve: Curves.easeInOut),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurpleAccent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        _isSeeding ? FontAwesomeIcons.gear : FontAwesomeIcons.bug,
+                        color: Colors.deepPurpleAccent,
+                        size: 16,
+                      ).animate(
+                        onPlay: (c) => _isSeeding ? c.repeat() : null,
+                      ).rotate(duration: 2.seconds),
                     ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _isSeeding ? 'INJECTING_PAYLOAD...' : 'INJECT_MOCK_DATA',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: Colors.deepPurpleAccent,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.1,
+                              fontFamily: 'Courier',
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Internal tool: Seed biology data',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                              fontFamily: 'Courier',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_isSeeding)
+                      const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(Colors.deepPurpleAccent),
+                        ),
+                      )
+                    else
+                      Icon(
+                        FontAwesomeIcons.chevronRight,
+                        size: 12,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                      ),
                   ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _isSeeding
-                            ? 'INJECTING...'
-                            : '[SYSTEM_DEBUG]: INJECT_MOCK_DATA',
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
-                          fontFamily: 'Courier',
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Pulls biology seeds from GitHub Main.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white38,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (_isSeeding)
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(Colors.cyanAccent),
-                    ),
-                  ),
-              ],
+              ),
             ),
-          ),
-        ).animate().fadeIn().slideY(begin: 0.1),
-      ),
+          ).animate().fadeIn().slideY(begin: 0.1),
+        );
+      },
     );
   }
 }

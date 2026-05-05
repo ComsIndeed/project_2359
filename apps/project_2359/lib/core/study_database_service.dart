@@ -259,4 +259,11 @@ class StudyDatabaseService {
     return await (_db.select(_db.citationItems)..where((t) => t.id.equals(id)))
         .getSingleOrNull();
   }
+
+  /// Checks if mock data has already been injected by looking for the Demo folder.
+  Stream<bool> watchHasMockData() {
+    return _db.select(_db.studyFolderItems).watch().map(
+      (folders) => folders.any((f) => f.name == 'Biology & Medicine (DEMO)'),
+    );
+  }
 }
