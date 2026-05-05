@@ -4,6 +4,7 @@ import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/app_controller.dart';
 import 'package:project_2359/core/widgets/project_important_tile.dart';
 import 'package:project_2359/features/home_page/widgets/due_cards_overview.dart';
+import 'package:project_2359/core/widgets/sensor_reactive_border.dart';
 
 class HomeDueCardsTile extends StatelessWidget {
   const HomeDueCardsTile({super.key});
@@ -74,6 +75,7 @@ class FolderDueCardsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final appController = context.watch<AppController>();
     final schedulingService = appController.schedulingService;
     final database = context.read<AppDatabase>();
@@ -90,11 +92,23 @@ class FolderDueCardsTile extends StatelessWidget {
             final deckCounts = deckSnapshot.data ?? {};
             if (deckCounts.isEmpty) return const SizedBox.shrink();
 
-            return ProjectImportantTile(
-              child: DueCardsOverview(
-                totalDue: cards.length,
-                items: deckCounts,
-                isFolderPage: true,
+            return SensorReactiveBorder(
+              innerColor:
+                  theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.8,
+                  ),
+              borderRadius: 24,
+              borderWidth: 2.0,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: DueCardsOverview(
+                  totalDue: cards.length,
+                  items: deckCounts,
+                  isFolderPage: true,
+                ),
               ),
             );
           },

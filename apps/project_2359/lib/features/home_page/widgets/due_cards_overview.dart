@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_2359/app_theme.dart';
 
 class DueCardsOverview extends StatelessWidget {
   final int totalDue;
@@ -61,41 +62,27 @@ class _DueChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
-        color: onColor.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: onColor.withValues(alpha: 0.1), width: 1),
-      ),
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: const BoxDecoration(
-              color: Colors.black, // Dark circle as requested
-              shape: BoxShape.circle,
-            ),
-            constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
-            child: Center(
-              child: Text(
-                "$count",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+          Text(
+            "$count",
+            style: const TextStyle(
+              color: AppTheme.important,
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           Flexible(
             child: Text(
               label,
               style: TextStyle(
-                color: onColor.withValues(alpha: 0.7),
-                fontSize: 12,
+                color: onColor.withValues(alpha: 0.5),
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
               overflow: TextOverflow.ellipsis,

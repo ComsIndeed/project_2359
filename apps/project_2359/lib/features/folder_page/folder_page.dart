@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_2359/core/app_controller.dart';
+import 'package:project_2359/app_theme.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import 'package:project_2359/app_database.dart';
@@ -1311,21 +1312,11 @@ class _DecksList extends StatelessWidget {
                         builder: (context, snapshot) {
                           final count = snapshot.data ?? 0;
                           if (count == 0) return const SizedBox.shrink();
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              count.toString(),
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          return Text(
+                            count.toString(),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: AppTheme.important,
+                              fontWeight: FontWeight.w900,
                             ),
                           );
                         },

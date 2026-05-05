@@ -29,22 +29,24 @@ class _SensorReactiveBorderState extends State<SensorReactiveBorder>
   late AnimationController _controller;
   StreamSubscription? _accelerometerSub;
   Offset _sensorOffset = Offset.zero;
+  Offset _mouseOffset = Offset.zero;
+  bool _isHovering = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 4),
+      duration: const Duration(seconds: 3),
     )..repeat();
 
     _accelerometerSub = accelerometerEventStream().listen((event) {
       if (mounted) {
         setState(() {
-          // Subtle movement
+          // Sensitive tracking of phone orientation
           _sensorOffset = Offset(
-            (_sensorOffset.dx * 0.9) + (event.x * 0.1),
-            (_sensorOffset.dy * 0.9) + (event.y * 0.1),
+            (_sensorOffset.dx * 0.6) + (event.x * 0.4),
+            (_sensorOffset.dy * 0.6) + (event.y * 0.4),
           );
         });
       }
@@ -61,53 +63,85 @@ class _SensorReactiveBorderState extends State<SensorReactiveBorder>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    final defaultColors = [
-      theme.colorScheme.primary,
-      theme.colorScheme.secondary,
-      theme.colorScheme.tertiary,
-      theme.colorScheme.primary,
+    // Brighter highlight for the "sun" shine
+    final shineColor = isDark
+        ? Colors.white.withValues(alpha: 0.9)
+        : Colors.black.withValues(alpha: 0.6);
+    
+    // Default border is now slightly brighter, just a bit darker than the shine
+    final baseBorderColor = shineColor.withValues(alpha: 0.3);
+
+    final colors = [
+      baseBorderColor,
+      shineColor,
+      baseBorderColor,
     ];
 
-    final colors = widget.colors ?? defaultColors;
+    // Combine inputs
+    final combinedX = (_sensorOffset.dx * 1.5) + (_mouseOffset.dx * 5);
+    final combinedY = (_sensorOffset.dy * 1.5) + (_mouseOffset.dy * 5);
+    
+    // 3D "Sun" effect logic: 
+    // The sun is "high and to the west (left)".
+    // We shift the light based on how the phone is pointing relative to that source.
+    final horizontalShift = (-combinedX / 6) - 0.5; // Anchored slightly left
+    final verticalShift = (combinedY / 6) - 0.8;    // Anchored high up
 
-    final alignment = Alignment(
-      (_sensorOffset.dx / 10).clamp(-1.0, 1.0),
-      (_sensorOffset.dy / 10).clamp(-1.0, 1.0),
-    );
+    // We use wide Alignment points (-2 to 2) to ensure only one "band" of light 
+    // is visible on the border at any time, preventing double-highlights.
+    final effectiveBegin = Alignment(horizontalShift - 1.5, verticalShift - 1.5);
+    final effectiveEnd = Alignment(horizontalShift + 1.5, verticalShift + 1.5);
 
-    final hasSensor = alignment.x != 0 || alignment.y != 0;
-    final effectiveBegin = hasSensor ? alignment : Alignment.topLeft;
-    final effectiveEnd = hasSensor
-        ? Alignment(-alignment.x, -alignment.y)
-        : Alignment.bottomRight;
-
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return CustomPaint(
-          painter: _GradientBorderPainter(
-            colors: colors,
-            borderWidth: widget.borderWidth,
-            borderRadius: widget.borderRadius,
-            begin: effectiveBegin,
-            end: effectiveEnd,
-            rotation: _controller.value * 2 * 3.141592653589793,
-          ),
-          child: Container(
-            decoration: ShapeDecoration(
-              color: widget.innerColor,
-              shape: ContinuousRectangleBorder(
-                borderRadius: BorderRadius.circular(widget.borderRadius),
-              ),
-            ),
-            child: child,
-          ),
-        );
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() {
+        _isHovering = false;
+        _mouseOffset = Offset.zero;
+      }),
+      onHover: (event) {
+        final box = context.findRenderObject() as RenderBox?;
+        if (box != null) {
+          final localPos = box.globalToLocal(event.position);
+          setState(() {
+            _mouseOffset = Offset(
+              (localPos.dx / box.size.width) * 2 - 1,
+              (localPos.dy / box.size.height) * 2 - 1,
+            );
+          });
+        }
       },
-      child: widget.child,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return CustomPaint(
+            painter: _GradientBorderPainter(
+              colors: colors,
+              borderWidth: widget.borderWidth,
+              borderRadius: widget.borderRadius,
+              begin: effectiveBegin,
+              end: effectiveEnd,
+              // No more distracting rotation, just pure reactive light
+              rotation: 0,
+            ),
+            child: Container(
+              decoration: ShapeDecoration(
+                color: widget.innerColor,
+                shape: ContinuousRectangleBorder(
+                  borderRadius: BorderRadius.circular(widget.borderRadius),
+                ),
+              ),
+              child: child,
+            ),
+          );
+        },
+        child: widget.child,
+      ),
     );
   }
+
+  bool get hasActiveInput => _isHovering || _sensorOffset.distance > 0.1;
 }
 
 class _GradientBorderPainter extends CustomPainter {
