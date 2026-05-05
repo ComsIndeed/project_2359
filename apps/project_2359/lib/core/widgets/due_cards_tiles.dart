@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/app_controller.dart';
@@ -11,6 +12,7 @@ class HomeDueCardsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final appController = context.watch<AppController>();
     final schedulingService = appController.schedulingService;
     final database = context.read<AppDatabase>();
@@ -27,10 +29,43 @@ class HomeDueCardsTile extends StatelessWidget {
             final folderCounts = folderSnapshot.data ?? {};
             if (folderCounts.isEmpty) return const SizedBox.shrink();
 
-            return ProjectImportantTile(
-              child: DueCardsOverview(
-                totalDue: cards.length,
-                items: folderCounts,
+            return Container(
+              decoration: ShapeDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.6, // Slightly cloudier
+                ),
+                shape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DueCardsOverview(
+                      totalDue: cards.length,
+                      items: folderCounts,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  SensorReactiveBorder(
+                    isCircle: true,
+                    innerColor: theme.colorScheme.surfaceContainerHighest,
+                    shineColor: theme.colorScheme.primary,
+                    baseColor: theme.colorScheme.primary.withValues(alpha: 0.6),
+                    child: IconButton(
+                      padding: const EdgeInsets.all(12),
+                      icon: const FaIcon(
+                        FontAwesomeIcons.play,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        // Study all due cards
+                      },
+                    ),
+                  ),
+                ],
               ),
             );
           },
@@ -92,23 +127,44 @@ class FolderDueCardsTile extends StatelessWidget {
             final deckCounts = deckSnapshot.data ?? {};
             if (deckCounts.isEmpty) return const SizedBox.shrink();
 
-            return SensorReactiveBorder(
-              innerColor:
-                  theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.8,
+            return Container(
+              decoration: ShapeDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.6, // Slightly cloudier
+                ),
+                shape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DueCardsOverview(
+                      totalDue: cards.length,
+                      items: deckCounts,
+                      isFolderPage: true,
+                    ),
                   ),
-              borderRadius: 24,
-              borderWidth: 2.0,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                child: DueCardsOverview(
-                  totalDue: cards.length,
-                  items: deckCounts,
-                  isFolderPage: true,
-                ),
+                  const SizedBox(width: 12),
+                  SensorReactiveBorder(
+                    isCircle: true,
+                    innerColor: theme.colorScheme.surfaceContainerHighest,
+                    shineColor: theme.colorScheme.primary,
+                    baseColor: theme.colorScheme.primary.withValues(alpha: 0.6),
+                    child: IconButton(
+                      padding: const EdgeInsets.all(12),
+                      icon: const FaIcon(
+                        FontAwesomeIcons.play,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        // Study all due cards in folder
+                      },
+                    ),
+                  ),
+                ],
               ),
             );
           },

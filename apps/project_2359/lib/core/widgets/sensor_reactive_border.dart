@@ -9,6 +9,9 @@ class SensorReactiveBorder extends StatefulWidget {
   final List<Color>? colors;
   final Duration duration;
   final Color? innerColor;
+  final bool isCircle;
+  final Color? baseColor;
+  final Color? shineColor;
 
   const SensorReactiveBorder({
     super.key,
@@ -18,6 +21,9 @@ class SensorReactiveBorder extends StatefulWidget {
     this.colors,
     this.duration = const Duration(milliseconds: 300),
     this.innerColor,
+    this.isCircle = false,
+    this.baseColor,
+    this.shineColor,
   });
 
   @override
@@ -65,15 +71,15 @@ class _SensorReactiveBorderState extends State<SensorReactiveBorder>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Brighter highlight for the "sun" shine
-    final shineColor = isDark
+    // Use provided shine color or default to theme-based bright/dark colors
+    final shineColor = widget.shineColor ?? (isDark
         ? Colors.white.withValues(alpha: 0.9)
-        : Colors.black.withValues(alpha: 0.6);
+        : Colors.black.withValues(alpha: 0.6));
     
-    // Default border is now slightly brighter, just a bit darker than the shine
-    final baseBorderColor = shineColor.withValues(alpha: 0.3);
+    // Use provided base color or default to a dimmer version of the shine
+    final baseBorderColor = widget.baseColor ?? shineColor.withValues(alpha: 0.3);
 
-    final colors = [
+    final colors = widget.colors ?? [
       baseBorderColor,
       shineColor,
       baseBorderColor,
@@ -124,13 +130,16 @@ class _SensorReactiveBorderState extends State<SensorReactiveBorder>
               end: effectiveEnd,
               // No more distracting rotation, just pure reactive light
               rotation: 0,
+              isCircle: widget.isCircle,
             ),
             child: Container(
               decoration: ShapeDecoration(
                 color: widget.innerColor,
-                shape: ContinuousRectangleBorder(
-                  borderRadius: BorderRadius.circular(widget.borderRadius),
-                ),
+                shape: widget.isCircle
+                    ? const CircleBorder()
+                    : ContinuousRectangleBorder(
+                        borderRadius: BorderRadius.circular(widget.borderRadius),
+                      ),
               ),
               child: child,
             ),
@@ -151,6 +160,7 @@ class _GradientBorderPainter extends CustomPainter {
   final Alignment begin;
   final Alignment end;
   final double rotation;
+  final bool isCircle;
 
   _GradientBorderPainter({
     required this.colors,
@@ -159,6 +169,7 @@ class _GradientBorderPainter extends CustomPainter {
     required this.begin,
     required this.end,
     required this.rotation,
+    this.isCircle = false,
   });
 
   @override
@@ -182,9 +193,11 @@ class _GradientBorderPainter extends CustomPainter {
         transform: GradientRotation(rotation),
       ).createShader(rect);
 
-    final path = ContinuousRectangleBorder(
-      borderRadius: BorderRadius.circular(borderRadius),
-    ).getOuterPath(Rect.fromLTWH(0, 0, size.width, size.height));
+    final path = isCircle
+        ? (Path()..addOval(Rect.fromLTWH(0, 0, size.width, size.height)))
+        : ContinuousRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ).getOuterPath(Rect.fromLTWH(0, 0, size.width, size.height));
 
     // We need to handle the stroke alignment for paths.
     // Usually drawing the path with a stroke paint works fine.
@@ -195,6 +208,7 @@ class _GradientBorderPainter extends CustomPainter {
   bool shouldRepaint(_GradientBorderPainter oldDelegate) {
     return oldDelegate.colors != colors ||
         oldDelegate.begin != begin ||
-        oldDelegate.rotation != rotation;
+        oldDelegate.rotation != rotation ||
+        oldDelegate.isCircle != isCircle;
   }
 }
