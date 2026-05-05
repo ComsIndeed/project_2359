@@ -17,9 +17,10 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> {
   String _searchQuery = '';
   String? _sortColumn;
   bool _sortAscending = true;
-  bool _liveUpdate = false;
   int _currentPage = 0;
   final int _rowsPerPage = 20;
+
+  Map<String, Set<dynamic>> _activeFilters = {};
 
   @override
   void initState() {
@@ -44,6 +45,7 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> {
       _sortColumn = null;
       _sortAscending = true;
       _currentPage = 0;
+      _activeFilters = {};
     });
   }
 
@@ -52,88 +54,154 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final tables = widget.db.allTables.toList();
+    final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
-      body: SafeArea(
-        child: Row(
-          children: [
-            // --- Sidebar: Table List ---
-            Container(
-              width: 250,
-              decoration: BoxDecoration(
-                border: Border(
-                  right: BorderSide(color: cs.onSurface.withValues(alpha: 0.1)),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        const ProjectBackButton(),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Database',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: tables.length,
-                      itemBuilder: (context, index) {
-                        final table = tables[index];
-                        final isSelected = _selectedTable == table;
-                        return ListTile(
-                          title: Text(
-                            table.actualTableName,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: isSelected ? FontWeight.bold : null,
-                            ),
-                          ),
-                          selected: isSelected,
-                          selectedTileColor: cs.primary.withValues(alpha: 0.1),
-                          onTap: () => _selectTable(table),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // --- Main: Table Content ---
-            Expanded(
-              child: Column(
-                children: [
-                  if (_selectedTable != null) ...[
-                    _buildHeader(theme, cs),
-                    const Divider(height: 1),
-                    Expanded(child: _buildDataTable(theme, cs)),
-                    _buildFooter(theme, cs),
-                  ] else
-                    const Center(child: Text('Select a table to inspect')),
-                ],
-              ),
-            ),
-          ],
+      appBar: AppBar(
+        title: Text(
+          _selectedTable?.actualTableName ?? 'Database',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
+        leading: const ProjectBackButton(),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, size: 20),
+            tooltip: 'Refresh',
+            onPressed: () => setState(() {}),
+          ),
+          if (isMobile)
+            Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu, size: 20),
+                tooltip: 'Tables',
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
+            ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      drawer: isMobile
+          ? Drawer(
+              child: SafeArea(
+                child: _buildTableList(theme, cs, tables, isMobile: true),
+              ),
+            )
+          : null,
+      body: SafeArea(
+        child: isMobile
+            ? _buildMainContent(theme, cs)
+            : Row(
+                children: [
+                  // --- Sidebar: Table List ---
+                  Container(
+                    width: 250,
+                    decoration: BoxDecoration(
+                      border: Border(
+                        right: BorderSide(
+                          color: cs.onSurface.withValues(alpha: 0.1),
+                        ),
+                      ),
+                    ),
+                    child: _buildTableList(theme, cs, tables, isMobile: false),
+                  ),
+
+                  // --- Main: Table Content ---
+                  Expanded(child: _buildMainContent(theme, cs)),
+                ],
+              ),
       ),
     );
   }
 
-  Widget _buildHeader(ThemeData theme, ColorScheme cs) {
+  Widget _buildTableList(
+    ThemeData theme,
+    ColorScheme cs,
+    List<TableInfo> tables, {
+    required bool isMobile,
+  }) {
+    return Column(
+      children: [
+        if (isMobile)
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Tables',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        const Divider(height: 1),
+        Expanded(
+          child: ListView.builder(
+            itemCount: tables.length,
+            itemBuilder: (context, index) {
+              final table = tables[index];
+              final isSelected = _selectedTable == table;
+              return ListTile(
+                title: Text(
+                  table.actualTableName,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.bold : null,
+                  ),
+                ),
+                selected: isSelected,
+                selectedTileColor: cs.primary.withValues(alpha: 0.1),
+                onTap: () {
+                  _selectTable(table);
+                  if (isMobile) {
+                    Navigator.pop(context);
+                  }
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMainContent(ThemeData theme, ColorScheme cs) {
+    if (_selectedTable == null) {
+      return const Center(child: Text('Select a table to inspect'));
+    }
+
+    final table = _selectedTable!;
+    final select = widget.db.customSelect('SELECT * FROM ${table.actualTableName}');
+
+    return StreamBuilder<List<QueryRow>>(
+      stream: select.get().asStream(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        final allRows = snapshot.data ?? [];
+
+        return Column(
+          children: [
+            _buildHeader(theme, cs, allRows),
+            const Divider(height: 1),
+            Expanded(child: _buildDataTable(theme, cs, allRows)),
+            _buildFooter(theme, cs),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildHeader(ThemeData theme, ColorScheme cs, List<QueryRow> allRows) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
         children: [
           Expanded(
+            flex: 1,
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -156,49 +224,147 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> {
             ),
           ),
           const SizedBox(width: 16),
-          Row(
-            children: [
-              const Text('Live', style: TextStyle(fontSize: 12)),
-              Switch.adaptive(
-                value: _liveUpdate,
-                onChanged: (val) => setState(() => _liveUpdate = val),
-              ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh, size: 20),
-            onPressed: () => setState(() {}),
+          Expanded(
+            flex: 2,
+            child: _buildFilterButtons(theme, cs, allRows),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDataTable(ThemeData theme, ColorScheme cs) {
+  Widget _buildFilterButtons(
+    ThemeData theme,
+    ColorScheme cs,
+    List<QueryRow> allRows,
+  ) {
+    if (_selectedTable == null) return const SizedBox.shrink();
+
+    final fkColumns =
+        _selectedTable!.$columns.where((c) => c.$name.endsWith('_id')).toList();
+    if (fkColumns.isEmpty) return const SizedBox.shrink();
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children:
+            fkColumns.map((col) {
+              final colName = col.$name;
+              final label =
+                  colName
+                      .replaceAll('_id', '')
+                      .replaceAll('_', ' ')
+                      .toUpperCase();
+              final activeFilters = _activeFilters[colName];
+              final hasActive = activeFilters != null && activeFilters.isNotEmpty;
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: FilterChip(
+                  label: Text(
+                    hasActive ? '$label (${activeFilters.length})' : label,
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                  selected: hasActive,
+                  onSelected: (_) => _showFilterDialog(colName, allRows),
+                ),
+              );
+            }).toList(),
+      ),
+    );
+  }
+
+  void _showFilterDialog(String colName, List<QueryRow> allRows) {
+    final uniqueValues = allRows.map((r) => r.data[colName]).toSet().toList();
+    uniqueValues.sort(
+      (a, b) => a?.toString().compareTo(b?.toString() ?? '') ?? 0,
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final currentFilters = _activeFilters[colName] ?? {};
+            return AlertDialog(
+              title: Text('Filter by $colName'),
+              content: SizedBox(
+                width: 300,
+                child:
+                    uniqueValues.isEmpty
+                        ? const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text('No values available'),
+                        )
+                        : ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: uniqueValues.length,
+                          itemBuilder: (context, index) {
+                            final val = uniqueValues[index];
+                            final isSelected = currentFilters.contains(val);
+                            return CheckboxListTile(
+                              title: Text(val?.toString() ?? 'NULL'),
+                              value: isSelected,
+                              onChanged: (checked) {
+                                _toggleFilter(colName, val);
+                                setDialogState(() {});
+                              },
+                            );
+                          },
+                        ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    setState(() => _activeFilters.remove(colName));
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Clear'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _toggleFilter(String column, dynamic value) {
+    setState(() {
+      final filters = _activeFilters[column] ?? {};
+      if (filters.contains(value)) {
+        filters.remove(value);
+      } else {
+        filters.add(value);
+      }
+      if (filters.isEmpty) {
+        _activeFilters.remove(column);
+      } else {
+        _activeFilters[column] = filters;
+      }
+      _currentPage = 0;
+    });
+  }
+
+  Widget _buildDataTable(
+    ThemeData theme,
+    ColorScheme cs,
+    List<QueryRow> allRows,
+  ) {
     final table = _selectedTable!;
-    final columns = table.$columns;
+    final columns = table.$columns.toList();
 
-    // Build the query
-    final select = widget.db.select(table);
+    var rows = List<QueryRow>.from(allRows);
 
-    return StreamBuilder<List<dynamic>>(
-      stream: _liveUpdate ? select.watch() : select.get().asStream(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting &&
-            !snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-
-        var rows = List<dynamic>.from(snapshot.data ?? []);
-
-        // In-memory searching
-        if (_searchQuery.isNotEmpty) {
-          rows = rows.where((row) {
-            final map = row.toJson();
-            return map.values.any(
+    // In-memory searching
+    if (_searchQuery.isNotEmpty) {
+      rows =
+          rows.where((row) {
+            return row.data.values.any(
               (v) =>
                   v?.toString().toLowerCase().contains(
                     _searchQuery.toLowerCase(),
@@ -206,40 +372,58 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> {
                   false,
             );
           }).toList();
-        }
+    }
 
-        // In-memory sorting
-        if (_sortColumn != null) {
-          rows.sort((a, b) {
-            final mapA = a.toJson();
-            final mapB = b.toJson();
-            final valA = mapA[_sortColumn];
-            final valB = mapB[_sortColumn];
-            if (valA == null || valB == null) return 0;
-            final cmp = valA.toString().compareTo(valB.toString());
-            return _sortAscending ? cmp : -cmp;
-          });
-        }
+    // In-memory filtering
+    if (_activeFilters.isNotEmpty) {
+      rows =
+          rows.where((row) {
+            return _activeFilters.entries.every((entry) {
+              final val = row.data[entry.key];
+              return entry.value.contains(val);
+            });
+          }).toList();
+    }
 
-        if (rows.isEmpty) {
-          return const Center(child: Text('No data found'));
-        }
+    // In-memory sorting
+    if (_sortColumn != null) {
+      rows.sort((a, b) {
+        final valA = a.data[_sortColumn];
+        final valB = b.data[_sortColumn];
+        if (valA == null || valB == null) return 0;
+        final cmp = valA.toString().compareTo(valB.toString());
+        return _sortAscending ? cmp : -cmp;
+      });
+    }
 
-        // Pagination
-        final start = _currentPage * _rowsPerPage;
-        final end = (start + _rowsPerPage).clamp(0, rows.length);
-        final paginatedRows = rows.sublist(start, end);
+    if (rows.isEmpty) {
+      return const Center(child: Text('No data found'));
+    }
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              headingRowHeight: 40,
-              dataRowMinHeight: 30,
-              dataRowMaxHeight: 50,
-              columnSpacing: 24,
-              columns: columns.map((col) {
+    // Pagination
+    final totalRows = rows.length;
+    final start = (_currentPage * _rowsPerPage).clamp(0, totalRows);
+    final end = (start + _rowsPerPage).clamp(0, totalRows);
+    final paginatedRows = rows.sublist(start, end);
+
+    final sortIndex =
+        _sortColumn == null
+            ? null
+            : columns.indexWhere((c) => c.name == _sortColumn);
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          sortColumnIndex: sortIndex == -1 ? null : sortIndex,
+          sortAscending: _sortAscending,
+          headingRowHeight: 40,
+          dataRowMinHeight: 30,
+          dataRowMaxHeight: 50,
+          columnSpacing: 24,
+          columns:
+              columns.map((col) {
                 return DataColumn(
                   label: Text(
                     col.name,
@@ -253,19 +437,18 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> {
                   },
                 );
               }).toList(),
-              rows: paginatedRows.map((row) {
-                final rowMap = row.toJson();
+          rows:
+              paginatedRows.map((row) {
                 return DataRow(
-                  cells: columns.map((col) {
-                    final value = rowMap[col.name];
-                    return DataCell(_buildCellWidget(col, value));
-                  }).toList(),
+                  cells:
+                      columns.map((col) {
+                        final value = row.data[col.name];
+                        return DataCell(_buildCellWidget(col, value));
+                      }).toList(),
                 );
               }).toList(),
-            ),
-          ),
-        );
-      },
+        ),
+      ),
     );
   }
 
