@@ -5,6 +5,7 @@ import 'package:fsrs/fsrs.dart' as fsrs;
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/app_controller.dart';
+import 'package:project_2359/core/settings/labs_settings.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/features/study_page/flippable_card.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
@@ -391,6 +392,10 @@ class _StudyPageState extends State<StudyPage> {
                               subtitle: _previews[fsrs.Rating.again],
                               color: Colors.red.shade400,
                               onPressed: () => _rateCard(fsrs.Rating.again),
+                              onLongPress:
+                                  labsSettings.debugModeEnabled
+                                      ? () => _showFsrsDebug(context, card)
+                                      : null,
                             ),
                             const SizedBox(width: 8),
                             _FsrsButton(
@@ -398,6 +403,10 @@ class _StudyPageState extends State<StudyPage> {
                               subtitle: _previews[fsrs.Rating.hard],
                               color: Colors.orange.shade400,
                               onPressed: () => _rateCard(fsrs.Rating.hard),
+                              onLongPress:
+                                  labsSettings.debugModeEnabled
+                                      ? () => _showFsrsDebug(context, card)
+                                      : null,
                             ),
                             const SizedBox(width: 8),
                             _FsrsButton(
@@ -405,6 +414,10 @@ class _StudyPageState extends State<StudyPage> {
                               subtitle: _previews[fsrs.Rating.good],
                               color: Colors.green.shade400,
                               onPressed: () => _rateCard(fsrs.Rating.good),
+                              onLongPress:
+                                  labsSettings.debugModeEnabled
+                                      ? () => _showFsrsDebug(context, card)
+                                      : null,
                             ),
                             const SizedBox(width: 8),
                             _FsrsButton(
@@ -412,6 +425,10 @@ class _StudyPageState extends State<StudyPage> {
                               subtitle: _previews[fsrs.Rating.easy],
                               color: Colors.blue.shade400,
                               onPressed: () => _rateCard(fsrs.Rating.easy),
+                              onLongPress:
+                                  labsSettings.debugModeEnabled
+                                      ? () => _showFsrsDebug(context, card)
+                                      : null,
                             ),
                           ],
                         ),
@@ -434,6 +451,96 @@ class _StudyPageState extends State<StudyPage> {
 
     if (widget.isNested) return content;
     return Scaffold(body: content);
+  }
+
+  void _showFsrsDebug(BuildContext context, CardItem card) {
+    final labsSettings = context.read<LabsSettings>();
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.bug_report, size: 20),
+                const SizedBox(width: 8),
+                const Text("FSRS Debug Data"),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.power_settings_new, size: 18),
+                  tooltip: "Disable Debug Mode",
+                  onPressed: () {
+                    labsSettings.setDebugModeEnabled(false);
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _debugItem("Card ID", card.id),
+                _debugItem(
+                  "Stability",
+                  card.spacedStability?.toStringAsFixed(4) ?? "0.0",
+                ),
+                _debugItem(
+                  "Difficulty",
+                  card.spacedDifficulty?.toStringAsFixed(4) ?? "0.0",
+                ),
+                _debugItem(
+                  "Interval",
+                  card.spacedDue != null && card.spacedLastReview != null
+                      ? "${card.spacedDue!.difference(card.spacedLastReview!).inDays} days"
+                      : "0 days",
+                ),
+                _debugItem(
+                  "Last Review",
+                  card.spacedLastReview?.toIso8601String() ?? "Never",
+                ),
+                const Divider(),
+                const Text(
+                  "Predicted Next States (Simplified)",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                ),
+                const SizedBox(height: 8),
+                ...fsrs.Rating.values.map((r) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Text(
+                      "${r.name.toUpperCase()}: ${_previews[r] ?? 'N/A'}",
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                  );
+                }),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Widget _debugItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(color: Colors.black87, fontSize: 12),
+          children: [
+            TextSpan(
+              text: "$label: ",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(text: value),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -476,12 +583,14 @@ class _FsrsButton extends StatelessWidget {
   final String? subtitle;
   final Color color;
   final VoidCallback onPressed;
+  final VoidCallback? onLongPress;
 
   const _FsrsButton({
     required this.label,
     this.subtitle,
     required this.color,
     required this.onPressed,
+    this.onLongPress,
   });
 
   @override
@@ -500,6 +609,7 @@ class _FsrsButton extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onPressed,
+          onLongPress: onLongPress,
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,

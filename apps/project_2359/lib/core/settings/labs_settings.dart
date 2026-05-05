@@ -10,15 +10,19 @@ class LabsSettings extends ChangeNotifier {
   static const _mobileEmulationKey = 'mobile_emulation_enabled';
   static const _swipeToRateKey = 'swipe_to_rate_enabled';
 
+  static const _debugModeKey = 'debug_mode_enabled';
+
   bool _smartSelectionEnabled = true;
   bool _macEmulationEnabled = false;
   bool _mobileEmulationEnabled = kDebugMode;
   bool _swipeToRateEnabled = false;
+  bool _debugModeEnabled = kDebugMode;
 
   bool get smartSelectionEnabled => _smartSelectionEnabled;
   bool get macEmulationEnabled => _macEmulationEnabled;
   bool get mobileEmulationEnabled => _mobileEmulationEnabled;
   bool get swipeToRateEnabled => _swipeToRateEnabled;
+  bool get debugModeEnabled => _debugModeEnabled;
 
   bool isMobileMode(BuildContext context) {
     if (_mobileEmulationEnabled) return true;
@@ -31,6 +35,7 @@ class LabsSettings extends ChangeNotifier {
     _macEmulationEnabled = prefs.getBool(_macEmulationKey) ?? false;
     _mobileEmulationEnabled = prefs.getBool(_mobileEmulationKey) ?? kDebugMode;
     _swipeToRateEnabled = prefs.getBool(_swipeToRateKey) ?? false;
+    _debugModeEnabled = prefs.getBool(_debugModeKey) ?? kDebugMode;
     notifyListeners();
   }
 
@@ -60,5 +65,12 @@ class LabsSettings extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_swipeToRateKey, value);
+  }
+
+  Future<void> setDebugModeEnabled(bool value) async {
+    _debugModeEnabled = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_debugModeKey, value);
   }
 }

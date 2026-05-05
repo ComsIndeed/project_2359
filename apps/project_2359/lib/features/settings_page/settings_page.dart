@@ -429,6 +429,16 @@ class SettingsPage extends StatelessWidget {
                             onTap: trigger,
                           ),
                         ),
+                        _divider(theme),
+                        _SettingsToggleTile(
+                          icon: FontAwesomeIcons.bug,
+                          title: 'Debug Mode',
+                          subtitle:
+                              'Enable long-press on elements to view technical data',
+                          value: labsSettings.debugModeEnabled,
+                          onChanged: (value) =>
+                              labsSettings.setDebugModeEnabled(value),
+                        ),
                       ],
                     ),
 

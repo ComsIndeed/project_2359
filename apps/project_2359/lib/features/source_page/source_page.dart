@@ -79,6 +79,8 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   double _zoomLevel = 1.0;
   bool _pdfReady = false;
   bool _pdfDocumentLoaded = false;
+  bool _debugOverlaysEnabled = false;
+  final Map<int, pdfrx.PdfPageText> _debugPageTextCache = {};
 
   // Constants
 
@@ -129,9 +131,19 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   }
 
   void _onPageChanged(int? pageNumber) {
-    if (pageNumber != null) {
-      setState(() {
-        _currentPage = pageNumber;
+    if (pageNumber == null) return;
+    setState(() => _currentPage = pageNumber);
+
+    // If debug overlays are enabled, pre-load the text for the current page
+    if (_debugOverlaysEnabled && !_debugPageTextCache.containsKey(pageNumber)) {
+      _pdfController.document.pages[pageNumber - 1]
+          .loadStructuredText()
+          .then((text) {
+        if (mounted) {
+          setState(() {
+            _debugPageTextCache[pageNumber] = text!;
+          });
+        }
       });
     }
   }
@@ -408,16 +420,11 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                       sourceName: widget.title ?? 'pdf',
                       controller: _pdfController,
                       params: pdfrx.PdfViewerParams(
-                        onViewerReady: (doc, controller) {
-                          setState(() {
-                            _totalPages = doc.pages.length;
-                            _pdfDocumentLoaded = true;
-                          });
-                        },
                         onPageChanged: _onPageChanged,
-                        backgroundColor: isDark
-                            ? cs.surfaceContainer
-                            : cs.surfaceContainerHighest,
+                        backgroundColor:
+                            isDark
+                                ? cs.surfaceContainer
+                                : cs.surfaceContainerHighest,
                         calculateInitialPageNumber: (document, controller) =>
                             widget.initialPage ?? 1,
                         pagePaintCallbacks: [
@@ -441,8 +448,42 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                                 );
                               }
                             }
+
+                            // Debug Overlays
+                            if (_debugOverlaysEnabled) {
+                              final paint =
+                                  Paint()
+                                    ..color = Colors.red.withValues(alpha: 0.2)
+                                    ..style = PaintingStyle.stroke
+                                    ..strokeWidth = 1.0;
+
+                              final text = _debugPageTextCache[page.pageNumber];
+                              if (text != null) {
+                                for (final fragment in text.fragments) {
+                                  canvas.drawRect(
+                                    fragment.bounds.toRect(page: page),
+                                    paint,
+                                  );
+                                }
+                              }
+                            }
                           },
                         ],
+                        onViewerReady: (document, controller) {
+                          setState(() {
+                            _totalPages = document.pages.length;
+                            _pdfDocumentLoaded = true;
+                          });
+                          // Pre-load first page text if debug enabled
+                          if (_debugOverlaysEnabled) {
+                            _onPageChanged(1);
+                          }
+                        },
+                        textSelectionParams: pdfrx.PdfTextSelectionParams(
+                          onTextSelectionChange: (selection) {
+                            // Selection change handling
+                          },
+                        ),
                       ),
                     )
                   : Center(

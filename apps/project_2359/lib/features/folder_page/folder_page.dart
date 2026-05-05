@@ -10,7 +10,6 @@ import 'package:project_2359/core/widgets/special_background_generator.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -20,6 +19,7 @@ import 'package:project_2359/core/widgets/due_cards_tiles.dart';
 import 'package:project_2359/core/widgets/selection_action_bar.dart';
 import 'package:project_2359/core/widgets/adaptive_pane_layout.dart';
 import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
+import 'package:project_2359/core/settings/labs_settings.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -30,6 +30,63 @@ import 'package:project_2359/features/card_creation_page/card_creation_page.dart
 import 'package:project_2359/features/study_page/study_page.dart';
 import 'package:project_2359/features/study_page/widgets/study_session_setup_sheet.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
+
+void _showDebugDialog(
+  BuildContext context,
+  String title,
+  Map<String, String> data,
+) {
+  final labsSettings = Provider.of<LabsSettings>(context, listen: false);
+  showDialog(
+    context: context,
+    builder:
+        (context) => AlertDialog(
+          title: Row(
+            children: [
+              const Icon(Icons.bug_report, size: 20),
+              const SizedBox(width: 8),
+              Text(title),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.power_settings_new, size: 18),
+                tooltip: "Disable Debug Mode",
+                onPressed: () {
+                  labsSettings.setDebugModeEnabled(false);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:
+                data.entries.map((e) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: SelectableText.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "${e.key}: ",
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          TextSpan(text: e.value),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+  );
+}
 
 class FolderPage extends StatefulWidget {
   final String folderId;
@@ -481,6 +538,7 @@ class _FolderPageState extends State<FolderPage> {
                   SliverPersistentHeader(
                     pinned: true,
                     delegate: _CollapsingHeaderDelegate(
+                      folderId: widget.folderId,
                       folderName: folderName,
                       topPadding: widget.isNested
                           ? 0
@@ -600,6 +658,7 @@ class _FolderPageState extends State<FolderPage> {
 }
 
 class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final String folderId;
   final String folderName;
   final double topPadding;
   final VoidCallback? onBack;
@@ -607,6 +666,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
   final ValueChanged<int> onPageRequested;
 
   _CollapsingHeaderDelegate({
+    required this.folderId,
     required this.folderName,
     required this.topPadding,
     this.onBack,
@@ -748,15 +808,26 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                   Expanded(
                     child: Opacity(
                       opacity: (t * 2.0 - 0.6).clamp(0.0, 1.0),
-                      child: Text(
-                        folderName,
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18,
-                          color: Colors.white,
+                      child: GestureDetector(
+                        onLongPress:
+                            Provider.of<LabsSettings>(context, listen: false)
+                                    .debugModeEnabled
+                                ? () => _showDebugDialog(context, "Folder Metadata", {
+                                      "ID": folderId,
+                                      "Name": folderName,
+                                    })
+                                : null,
+                        child: Text(
+                          folderName,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            fontSize: 28,
+                            letterSpacing: -0.5,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
@@ -1343,7 +1414,14 @@ class _DecksList extends StatelessWidget {
                                 );
                               }
                             },
-                      onLongTap: () => onToggleSelection(decks[i].id),
+                      onLongTap:
+                          context.read<LabsSettings>().debugModeEnabled
+                              ? () => _showDebugDialog(context, "Deck Metadata", {
+                                "ID": decks[i].id,
+                                "Name": decks[i].name,
+                                "Folder ID": folderId,
+                              })
+                              : () => onToggleSelection(decks[i].id),
                     )
                     .animate()
                     .fadeIn(delay: (i * 50).ms)

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
+import 'package:project_2359/core/settings/labs_settings.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -55,28 +57,42 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'John Doe',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                GestureDetector(
+                  onLongPress:
+                      context.read<LabsSettings>().debugModeEnabled
+                          ? () => _showAuthDebug(context)
+                          : null,
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'John Doe',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          FaIcon(
+                            FontAwesomeIcons.pencil,
+                            size: 14,
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.6,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    FaIcon(
-                      FontAwesomeIcons.pencil,
-                      size: 14,
-                      color: theme.colorScheme.primary.withValues(alpha: 0.6),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'john.doe@example.com',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      const SizedBox(height: 4),
+                      Text(
+                        'john.doe@example.com',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.6,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -136,6 +152,71 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAuthDebug(BuildContext context) {
+    final labsSettings = context.read<LabsSettings>();
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.bug_report, size: 20),
+                const SizedBox(width: 8),
+                const Text("Auth Metadata"),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.power_settings_new, size: 18),
+                  tooltip: "Disable Debug Mode",
+                  onPressed: () {
+                    labsSettings.setDebugModeEnabled(false);
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _debugItem("User UID", "user_1234567890"),
+                _debugItem("Auth Provider", "Google (OAuth2)"),
+                _debugItem("Session Start", "2026-05-06 01:15:59"),
+                _debugItem("Email Verified", "Yes"),
+                const SizedBox(height: 12),
+                const Text(
+                  "Note: Sensitive data (JWT, Secrets) are hidden.",
+                  style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Widget _debugItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(color: Colors.black87, fontSize: 12),
+          children: [
+            TextSpan(
+              text: "$label: ",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(text: value),
           ],
         ),
       ),
