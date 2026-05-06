@@ -52,7 +52,56 @@
 
 ---
 
-## MVP 4 — Source Heatmap
+## MVP 4 — Note System Migration
+**Goal:** Replace direct flashcard creation with a note-based authoring system (à la Anki's note/card distinction). Authors write *notes*; the app derives one or more *cards* from each note. This unlocks richer card types without duplicating content.
+
+### How Notes Work (Anki-style Model)
+In Anki, the core primitives are:
+
+| Concept | What it is |
+|---|---|
+| **Note** | The raw knowledge unit. Has a set of named **fields** (e.g. `Front`, `Back`, `Extra`). |
+| **Note Type** (template) | Defines the field schema and one or more **card templates** — each template specifies how to render a field set into a front/back pair. |
+| **Card** | A *derived* object produced by applying a card template to a note's fields. One note can produce multiple cards (e.g. forward *and* reverse). |
+
+**Example:** A "Basic + Reversed" note type has fields `[Front, Back]` and two templates:
+- Template 1 → card front: `{{Front}}`, card back: `{{Back}}`
+- Template 2 → card front: `{{Back}}`, card back: `{{Front}}`
+
+Creating one note with `Front = "犬"` and `Back = "dog"` automatically generates *two* cards for free.
+
+### What Needs to Exist
+
+**Data layer:**
+- Add a `notes` table: `id`, `noteTypeId`, `deckId`, `createdAt`, `updatedAt`.
+- Add a `note_fields` table (or store as JSON on the note): maps field name → field value (text, and later asset IDs).
+- Add a `note_types` table: `id`, `name`. Ship with built-in types: `Basic`, `Basic (reversed)`, `Cloze`.
+- Add a `card_templates` table: `id`, `noteTypeId`, `name`, `frontTemplate`, `backTemplate` — templates are Mustache-style strings (`{{FieldName}}`).
+- Migrate `card_items`: add a nullable `noteId` FK. Cards *derived* from notes carry this; legacy hand-crafted cards leave it null (backward compatible).
+
+**Note generation service:**
+- `NoteService.createNote(noteType, fields, deckId)` — inserts the note, evaluates each card template against the field map, and inserts the resulting `card_items` rows (with `noteId` set). Returns the list of generated card IDs.
+- `NoteService.updateNote(noteId, fields)` — re-evaluates all templates and updates/regenerates the derived cards. Does **not** touch the cards' FSRS scheduling state (scheduling is on the card, not the note).
+- `NoteService.deleteNote(noteId)` — cascades to all derived cards.
+
+**Cloze support:**
+- Cloze notes have a single `Text` field containing markers like `{{c1::Berlin}} is the capital of {{c2::Germany}}`.
+- A parser extracts each `cN` group and produces one card per group: the front hides that group's text with `[...]`, the back reveals the full sentence.
+
+**UI migration:**
+- The card creation flow becomes a *note creation* flow. The toolbar's "add card" action is now "add note" — the user picks a note type first, then fills in the named fields.
+- The `MenuModeContent` card list now shows notes (grouped), with a sub-list of derived cards per note when expanded.
+- Tapping a derived card in the list shows its rendered front/back (evaluated from the template + fields). Tapping the parent note opens the note editor.
+- Keep a "quick card" escape hatch: a `Basic` note type with `Front`/`Back` fields that behaves identically to the old flow (no regression for existing users).
+
+**Migration of existing cards:**
+- On first run after the schema migration, wrap every existing `card_items` row that has no `noteId` in a synthetic `Basic` note (one note per card, `Front` = old front content, `Back` = old back content). This keeps the study schedule intact since the card rows are preserved in-place.
+
+**Deadline suggestion:** 4–5 days.
+
+---
+
+## MVP 5 — Source Heatmap
 **Goal:** Open a source document and see visual overlays showing which pages/regions have been cited in studied cards.
 
 **What needs to exist:**
@@ -64,7 +113,7 @@
 
 ---
 
-## MVP 5 — Image Attachments on Cards
+## MVP 6 — Image Attachments on Cards
 **Goal:** Cards can have images on front/back. Settings storage section shows local images and allows deletion.
 
 **What needs to exist:**
@@ -77,18 +126,19 @@
 
 ---
 
-## MVP 6 — Image Occlusion Cards
+## MVP 7 — Image Occlusion Cards
 **Goal:** Create cards where parts of an image are hidden with boxes, and you reveal them one at a time (or all at once) when studying.
 
 **What needs to exist:**
-- The occlusion editor UI (`ImageOcclusionEditor`, `PdfOcclusionOverlay`) is already partially built. Wire it up — when the user confirms their boxes, serialize the rect list into a `CardOcclusion` object (model already exists), create a card with `occlusionData` set and `frontImageId` pointing to the captured image asset.
-- Decide on the card generation strategy — one card per box (each box is the "answer", all other boxes shown as context hints), or one card with all boxes. Let the user pick.
+- The occlusion editor UI (`ImageOcclusionEditor`, `PdfOcclusionOverlay`) is already partially built. Wire it up — when the user confirms their boxes, serialize the rect list into a `CardOcclusion` object (model already exists), create a note with an `ImageOcclusion` note type and `occlusionData`/`frontImageId` fields set.
+- Decide on the card generation strategy — one card per box (each box is the "answer", all other boxes shown as context hints), or one card with all boxes. Let the user pick. This maps naturally onto the note → multi-card model from MVP 4.
 - In the study page, detect that a card has `occlusionData`. Render the image with all occlusion boxes drawn. On reveal, animate the boxes away (or just one at a time if multi-box). You can use a `CustomPaint` over `Image.memory` for this.
 
 **Deadline suggestion:** 3–4 days.
 
 ---
 
-> **Total rough timeline: ~3 weeks to MVP 6 if you keep scope tight and don't gold-plate each step.**
+
+> **Total rough timeline: ~5 weeks to MVP 7 if you keep scope tight and don't gold-plate each step.**
 >
 > The single most important thing — don't touch the UI beyond what's needed to verify each MVP works. Ship the logic, slap a temporary ugly button on it, move on.
