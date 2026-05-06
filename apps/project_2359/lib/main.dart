@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
@@ -18,6 +19,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:flutter/services.dart';
+import 'package:fsrs_rs/fsrs.dart' as fsrs_rs;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +34,11 @@ Future<void> main() async {
     url: 'https://digzsxnfivcmrsyzdnrb.supabase.co',
     anonKey: 'sb_publishable_moMCFpqrLfTXqWaJATrahQ_SUfKdwbm',
   );
+
+  if (!kIsWeb) {
+    AppLogger.info('Initializing FSRS Rust...', tag: 'Main');
+    await fsrs_rs.RustLib.init();
+  }
 
   try {
     await FlutterDisplayMode.setHighRefreshRate();

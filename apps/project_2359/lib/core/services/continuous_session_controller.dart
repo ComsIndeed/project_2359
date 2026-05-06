@@ -1,6 +1,6 @@
 import 'dart:math' as math;
-import 'package:fsrs/fsrs.dart' as fsrs;
 import 'package:project_2359/app_database.dart';
+import 'package:project_2359/core/services/fsrs_shim.dart';
 
 class ContinuousSessionController {
   final List<CardItem> _queue;
@@ -43,14 +43,14 @@ class ContinuousSessionController {
 
   CardItem? get peekNextCard => _queue.length > 1 ? _queue[1] : null;
 
-  /// Process user rating for the current card.
-  void submitRating(fsrs.Rating rating) {
+  /// Process user FsrsRating for the current card.
+  void submitRating(FsrsRating rating) {
     if (_queue.isEmpty) return;
     
     final card = _queue.removeAt(0);
     _totalReviews++;
 
-    if (rating == fsrs.Rating.again) {
+    if (rating == FsrsRating.again) {
       _lapseCount[card.id] = (_lapseCount[card.id] ?? 0) + 1;
       
       // Reinsert 5-10 positions ahead (clamped to queue length)

@@ -79,7 +79,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
   double _zoomLevel = 1.0;
   bool _pdfReady = false;
   bool _pdfDocumentLoaded = false;
-  bool _debugOverlaysEnabled = false;
+  final bool _debugOverlaysEnabled = false;
   final Map<int, pdfrx.PdfPageText> _debugPageTextCache = {};
 
   // Constants
@@ -141,7 +141,7 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
           .then((text) {
         if (mounted) {
           setState(() {
-            _debugPageTextCache[pageNumber] = text!;
+            _debugPageTextCache[pageNumber] = text;
           });
         }
       });

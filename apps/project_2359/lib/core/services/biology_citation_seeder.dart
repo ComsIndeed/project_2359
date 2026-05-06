@@ -28,7 +28,7 @@ class BiologyCitationSeeder {
     );
 
     // 2. Download and Create Sources/Blobs
-    final sourceId_bio_heavy_bullets_v1_pdf = uuid.v4();
+    final sourceidBioHeavyBulletsV1Pdf = uuid.v4();
     try {
       final response = await http.get(Uri.parse('${_baseUrl}bio_heavy_bullets-v1.pdf'));
       if (response.statusCode == 200) {
@@ -36,7 +36,7 @@ class BiologyCitationSeeder {
         await db.into(db.sourceItemBlobs).insert(
           SourceItemBlobsCompanion(
             id: Value(uuid.v4()),
-            sourceItemId: Value(sourceId_bio_heavy_bullets_v1_pdf),
+            sourceItemId: Value(sourceidBioHeavyBulletsV1Pdf),
             sourceItemName: const Value('bio_heavy_bullets-v1.pdf'),
             type: const Value(SourceFileType.pdf),
             bytes: Value(response.bodyBytes),
@@ -51,13 +51,13 @@ class BiologyCitationSeeder {
 
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
-        id: Value(sourceId_bio_heavy_bullets_v1_pdf),
+        id: Value(sourceidBioHeavyBulletsV1Pdf),
         folderId: Value(folderId),
         label: const Value('bio_heavy_bullets-v1.pdf'),
         type: const Value(MediaType.document),
       ),
     );
-    final sourceId_bio_wall_of_text_v1_pdf = uuid.v4();
+    final sourceidBioWallOfTextV1Pdf = uuid.v4();
     try {
       final response = await http.get(Uri.parse('${_baseUrl}bio_wall_of_text-v1.pdf'));
       if (response.statusCode == 200) {
@@ -65,7 +65,7 @@ class BiologyCitationSeeder {
         await db.into(db.sourceItemBlobs).insert(
           SourceItemBlobsCompanion(
             id: Value(uuid.v4()),
-            sourceItemId: Value(sourceId_bio_wall_of_text_v1_pdf),
+            sourceItemId: Value(sourceidBioWallOfTextV1Pdf),
             sourceItemName: const Value('bio_wall_of_text-v1.pdf'),
             type: const Value(SourceFileType.pdf),
             bytes: Value(response.bodyBytes),
@@ -80,13 +80,13 @@ class BiologyCitationSeeder {
 
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
-        id: Value(sourceId_bio_wall_of_text_v1_pdf),
+        id: Value(sourceidBioWallOfTextV1Pdf),
         folderId: Value(folderId),
         label: const Value('bio_wall_of_text-v1.pdf'),
         type: const Value(MediaType.document),
       ),
     );
-    final sourceId_cardiovascular_dynamics_v1_pdf = uuid.v4();
+    final sourceidCardiovascularDynamicsV1Pdf = uuid.v4();
     try {
       final response = await http.get(Uri.parse('${_baseUrl}cardiovascular_dynamics-v1.pdf'));
       if (response.statusCode == 200) {
@@ -94,7 +94,7 @@ class BiologyCitationSeeder {
         await db.into(db.sourceItemBlobs).insert(
           SourceItemBlobsCompanion(
             id: Value(uuid.v4()),
-            sourceItemId: Value(sourceId_cardiovascular_dynamics_v1_pdf),
+            sourceItemId: Value(sourceidCardiovascularDynamicsV1Pdf),
             sourceItemName: const Value('cardiovascular_dynamics-v1.pdf'),
             type: const Value(SourceFileType.pdf),
             bytes: Value(response.bodyBytes),
@@ -109,13 +109,13 @@ class BiologyCitationSeeder {
 
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
-        id: Value(sourceId_cardiovascular_dynamics_v1_pdf),
+        id: Value(sourceidCardiovascularDynamicsV1Pdf),
         folderId: Value(folderId),
         label: const Value('cardiovascular_dynamics-v1.pdf'),
         type: const Value(MediaType.document),
       ),
     );
-    final sourceId_cellular_respiration_v1_pdf = uuid.v4();
+    final sourceidCellularRespirationV1Pdf = uuid.v4();
     try {
       final response = await http.get(Uri.parse('${_baseUrl}cellular_respiration-v1.pdf'));
       if (response.statusCode == 200) {
@@ -123,7 +123,7 @@ class BiologyCitationSeeder {
         await db.into(db.sourceItemBlobs).insert(
           SourceItemBlobsCompanion(
             id: Value(uuid.v4()),
-            sourceItemId: Value(sourceId_cellular_respiration_v1_pdf),
+            sourceItemId: Value(sourceidCellularRespirationV1Pdf),
             sourceItemName: const Value('cellular_respiration-v1.pdf'),
             type: const Value(SourceFileType.pdf),
             bytes: Value(response.bodyBytes),
@@ -138,13 +138,13 @@ class BiologyCitationSeeder {
 
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
-        id: Value(sourceId_cellular_respiration_v1_pdf),
+        id: Value(sourceidCellularRespirationV1Pdf),
         folderId: Value(folderId),
         label: const Value('cellular_respiration-v1.pdf'),
         type: const Value(MediaType.document),
       ),
     );
-    final sourceId_immunology_basics_v1_pdf = uuid.v4();
+    final sourceidImmunologyBasicsV1Pdf = uuid.v4();
     try {
       final response = await http.get(Uri.parse('${_baseUrl}immunology_basics-v1.pdf'));
       if (response.statusCode == 200) {
@@ -152,7 +152,7 @@ class BiologyCitationSeeder {
         await db.into(db.sourceItemBlobs).insert(
           SourceItemBlobsCompanion(
             id: Value(uuid.v4()),
-            sourceItemId: Value(sourceId_immunology_basics_v1_pdf),
+            sourceItemId: Value(sourceidImmunologyBasicsV1Pdf),
             sourceItemName: const Value('immunology_basics-v1.pdf'),
             type: const Value(SourceFileType.pdf),
             bytes: Value(response.bodyBytes),
@@ -167,13 +167,13 @@ class BiologyCitationSeeder {
 
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
-        id: Value(sourceId_immunology_basics_v1_pdf),
+        id: Value(sourceidImmunologyBasicsV1Pdf),
         folderId: Value(folderId),
         label: const Value('immunology_basics-v1.pdf'),
         type: const Value(MediaType.document),
       ),
     );
-    final sourceId_molecular_genetics_v1_pdf = uuid.v4();
+    final sourceidMolecularGeneticsV1Pdf = uuid.v4();
     try {
       final response = await http.get(Uri.parse('${_baseUrl}molecular_genetics-v1.pdf'));
       if (response.statusCode == 200) {
@@ -181,7 +181,7 @@ class BiologyCitationSeeder {
         await db.into(db.sourceItemBlobs).insert(
           SourceItemBlobsCompanion(
             id: Value(uuid.v4()),
-            sourceItemId: Value(sourceId_molecular_genetics_v1_pdf),
+            sourceItemId: Value(sourceidMolecularGeneticsV1Pdf),
             sourceItemName: const Value('molecular_genetics-v1.pdf'),
             type: const Value(SourceFileType.pdf),
             bytes: Value(response.bodyBytes),
@@ -196,13 +196,13 @@ class BiologyCitationSeeder {
 
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
-        id: Value(sourceId_molecular_genetics_v1_pdf),
+        id: Value(sourceidMolecularGeneticsV1Pdf),
         folderId: Value(folderId),
         label: const Value('molecular_genetics-v1.pdf'),
         type: const Value(MediaType.document),
       ),
     );
-    final sourceId_population_ecology_v1_pdf = uuid.v4();
+    final sourceidPopulationEcologyV1Pdf = uuid.v4();
     try {
       final response = await http.get(Uri.parse('${_baseUrl}population_ecology-v1.pdf'));
       if (response.statusCode == 200) {
@@ -210,7 +210,7 @@ class BiologyCitationSeeder {
         await db.into(db.sourceItemBlobs).insert(
           SourceItemBlobsCompanion(
             id: Value(uuid.v4()),
-            sourceItemId: Value(sourceId_population_ecology_v1_pdf),
+            sourceItemId: Value(sourceidPopulationEcologyV1Pdf),
             sourceItemName: const Value('population_ecology-v1.pdf'),
             type: const Value(SourceFileType.pdf),
             bytes: Value(response.bodyBytes),
@@ -225,7 +225,7 @@ class BiologyCitationSeeder {
 
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
-        id: Value(sourceId_population_ecology_v1_pdf),
+        id: Value(sourceidPopulationEcologyV1Pdf),
         folderId: Value(folderId),
         label: const Value('population_ecology-v1.pdf'),
         type: const Value(MediaType.document),
@@ -277,7 +277,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Population Ecology"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 151.7842, top: 252.1802, right: 641.7802, bottom: 306.1262)]),
         ),
@@ -302,7 +302,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Project 2359 Stress Test Deck"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 235.403, top: 409.5006, right: 556.691, bottom: 433.4766)]),
         ),
@@ -327,7 +327,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("RR"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 551.7931, top: 316.7498, right: 586.1371, bottom: 340.7258)]),
         ),
@@ -352,7 +352,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Energy Requirements: This is a highly endergonic process. The hydrolysis of ATP to ADP and inorganic phosphate (Pi) yields approximately -7.3 kcal/mol of free energy, which is coupled to this reaction to drive it forward against thermodynamic equilibrium."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 53.7019, top: 445.0499, right: 737.3307, bottom: 505.8339)]),
         ),
@@ -377,7 +377,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Pathological Correlates: Dysregulation in this specific pathway often presents clinically as a spectrum of metabolic or neurological disorders. Genetic mutations affecting the transcription factors responsible for expressing these proteins result in truncated or misfolded polypeptides."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([19]),
           rects: const Value([ProjectRect(left: 53.7019, top: 270.2499, right: 726.934, bottom: 331.0339)]),
         ),
@@ -402,7 +402,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Feature"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 57.0, top: 132.2498, right: 121.926, bottom: 150.2318)]),
         ),
@@ -427,7 +427,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -452,7 +452,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("4. Purkinje Fibers: Rapidly distributes impulse through ventricular muscle."),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([4]),
           rects: const Value([ProjectRect(left: 52.76, top: 331.25, right: 713.0833, bottom: 351.23)]),
         ),
@@ -477,7 +477,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Heavy Chains: Two identical long polypeptide chains."),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 54.9404, top: 220.75, right: 369.3036, bottom: 270.73)]),
         ),
@@ -502,7 +502,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Heavy Chains: Two identical long polypeptide chains."),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 54.9404, top: 220.75, right: 369.3036, bottom: 270.73)]),
         ),
@@ -527,7 +527,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Cardiovascular Dynamics"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 75.575, top: 252.1802, right: 718.229, bottom: 306.1262)]),
         ),
@@ -552,7 +552,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Slide 6: Avian Flight Mechanics"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([7]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 491.76, bottom: 67.4701)]),
         ),
@@ -577,7 +577,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Key regulatory enzyme: [Cite: \"Principles of Biochemistry, 8th Ed., Ch. 14\"] Phosphofructokinase (PFK)."),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 54.9404, top: 528.75, right: 734.9922, bottom: 578.73)]),
         ),
@@ -602,7 +602,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("2. Antibody Structure"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 45.0, top: 44.9999, right: 390.712, bottom: 78.9659)]),
         ),
@@ -627,7 +627,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -652,7 +652,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("driven)"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 504.9308, top: 286.7498, right: 559.5788, bottom: 304.7318)]),
         ),
@@ -677,7 +677,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Energy Requirements: This is a highly endergonic process. The hydrolysis of ATP to ADP and inorganic phosphate (Pi) yields approximately -7.3 kcal/mol of free energy, which is coupled to this reaction to drive it forward against thermodynamic equilibrium."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([20]),
           rects: const Value([ProjectRect(left: 53.7019, top: 445.0499, right: 737.3307, bottom: 505.8339)]),
         ),
@@ -702,7 +702,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Occurs in the cytoplasm of the cell."),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 54.9404, top: 338.25, right: 377.04, bottom: 358.23)]),
         ),
@@ -727,7 +727,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("2. Antibody Structure"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 45.0, top: 44.9999, right: 390.712, bottom: 78.9659)]),
         ),
@@ -752,7 +752,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("MAP ≈ DP + 1/3(SP - DP)"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 67.5, top: 300.5199, right: 296.56, bottom: 323.4999)]),
         ),
@@ -777,7 +777,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -802,7 +802,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("[Cite: \"Campbell Biology 12th Ed., Unit 8\"]"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 373.7937, top: 556.9317, right: 734.9937, bottom: 575.9997)]),
         ),
@@ -827,7 +827,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Pathological Correlates: Dysregulation in this specific pathway often presents clinically as a spectrum of metabolic or neurological disorders. Genetic mutations affecting the transcription factors responsible for expressing these proteins result in truncated or misfolded polypeptides."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([10]),
           rects: const Value([ProjectRect(left: 53.7019, top: 270.2499, right: 726.934, bottom: 331.0339)]),
         ),
@@ -852,7 +852,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("[Cite: \"Cardiovascular Physiology Concepts, Richard E. Klabunde\"]"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 188.9905, top: 511.9317, right: 734.9905, bottom: 530.9997)]),
         ),
@@ -877,7 +877,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("[Cite: \"Campbell Biology 12th Ed., Unit 8\"]"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 373.7937, top: 556.9317, right: 734.9937, bottom: 575.9997)]),
         ),
@@ -902,7 +902,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -927,7 +927,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Pathological Correlates: Dysregulation in this specific pathway often presents clinically as a spectrum of metabolic or neurological disorders. Genetic mutations affecting the transcription factors responsible for expressing these proteins result in truncated or misfolded polypeptides."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([14]),
           rects: const Value([ProjectRect(left: 53.7019, top: 270.2499, right: 726.934, bottom: 331.0339)]),
         ),
@@ -952,7 +952,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Memory"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 57.0, top: 350.4998, right: 126.408, bottom: 368.4818)]),
         ),
@@ -977,7 +977,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -1002,7 +1002,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Cardiovascular Dynamics"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 75.575, top: 252.1802, right: 718.229, bottom: 306.1262)]),
         ),
@@ -1027,7 +1027,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -1052,7 +1052,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Population Ecology"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 151.7842, top: 252.1802, right: 641.7802, bottom: 306.1262)]),
         ),
@@ -1077,7 +1077,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Immunology Basics"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 147.4944, top: 252.1802, right: 646.0224, bottom: 306.1262)]),
         ),
@@ -1102,7 +1102,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("The Central Dogma of molecular biology explains the flow of genetic information, from DNA to RNA, to make a functional product, a protein."),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 60.0, top: 132.0, right: 682.02, bottom: 181.98)]),
         ),
@@ -1127,7 +1127,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Cellular Localization: While the initial stages occur in the cytosol, the terminal enzymatic steps are tethered to the inner mitochondrial membrane, increasing the local concentration of intermediates and preventing their diffusion into off-target pathways."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([9]),
           rects: const Value([ProjectRect(left: 53.7019, top: 521.2499, right: 739.4261, bottom: 582.0339)]),
         ),
@@ -1152,7 +1152,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Evolutionary Biology: Text Dumps"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 82.8754, top: 285.5004, right: 709.2254, bottom: 385.4507)]),
         ),
@@ -1177,7 +1177,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Antigen Binding Sites Variable Region"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 526.02, top: 151.0358, right: 700.9272, bottom: 165.3158)]),
         ),
@@ -1202,7 +1202,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Energy flow through an ecosystem is fundamentally inefficient. Only about 10% of the energy stored as biomass in a trophic level is passed to the next."),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 45.0, top: 120.75, right: 743.08, bottom: 170.73)]),
         ),
@@ -1227,7 +1227,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -1252,7 +1252,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("[Source: Unformatted Bio Text Dump, Vol 7]"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([8]),
           rects: const Value([ProjectRect(left: 444.6123, top: 569.4176, right: 747.0123, bottom: 585.7496)]),
         ),
@@ -1277,7 +1277,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("When considering the overarching paradigms of the endosymbiotic theory, one must account for a myriad of confounding variables that researchers have debated for decades (Smith & Wesson, 2018). The fossil record, while invaluable, presents a highly fragmented and taphonomically biased window into deep time, meaning that absence of evidence is fundamentally not evidence of absence. Furthermore, isotopic analysis of carbon-13 and oxygen-18 ratios in sedimentary rocks indicates massive fluctuations in global climate and atmospheric composition, which directly correlates with the selective pressures driving morphological divergence in early taxa (Jones et al., 2021). It is crucial to note that the morphological innovations observed during this period were not sudden in a biological sense, but rather the culmination of millions of years of cryptic genetic variation accumulating within isolated subpopulations, eventually reaching a tipping point of phenotypic expression once environmental constraints were lifted or new ecological niches became available following major tectonic shifts. For example, the regulatory gene networks—specifically the Hox gene clusters responsible for anteroposterior axis patterning—likely underwent significant duplication events, allowing for the functional divergence of redundant genomic segments without compromising the viability of the organism (Chen & Zhao, 2019; Miller, 2020). This genomic plasticity facilitated the rapid radiation of body plans. Additionally, we cannot ignore the role of lateral gene transfer among prokaryotic ancestors, which significantly complicates the construction of a standard bifurcating phylogenetic tree and instead suggests a highly reticulated 'web of life' at its base. The integration of mitochondrial and plastid precursors via phagocytosis without subsequent digestion revolutionized eukaryotic cellular energetics, granting an unparalleled advantage in oxygen-rich environments and setting the stage for multicellularity. Consequently, attempting to categorize these early organisms using modern Linnaean taxonomy often forces contiguous evolutionary grades into discrete clades, obscuring the transitional nature of the lineages. All of this underscores the profound complexity and interconnectedness of Earth's biological history, where geological, atmospheric, and genetic factors intertwine to drive the relentless engine of evolution (Williams, 2022)."),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 45.0, top: 93.7501, right: 747.2175, bottom: 522.7351)]),
         ),
@@ -1302,7 +1302,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("When considering the overarching paradigms of mass extinction events, one must account for a myriad of confounding variables that researchers have debated for decades (Smith & Wesson, 2018). The fossil record, while invaluable, presents a highly fragmented and taphonomically biased window into deep time, meaning that absence of evidence is fundamentally not evidence of absence. Furthermore, isotopic analysis of carbon-13 and oxygen-18 ratios in sedimentary rocks indicates massive fluctuations in global climate and atmospheric composition, which directly correlates with the selective pressures driving morphological divergence in early taxa (Jones et al., 2021). It is crucial to note that the morphological innovations observed during this period were not sudden in a biological sense, but rather the culmination of millions of years of cryptic genetic variation accumulating within isolated subpopulations, eventually reaching a tipping point of phenotypic expression once environmental constraints were lifted or new ecological niches became available following major tectonic shifts. For example, the regulatory gene networks—specifically the Hox gene clusters responsible for anteroposterior axis patterning—likely underwent significant duplication events, allowing for the functional divergence of redundant genomic segments without compromising the viability of the organism (Chen & Zhao, 2019; Miller, 2020). This genomic plasticity facilitated the rapid radiation of body plans. Additionally, we cannot ignore the role of lateral gene transfer among prokaryotic ancestors, which significantly complicates the construction of a standard bifurcating phylogenetic tree and instead suggests a highly reticulated 'web of life' at its base. The integration of mitochondrial and plastid precursors via phagocytosis without subsequent digestion revolutionized eukaryotic cellular energetics, granting an unparalleled advantage in oxygen-rich environments and setting the stage for multicellularity. Consequently, attempting to categorize these early organisms using modern Linnaean taxonomy often forces contiguous evolutionary grades into discrete clades, obscuring the transitional nature of the lineages. All of this underscores the profound complexity and interconnectedness of Earth's biological history, where geological, atmospheric, and genetic factors intertwine to drive the relentless engine of evolution (Williams, 2022)."),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([5]),
           rects: const Value([ProjectRect(left: 45.0, top: 93.7501, right: 747.2175, bottom: 522.7351)]),
         ),
@@ -1327,7 +1327,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Immunology Basics"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 147.4944, top: 252.1802, right: 646.0224, bottom: 306.1262)]),
         ),
@@ -1352,7 +1352,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Heavy Chains: Two identical long polypeptide chains."),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 54.9404, top: 220.75, right: 369.3036, bottom: 270.73)]),
         ),
@@ -1377,7 +1377,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("1. Population Growth Models"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 45.0, top: 44.9999, right: 513.248, bottom: 78.9659)]),
         ),
@@ -1402,7 +1402,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Transcription: Synthesizing RNA from a DNA template (in nucleus)."),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 54.9404, top: 434.1698, right: 671.7616, bottom: 454.1498)]),
         ),
@@ -1427,7 +1427,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Transcription: Synthesizing RNA from a DNA template (in nucleus)."),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 54.9404, top: 434.1698, right: 671.7616, bottom: 454.1498)]),
         ),
@@ -1452,7 +1452,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Cellular Localization: While the initial stages occur in the cytosol, the terminal enzymatic steps are tethered to the inner mitochondrial membrane, increasing the local concentration of intermediates and preventing their diffusion into off-target pathways. [Cite: \"Advanced Physiology, Chapter 18\"]"),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([10]),
           rects: const Value([ProjectRect(left: 53.7019, top: 521.2499, right: 747.012, bottom: 585.7496)]),
         ),
@@ -1477,7 +1477,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Molecular Genetics"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 155.0251, top: 252.1802, right: 638.5411, bottom: 306.1262)]),
         ),
@@ -1502,7 +1502,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Cellular Respiration"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 148.0525, top: 252.1802, right: 645.6085, bottom: 306.1262)]),
         ),
@@ -1527,7 +1527,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -1552,7 +1552,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -1577,7 +1577,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Delayed (Days)"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 504.9308, top: 195.9998, right: 626.9888, bottom: 213.9818)]),
         ),
@@ -1602,7 +1602,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("6. Autonomic Nervous System"),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([7]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 477.48, bottom: 67.4701)]),
         ),
@@ -1627,7 +1627,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -1652,7 +1652,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("3. Bundle of His: Conducts impulse to the septum."),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([4]),
           rects: const Value([ProjectRect(left: 52.76, top: 287.75, right: 507.2825, bottom: 307.73)]),
         ),
@@ -1677,7 +1677,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("T-Cells, B-Cells"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 504.9308, top: 427.7498, right: 628.9868, bottom: 445.7318)]),
         ),
@@ -1702,7 +1702,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("When considering the overarching paradigms of the endosymbiotic theory, one must account for a myriad of confounding variables that researchers have debated for decades (Smith & Wesson, 2018). The fossil record, while invaluable, presents a highly fragmented and taphonomically biased window into deep time, meaning that absence of evidence is fundamentally not evidence of absence. Furthermore, isotopic analysis of carbon-13 and oxygen-18 ratios in sedimentary rocks indicates massive fluctuations in global climate and atmospheric composition, which directly correlates with the selective pressures driving morphological divergence in early taxa (Jones et al., 2021). It is crucial to note that the morphological innovations observed during this period were not sudden in a biological sense, but rather the culmination of millions of years of cryptic genetic variation accumulating within isolated subpopulations, eventually reaching a tipping point of phenotypic expression once environmental constraints were lifted or new ecological niches became available following major tectonic shifts. For example, the regulatory gene networks—specifically the Hox gene clusters responsible for anteroposterior axis patterning—likely underwent significant duplication events, allowing for the functional divergence of redundant genomic segments without compromising the viability of the organism (Chen & Zhao, 2019; Miller, 2020). This genomic plasticity facilitated the rapid radiation of body plans. Additionally, we cannot ignore the role of lateral gene transfer among prokaryotic ancestors, which significantly complicates the construction of a standard bifurcating phylogenetic tree and instead suggests a highly reticulated 'web of life' at its base. The integration of mitochondrial and plastid precursors via phagocytosis without subsequent digestion revolutionized eukaryotic cellular energetics, granting an unparalleled advantage in oxygen-rich environments and setting the stage for multicellularity. Consequently, attempting to categorize these early organisms using modern Linnaean taxonomy often forces contiguous evolutionary grades into discrete clades, obscuring the transitional nature of the lineages. All of this underscores the profound complexity and interconnectedness of Earth's biological history, where geological, atmospheric, and genetic factors intertwine to drive the relentless engine of evolution (Williams, 2022)."),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 45.0, top: 93.7501, right: 747.2175, bottom: 522.7351)]),
         ),
@@ -1727,7 +1727,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("19. Alveolar Gas Exchange"),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([20]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 427.23, bottom: 67.4701)]),
         ),
@@ -1752,7 +1752,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("1. The Glycolysis Pathway"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 45.0, top: 44.9999, right: 467.416, bottom: 78.9659)]),
         ),
@@ -1777,7 +1777,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("When considering the overarching paradigms of the rna world, one must account for a myriad of confounding variables that researchers have debated for decades (Smith & Wesson, 2018). The fossil record, while invaluable, presents a highly fragmented and taphonomically biased window into deep time, meaning that absence of evidence is fundamentally not evidence of absence. Furthermore, isotopic analysis of carbon-13 and oxygen-18 ratios in sedimentary rocks indicates massive fluctuations in global climate and atmospheric composition, which directly correlates with the selective pressures driving morphological divergence in early taxa (Jones et al., 2021). It is crucial to note that the morphological innovations observed during this period were not sudden in a biological sense, but rather the culmination of millions of years of cryptic genetic variation accumulating within isolated subpopulations, eventually reaching a tipping point of phenotypic expression once environmental constraints were lifted or new ecological niches became available following major tectonic shifts. For example, the regulatory gene networks—specifically the Hox gene clusters responsible for anteroposterior axis patterning—likely underwent significant duplication events, allowing for the functional divergence of redundant genomic segments without compromising the viability of the organism (Chen & Zhao, 2019; Miller, 2020). This genomic plasticity facilitated the rapid radiation of body plans. Additionally, we cannot ignore the role of lateral gene transfer among prokaryotic ancestors, which significantly complicates the construction of a standard bifurcating phylogenetic tree and instead suggests a highly reticulated 'web of life' at its base. The integration of mitochondrial and plastid precursors via phagocytosis without subsequent digestion revolutionized eukaryotic cellular energetics, granting an unparalleled advantage in oxygen-rich environments and setting the stage for multicellularity. Consequently, attempting to categorize these early organisms using modern Linnaean taxonomy often forces contiguous evolutionary grades into discrete clades, obscuring the transitional nature of the lineages. All of this underscores the profound complexity and interconnectedness of Earth's biological history, where geological, atmospheric, and genetic factors intertwine to drive the relentless engine of evolution (Williams, 2022)."),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([11]),
           rects: const Value([ProjectRect(left: 45.0, top: 93.7501, right: 747.2175, bottom: 522.7351)]),
         ),
@@ -1802,7 +1802,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("FADH2"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 306.0, top: 374.4338, right: 345.7922, bottom: 390.7658)]),
         ),
@@ -1827,7 +1827,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Time (t)"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 559.77, top: 291.9338, right: 602.1781, bottom: 308.2658)]),
         ),
@@ -1852,7 +1852,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("The Central Dogma of molecular biology explains the flow of genetic information, from DNA to RNA, to make a functional product, a protein."),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 60.0, top: 132.0, right: 682.02, bottom: 181.98)]),
         ),
@@ -1877,7 +1877,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -1902,7 +1902,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("When considering the overarching paradigms of hominin bipedalism, one must account for a myriad of confounding variables that researchers have debated for decades (Smith & Wesson, 2018). The fossil record, while invaluable, presents a highly fragmented and taphonomically biased window into deep time, meaning that absence of evidence is fundamentally not evidence of absence. Furthermore, isotopic analysis of carbon-13 and oxygen-18 ratios in sedimentary rocks indicates massive fluctuations in global climate and atmospheric composition, which directly correlates with the selective pressures driving morphological divergence in early taxa (Jones et al., 2021). It is crucial to note that the morphological innovations observed during this period were not sudden in a biological sense, but rather the culmination of millions of years of cryptic genetic variation accumulating within isolated subpopulations, eventually reaching a tipping point of phenotypic expression once environmental constraints were lifted or new ecological niches became available following major tectonic shifts. For example, the regulatory gene networks—specifically the Hox gene clusters responsible for anteroposterior axis patterning—likely underwent significant duplication events, allowing for the functional divergence of redundant genomic segments without compromising the viability of the organism (Chen & Zhao, 2019; Miller, 2020). This genomic plasticity facilitated the rapid radiation of body plans. Additionally, we cannot ignore the role of lateral gene transfer among prokaryotic ancestors, which significantly complicates the construction of a standard bifurcating phylogenetic tree and instead suggests a highly reticulated 'web of life' at its base. The integration of mitochondrial and plastid precursors via phagocytosis without subsequent digestion revolutionized eukaryotic cellular energetics, granting an unparalleled advantage in oxygen-rich environments and setting the stage for multicellularity. Consequently, attempting to categorize these early organisms using modern Linnaean taxonomy often forces contiguous evolutionary grades into discrete clades, obscuring the transitional nature of the lineages. All of this underscores the profound complexity and interconnectedness of Earth's biological history, where geological, atmospheric, and genetic factors intertwine to drive the relentless engine of evolution (Williams, 2022)."),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([8]),
           rects: const Value([ProjectRect(left: 45.0, top: 93.7501, right: 747.2175, bottom: 522.7351)]),
         ),
@@ -1927,7 +1927,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("1. Population Growth Models"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 45.0, top: 44.9999, right: 513.248, bottom: 78.9659)]),
         ),
@@ -1952,7 +1952,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Pharmacological Intervention: Competitive inhibitors can bind to the active site, effectively halting the conversion of substrate to product. The Michaelis-Menten kinetics (Km and Vmax) are altered depending on whether the inhibition is competitive, non-competitive, or uncompetitive."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([9]),
           rects: const Value([ProjectRect(left: 53.7019, top: 346.4499, right: 721.03, bottom: 429.6339)]),
         ),
@@ -1977,7 +1977,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("2. The Electrical Conduction System"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([4]),
           rects: const Value([ProjectRect(left: 45.0, top: 44.9999, right: 631.432, bottom: 78.9659)]),
         ),
@@ -2002,7 +2002,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("CO2, NADH"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 471.0, top: 261.9338, right: 537.6964, bottom: 278.2658)]),
         ),
@@ -2027,7 +2027,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -2052,7 +2052,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("MAP ≈ DP + 1/3(SP - DP)"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 67.5, top: 300.5199, right: 296.56, bottom: 323.4999)]),
         ),
@@ -2077,7 +2077,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Population Ecology"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 151.7842, top: 252.1802, right: 641.7802, bottom: 306.1262)]),
         ),
@@ -2102,7 +2102,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Highly specific (antigen-"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 504.9308, top: 259.7498, right: 695.5688, bottom: 277.7318)]),
         ),
@@ -2127,7 +2127,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Cardiovascular Dynamics"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 75.575, top: 252.1802, right: 718.229, bottom: 306.1262)]),
         ),
@@ -2152,7 +2152,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -2177,7 +2177,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Immunology Basics"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 147.4944, top: 252.1802, right: 646.0224, bottom: 306.1262)]),
         ),
@@ -2202,7 +2202,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("[Source: Unformatted Bio Text Dump, Vol 4]"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([5]),
           rects: const Value([ProjectRect(left: 444.6123, top: 569.4176, right: 747.0123, bottom: 585.7496)]),
         ),
@@ -2227,7 +2227,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Project 2359 Stress Test Deck"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 235.403, top: 409.5006, right: 556.691, bottom: 433.4766)]),
         ),
@@ -2252,7 +2252,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• N: Population size."),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 54.9404, top: 425.25, right: 233.4403, bottom: 445.23)]),
         ),
@@ -2277,7 +2277,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("FADH2"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 306.0, top: 374.4338, right: 345.7922, bottom: 390.7658)]),
         ),
@@ -2302,7 +2302,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -2327,7 +2327,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Memory"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 57.0, top: 350.4998, right: 126.408, bottom: 368.4818)]),
         ),
@@ -2352,7 +2352,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("11. Adrenal Steroidogenesis"),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([12]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 448.11, bottom: 67.4701)]),
         ),
@@ -2377,7 +2377,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -2402,7 +2402,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Primary Mechanism: The integration of action potential propagation relies heavily on protein- protein interactions, ATP-dependent phosphorylation, and concentration gradients across the semi-permeable lipid bilayer. These processes are extremely sensitive to temperature and pH variations."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 53.7019, top: 95.4499, right: 725.3965, bottom: 178.6339)]),
         ),
@@ -2427,7 +2427,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Antibodies (immunoglobulins) are Y- shaped proteins produced by B cells."),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 45.0, top: 140.75, right: 371.9, bottom: 190.73)]),
         ),
@@ -2452,7 +2452,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Slide 4: Mass Extinction Events"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([5]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 493.86, bottom: 67.4701)]),
         ),
@@ -2477,7 +2477,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Innate Immune System"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 209.2928, top: 132.2498, right: 404.8628, bottom: 150.2318)]),
         ),
@@ -2502,7 +2502,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Cardiovascular Dynamics"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 75.575, top: 252.1802, right: 718.229, bottom: 306.1262)]),
         ),
@@ -2527,7 +2527,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -2552,7 +2552,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Slide 10: The RNA World"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([11]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 395.4, bottom: 67.4701)]),
         ),
@@ -2577,7 +2577,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Slide 8: The Multi-Regional Hypothesis"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([9]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 598.32, bottom: 67.4701)]),
         ),
@@ -2602,7 +2602,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Molecular Genetics"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 155.0251, top: 252.1802, right: 638.5411, bottom: 306.1262)]),
         ),
@@ -2627,7 +2627,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Slide 6: Avian Flight Mechanics"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([7]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 491.76, bottom: 67.4701)]),
         ),
@@ -2652,7 +2652,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Molecular Genetics"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 155.0251, top: 252.1802, right: 638.5411, bottom: 306.1262)]),
         ),
@@ -2677,7 +2677,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -2702,7 +2702,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Highly specific (antigen-"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 504.9308, top: 259.7498, right: 695.5688, bottom: 277.7318)]),
         ),
@@ -2727,7 +2727,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Enzymatic Regulation: Kinases and phosphatases dynamically alter the structural conformation of key channel proteins. For instance, the binding of cyclic AMP (cAMP) to the regulatory subunits of Protein Kinase A (PKA) releases the catalytic subunits."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([4]),
           rects: const Value([ProjectRect(left: 53.7019, top: 194.0499, right: 708.982, bottom: 254.8339)]),
         ),
@@ -2752,7 +2752,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -2777,7 +2777,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Net yield: 2 ATP, 2 NADH, 2 Pyruvate molecules per glucose."),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 54.9404, top: 455.25, right: 355.3, bottom: 505.23)]),
         ),
@@ -2802,7 +2802,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("rr"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 671.7588, top: 369.2498, right: 687.7428, bottom: 393.2258)]),
         ),
@@ -2827,7 +2827,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Antigen Binding Sites Variable Region"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 526.02, top: 151.0358, right: 700.9272, bottom: 165.3158)]),
         ),
@@ -2852,7 +2852,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Net yield: 2 ATP, 2 NADH, 2 Pyruvate molecules per glucose."),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 54.9404, top: 455.25, right: 355.3, bottom: 505.23)]),
         ),
@@ -2877,7 +2877,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -2902,7 +2902,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Light Chains: Two identical short chains."),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 54.9404, top: 294.25, right: 365.8635, bottom: 344.23)]),
         ),
@@ -2927,7 +2927,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rr"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 556.3048, top: 369.2498, right: 581.6248, bottom: 393.2258)]),
         ),
@@ -2952,7 +2952,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Primary Mechanism: The integration of alveolar gas exchange relies heavily on protein-protein interactions, ATP-dependent phosphorylation, and concentration gradients across the semi- permeable lipid bilayer. These processes are extremely sensitive to temperature and pH variations."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([20]),
           rects: const Value([ProjectRect(left: 53.7019, top: 95.4499, right: 736.9645, bottom: 178.6339)]),
         ),
@@ -2977,7 +2977,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("1. Hemodynamics & Blood Pressure"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 45.0, top: 44.9999, right: 629.46, bottom: 78.9659)]),
         ),
@@ -3002,7 +3002,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Tertiary (10 J)"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 356.0222, top: 261.9338, right: 435.9779, bottom: 278.2658)]),
         ),
@@ -3027,7 +3027,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("12. Pancreatic Endocrine Function"),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([13]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 535.89, bottom: 67.4701)]),
         ),
@@ -3052,7 +3052,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Immediate (Minutes/Hours)"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 209.2928, top: 195.9998, right: 426.3368, bottom: 213.9818)]),
         ),
@@ -3077,7 +3077,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Slide 4: Mass Extinction Events"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([5]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 493.86, bottom: 67.4701)]),
         ),
@@ -3102,7 +3102,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Secondary Consumers (100 J)"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 310.2719, top: 314.4338, right: 481.7283, bottom: 330.7658)]),
         ),
@@ -3127,7 +3127,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -3152,7 +3152,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("[Source: Unformatted Bio Text Dump, Vol 7]"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([8]),
           rects: const Value([ProjectRect(left: 444.6123, top: 569.4176, right: 747.0123, bottom: 585.7496)]),
         ),
@@ -3177,7 +3177,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -3202,7 +3202,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -3227,7 +3227,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Molecular Genetics"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 155.0251, top: 252.1802, right: 638.5411, bottom: 306.1262)]),
         ),
@@ -3252,7 +3252,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Population Ecology"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 151.7842, top: 252.1802, right: 641.7802, bottom: 306.1262)]),
         ),
@@ -3277,7 +3277,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Highly specific (antigen-"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 504.9308, top: 259.7498, right: 695.5688, bottom: 277.7318)]),
         ),
@@ -3302,7 +3302,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Pathological Correlates: Dysregulation in this specific pathway often presents clinically as a spectrum of metabolic or neurological disorders. Genetic mutations affecting the transcription factors responsible for expressing these proteins result in truncated or misfolded polypeptides."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([19]),
           rects: const Value([ProjectRect(left: 53.7019, top: 270.2499, right: 726.934, bottom: 331.0339)]),
         ),
@@ -3327,7 +3327,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• K: Carrying capacity."),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 54.9404, top: 468.75, right: 253.3603, bottom: 488.73)]),
         ),
@@ -3352,7 +3352,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -3377,7 +3377,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Net yield: 2 ATP, 2 NADH, 2 Pyruvate molecules per glucose."),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 54.9404, top: 455.25, right: 355.3, bottom: 505.23)]),
         ),
@@ -3402,7 +3402,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -3427,7 +3427,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Population Ecology"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 151.7842, top: 252.1802, right: 641.7802, bottom: 306.1262)]),
         ),
@@ -3452,7 +3452,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Time (t)"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 559.77, top: 291.9338, right: 602.1781, bottom: 308.2658)]),
         ),
@@ -3477,7 +3477,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Systolic Pressure: Peak pressure in the arteries during the cardiac cycle."),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 54.9404, top: 5.0002, right: 375.4828, bottom: 84.9802)]),
         ),
@@ -3502,7 +3502,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Law of Segregation: Allele pairs separate during gamete formation, and randomly unite at fertilization."),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 45.0, top: 140.75, right: 349.06, bottom: 220.73)]),
         ),
@@ -3527,7 +3527,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("R"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 560.3009, top: 264.2498, right: 577.6289, bottom: 288.2258)]),
         ),
@@ -3552,7 +3552,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Glucose (6C)"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 539.3973, top: 155.3183, right: 617.6424, bottom: 173.7053)]),
         ),
@@ -3577,7 +3577,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Fc Region (Constant)"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 616.02, top: 308.5358, right: 717.1973, bottom: 322.8158)]),
         ),
@@ -3602,7 +3602,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("6. Autonomic Nervous System"),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([7]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 477.48, bottom: 67.4701)]),
         ),
@@ -3627,7 +3627,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("The Central Dogma of molecular biology explains the flow of genetic information, from DNA to RNA, to make a functional product, a protein."),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 60.0, top: 132.0, right: 682.02, bottom: 181.98)]),
         ),
@@ -3652,7 +3652,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("3. Bundle of His: Conducts impulse to the septum."),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([4]),
           rects: const Value([ProjectRect(left: 52.76, top: 287.75, right: 507.2825, bottom: 307.73)]),
         ),
@@ -3677,7 +3677,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Pharmacological Intervention: Competitive inhibitors can bind to the active site, effectively halting the conversion of substrate to product. The Michaelis-Menten kinetics (Km and Vmax) are altered depending on whether the inhibition is competitive, non-competitive, or uncompetitive."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([16]),
           rects: const Value([ProjectRect(left: 53.7019, top: 346.4499, right: 721.03, bottom: 429.6339)]),
         ),
@@ -3702,7 +3702,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("When considering the overarching paradigms of mass extinction events, one must account for a myriad of confounding variables that researchers have debated for decades (Smith & Wesson, 2018). The fossil record, while invaluable, presents a highly fragmented and taphonomically biased window into deep time, meaning that absence of evidence is fundamentally not evidence of absence. Furthermore, isotopic analysis of carbon-13 and oxygen-18 ratios in sedimentary rocks indicates massive fluctuations in global climate and atmospheric composition, which directly correlates with the selective pressures driving morphological divergence in early taxa (Jones et al., 2021). It is crucial to note that the morphological innovations observed during this period were not sudden in a biological sense, but rather the culmination of millions of years of cryptic genetic variation accumulating within isolated subpopulations, eventually reaching a tipping point of phenotypic expression once environmental constraints were lifted or new ecological niches became available following major tectonic shifts. For example, the regulatory gene networks—specifically the Hox gene clusters responsible for anteroposterior axis patterning—likely underwent significant duplication events, allowing for the functional divergence of redundant genomic segments without compromising the viability of the organism (Chen & Zhao, 2019; Miller, 2020). This genomic plasticity facilitated the rapid radiation of body plans. Additionally, we cannot ignore the role of lateral gene transfer among prokaryotic ancestors, which significantly complicates the construction of a standard bifurcating phylogenetic tree and instead suggests a highly reticulated 'web of life' at its base. The integration of mitochondrial and plastid precursors via phagocytosis without subsequent digestion revolutionized eukaryotic cellular energetics, granting an unparalleled advantage in oxygen-rich environments and setting the stage for multicellularity. Consequently, attempting to categorize these early organisms using modern Linnaean taxonomy often forces contiguous evolutionary grades into discrete clades, obscuring the transitional nature of the lineages. All of this underscores the profound complexity and interconnectedness of Earth's biological history, where geological, atmospheric, and genetic factors intertwine to drive the relentless engine of evolution (Williams, 2022)."),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([5]),
           rects: const Value([ProjectRect(left: 45.0, top: 93.7501, right: 747.2175, bottom: 522.7351)]),
         ),
@@ -3727,7 +3727,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Systolic Pressure: Peak pressure in the arteries during the cardiac cycle."),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 54.9404, top: 5.0002, right: 375.4828, bottom: 84.9802)]),
         ),
@@ -3752,7 +3752,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Cellular Respiration"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 148.0525, top: 252.1802, right: 645.6085, bottom: 306.1262)]),
         ),
@@ -3777,7 +3777,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("When considering the overarching paradigms of epigenetic inheritance, one must account for a myriad of confounding variables that researchers have debated for decades (Smith & Wesson, 2018). The fossil record, while invaluable, presents a highly fragmented and taphonomically biased window into deep time, meaning that absence of evidence is fundamentally not evidence of absence. Furthermore, isotopic analysis of carbon-13 and oxygen-18 ratios in sedimentary rocks indicates massive fluctuations in global climate and atmospheric composition, which directly correlates with the selective pressures driving morphological divergence in early taxa (Jones et al., 2021). It is crucial to note that the morphological innovations observed during this period were not sudden in a biological sense, but rather the culmination of millions of years of cryptic genetic variation accumulating within isolated subpopulations, eventually reaching a tipping point of phenotypic expression once environmental constraints were lifted or new ecological niches became available following major tectonic shifts. For example, the regulatory gene networks—specifically the Hox gene clusters responsible for anteroposterior axis patterning—likely underwent significant duplication events, allowing for the functional divergence of redundant genomic segments without compromising the viability of the organism (Chen & Zhao, 2019; Miller, 2020). This genomic plasticity facilitated the rapid radiation of body plans. Additionally, we cannot ignore the role of lateral gene transfer among prokaryotic ancestors, which significantly complicates the construction of a standard bifurcating phylogenetic tree and instead suggests a highly reticulated 'web of life' at its base. The integration of mitochondrial and plastid precursors via phagocytosis without subsequent digestion revolutionized eukaryotic cellular energetics, granting an unparalleled advantage in oxygen-rich environments and setting the stage for multicellularity. Consequently, attempting to categorize these early organisms using modern Linnaean taxonomy often forces contiguous evolutionary grades into discrete clades, obscuring the transitional nature of the lineages. All of this underscores the profound complexity and interconnectedness of Earth's biological history, where geological, atmospheric, and genetic factors intertwine to drive the relentless engine of evolution (Williams, 2022)."),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([10]),
           rects: const Value([ProjectRect(left: 45.0, top: 93.7501, right: 747.2175, bottom: 522.7351)]),
         ),
@@ -3802,7 +3802,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -3827,7 +3827,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Pharmacological Intervention: Competitive inhibitors can bind to the active site, effectively halting the conversion of substrate to product. The Michaelis-Menten kinetics (Km and Vmax) are altered depending on whether the inhibition is competitive, non-competitive, or uncompetitive."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([14]),
           rects: const Value([ProjectRect(left: 53.7019, top: 346.4499, right: 721.03, bottom: 429.6339)]),
         ),
@@ -3852,7 +3852,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("[Source: Unformatted Bio Text Dump, Vol 8]"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([9]),
           rects: const Value([ProjectRect(left: 444.6123, top: 569.4176, right: 747.0123, bottom: 585.7496)]),
         ),
@@ -3877,7 +3877,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -3902,7 +3902,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("When considering the overarching paradigms of hominin bipedalism, one must account for a myriad of confounding variables that researchers have debated for decades (Smith & Wesson, 2018). The fossil record, while invaluable, presents a highly fragmented and taphonomically biased window into deep time, meaning that absence of evidence is fundamentally not evidence of absence. Furthermore, isotopic analysis of carbon-13 and oxygen-18 ratios in sedimentary rocks indicates massive fluctuations in global climate and atmospheric composition, which directly correlates with the selective pressures driving morphological divergence in early taxa (Jones et al., 2021). It is crucial to note that the morphological innovations observed during this period were not sudden in a biological sense, but rather the culmination of millions of years of cryptic genetic variation accumulating within isolated subpopulations, eventually reaching a tipping point of phenotypic expression once environmental constraints were lifted or new ecological niches became available following major tectonic shifts. For example, the regulatory gene networks—specifically the Hox gene clusters responsible for anteroposterior axis patterning—likely underwent significant duplication events, allowing for the functional divergence of redundant genomic segments without compromising the viability of the organism (Chen & Zhao, 2019; Miller, 2020). This genomic plasticity facilitated the rapid radiation of body plans. Additionally, we cannot ignore the role of lateral gene transfer among prokaryotic ancestors, which significantly complicates the construction of a standard bifurcating phylogenetic tree and instead suggests a highly reticulated 'web of life' at its base. The integration of mitochondrial and plastid precursors via phagocytosis without subsequent digestion revolutionized eukaryotic cellular energetics, granting an unparalleled advantage in oxygen-rich environments and setting the stage for multicellularity. Consequently, attempting to categorize these early organisms using modern Linnaean taxonomy often forces contiguous evolutionary grades into discrete clades, obscuring the transitional nature of the lineages. All of this underscores the profound complexity and interconnectedness of Earth's biological history, where geological, atmospheric, and genetic factors intertwine to drive the relentless engine of evolution (Williams, 2022)."),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([8]),
           rects: const Value([ProjectRect(left: 45.0, top: 93.7501, right: 747.2175, bottom: 522.7351)]),
         ),
@@ -3927,7 +3927,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Cellular Respiration"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 148.0525, top: 252.1802, right: 645.6085, bottom: 306.1262)]),
         ),
@@ -3952,7 +3952,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("[Cite: \"Janeway's Immunobiology, 9th Edition\"]"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 348.5933, top: 556.9317, right: 734.9933, bottom: 575.9997)]),
         ),
@@ -3977,7 +3977,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Project 2359 Stress Test Deck"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 235.403, top: 409.5006, right: 556.691, bottom: 433.4766)]),
         ),
@@ -4002,7 +4002,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -4027,7 +4027,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("[Cite: \"Journal of Metabolic Studies, Vol 4. 2023\"]"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 306.5925, top: 556.9317, right: 734.9925, bottom: 575.9997)]),
         ),
@@ -4052,7 +4052,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -4077,7 +4077,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("[Cite: \"Journal of Metabolic Studies, Vol 4. 2023\"]"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 306.5925, top: 556.9317, right: 734.9925, bottom: 575.9997)]),
         ),
@@ -4102,7 +4102,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Slide 1: The Endosymbiotic Theory"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 545.01, bottom: 67.4701)]),
         ),
@@ -4127,7 +4127,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("The Central Dogma of molecular biology explains the flow of genetic information, from DNA to RNA, to make a functional product, a protein."),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 60.0, top: 132.0, right: 682.02, bottom: 181.98)]),
         ),
@@ -4152,7 +4152,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Immunology Basics"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 147.4944, top: 252.1802, right: 646.0224, bottom: 306.1262)]),
         ),
@@ -4177,7 +4177,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Evolutionary Biology: Text Dumps"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 82.8754, top: 285.5004, right: 709.2254, bottom: 385.4507)]),
         ),
@@ -4202,7 +4202,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Cellular Localization: While the initial stages occur in the cytosol, the terminal enzymatic steps are tethered to the inner mitochondrial membrane, increasing the local concentration of intermediates and preventing their diffusion into off-target pathways. [Cite: \"Advanced Physiology, Chapter 19\"]"),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([11]),
           rects: const Value([ProjectRect(left: 53.7019, top: 521.2499, right: 747.012, bottom: 585.7496)]),
         ),
@@ -4227,7 +4227,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("alpha-KG"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 451.7307, top: 321.3788, right: 490.269, bottom: 333.6368)]),
         ),
@@ -4252,7 +4252,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Slide 6: Avian Flight Mechanics"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([7]),
           rects: const Value([ProjectRect(left: 45.0, top: 37.5001, right: 491.76, bottom: 67.4701)]),
         ),
@@ -4277,7 +4277,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Cellular Localization: While the initial stages occur in the cytosol, the terminal enzymatic steps are tethered to the inner mitochondrial membrane, increasing the local concentration of intermediates and preventing their diffusion into off-target pathways. [Cite: \"Advanced Physiology, Chapter 16\"]"),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([8]),
           rects: const Value([ProjectRect(left: 53.7019, top: 521.2499, right: 747.012, bottom: 585.7496)]),
         ),
@@ -4302,7 +4302,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("[Cite: \"Janeway's Immunobiology, 9th Edition\"]"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 348.5933, top: 556.9317, right: 734.9933, bottom: 575.9997)]),
         ),
@@ -4327,7 +4327,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Law of Independent Assortment: Alleles of two (or more) different genes get sorted into gametes independently of one another."),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 45.0, top: 250.75, right: 356.84, bottom: 360.73)]),
         ),
@@ -4352,7 +4352,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("2. Mendelian Inheritance"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 45.0, top: 44.9999, right: 440.114, bottom: 78.9659)]),
         ),
@@ -4377,7 +4377,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Rich Content Visual Test Deck"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 221.2533, top: 321.1803, right: 570.8493, bottom: 347.1543)]),
         ),
@@ -4402,7 +4402,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("When considering the overarching paradigms of the multi-regional hypothesis, one must account for a myriad of confounding variables that researchers have debated for decades (Smith & Wesson, 2018). The fossil record, while invaluable, presents a highly fragmented and taphonomically biased window into deep time, meaning that absence of evidence is fundamentally not evidence of absence. Furthermore, isotopic analysis of carbon-13 and oxygen-18 ratios in sedimentary rocks indicates massive fluctuations in global climate and atmospheric composition, which directly correlates with the selective pressures driving morphological divergence in early taxa (Jones et al., 2021). It is crucial to note that the morphological innovations observed during this period were not sudden in a biological sense, but rather the culmination of millions of years of cryptic genetic variation accumulating within isolated subpopulations, eventually reaching a tipping point of phenotypic expression once environmental constraints were lifted or new ecological niches became available following major tectonic shifts. For example, the regulatory gene networks—specifically the Hox gene clusters responsible for anteroposterior axis patterning—likely underwent significant duplication events, allowing for the functional divergence of redundant genomic segments without compromising the viability of the organism (Chen & Zhao, 2019; Miller, 2020). This genomic plasticity facilitated the rapid radiation of body plans. Additionally, we cannot ignore the role of lateral gene transfer among prokaryotic ancestors, which significantly complicates the construction of a standard bifurcating phylogenetic tree and instead suggests a highly reticulated 'web of life' at its base. The integration of mitochondrial and plastid precursors via phagocytosis without subsequent digestion revolutionized eukaryotic cellular energetics, granting an unparalleled advantage in oxygen-rich environments and setting the stage for multicellularity. Consequently, attempting to categorize these early organisms using modern Linnaean taxonomy often forces contiguous evolutionary grades into discrete clades, obscuring the transitional nature of the lineages. All of this underscores the profound complexity and interconnectedness of Earth's biological history, where geological, atmospheric, and genetic factors intertwine to drive the relentless engine of evolution (Williams, 2022)."),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([9]),
           rects: const Value([ProjectRect(left: 45.0, top: 93.7501, right: 747.2175, bottom: 522.7351)]),
         ),
@@ -4427,7 +4427,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Primary Mechanism: The integration of somatic nervous system relies heavily on protein- protein interactions, ATP-dependent phosphorylation, and concentration gradients across the semi-permeable lipid bilayer. These processes are extremely sensitive to temperature and pH variations."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([6]),
           rects: const Value([ProjectRect(left: 53.7019, top: 95.4499, right: 721.734, bottom: 178.6339)]),
         ),
@@ -4452,7 +4452,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("1. The Central Dogma"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 45.0, top: 44.9999, right: 394.758, bottom: 78.9659)]),
         ),
@@ -4477,7 +4477,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Optimized for data extraction testing"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 253.1082, top: 373.1803, right: 539.0202, bottom: 391.1623)]),
         ),
@@ -4502,7 +4502,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Pathological Correlates: Dysregulation in this specific pathway often presents clinically as a spectrum of metabolic or neurological disorders. Genetic mutations affecting the transcription factors responsible for expressing these proteins result in truncated or misfolded polypeptides."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 53.7019, top: 270.2499, right: 726.934, bottom: 331.0339)]),
         ),
@@ -4527,7 +4527,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Aortic Pres."),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 634.77, top: 134.784, right: 698.9103, bottom: 151.116)]),
         ),
@@ -4552,7 +4552,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Delayed (Days)"),
-          sourceIds: Value([sourceId_immunology_basics_v1_pdf]),
+          sourceIds: Value([sourceidImmunologyBasicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 504.9308, top: 195.9998, right: 626.9888, bottom: 213.9818)]),
         ),
@@ -4577,7 +4577,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("2. The Electrical Conduction System"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([4]),
           rects: const Value([ProjectRect(left: 45.0, top: 44.9999, right: 631.432, bottom: 78.9659)]),
         ),
@@ -4602,7 +4602,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("[Source: Unformatted Bio Text Dump, Vol 3]"),
-          sourceIds: Value([sourceId_bio_wall_of_text_v1_pdf]),
+          sourceIds: Value([sourceidBioWallOfTextV1Pdf]),
           pageNumbers: const Value([4]),
           rects: const Value([ProjectRect(left: 444.6123, top: 569.4176, right: 747.0123, bottom: 585.7496)]),
         ),
@@ -4627,7 +4627,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Tertiary (10 J)"),
-          sourceIds: Value([sourceId_population_ecology_v1_pdf]),
+          sourceIds: Value([sourceidPopulationEcologyV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 356.0222, top: 261.9338, right: 435.9779, bottom: 278.2658)]),
         ),
@@ -4652,7 +4652,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("Molecular Genetics"),
-          sourceIds: Value([sourceId_molecular_genetics_v1_pdf]),
+          sourceIds: Value([sourceidMolecularGeneticsV1Pdf]),
           pageNumbers: const Value([1]),
           rects: const Value([ProjectRect(left: 155.0251, top: 252.1802, right: 638.5411, bottom: 306.1262)]),
         ),
@@ -4677,7 +4677,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("1. Hemodynamics & Blood Pressure"),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([2]),
           rects: const Value([ProjectRect(left: 45.0, top: 44.9999, right: 629.46, bottom: 78.9659)]),
         ),
@@ -4702,7 +4702,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("alpha-KG"),
-          sourceIds: Value([sourceId_cellular_respiration_v1_pdf]),
+          sourceIds: Value([sourceidCellularRespirationV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 451.7307, top: 321.3788, right: 490.269, bottom: 333.6368)]),
         ),
@@ -4727,7 +4727,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Diastolic Pressure: Lowest pressure at the resting phase of the cardiac cycle."),
-          sourceIds: Value([sourceId_cardiovascular_dynamics_v1_pdf]),
+          sourceIds: Value([sourceidCardiovascularDynamicsV1Pdf]),
           pageNumbers: const Value([3]),
           rects: const Value([ProjectRect(left: 54.9404, top: 108.5002, right: 380.84, bottom: 188.4802)]),
         ),
@@ -4752,7 +4752,7 @@ class BiologyCitationSeeder {
         CitationItemsCompanion(
           id: Value(citationId),
           citedText: const Value("• Energy Requirements: This is a highly endergonic process. The hydrolysis of ATP to ADP and inorganic phosphate (Pi) yields approximately -7.3 kcal/mol of free energy, which is coupled to this reaction to drive it forward against thermodynamic equilibrium."),
-          sourceIds: Value([sourceId_bio_heavy_bullets_v1_pdf]),
+          sourceIds: Value([sourceidBioHeavyBulletsV1Pdf]),
           pageNumbers: const Value([18]),
           rects: const Value([ProjectRect(left: 53.7019, top: 445.0499, right: 737.3307, bottom: 505.8339)]),
         ),

@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fsrs/fsrs.dart' as fsrs;
+import 'package:provider/provider.dart';
+
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/app_controller.dart';
-import 'package:project_2359/core/settings/labs_settings.dart';
-import 'package:project_2359/core/widgets/project_back_button.dart';
-import 'package:project_2359/features/study_page/flippable_card.dart';
-import 'package:project_2359/core/tables/study_session_events.dart';
 import 'package:project_2359/core/services/continuous_session_controller.dart';
+import 'package:project_2359/core/services/fsrs_shim.dart';
+import 'package:project_2359/core/settings/labs_settings.dart';
+import 'package:project_2359/core/tables/study_session_events.dart';
+import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/features/study_page/flippable_card.dart';
 import 'package:project_2359/features/study_page/widgets/source_preview_sheet.dart';
-import 'package:provider/provider.dart';
 
 class StudyPage extends StatefulWidget {
   final String? deckId;
@@ -31,10 +32,10 @@ class StudyPage extends StatefulWidget {
   });
 
   @override
-  State<StudyPage> createState() => _StudyPageState();
+  State<StudyPage> createState() => _StudyPageFsrsState();
 }
 
-class _StudyPageState extends State<StudyPage> {
+class _StudyPageFsrsState extends State<StudyPage> {
   int _currentIndex = 0;
   bool _isFlipped = false;
   bool _isTransitioning = false;
@@ -42,7 +43,7 @@ class _StudyPageState extends State<StudyPage> {
   ContinuousSessionController? _continuousController;
   final FocusNode _focusNode = FocusNode();
   final GlobalKey<_SwipeableCardStackState> _swipeKey = GlobalKey();
-  Map<fsrs.Rating, String> _previews = {};
+  Map<FsrsRating, String> _previews = {};
 
   @override
   void initState() {
@@ -115,9 +116,9 @@ class _StudyPageState extends State<StudyPage> {
     if (widget.mode != StudySessionMode.spaced || _currentCard == null) return;
 
     final schedulingService = context.read<AppController>().schedulingService;
-    final Map<fsrs.Rating, String> newPreviews = {};
+    final Map<FsrsRating, String> newPreviews = {};
 
-    for (final rating in fsrs.Rating.values) {
+    for (final rating in FsrsRating.values) {
       final nextDue = await schedulingService.getPreviewNextDue(
         cardId: _currentCard!.id,
         rating: rating,
@@ -147,7 +148,7 @@ class _StudyPageState extends State<StudyPage> {
     });
   }
 
-  void _rateCard(fsrs.Rating rating) async {
+  void _rateCard(FsrsRating rating) async {
     if (_isTransitioning) return;
     final card = _currentCard;
     if (card == null) return;
@@ -158,16 +159,16 @@ class _StudyPageState extends State<StudyPage> {
     final size = MediaQuery.of(context).size;
     Offset direction;
     switch (rating) {
-      case fsrs.Rating.again:
+      case FsrsRating.again:
         direction = Offset(-size.width * 1.5, 0);
         break;
-      case fsrs.Rating.good:
+      case FsrsRating.good:
         direction = Offset(size.width * 1.5, 0);
         break;
-      case fsrs.Rating.easy:
+      case FsrsRating.easy:
         direction = Offset(0, -size.height * 1.5);
         break;
-      case fsrs.Rating.hard:
+      case FsrsRating.hard:
         direction = Offset(0, size.height * 1.5);
         break;
     }
@@ -235,11 +236,8 @@ class _StudyPageState extends State<StudyPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder:
-          (context) => SourcePreviewSheet(
-            pdfBytes: sourceBlob.bytes,
-            citation: citation,
-          ),
+      builder: (context) =>
+          SourcePreviewSheet(pdfBytes: sourceBlob.bytes, citation: citation),
     );
   }
 
@@ -288,16 +286,16 @@ class _StudyPageState extends State<StudyPage> {
             }
           } else if (_isFlipped) {
             if (event.logicalKey == LogicalKeyboardKey.digit1) {
-              _rateCard(fsrs.Rating.again);
+              _rateCard(FsrsRating.again);
             }
             if (event.logicalKey == LogicalKeyboardKey.digit2) {
-              _rateCard(fsrs.Rating.hard);
+              _rateCard(FsrsRating.hard);
             }
             if (event.logicalKey == LogicalKeyboardKey.digit3) {
-              _rateCard(fsrs.Rating.good);
+              _rateCard(FsrsRating.good);
             }
             if (event.logicalKey == LogicalKeyboardKey.digit4) {
-              _rateCard(fsrs.Rating.easy);
+              _rateCard(FsrsRating.easy);
             }
           }
         }
@@ -362,10 +360,10 @@ class _StudyPageState extends State<StudyPage> {
               key: _swipeKey,
               isFlipped: _isFlipped,
               isTransitioning: _isTransitioning,
-              onSwipeLeft: () => _rateCard(fsrs.Rating.again),
-              onSwipeRight: () => _rateCard(fsrs.Rating.good),
-              onSwipeUp: () => _rateCard(fsrs.Rating.easy),
-              onSwipeDown: () => _rateCard(fsrs.Rating.hard),
+              onSwipeLeft: () => _rateCard(FsrsRating.again),
+              onSwipeRight: () => _rateCard(FsrsRating.good),
+              onSwipeUp: () => _rateCard(FsrsRating.easy),
+              onSwipeDown: () => _rateCard(FsrsRating.hard),
               backgroundCard: _nextCard == null
                   ? null
                   : FlippableCard(
@@ -374,10 +372,9 @@ class _StudyPageState extends State<StudyPage> {
                       frontText: _nextCard!.frontText ?? '',
                       backText: _nextCard!.backText ?? '',
                       onTap: () {},
-                      onViewSource:
-                          _nextCard!.citationId != null
-                              ? _onViewSourcePressed
-                              : null,
+                      onViewSource: _nextCard!.citationId != null
+                          ? _onViewSourcePressed
+                          : null,
                     ),
               overlay: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
@@ -389,46 +386,42 @@ class _StudyPageState extends State<StudyPage> {
                           children: [
                             _FsrsButton(
                               label: 'Again',
-                              subtitle: _previews[fsrs.Rating.again],
+                              subtitle: _previews[FsrsRating.again],
                               color: Colors.red.shade400,
-                              onPressed: () => _rateCard(fsrs.Rating.again),
-                              onLongPress:
-                                  labsSettings.debugModeEnabled
-                                      ? () => _showFsrsDebug(context, card)
-                                      : null,
+                              onPressed: () => _rateCard(FsrsRating.again),
+                              onLongPress: labsSettings.debugModeEnabled
+                                  ? () => _showFsrsDebug(context, card)
+                                  : null,
                             ),
                             const SizedBox(width: 8),
                             _FsrsButton(
                               label: 'Hard',
-                              subtitle: _previews[fsrs.Rating.hard],
+                              subtitle: _previews[FsrsRating.hard],
                               color: Colors.orange.shade400,
-                              onPressed: () => _rateCard(fsrs.Rating.hard),
-                              onLongPress:
-                                  labsSettings.debugModeEnabled
-                                      ? () => _showFsrsDebug(context, card)
-                                      : null,
+                              onPressed: () => _rateCard(FsrsRating.hard),
+                              onLongPress: labsSettings.debugModeEnabled
+                                  ? () => _showFsrsDebug(context, card)
+                                  : null,
                             ),
                             const SizedBox(width: 8),
                             _FsrsButton(
                               label: 'Good',
-                              subtitle: _previews[fsrs.Rating.good],
+                              subtitle: _previews[FsrsRating.good],
                               color: Colors.green.shade400,
-                              onPressed: () => _rateCard(fsrs.Rating.good),
-                              onLongPress:
-                                  labsSettings.debugModeEnabled
-                                      ? () => _showFsrsDebug(context, card)
-                                      : null,
+                              onPressed: () => _rateCard(FsrsRating.good),
+                              onLongPress: labsSettings.debugModeEnabled
+                                  ? () => _showFsrsDebug(context, card)
+                                  : null,
                             ),
                             const SizedBox(width: 8),
                             _FsrsButton(
                               label: 'Easy',
-                              subtitle: _previews[fsrs.Rating.easy],
+                              subtitle: _previews[FsrsRating.easy],
                               color: Colors.blue.shade400,
-                              onPressed: () => _rateCard(fsrs.Rating.easy),
-                              onLongPress:
-                                  labsSettings.debugModeEnabled
-                                      ? () => _showFsrsDebug(context, card)
-                                      : null,
+                              onPressed: () => _rateCard(FsrsRating.easy),
+                              onLongPress: labsSettings.debugModeEnabled
+                                  ? () => _showFsrsDebug(context, card)
+                                  : null,
                             ),
                           ],
                         ),
@@ -440,8 +433,9 @@ class _StudyPageState extends State<StudyPage> {
                 frontText: card.frontText ?? '',
                 backText: card.backText ?? '',
                 onTap: _flipCard,
-                onViewSource:
-                    card.citationId != null ? _onViewSourcePressed : null,
+                onViewSource: card.citationId != null
+                    ? _onViewSourcePressed
+                    : null,
               ),
             ),
           ],
@@ -457,71 +451,70 @@ class _StudyPageState extends State<StudyPage> {
     final labsSettings = context.read<LabsSettings>();
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Row(
-              children: [
-                const Icon(Icons.bug_report, size: 20),
-                const SizedBox(width: 8),
-                const Text("FSRS Debug Data"),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.power_settings_new, size: 18),
-                  tooltip: "Disable Debug Mode",
-                  onPressed: () {
-                    labsSettings.setDebugModeEnabled(false);
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.bug_report, size: 20),
+            const SizedBox(width: 8),
+            const Text("FSRS Debug Data"),
+            const Spacer(),
+            IconButton(
+              icon: const Icon(Icons.power_settings_new, size: 18),
+              tooltip: "Disable Debug Mode",
+              onPressed: () {
+                labsSettings.setDebugModeEnabled(false);
+                Navigator.pop(context);
+              },
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _debugItem("Card ID", card.id),
-                _debugItem(
-                  "Stability",
-                  card.spacedStability?.toStringAsFixed(4) ?? "0.0",
-                ),
-                _debugItem(
-                  "Difficulty",
-                  card.spacedDifficulty?.toStringAsFixed(4) ?? "0.0",
-                ),
-                _debugItem(
-                  "Interval",
-                  card.spacedDue != null && card.spacedLastReview != null
-                      ? "${card.spacedDue!.difference(card.spacedLastReview!).inDays} days"
-                      : "0 days",
-                ),
-                _debugItem(
-                  "Last Review",
-                  card.spacedLastReview?.toIso8601String() ?? "Never",
-                ),
-                const Divider(),
-                const Text(
-                  "Predicted Next States (Simplified)",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                ),
-                const SizedBox(height: 8),
-                ...fsrs.Rating.values.map((r) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 2),
-                    child: Text(
-                      "${r.name.toUpperCase()}: ${_previews[r] ?? 'N/A'}",
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                  );
-                }),
-              ],
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _debugItem("Card ID", card.id),
+            _debugItem(
+              "Stability",
+              card.spacedStability?.toStringAsFixed(4) ?? "0.0",
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("OK"),
-              ),
-            ],
+            _debugItem(
+              "Difficulty",
+              card.spacedDifficulty?.toStringAsFixed(4) ?? "0.0",
+            ),
+            _debugItem(
+              "Interval",
+              card.spacedDue != null && card.spacedLastReview != null
+                  ? "${card.spacedDue!.difference(card.spacedLastReview!).inDays} days"
+                  : "0 days",
+            ),
+            _debugItem(
+              "Last Review",
+              card.spacedLastReview?.toIso8601String() ?? "Never",
+            ),
+            const Divider(),
+            const Text(
+              "Predicted Next FsrsStates (Simplified)",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            ...FsrsRating.values.map((r) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: Text(
+                  "${r.name.toUpperCase()}: ${_previews[r] ?? 'N/A'}",
+                  style: const TextStyle(fontSize: 11),
+                ),
+              );
+            }),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
           ),
+        ],
+      ),
     );
   }
 
@@ -830,15 +823,15 @@ class _SwipeableCardStackState extends State<_SwipeableCardStack>
         final upIntensity = (-dragY / thresholdUp).clamp(0.0, 1.0);
         final downIntensity = (dragY / thresholdY).clamp(0.0, 1.0);
 
-        fsrs.Rating? activeRating;
+        FsrsRating? activeFsrsRating;
         if (leftIntensity >= 1.0) {
-          activeRating = fsrs.Rating.again;
+          activeFsrsRating = FsrsRating.again;
         } else if (rightIntensity >= 1.0) {
-          activeRating = fsrs.Rating.good;
+          activeFsrsRating = FsrsRating.good;
         } else if (upIntensity >= 1.0) {
-          activeRating = fsrs.Rating.easy;
+          activeFsrsRating = FsrsRating.easy;
         } else if (downIntensity >= 1.0) {
-          activeRating = fsrs.Rating.hard;
+          activeFsrsRating = FsrsRating.hard;
         }
 
         return Stack(
@@ -937,8 +930,8 @@ class _SwipeableCardStackState extends State<_SwipeableCardStack>
             ),
 
             // Top Selection Indicator
-            if (_isDragging && activeRating != null)
-              _TopSelectionOverlay(rating: activeRating),
+            if (_isDragging && activeFsrsRating != null)
+              _TopSelectionOverlay(rating: activeFsrsRating),
           ],
         );
       },
@@ -985,7 +978,7 @@ class _RadialGradientOverlay extends StatelessWidget {
 }
 
 class _TopSelectionOverlay extends StatelessWidget {
-  final fsrs.Rating rating;
+  final FsrsRating rating;
 
   const _TopSelectionOverlay({required this.rating});
 
@@ -995,19 +988,19 @@ class _TopSelectionOverlay extends StatelessWidget {
     Color color = Colors.grey;
 
     switch (rating) {
-      case fsrs.Rating.again:
+      case FsrsRating.again:
         label = 'AGAIN';
         color = Colors.red.shade400;
         break;
-      case fsrs.Rating.hard:
+      case FsrsRating.hard:
         label = 'HARD';
         color = Colors.orange.shade400;
         break;
-      case fsrs.Rating.good:
+      case FsrsRating.good:
         label = 'GOOD';
         color = Colors.green.shade400;
         break;
-      case fsrs.Rating.easy:
+      case FsrsRating.easy:
         label = 'EASY';
         color = Colors.blue.shade400;
         break;

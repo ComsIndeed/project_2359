@@ -1,13 +1,13 @@
 import 'package:drift/drift.dart';
-import 'package:fsrs/fsrs.dart' as fsrs;
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
 import 'package:project_2359/core/utils/logger.dart';
 import 'package:uuid/uuid.dart';
+import 'package:project_2359/core/services/fsrs_shim.dart';
 
 class SchedulingService {
   final AppDatabase _db;
-  final fsrs.Scheduler _scheduler = fsrs.Scheduler();
+  final Scheduler _scheduler = Scheduler();
   static const String _tag = 'SchedulingService';
 
   SchedulingService(this._db);
@@ -17,7 +17,7 @@ class SchedulingService {
   /// saves it back to the card, and logs the event.
   Future<void> reviewCard({
     required String cardId,
-    required fsrs.Rating rating,
+    required FsrsRating rating,
     StudySessionMode mode = StudySessionMode.spaced,
   }) async {
     final now = DateTime.now();
@@ -32,7 +32,7 @@ class SchedulingService {
         _db.cardItems,
       )..where((t) => t.id.equals(cardId))).getSingle();
 
-      // 2. Map row data to FSRS Card object based on mode
+      // 2. Map row data to Card object based on mode
       // NOTE: For Continuous mode, we don't actually call this from SchedulingService 
       // if we follow the in-memory only rule. But we keep it for backward compatibility 
       // with existing DB columns if needed.
@@ -72,11 +72,11 @@ class SchedulingService {
     });
   }
 
-  /// Gives a hypothetical rating to a card and returns the resulting due date.
+  /// Gives a hypothetical FsrsRating to a card and returns the resulting due date.
   /// Useful for displaying "1d", "4d", etc. on review buttons.
   Future<DateTime> getPreviewNextDue({
     required String cardId,
-    required fsrs.Rating rating,
+    required FsrsRating rating,
     StudySessionMode mode = StudySessionMode.spaced,
   }) async {
     final card = await (_db.select(
@@ -89,37 +89,37 @@ class SchedulingService {
     return result.card.due;
   }
 
-  /// Maps a CardItem row to an fsrs.Card
-  fsrs.Card _toFsrsCard(CardItem card, StudySessionMode mode) {
+  /// Maps a CardItem row to an Card
+  Card _toFsrsCard(CardItem card, StudySessionMode mode) {
     final fCardId = card.id.hashCode;
     final now = DateTime.now();
 
     if (mode == StudySessionMode.spaced) {
-      return fsrs.Card(
+      return Card(
         cardId: fCardId,
         due: card.spacedDue ?? now,
         stability: card.spacedStability ?? 0.0,
         difficulty: card.spacedDifficulty ?? 0.0,
-        state: fsrs.State.values[card.spacedState ?? 0],
+        state: FsrsState.values[card.spacedState ?? 0],
         step: card.spacedStep ?? 0,
         lastReview: card.spacedLastReview,
       );
     } else {
       // Load from continuous columns
-      return fsrs.Card(
+      return Card(
         cardId: fCardId,
         due: card.continuousDue ?? now,
         stability: card.continuousStability ?? 0.0,
         difficulty: card.continuousDifficulty ?? 0.0,
-        state: fsrs.State.values[card.continuousState ?? 0],
+        state: FsrsState.values[card.continuousState ?? 0],
         step: card.continuousStep ?? 0,
         lastReview: card.continuousLastReview,
       );
     }
   }
 
-  /// Converts FSRS Card object back to a Drift companion
-  CardItemsCompanion _toCompanion(fsrs.Card card, StudySessionMode mode) {
+  /// Converts Card object back to a Drift companion
+  CardItemsCompanion _toCompanion(Card card, StudySessionMode mode) {
     if (mode == StudySessionMode.spaced) {
       return CardItemsCompanion(
         spacedDue: Value(card.due),
