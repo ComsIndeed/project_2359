@@ -12,36 +12,36 @@ import 'package:file_picker/file_picker.dart';
 
 class NewItemMenu extends StatefulWidget {
   final VoidCallback? onActionCompleted;
-  final String? activeFolderId;
+  final String? activeCollectionId;
 
-  const NewItemMenu({super.key, this.onActionCompleted, this.activeFolderId});
+  const NewItemMenu({super.key, this.onActionCompleted, this.activeCollectionId});
 
   @override
   State<NewItemMenu> createState() => _NewItemMenuState();
 }
 
 class _NewItemMenuState extends State<NewItemMenu> {
-  final TextEditingController folderNameController = TextEditingController();
-  bool isCreatingFolder = false;
+  final TextEditingController collectionNameController = TextEditingController();
+  bool isCreatingCollection = false;
 
   @override
   void initState() {
     super.initState();
-    folderNameController.addListener(() {
+    collectionNameController.addListener(() {
       setState(() {}); // Trigger rebuild to show/hide the button
     });
   }
 
-  Future<void> createFolder() async {
-    final name = folderNameController.text.trim();
+  Future<void> createCollection() async {
+    final name = collectionNameController.text.trim();
     if (name.isEmpty) return;
 
-    setState(() => isCreatingFolder = true);
+    setState(() => isCreatingCollection = true);
     try {
       final service = context.read<StudyDatabaseService>();
       final id = DateTime.now().millisecondsSinceEpoch.toString();
-      await service.insertFolder(
-        StudyFolderItemsCompanion.insert(
+      await service.insertCollection(
+        StudyCollectionItemsCompanion.insert(
           id: id,
           name: name,
           createdAt: DateTime.now().toIso8601String(),
@@ -50,7 +50,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
       );
 
       if (mounted) {
-        folderNameController.clear();
+        collectionNameController.clear();
         if (widget.onActionCompleted != null) {
           widget.onActionCompleted!();
         } else {
@@ -63,7 +63,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => isCreatingFolder = false);
+        setState(() => isCreatingCollection = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Error: $e"),
@@ -76,7 +76,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
 
   @override
   void dispose() {
-    folderNameController.dispose();
+    collectionNameController.dispose();
     super.dispose();
   }
 
@@ -111,7 +111,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
                   children: [
                     Expanded(
                       child: TextField(
-                        controller: folderNameController,
+                        controller: collectionNameController,
                         decoration: InputDecoration(
                           hintText: "Enter Name...",
                           hintStyle: TextStyle(
@@ -121,7 +121,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
                           prefixIcon: Container(
                             padding: const EdgeInsets.all(12),
                             child: FaIcon(
-                              FontAwesomeIcons.folderPlus,
+                              FontAwesomeIcons.plus,
                               size: 16,
                               color: cs.primary.withValues(alpha: 0.6),
                             ),
@@ -148,20 +148,20 @@ class _NewItemMenuState extends State<NewItemMenu> {
                             ),
                           ),
                         ),
-                        onSubmitted: (_) => createFolder(),
+                        onSubmitted: (_) => createCollection(),
                       ),
                     ),
                     AnimatedSize(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOutCubic,
-                      child: folderNameController.text.isNotEmpty
+                      child: collectionNameController.text.isNotEmpty
                           ? Padding(
                               padding: const EdgeInsets.only(left: 10),
                               child: IconButton(
-                                onPressed: isCreatingFolder
+                                onPressed: isCreatingCollection
                                     ? null
-                                    : createFolder,
-                                icon: isCreatingFolder
+                                    : createCollection,
+                                icon: isCreatingCollection
                                     ? const SizedBox(
                                         height: 18,
                                         width: 18,
@@ -234,7 +234,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => CardCreationPage(
-                        folderId: widget.activeFolderId ?? "default",
+                        collectionId: widget.activeCollectionId ?? "default",
                       ),
                     ),
                   );
@@ -272,7 +272,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
                   context.read<SourcesPageBloc>().add(
                     ImportDocumentsEvent(
                       result.files,
-                      folderId: widget.activeFolderId,
+                      collectionId: widget.activeCollectionId,
                     ),
                   );
 

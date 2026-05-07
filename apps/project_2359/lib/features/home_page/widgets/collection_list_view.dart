@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
-import 'package:project_2359/features/folder_page/folder_page.dart';
+import 'package:project_2359/features/collection_page/collection_page.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 class SectionHeader extends StatelessWidget {
@@ -28,18 +28,18 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-class PinnedFoldersSection extends StatelessWidget {
-  final Stream<List<(StudyFolderItem, int)>> stream;
+class PinnedCollectionsSection extends StatelessWidget {
+  final Stream<List<(StudyCollectionItem, int)>> stream;
   final String searchQuery;
   final Set<String> selectedIds;
   final Function(String) onToggleSelection;
   final Function(String) onSelect;
   final bool isSelecting;
   final bool isLandscape;
-  final String? activeFolderId;
+  final String? activeCollectionId;
   final Function(Offset, String, bool)? onContextMenu;
 
-  const PinnedFoldersSection({
+  const PinnedCollectionsSection({
     super.key,
     required this.stream,
     required this.searchQuery,
@@ -48,7 +48,7 @@ class PinnedFoldersSection extends StatelessWidget {
     required this.onSelect,
     required this.isSelecting,
     this.isLandscape = false,
-    this.activeFolderId,
+    this.activeCollectionId,
     this.onContextMenu,
   });
 
@@ -56,22 +56,22 @@ class PinnedFoldersSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return StreamBuilder<List<(StudyFolderItem, int)>>(
+    return StreamBuilder<List<(StudyCollectionItem, int)>>(
       stream: stream,
       builder: (context, snapshot) {
-        final folderPairs = (snapshot.data ?? []).where((p) {
+        final collectionPairs = (snapshot.data ?? []).where((p) {
           if (searchQuery.isEmpty) return true;
           return p.$1.name.toLowerCase().contains(searchQuery.toLowerCase());
         }).toList();
 
-        if (folderPairs.isEmpty) return const SizedBox.shrink();
+        if (collectionPairs.isEmpty) return const SizedBox.shrink();
 
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SectionHeader(title: "Pinned"),
-            for (final pair in folderPairs)
+            for (final pair in collectionPairs)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: GestureDetector(
@@ -113,7 +113,7 @@ class PinnedFoldersSection extends StatelessWidget {
                     ),
                     isSelected:
                         selectedIds.contains(pair.$1.id) ||
-                        (isLandscape && activeFolderId == pair.$1.id),
+                        (isLandscape && activeCollectionId == pair.$1.id),
                     isCompact: isLandscape,
                     onTap: isSelecting
                         ? () => onToggleSelection(pair.$1.id)
@@ -126,9 +126,9 @@ class PinnedFoldersSection extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => FolderPage(
-                                    folderId: pair.$1.id,
-                                    initialFolderName: pair.$1.name,
+                                  builder: (context) => CollectionPage(
+                                    collectionId: pair.$1.id,
+                                    initialCollectionName: pair.$1.name,
                                   ),
                                 ),
                               );
@@ -145,8 +145,8 @@ class PinnedFoldersSection extends StatelessWidget {
   }
 }
 
-class FolderList extends StatelessWidget {
-  final Stream<List<(StudyFolderItem, int)>> stream;
+class CollectionList extends StatelessWidget {
+  final Stream<List<(StudyCollectionItem, int)>> stream;
   final String searchQuery;
   final Color? backgroundColor;
   final Set<String> selectedIds;
@@ -154,10 +154,10 @@ class FolderList extends StatelessWidget {
   final Function(String) onSelect;
   final bool isSelecting;
   final bool isLandscape;
-  final String? activeFolderId;
+  final String? activeCollectionId;
   final Function(Offset, String, bool)? onContextMenu;
 
-  const FolderList({
+  const CollectionList({
     super.key,
     required this.stream,
     required this.searchQuery,
@@ -167,7 +167,7 @@ class FolderList extends StatelessWidget {
     required this.onSelect,
     required this.isSelecting,
     this.isLandscape = false,
-    this.activeFolderId,
+    this.activeCollectionId,
     this.onContextMenu,
   });
 
@@ -175,15 +175,15 @@ class FolderList extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return StreamBuilder<List<(StudyFolderItem, int)>>(
+    return StreamBuilder<List<(StudyCollectionItem, int)>>(
       stream: stream,
       builder: (context, snapshot) {
-        final folderPairs = (snapshot.data ?? []).where((p) {
+        final collectionPairs = (snapshot.data ?? []).where((p) {
           if (searchQuery.isEmpty) return true;
           return p.$1.name.toLowerCase().contains(searchQuery.toLowerCase());
         }).toList();
 
-        if (folderPairs.isEmpty) {
+        if (collectionPairs.isEmpty) {
           final isSearching = searchQuery.isNotEmpty;
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
@@ -203,7 +203,7 @@ class FolderList extends StatelessWidget {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            for (final pair in folderPairs)
+            for (final pair in collectionPairs)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: GestureDetector(
@@ -247,7 +247,7 @@ class FolderList extends StatelessWidget {
                     ),
                     isSelected:
                         selectedIds.contains(pair.$1.id) ||
-                        (isLandscape && activeFolderId == pair.$1.id),
+                        (isLandscape && activeCollectionId == pair.$1.id),
                     isCompact: isLandscape,
                     onTap: isSelecting
                         ? () => onToggleSelection(pair.$1.id)
@@ -260,9 +260,9 @@ class FolderList extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => FolderPage(
-                                    folderId: pair.$1.id,
-                                    initialFolderName: pair.$1.name,
+                                  builder: (context) => CollectionPage(
+                                    collectionId: pair.$1.id,
+                                    initialCollectionName: pair.$1.name,
                                   ),
                                 ),
                               );

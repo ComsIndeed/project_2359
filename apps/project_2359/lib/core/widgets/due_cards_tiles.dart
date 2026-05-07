@@ -25,10 +25,10 @@ class HomeDueCardsTile extends StatelessWidget {
         if (cards.isEmpty) return const SizedBox.shrink();
 
         return FutureBuilder<Map<String, int>>(
-          future: _groupCardsByFolder(database, cards),
-          builder: (context, folderSnapshot) {
-            final folderCounts = folderSnapshot.data ?? {};
-            if (folderCounts.isEmpty) return const SizedBox.shrink();
+          future: _groupCardsByCollection(database, cards),
+          builder: (context, collectionSnapshot) {
+            final collectionCounts = collectionSnapshot.data ?? {};
+            if (collectionCounts.isEmpty) return const SizedBox.shrink();
 
             return Container(
               decoration: ShapeDecoration(
@@ -45,7 +45,7 @@ class HomeDueCardsTile extends StatelessWidget {
                   Expanded(
                     child: DueCardsOverview(
                       totalDue: cards.length,
-                      items: folderCounts,
+                      items: collectionCounts,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -82,39 +82,39 @@ class HomeDueCardsTile extends StatelessWidget {
     );
   }
 
-  Future<Map<String, int>> _groupCardsByFolder(
+  Future<Map<String, int>> _groupCardsByCollection(
     AppDatabase db,
     List<CardItem> cards,
   ) async {
-    final Map<String, int> folderCounts = {};
+    final Map<String, int> collectionCounts = {};
     final deckIds = cards.map((c) => c.deckId).whereType<String>().toSet();
 
-    if (deckIds.isEmpty) return folderCounts;
+    if (deckIds.isEmpty) return collectionCounts;
 
     final decks = await (db.select(
       db.deckItems,
     )..where((t) => t.id.isIn(deckIds))).get();
-    final deckToFolder = {for (var d in decks) d.id: d.folderId};
+    final deckToCollection = {for (var d in decks) d.id: d.collectionId};
 
-    final folderIds = deckToFolder.values.toSet();
-    final folders = await (db.select(
-      db.studyFolderItems,
-    )..where((t) => t.id.isIn(folderIds))).get();
-    final folderIdToName = {for (var f in folders) f.id: f.name};
+    final collectionIds = deckToCollection.values.toSet();
+    final collections = await (db.select(
+      db.studyCollectionItems,
+    )..where((t) => t.id.isIn(collectionIds))).get();
+    final collectionIdToName = {for (var f in collections) f.id: f.name};
 
     for (var card in cards) {
-      final folderId = deckToFolder[card.deckId];
-      final folderName = folderIdToName[folderId] ?? "Unknown Folder";
-      folderCounts[folderName] = (folderCounts[folderName] ?? 0) + 1;
+      final collectionId = deckToCollection[card.deckId];
+      final collectionName = collectionIdToName[collectionId] ?? "Unknown Collection";
+      collectionCounts[collectionName] = (collectionCounts[collectionName] ?? 0) + 1;
     }
 
-    return folderCounts;
+    return collectionCounts;
   }
 }
 
-class FolderDueCardsTile extends StatelessWidget {
-  final String folderId;
-  const FolderDueCardsTile({super.key, required this.folderId});
+class CollectionDueCardsTile extends StatelessWidget {
+  final String collectionId;
+  const CollectionDueCardsTile({super.key, required this.collectionId});
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +124,7 @@ class FolderDueCardsTile extends StatelessWidget {
     final database = context.read<AppDatabase>();
 
     return StreamBuilder<List<CardItem>>(
-      stream: schedulingService.watchDueCardItemsForFolder(folderId: folderId),
+      stream: schedulingService.watchDueCardItemsForCollection(collectionId: collectionId),
       builder: (context, snapshot) {
         final cards = snapshot.data ?? [];
         if (cards.isEmpty) return const SizedBox.shrink();
@@ -151,7 +151,7 @@ class FolderDueCardsTile extends StatelessWidget {
                     child: DueCardsOverview(
                       totalDue: cards.length,
                       items: deckCounts,
-                      isFolderPage: true,
+                      isCollectionPage: true,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -172,8 +172,8 @@ class FolderDueCardsTile extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => StudyPage(
-                              folderId: folderId,
-                              title: "Folder Review",
+                              collectionId: collectionId,
+                              title: "Collection Review",
                             ),
                           ),
                         );

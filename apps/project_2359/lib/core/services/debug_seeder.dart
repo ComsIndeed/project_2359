@@ -22,13 +22,13 @@ class DebugSeeder {
     // 0. Seed the new Biology Citation Demo (180 cards + 7 PDFs)
     await BiologyCitationSeeder.seed(db);
 
-    // 1. Create a Demo Folder
-    final folderId = uuid.v4();
+    // 1. Create a Demo Collection
+    final collectionId = uuid.v4();
     await db
-        .into(db.studyFolderItems)
+        .into(db.studyCollectionItems)
         .insert(
-          StudyFolderItemsCompanion(
-            id: Value(folderId),
+          StudyCollectionItemsCompanion(
+            id: Value(collectionId),
             name: const Value('Biology & Medicine (DEMO)'),
             isPinned: const Value(true),
             createdAt: Value(DateTime.now().toIso8601String()),
@@ -63,7 +63,7 @@ class DebugSeeder {
               .insert(
                 SourceItemsCompanion(
                   id: Value(sourceId),
-                  folderId: Value(folderId),
+                  collectionId: Value(collectionId),
                   label: Value(fileName),
                   type: const Value(MediaType.document),
                 ),
@@ -84,7 +84,7 @@ class DebugSeeder {
       batch.insertAll(db.deckItems, [
         DeckItemsCompanion(
           id: Value(deck1Id),
-          folderId: Value(folderId),
+          collectionId: Value(collectionId),
           name: const Value('Cell Bio & Pathology'),
           description: const Value(
             'Cellular mechanisms and basic pathology hallmarks.',
@@ -92,7 +92,7 @@ class DebugSeeder {
         ),
         DeckItemsCompanion(
           id: Value(deck2Id),
-          folderId: Value(folderId),
+          collectionId: Value(collectionId),
           name: const Value('High-Yield Micro'),
           description: const Value(
             'Key pathogens, virulence factors, and clinical markers.',
@@ -100,7 +100,7 @@ class DebugSeeder {
         ),
         DeckItemsCompanion(
           id: Value(deck3Id),
-          folderId: Value(folderId),
+          collectionId: Value(collectionId),
           name: const Value('Master Biochemistry'),
           description: const Value(
             'Metabolic pathways, enzymes, and clinical correlations.',
@@ -108,7 +108,7 @@ class DebugSeeder {
         ),
         DeckItemsCompanion(
           id: Value(deck4Id),
-          folderId: Value(folderId),
+          collectionId: Value(collectionId),
           name: const Value('Comprehensive Rapid Review'),
           description: const Value(
             'Mixed high-yield facts from Anatomy, Pharm, and Physio.',

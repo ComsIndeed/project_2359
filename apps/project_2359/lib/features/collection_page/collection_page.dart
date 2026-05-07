@@ -19,7 +19,7 @@ import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/core/widgets/due_cards_tiles.dart';
 import 'package:project_2359/core/widgets/selection_action_bar.dart';
 import 'package:project_2359/core/widgets/adaptive_pane_layout.dart';
-import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
+import 'package:project_2359/features/collection_page/widgets/shared_widgets.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -31,24 +31,24 @@ import 'package:project_2359/features/study_page/study_page.dart';
 import 'package:project_2359/features/study_page/widgets/study_session_setup_sheet.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
 
-class FolderPage extends StatefulWidget {
-  final String folderId;
-  final String initialFolderName;
+class CollectionPage extends StatefulWidget {
+  final String collectionId;
+  final String initialCollectionName;
   final bool isNested;
 
-  const FolderPage({
+  const CollectionPage({
     super.key,
-    required this.folderId,
-    required this.initialFolderName,
+    required this.collectionId,
+    required this.initialCollectionName,
     this.isNested = false,
   });
 
   @override
-  State<FolderPage> createState() => _FolderPageState();
+  State<CollectionPage> createState() => _CollectionPageState();
 }
 
-class _FolderPageState extends State<FolderPage> {
-  late String folderName;
+class _CollectionPageState extends State<CollectionPage> {
+  late String collectionName;
   final Set<String> _selectedDeckIds = {};
   String? _selectedDeckId;
   final StudySessionMode _currentMode = StudySessionMode.spaced;
@@ -172,7 +172,7 @@ class _FolderPageState extends State<FolderPage> {
         await sourceService.insertSource(
           SourceItemsCompanion(
             id: drift.Value(sourceId),
-            folderId: drift.Value(widget.folderId),
+            collectionId: drift.Value(widget.collectionId),
             label: drift.Value(file.name),
             type: const drift.Value(MediaType.document),
             isPinned: const drift.Value(false),
@@ -211,22 +211,22 @@ class _FolderPageState extends State<FolderPage> {
   @override
   void initState() {
     super.initState();
-    folderName = widget.initialFolderName;
+    collectionName = widget.initialCollectionName;
     final service = context.read<StudyDatabaseService>();
-    _decksStream = service.watchDecksByFolderId(widget.folderId);
+    _decksStream = service.watchDecksByCollectionId(widget.collectionId);
     _deckSub = _decksStream.listen((decks) {
       if (mounted) setState(() => _allDecks = decks);
     });
 
     final draftService = context.read<AppController>().draftService;
-    _draftSub = draftService.watchDraftsByFolderId(widget.folderId).listen((
+    _draftSub = draftService.watchDraftsByCollectionId(widget.collectionId).listen((
       drafts,
     ) {
       if (mounted) setState(() => _allDrafts = drafts);
     });
 
     final sourceService = context.read<SourceService>();
-    _sourcesSub = sourceService.watchSourcesByFolderId(widget.folderId).listen((
+    _sourcesSub = sourceService.watchSourcesByCollectionId(widget.collectionId).listen((
       sources,
     ) {
       if (mounted) setState(() => _currentSources = sources);
@@ -234,21 +234,21 @@ class _FolderPageState extends State<FolderPage> {
   }
 
   @override
-  void didUpdateWidget(FolderPage oldWidget) {
+  void didUpdateWidget(CollectionPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.folderId != widget.folderId) {
+    if (oldWidget.collectionId != widget.collectionId) {
       _deckSub?.cancel();
       _sourcesSub?.cancel();
 
       final service = context.read<StudyDatabaseService>();
-      _decksStream = service.watchDecksByFolderId(widget.folderId);
+      _decksStream = service.watchDecksByCollectionId(widget.collectionId);
       _deckSub = _decksStream.listen((decks) {
         if (mounted) setState(() => _allDecks = decks);
       });
 
       _draftSub?.cancel();
       final draftService = context.read<AppController>().draftService;
-      _draftSub = draftService.watchDraftsByFolderId(widget.folderId).listen((
+      _draftSub = draftService.watchDraftsByCollectionId(widget.collectionId).listen((
         drafts,
       ) {
         if (mounted) setState(() => _allDrafts = drafts);
@@ -256,7 +256,7 @@ class _FolderPageState extends State<FolderPage> {
 
       final sourceService = context.read<SourceService>();
       _sourcesSub = sourceService
-          .watchSourcesByFolderId(widget.folderId)
+          .watchSourcesByCollectionId(widget.collectionId)
           .listen((sources) {
             if (mounted) setState(() => _currentSources = sources);
           });
@@ -293,7 +293,7 @@ class _FolderPageState extends State<FolderPage> {
 
   Widget _buildMasterView() {
     final theme = Theme.of(context);
-    final folderName = widget.initialFolderName;
+    final collectionName = widget.initialCollectionName;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -345,7 +345,7 @@ class _FolderPageState extends State<FolderPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                CardCreationPage(folderId: widget.folderId),
+                                CardCreationPage(collectionId: widget.collectionId),
                           ),
                         );
                       }
@@ -465,9 +465,9 @@ class _FolderPageState extends State<FolderPage> {
             Positioned.fill(
               child: SpecialBackgroundGenerator(
                 type: SpecialBackgroundType.geometricSquares,
-                seed: GenerationSeed.fromString(folderName),
-                label: folderName,
-                icon: FontAwesomeIcons.folder,
+                seed: GenerationSeed.fromString(collectionName),
+                label: collectionName,
+                icon: FontAwesomeIcons.layerGroup,
                 showBorder: false,
                 showShadow: false,
                 backgroundColor: null,
@@ -481,7 +481,7 @@ class _FolderPageState extends State<FolderPage> {
                   SliverPersistentHeader(
                     pinned: true,
                     delegate: _CollapsingHeaderDelegate(
-                      folderName: folderName,
+                      collectionName: collectionName,
                       topPadding: widget.isNested
                           ? 0
                           : MediaQuery.of(context).padding.top,
@@ -501,7 +501,7 @@ class _FolderPageState extends State<FolderPage> {
                   _CardsPage(
                     decks: _allDecks,
                     drafts: _allDrafts,
-                    folderId: widget.folderId,
+                    collectionId: widget.collectionId,
                     selectedIds: _selectedDeckIds,
                     onToggleSelection: _toggleDeckSelection,
                     isSelecting: _isSelecting,
@@ -549,12 +549,12 @@ class _FolderPageState extends State<FolderPage> {
                     },
                   ),
                   _SourcesPage(
-                    folderId: widget.folderId,
+                    collectionId: widget.collectionId,
                     sources: _currentSources ?? [],
                   ),
                   _SettingsPage(
-                    folderId: widget.folderId,
-                    folderName: folderName,
+                    collectionId: widget.collectionId,
+                    collectionName: collectionName,
                   ),
                 ],
               ),
@@ -600,14 +600,14 @@ class _FolderPageState extends State<FolderPage> {
 }
 
 class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final String folderName;
+  final String collectionName;
   final double topPadding;
   final VoidCallback? onBack;
   final int currentIndex;
   final ValueChanged<int> onPageRequested;
 
   _CollapsingHeaderDelegate({
-    required this.folderName,
+    required this.collectionName,
     required this.topPadding,
     this.onBack,
     required this.currentIndex,
@@ -667,7 +667,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "FOLDER",
+                        "COLLECTION",
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: Colors.white.withValues(alpha: 0.4),
                           fontWeight: FontWeight.w900,
@@ -690,7 +690,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                           ),
                           Expanded(
                             child: Text(
-                              folderName,
+                              collectionName,
                               style: theme.textTheme.displaySmall?.copyWith(
                                 fontWeight: FontWeight.w900,
                                 color: Colors.white,
@@ -749,7 +749,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                     child: Opacity(
                       opacity: (t * 2.0 - 0.6).clamp(0.0, 1.0),
                       child: Text(
-                        folderName,
+                        collectionName,
                         style: theme.textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                           fontSize: 18,
@@ -896,7 +896,7 @@ class _CompactIconButton extends StatelessWidget {
 class _CardsPage extends StatelessWidget {
   final List<DeckItem> decks;
   final List<CardCreationDraftItem> drafts;
-  final String folderId;
+  final String collectionId;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
   final bool isSelecting;
@@ -906,7 +906,7 @@ class _CardsPage extends StatelessWidget {
   const _CardsPage({
     required this.decks,
     required this.drafts,
-    required this.folderId,
+    required this.collectionId,
     required this.selectedIds,
     required this.onToggleSelection,
     required this.isSelecting,
@@ -922,7 +922,7 @@ class _CardsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FolderDueCardsTile(folderId: folderId),
+          CollectionDueCardsTile(collectionId: collectionId),
           const SizedBox(height: 16),
           if (drafts.isNotEmpty) ...[
             const _SectionLabel(title: "Resume Projects"),
@@ -963,7 +963,7 @@ class _CardsPage extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => CardCreationPage(
-                                folderId: folderId,
+                                collectionId: collectionId,
                                 deckId: draft.deckId,
                                 draftId: draft.id,
                               ),
@@ -982,7 +982,7 @@ class _CardsPage extends StatelessWidget {
           const SizedBox(height: 12),
           _DecksList(
             decks: decks,
-            folderId: folderId,
+            collectionId: collectionId,
             selectedIds: selectedIds,
             onToggleSelection: onToggleSelection,
             isSelecting: isSelecting,
@@ -997,10 +997,10 @@ class _CardsPage extends StatelessWidget {
 }
 
 class _SourcesPage extends StatelessWidget {
-  final String folderId;
+  final String collectionId;
   final List<SourceItem> sources;
 
-  const _SourcesPage({required this.folderId, required this.sources});
+  const _SourcesPage({required this.collectionId, required this.sources});
 
   IconData _getSourceIcon(MediaType type) {
     switch (type) {
@@ -1028,7 +1028,7 @@ class _SourcesPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const _SectionLabel(title: "Folder Sources"),
+          const _SectionLabel(title: "Collection Sources"),
           const SizedBox(height: 12),
           if (sources.isEmpty)
             Center(
@@ -1112,10 +1112,10 @@ class _SourcesPage extends StatelessWidget {
 }
 
 class _SettingsPage extends StatelessWidget {
-  final String folderId;
-  final String folderName;
+  final String collectionId;
+  final String collectionName;
 
-  const _SettingsPage({required this.folderId, required this.folderName});
+  const _SettingsPage({required this.collectionId, required this.collectionName});
 
   @override
   Widget build(BuildContext context) {
@@ -1134,13 +1134,13 @@ class _SettingsPage extends StatelessWidget {
             backgroundColor: Colors.white.withValues(alpha: 0.05),
             children: [
               ProjectListTile.simple(
-                label: "Rename Folder",
+                label: "Rename Collection",
                 icon: FontAwesomeIcons.pen,
                 showDivider: true,
                 onTap: () {},
               ).animate().fadeIn(delay: 50.ms).slideY(begin: 0.1),
               ProjectListTile.simple(
-                label: "Folder Icon & Color",
+                label: "Collection Icon & Color",
                 icon: FontAwesomeIcons.palette,
                 showDivider: true,
                 onTap: () {},
@@ -1159,7 +1159,7 @@ class _SettingsPage extends StatelessWidget {
             backgroundColor: Colors.white.withValues(alpha: 0.05),
             children: [
               ProjectListTile.simple(
-                label: "Archive Folder",
+                label: "Archive Collection",
                 icon: FontAwesomeIcons.boxArchive,
                 showDivider: true,
                 onTap: () {},
@@ -1178,7 +1178,7 @@ class _SettingsPage extends StatelessWidget {
             backgroundColor: Colors.white.withValues(alpha: 0.05),
             children: [
               ProjectListTile.simple(
-                label: "Delete Folder",
+                label: "Delete Collection",
                 icon: FontAwesomeIcons.trashCan,
                 isAlert: true,
                 onTap: () async {
@@ -1187,9 +1187,9 @@ class _SettingsPage extends StatelessWidget {
                       await showDialog<bool>(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: const Text("Delete Folder?"),
+                          title: const Text("Delete Collection?"),
                           content: const Text(
-                            "Are you sure you want to delete this folder? This action cannot be undone.",
+                            "Are you sure you want to delete this collection? This action cannot be undone.",
                           ),
                           actions: [
                             TextButton(
@@ -1209,7 +1209,7 @@ class _SettingsPage extends StatelessWidget {
                       false;
 
                   if (confirmed) {
-                    await service.deleteFolder(folderId);
+                    await service.deleteCollection(collectionId);
                     if (context.mounted) {
                       Navigator.pop(context);
                     }
@@ -1227,7 +1227,7 @@ class _SettingsPage extends StatelessWidget {
 
 class _DecksList extends StatelessWidget {
   final List<DeckItem> decks;
-  final String folderId;
+  final String collectionId;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
   final bool isSelecting;
@@ -1236,7 +1236,7 @@ class _DecksList extends StatelessWidget {
 
   const _DecksList({
     required this.decks,
-    required this.folderId,
+    required this.collectionId,
     required this.selectedIds,
     required this.onToggleSelection,
     required this.isSelecting,

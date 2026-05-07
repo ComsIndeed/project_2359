@@ -3,12 +3,12 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $StudyFolderItemsTable extends StudyFolderItems
-    with TableInfo<$StudyFolderItemsTable, StudyFolderItem> {
+class $StudyCollectionItemsTable extends StudyCollectionItems
+    with TableInfo<$StudyCollectionItemsTable, StudyCollectionItem> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $StudyFolderItemsTable(this.attachedDatabase, [this._alias]);
+  $StudyCollectionItemsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -76,10 +76,10 @@ class $StudyFolderItemsTable extends StudyFolderItems
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'study_folder_items';
+  static const String $name = 'study_collection_items';
   @override
   VerificationContext validateIntegrity(
-    Insertable<StudyFolderItem> instance, {
+    Insertable<StudyCollectionItem> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -125,9 +125,9 @@ class $StudyFolderItemsTable extends StudyFolderItems
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  StudyFolderItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+  StudyCollectionItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return StudyFolderItem(
+    return StudyCollectionItem(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -152,18 +152,19 @@ class $StudyFolderItemsTable extends StudyFolderItems
   }
 
   @override
-  $StudyFolderItemsTable createAlias(String alias) {
-    return $StudyFolderItemsTable(attachedDatabase, alias);
+  $StudyCollectionItemsTable createAlias(String alias) {
+    return $StudyCollectionItemsTable(attachedDatabase, alias);
   }
 }
 
-class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
+class StudyCollectionItem extends DataClass
+    implements Insertable<StudyCollectionItem> {
   final String id;
   final String name;
   final String createdAt;
   final String updatedAt;
   final bool isPinned;
-  const StudyFolderItem({
+  const StudyCollectionItem({
     required this.id,
     required this.name,
     required this.createdAt,
@@ -181,8 +182,8 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
     return map;
   }
 
-  StudyFolderItemsCompanion toCompanion(bool nullToAbsent) {
-    return StudyFolderItemsCompanion(
+  StudyCollectionItemsCompanion toCompanion(bool nullToAbsent) {
+    return StudyCollectionItemsCompanion(
       id: Value(id),
       name: Value(name),
       createdAt: Value(createdAt),
@@ -191,12 +192,12 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
     );
   }
 
-  factory StudyFolderItem.fromJson(
+  factory StudyCollectionItem.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return StudyFolderItem(
+    return StudyCollectionItem(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
@@ -216,21 +217,21 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
     };
   }
 
-  StudyFolderItem copyWith({
+  StudyCollectionItem copyWith({
     String? id,
     String? name,
     String? createdAt,
     String? updatedAt,
     bool? isPinned,
-  }) => StudyFolderItem(
+  }) => StudyCollectionItem(
     id: id ?? this.id,
     name: name ?? this.name,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     isPinned: isPinned ?? this.isPinned,
   );
-  StudyFolderItem copyWithCompanion(StudyFolderItemsCompanion data) {
-    return StudyFolderItem(
+  StudyCollectionItem copyWithCompanion(StudyCollectionItemsCompanion data) {
+    return StudyCollectionItem(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -241,7 +242,7 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
 
   @override
   String toString() {
-    return (StringBuffer('StudyFolderItem(')
+    return (StringBuffer('StudyCollectionItem(')
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('createdAt: $createdAt, ')
@@ -256,7 +257,7 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is StudyFolderItem &&
+      (other is StudyCollectionItem &&
           other.id == this.id &&
           other.name == this.name &&
           other.createdAt == this.createdAt &&
@@ -264,14 +265,15 @@ class StudyFolderItem extends DataClass implements Insertable<StudyFolderItem> {
           other.isPinned == this.isPinned);
 }
 
-class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
+class StudyCollectionItemsCompanion
+    extends UpdateCompanion<StudyCollectionItem> {
   final Value<String> id;
   final Value<String> name;
   final Value<String> createdAt;
   final Value<String> updatedAt;
   final Value<bool> isPinned;
   final Value<int> rowid;
-  const StudyFolderItemsCompanion({
+  const StudyCollectionItemsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -279,7 +281,7 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
     this.isPinned = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  StudyFolderItemsCompanion.insert({
+  StudyCollectionItemsCompanion.insert({
     required String id,
     required String name,
     required String createdAt,
@@ -290,7 +292,7 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
        name = Value(name),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
-  static Insertable<StudyFolderItem> custom({
+  static Insertable<StudyCollectionItem> custom({
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? createdAt,
@@ -308,7 +310,7 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
     });
   }
 
-  StudyFolderItemsCompanion copyWith({
+  StudyCollectionItemsCompanion copyWith({
     Value<String>? id,
     Value<String>? name,
     Value<String>? createdAt,
@@ -316,7 +318,7 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
     Value<bool>? isPinned,
     Value<int>? rowid,
   }) {
-    return StudyFolderItemsCompanion(
+    return StudyCollectionItemsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       createdAt: createdAt ?? this.createdAt,
@@ -352,7 +354,7 @@ class StudyFolderItemsCompanion extends UpdateCompanion<StudyFolderItem> {
 
   @override
   String toString() {
-    return (StringBuffer('StudyFolderItemsCompanion(')
+    return (StringBuffer('StudyCollectionItemsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('createdAt: $createdAt, ')
@@ -379,18 +381,18 @@ class $SourceItemsTable extends SourceItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _folderIdMeta = const VerificationMeta(
-    'folderId',
+  static const VerificationMeta _collectionIdMeta = const VerificationMeta(
+    'collectionId',
   );
   @override
-  late final GeneratedColumn<String> folderId = GeneratedColumn<String>(
-    'folder_id',
+  late final GeneratedColumn<String> collectionId = GeneratedColumn<String>(
+    'collection_id',
     aliasedName,
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES study_folder_items (id)',
+      'REFERENCES study_collection_items (id)',
     ),
   );
   static const VerificationMeta _labelMeta = const VerificationMeta('label');
@@ -449,7 +451,7 @@ class $SourceItemsTable extends SourceItems
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    folderId,
+    collectionId,
     label,
     path,
     type,
@@ -473,10 +475,13 @@ class $SourceItemsTable extends SourceItems
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('folder_id')) {
+    if (data.containsKey('collection_id')) {
       context.handle(
-        _folderIdMeta,
-        folderId.isAcceptableOrUnknown(data['folder_id']!, _folderIdMeta),
+        _collectionIdMeta,
+        collectionId.isAcceptableOrUnknown(
+          data['collection_id']!,
+          _collectionIdMeta,
+        ),
       );
     }
     if (data.containsKey('label')) {
@@ -521,9 +526,9 @@ class $SourceItemsTable extends SourceItems
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
-      folderId: attachedDatabase.typeMapping.read(
+      collectionId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}folder_id'],
+        data['${effectivePrefix}collection_id'],
       ),
       label: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -561,7 +566,7 @@ class $SourceItemsTable extends SourceItems
 
 class SourceItem extends DataClass implements Insertable<SourceItem> {
   final String id;
-  final String? folderId;
+  final String? collectionId;
   final String label;
   final String? path;
   final MediaType type;
@@ -569,7 +574,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
   final bool isPinned;
   const SourceItem({
     required this.id,
-    this.folderId,
+    this.collectionId,
     required this.label,
     this.path,
     required this.type,
@@ -580,8 +585,8 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    if (!nullToAbsent || folderId != null) {
-      map['folder_id'] = Variable<String>(folderId);
+    if (!nullToAbsent || collectionId != null) {
+      map['collection_id'] = Variable<String>(collectionId);
     }
     map['label'] = Variable<String>(label);
     if (!nullToAbsent || path != null) {
@@ -602,9 +607,9 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
   SourceItemsCompanion toCompanion(bool nullToAbsent) {
     return SourceItemsCompanion(
       id: Value(id),
-      folderId: folderId == null && nullToAbsent
+      collectionId: collectionId == null && nullToAbsent
           ? const Value.absent()
-          : Value(folderId),
+          : Value(collectionId),
       label: Value(label),
       path: path == null && nullToAbsent ? const Value.absent() : Value(path),
       type: Value(type),
@@ -622,7 +627,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SourceItem(
       id: serializer.fromJson<String>(json['id']),
-      folderId: serializer.fromJson<String?>(json['folderId']),
+      collectionId: serializer.fromJson<String?>(json['collectionId']),
       label: serializer.fromJson<String>(json['label']),
       path: serializer.fromJson<String?>(json['path']),
       type: $SourceItemsTable.$convertertype.fromJson(
@@ -637,7 +642,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'folderId': serializer.toJson<String?>(folderId),
+      'collectionId': serializer.toJson<String?>(collectionId),
       'label': serializer.toJson<String>(label),
       'path': serializer.toJson<String?>(path),
       'type': serializer.toJson<String>(
@@ -650,7 +655,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
 
   SourceItem copyWith({
     String? id,
-    Value<String?> folderId = const Value.absent(),
+    Value<String?> collectionId = const Value.absent(),
     String? label,
     Value<String?> path = const Value.absent(),
     MediaType? type,
@@ -658,7 +663,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
     bool? isPinned,
   }) => SourceItem(
     id: id ?? this.id,
-    folderId: folderId.present ? folderId.value : this.folderId,
+    collectionId: collectionId.present ? collectionId.value : this.collectionId,
     label: label ?? this.label,
     path: path.present ? path.value : this.path,
     type: type ?? this.type,
@@ -670,7 +675,9 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
   SourceItem copyWithCompanion(SourceItemsCompanion data) {
     return SourceItem(
       id: data.id.present ? data.id.value : this.id,
-      folderId: data.folderId.present ? data.folderId.value : this.folderId,
+      collectionId: data.collectionId.present
+          ? data.collectionId.value
+          : this.collectionId,
       label: data.label.present ? data.label.value : this.label,
       path: data.path.present ? data.path.value : this.path,
       type: data.type.present ? data.type.value : this.type,
@@ -685,7 +692,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
   String toString() {
     return (StringBuffer('SourceItem(')
           ..write('id: $id, ')
-          ..write('folderId: $folderId, ')
+          ..write('collectionId: $collectionId, ')
           ..write('label: $label, ')
           ..write('path: $path, ')
           ..write('type: $type, ')
@@ -696,14 +703,21 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, folderId, label, path, type, extractedContent, isPinned);
+  int get hashCode => Object.hash(
+    id,
+    collectionId,
+    label,
+    path,
+    type,
+    extractedContent,
+    isPinned,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SourceItem &&
           other.id == this.id &&
-          other.folderId == this.folderId &&
+          other.collectionId == this.collectionId &&
           other.label == this.label &&
           other.path == this.path &&
           other.type == this.type &&
@@ -713,7 +727,7 @@ class SourceItem extends DataClass implements Insertable<SourceItem> {
 
 class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
   final Value<String> id;
-  final Value<String?> folderId;
+  final Value<String?> collectionId;
   final Value<String> label;
   final Value<String?> path;
   final Value<MediaType> type;
@@ -722,7 +736,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
   final Value<int> rowid;
   const SourceItemsCompanion({
     this.id = const Value.absent(),
-    this.folderId = const Value.absent(),
+    this.collectionId = const Value.absent(),
     this.label = const Value.absent(),
     this.path = const Value.absent(),
     this.type = const Value.absent(),
@@ -732,7 +746,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
   });
   SourceItemsCompanion.insert({
     required String id,
-    this.folderId = const Value.absent(),
+    this.collectionId = const Value.absent(),
     required String label,
     this.path = const Value.absent(),
     required MediaType type,
@@ -744,7 +758,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
        type = Value(type);
   static Insertable<SourceItem> custom({
     Expression<String>? id,
-    Expression<String>? folderId,
+    Expression<String>? collectionId,
     Expression<String>? label,
     Expression<String>? path,
     Expression<String>? type,
@@ -754,7 +768,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (folderId != null) 'folder_id': folderId,
+      if (collectionId != null) 'collection_id': collectionId,
       if (label != null) 'label': label,
       if (path != null) 'path': path,
       if (type != null) 'type': type,
@@ -766,7 +780,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
 
   SourceItemsCompanion copyWith({
     Value<String>? id,
-    Value<String?>? folderId,
+    Value<String?>? collectionId,
     Value<String>? label,
     Value<String?>? path,
     Value<MediaType>? type,
@@ -776,7 +790,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
   }) {
     return SourceItemsCompanion(
       id: id ?? this.id,
-      folderId: folderId ?? this.folderId,
+      collectionId: collectionId ?? this.collectionId,
       label: label ?? this.label,
       path: path ?? this.path,
       type: type ?? this.type,
@@ -792,8 +806,8 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (folderId.present) {
-      map['folder_id'] = Variable<String>(folderId.value);
+    if (collectionId.present) {
+      map['collection_id'] = Variable<String>(collectionId.value);
     }
     if (label.present) {
       map['label'] = Variable<String>(label.value);
@@ -822,7 +836,7 @@ class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
   String toString() {
     return (StringBuffer('SourceItemsCompanion(')
           ..write('id: $id, ')
-          ..write('folderId: $folderId, ')
+          ..write('collectionId: $collectionId, ')
           ..write('label: $label, ')
           ..write('path: $path, ')
           ..write('type: $type, ')
@@ -849,18 +863,18 @@ class $DeckItemsTable extends DeckItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _folderIdMeta = const VerificationMeta(
-    'folderId',
+  static const VerificationMeta _collectionIdMeta = const VerificationMeta(
+    'collectionId',
   );
   @override
-  late final GeneratedColumn<String> folderId = GeneratedColumn<String>(
-    'folder_id',
+  late final GeneratedColumn<String> collectionId = GeneratedColumn<String>(
+    'collection_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES study_folder_items (id)',
+      'REFERENCES study_collection_items (id)',
     ),
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
@@ -901,7 +915,7 @@ class $DeckItemsTable extends DeckItems
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    folderId,
+    collectionId,
     name,
     description,
     isPinned,
@@ -923,13 +937,16 @@ class $DeckItemsTable extends DeckItems
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('folder_id')) {
+    if (data.containsKey('collection_id')) {
       context.handle(
-        _folderIdMeta,
-        folderId.isAcceptableOrUnknown(data['folder_id']!, _folderIdMeta),
+        _collectionIdMeta,
+        collectionId.isAcceptableOrUnknown(
+          data['collection_id']!,
+          _collectionIdMeta,
+        ),
       );
     } else if (isInserting) {
-      context.missing(_folderIdMeta);
+      context.missing(_collectionIdMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -967,9 +984,9 @@ class $DeckItemsTable extends DeckItems
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
-      folderId: attachedDatabase.typeMapping.read(
+      collectionId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}folder_id'],
+        data['${effectivePrefix}collection_id'],
       )!,
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -994,13 +1011,13 @@ class $DeckItemsTable extends DeckItems
 
 class DeckItem extends DataClass implements Insertable<DeckItem> {
   final String id;
-  final String folderId;
+  final String collectionId;
   final String name;
   final String? description;
   final bool isPinned;
   const DeckItem({
     required this.id,
-    required this.folderId,
+    required this.collectionId,
     required this.name,
     this.description,
     required this.isPinned,
@@ -1009,7 +1026,7 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['folder_id'] = Variable<String>(folderId);
+    map['collection_id'] = Variable<String>(collectionId);
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
@@ -1021,7 +1038,7 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
   DeckItemsCompanion toCompanion(bool nullToAbsent) {
     return DeckItemsCompanion(
       id: Value(id),
-      folderId: Value(folderId),
+      collectionId: Value(collectionId),
       name: Value(name),
       description: description == null && nullToAbsent
           ? const Value.absent()
@@ -1037,7 +1054,7 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DeckItem(
       id: serializer.fromJson<String>(json['id']),
-      folderId: serializer.fromJson<String>(json['folderId']),
+      collectionId: serializer.fromJson<String>(json['collectionId']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
       isPinned: serializer.fromJson<bool>(json['isPinned']),
@@ -1048,7 +1065,7 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'folderId': serializer.toJson<String>(folderId),
+      'collectionId': serializer.toJson<String>(collectionId),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
       'isPinned': serializer.toJson<bool>(isPinned),
@@ -1057,13 +1074,13 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
 
   DeckItem copyWith({
     String? id,
-    String? folderId,
+    String? collectionId,
     String? name,
     Value<String?> description = const Value.absent(),
     bool? isPinned,
   }) => DeckItem(
     id: id ?? this.id,
-    folderId: folderId ?? this.folderId,
+    collectionId: collectionId ?? this.collectionId,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
     isPinned: isPinned ?? this.isPinned,
@@ -1071,7 +1088,9 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
   DeckItem copyWithCompanion(DeckItemsCompanion data) {
     return DeckItem(
       id: data.id.present ? data.id.value : this.id,
-      folderId: data.folderId.present ? data.folderId.value : this.folderId,
+      collectionId: data.collectionId.present
+          ? data.collectionId.value
+          : this.collectionId,
       name: data.name.present ? data.name.value : this.name,
       description: data.description.present
           ? data.description.value
@@ -1084,7 +1103,7 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
   String toString() {
     return (StringBuffer('DeckItem(')
           ..write('id: $id, ')
-          ..write('folderId: $folderId, ')
+          ..write('collectionId: $collectionId, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('isPinned: $isPinned')
@@ -1093,13 +1112,14 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
   }
 
   @override
-  int get hashCode => Object.hash(id, folderId, name, description, isPinned);
+  int get hashCode =>
+      Object.hash(id, collectionId, name, description, isPinned);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is DeckItem &&
           other.id == this.id &&
-          other.folderId == this.folderId &&
+          other.collectionId == this.collectionId &&
           other.name == this.name &&
           other.description == this.description &&
           other.isPinned == this.isPinned);
@@ -1107,14 +1127,14 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
 
 class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   final Value<String> id;
-  final Value<String> folderId;
+  final Value<String> collectionId;
   final Value<String> name;
   final Value<String?> description;
   final Value<bool> isPinned;
   final Value<int> rowid;
   const DeckItemsCompanion({
     this.id = const Value.absent(),
-    this.folderId = const Value.absent(),
+    this.collectionId = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
     this.isPinned = const Value.absent(),
@@ -1122,17 +1142,17 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   });
   DeckItemsCompanion.insert({
     required String id,
-    required String folderId,
+    required String collectionId,
     required String name,
     this.description = const Value.absent(),
     this.isPinned = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       folderId = Value(folderId),
+       collectionId = Value(collectionId),
        name = Value(name);
   static Insertable<DeckItem> custom({
     Expression<String>? id,
-    Expression<String>? folderId,
+    Expression<String>? collectionId,
     Expression<String>? name,
     Expression<String>? description,
     Expression<bool>? isPinned,
@@ -1140,7 +1160,7 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (folderId != null) 'folder_id': folderId,
+      if (collectionId != null) 'collection_id': collectionId,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
       if (isPinned != null) 'is_pinned': isPinned,
@@ -1150,7 +1170,7 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
 
   DeckItemsCompanion copyWith({
     Value<String>? id,
-    Value<String>? folderId,
+    Value<String>? collectionId,
     Value<String>? name,
     Value<String?>? description,
     Value<bool>? isPinned,
@@ -1158,7 +1178,7 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   }) {
     return DeckItemsCompanion(
       id: id ?? this.id,
-      folderId: folderId ?? this.folderId,
+      collectionId: collectionId ?? this.collectionId,
       name: name ?? this.name,
       description: description ?? this.description,
       isPinned: isPinned ?? this.isPinned,
@@ -1172,8 +1192,8 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (folderId.present) {
-      map['folder_id'] = Variable<String>(folderId.value);
+    if (collectionId.present) {
+      map['collection_id'] = Variable<String>(collectionId.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -1194,7 +1214,7 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   String toString() {
     return (StringBuffer('DeckItemsCompanion(')
           ..write('id: $id, ')
-          ..write('folderId: $folderId, ')
+          ..write('collectionId: $collectionId, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('isPinned: $isPinned, ')
@@ -1600,12 +1620,12 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _folderIdMeta = const VerificationMeta(
-    'folderId',
+  static const VerificationMeta _collectionIdMeta = const VerificationMeta(
+    'collectionId',
   );
   @override
-  late final GeneratedColumn<String> folderId = GeneratedColumn<String>(
-    'folder_id',
+  late final GeneratedColumn<String> collectionId = GeneratedColumn<String>(
+    'collection_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -1667,7 +1687,7 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    folderId,
+    collectionId,
     deckId,
     createdAt,
     updatedAt,
@@ -1691,13 +1711,16 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('folder_id')) {
+    if (data.containsKey('collection_id')) {
       context.handle(
-        _folderIdMeta,
-        folderId.isAcceptableOrUnknown(data['folder_id']!, _folderIdMeta),
+        _collectionIdMeta,
+        collectionId.isAcceptableOrUnknown(
+          data['collection_id']!,
+          _collectionIdMeta,
+        ),
       );
     } else if (isInserting) {
-      context.missing(_folderIdMeta);
+      context.missing(_collectionIdMeta);
     }
     if (data.containsKey('deck_id')) {
       context.handle(
@@ -1754,9 +1777,9 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
-      folderId: attachedDatabase.typeMapping.read(
+      collectionId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}folder_id'],
+        data['${effectivePrefix}collection_id'],
       )!,
       deckId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -1790,7 +1813,7 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
 class CardCreationDraftItem extends DataClass
     implements Insertable<CardCreationDraftItem> {
   final String id;
-  final String folderId;
+  final String collectionId;
   final String deckId;
   final String createdAt;
   final String updatedAt;
@@ -1798,7 +1821,7 @@ class CardCreationDraftItem extends DataClass
   final String? lastOpenedPage;
   const CardCreationDraftItem({
     required this.id,
-    required this.folderId,
+    required this.collectionId,
     required this.deckId,
     required this.createdAt,
     required this.updatedAt,
@@ -1809,7 +1832,7 @@ class CardCreationDraftItem extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['folder_id'] = Variable<String>(folderId);
+    map['collection_id'] = Variable<String>(collectionId);
     map['deck_id'] = Variable<String>(deckId);
     map['created_at'] = Variable<String>(createdAt);
     map['updated_at'] = Variable<String>(updatedAt);
@@ -1825,7 +1848,7 @@ class CardCreationDraftItem extends DataClass
   CardCreationDraftItemsCompanion toCompanion(bool nullToAbsent) {
     return CardCreationDraftItemsCompanion(
       id: Value(id),
-      folderId: Value(folderId),
+      collectionId: Value(collectionId),
       deckId: Value(deckId),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -1845,7 +1868,7 @@ class CardCreationDraftItem extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return CardCreationDraftItem(
       id: serializer.fromJson<String>(json['id']),
-      folderId: serializer.fromJson<String>(json['folderId']),
+      collectionId: serializer.fromJson<String>(json['collectionId']),
       deckId: serializer.fromJson<String>(json['deckId']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
       updatedAt: serializer.fromJson<String>(json['updatedAt']),
@@ -1860,7 +1883,7 @@ class CardCreationDraftItem extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'folderId': serializer.toJson<String>(folderId),
+      'collectionId': serializer.toJson<String>(collectionId),
       'deckId': serializer.toJson<String>(deckId),
       'createdAt': serializer.toJson<String>(createdAt),
       'updatedAt': serializer.toJson<String>(updatedAt),
@@ -1871,7 +1894,7 @@ class CardCreationDraftItem extends DataClass
 
   CardCreationDraftItem copyWith({
     String? id,
-    String? folderId,
+    String? collectionId,
     String? deckId,
     String? createdAt,
     String? updatedAt,
@@ -1879,7 +1902,7 @@ class CardCreationDraftItem extends DataClass
     Value<String?> lastOpenedPage = const Value.absent(),
   }) => CardCreationDraftItem(
     id: id ?? this.id,
-    folderId: folderId ?? this.folderId,
+    collectionId: collectionId ?? this.collectionId,
     deckId: deckId ?? this.deckId,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -1895,7 +1918,9 @@ class CardCreationDraftItem extends DataClass
   ) {
     return CardCreationDraftItem(
       id: data.id.present ? data.id.value : this.id,
-      folderId: data.folderId.present ? data.folderId.value : this.folderId,
+      collectionId: data.collectionId.present
+          ? data.collectionId.value
+          : this.collectionId,
       deckId: data.deckId.present ? data.deckId.value : this.deckId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -1912,7 +1937,7 @@ class CardCreationDraftItem extends DataClass
   String toString() {
     return (StringBuffer('CardCreationDraftItem(')
           ..write('id: $id, ')
-          ..write('folderId: $folderId, ')
+          ..write('collectionId: $collectionId, ')
           ..write('deckId: $deckId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1925,7 +1950,7 @@ class CardCreationDraftItem extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
-    folderId,
+    collectionId,
     deckId,
     createdAt,
     updatedAt,
@@ -1937,7 +1962,7 @@ class CardCreationDraftItem extends DataClass
       identical(this, other) ||
       (other is CardCreationDraftItem &&
           other.id == this.id &&
-          other.folderId == this.folderId &&
+          other.collectionId == this.collectionId &&
           other.deckId == this.deckId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -1948,7 +1973,7 @@ class CardCreationDraftItem extends DataClass
 class CardCreationDraftItemsCompanion
     extends UpdateCompanion<CardCreationDraftItem> {
   final Value<String> id;
-  final Value<String> folderId;
+  final Value<String> collectionId;
   final Value<String> deckId;
   final Value<String> createdAt;
   final Value<String> updatedAt;
@@ -1957,7 +1982,7 @@ class CardCreationDraftItemsCompanion
   final Value<int> rowid;
   const CardCreationDraftItemsCompanion({
     this.id = const Value.absent(),
-    this.folderId = const Value.absent(),
+    this.collectionId = const Value.absent(),
     this.deckId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1967,7 +1992,7 @@ class CardCreationDraftItemsCompanion
   });
   CardCreationDraftItemsCompanion.insert({
     required String id,
-    required String folderId,
+    required String collectionId,
     required String deckId,
     required String createdAt,
     required String updatedAt,
@@ -1975,13 +2000,13 @@ class CardCreationDraftItemsCompanion
     this.lastOpenedPage = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       folderId = Value(folderId),
+       collectionId = Value(collectionId),
        deckId = Value(deckId),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
   static Insertable<CardCreationDraftItem> custom({
     Expression<String>? id,
-    Expression<String>? folderId,
+    Expression<String>? collectionId,
     Expression<String>? deckId,
     Expression<String>? createdAt,
     Expression<String>? updatedAt,
@@ -1991,7 +2016,7 @@ class CardCreationDraftItemsCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (folderId != null) 'folder_id': folderId,
+      if (collectionId != null) 'collection_id': collectionId,
       if (deckId != null) 'deck_id': deckId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -2004,7 +2029,7 @@ class CardCreationDraftItemsCompanion
 
   CardCreationDraftItemsCompanion copyWith({
     Value<String>? id,
-    Value<String>? folderId,
+    Value<String>? collectionId,
     Value<String>? deckId,
     Value<String>? createdAt,
     Value<String>? updatedAt,
@@ -2014,7 +2039,7 @@ class CardCreationDraftItemsCompanion
   }) {
     return CardCreationDraftItemsCompanion(
       id: id ?? this.id,
-      folderId: folderId ?? this.folderId,
+      collectionId: collectionId ?? this.collectionId,
       deckId: deckId ?? this.deckId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -2030,8 +2055,8 @@ class CardCreationDraftItemsCompanion
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (folderId.present) {
-      map['folder_id'] = Variable<String>(folderId.value);
+    if (collectionId.present) {
+      map['collection_id'] = Variable<String>(collectionId.value);
     }
     if (deckId.present) {
       map['deck_id'] = Variable<String>(deckId.value);
@@ -2058,7 +2083,7 @@ class CardCreationDraftItemsCompanion
   String toString() {
     return (StringBuffer('CardCreationDraftItemsCompanion(')
           ..write('id: $id, ')
-          ..write('folderId: $folderId, ')
+          ..write('collectionId: $collectionId, ')
           ..write('deckId: $deckId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -4820,9 +4845,8 @@ class AssetItemsCompanion extends UpdateCompanion<AssetItem> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $StudyFolderItemsTable studyFolderItems = $StudyFolderItemsTable(
-    this,
-  );
+  late final $StudyCollectionItemsTable studyCollectionItems =
+      $StudyCollectionItemsTable(this);
   late final $SourceItemsTable sourceItems = $SourceItemsTable(this);
   late final $DeckItemsTable deckItems = $DeckItemsTable(this);
   late final $SourceItemBlobsTable sourceItemBlobs = $SourceItemBlobsTable(
@@ -4840,7 +4864,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-    studyFolderItems,
+    studyCollectionItems,
     sourceItems,
     deckItems,
     sourceItemBlobs,
@@ -4852,8 +4876,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ];
 }
 
-typedef $$StudyFolderItemsTableCreateCompanionBuilder =
-    StudyFolderItemsCompanion Function({
+typedef $$StudyCollectionItemsTableCreateCompanionBuilder =
+    StudyCollectionItemsCompanion Function({
       required String id,
       required String name,
       required String createdAt,
@@ -4861,8 +4885,8 @@ typedef $$StudyFolderItemsTableCreateCompanionBuilder =
       Value<bool> isPinned,
       Value<int> rowid,
     });
-typedef $$StudyFolderItemsTableUpdateCompanionBuilder =
-    StudyFolderItemsCompanion Function({
+typedef $$StudyCollectionItemsTableUpdateCompanionBuilder =
+    StudyCollectionItemsCompanion Function({
       Value<String> id,
       Value<String> name,
       Value<String> createdAt,
@@ -4871,10 +4895,14 @@ typedef $$StudyFolderItemsTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$StudyFolderItemsTableReferences
+final class $$StudyCollectionItemsTableReferences
     extends
-        BaseReferences<_$AppDatabase, $StudyFolderItemsTable, StudyFolderItem> {
-  $$StudyFolderItemsTableReferences(
+        BaseReferences<
+          _$AppDatabase,
+          $StudyCollectionItemsTable,
+          StudyCollectionItem
+        > {
+  $$StudyCollectionItemsTableReferences(
     super.$_db,
     super.$_table,
     super.$_typedResult,
@@ -4884,8 +4912,8 @@ final class $$StudyFolderItemsTableReferences
   _sourceItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.sourceItems,
     aliasName: $_aliasNameGenerator(
-      db.studyFolderItems.id,
-      db.sourceItems.folderId,
+      db.studyCollectionItems.id,
+      db.sourceItems.collectionId,
     ),
   );
 
@@ -4893,7 +4921,7 @@ final class $$StudyFolderItemsTableReferences
     final manager = $$SourceItemsTableTableManager(
       $_db,
       $_db.sourceItems,
-    ).filter((f) => f.folderId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.collectionId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_sourceItemsRefsTable($_db));
     return ProcessedTableManager(
@@ -4905,8 +4933,8 @@ final class $$StudyFolderItemsTableReferences
   _deckItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.deckItems,
     aliasName: $_aliasNameGenerator(
-      db.studyFolderItems.id,
-      db.deckItems.folderId,
+      db.studyCollectionItems.id,
+      db.deckItems.collectionId,
     ),
   );
 
@@ -4914,7 +4942,7 @@ final class $$StudyFolderItemsTableReferences
     final manager = $$DeckItemsTableTableManager(
       $_db,
       $_db.deckItems,
-    ).filter((f) => f.folderId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.collectionId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_deckItemsRefsTable($_db));
     return ProcessedTableManager(
@@ -4923,9 +4951,9 @@ final class $$StudyFolderItemsTableReferences
   }
 }
 
-class $$StudyFolderItemsTableFilterComposer
-    extends Composer<_$AppDatabase, $StudyFolderItemsTable> {
-  $$StudyFolderItemsTableFilterComposer({
+class $$StudyCollectionItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $StudyCollectionItemsTable> {
+  $$StudyCollectionItemsTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -4964,7 +4992,7 @@ class $$StudyFolderItemsTableFilterComposer
       composer: this,
       getCurrentColumn: (t) => t.id,
       referencedTable: $db.sourceItems,
-      getReferencedColumn: (t) => t.folderId,
+      getReferencedColumn: (t) => t.collectionId,
       builder:
           (
             joinBuilder, {
@@ -4989,7 +5017,7 @@ class $$StudyFolderItemsTableFilterComposer
       composer: this,
       getCurrentColumn: (t) => t.id,
       referencedTable: $db.deckItems,
-      getReferencedColumn: (t) => t.folderId,
+      getReferencedColumn: (t) => t.collectionId,
       builder:
           (
             joinBuilder, {
@@ -5008,9 +5036,9 @@ class $$StudyFolderItemsTableFilterComposer
   }
 }
 
-class $$StudyFolderItemsTableOrderingComposer
-    extends Composer<_$AppDatabase, $StudyFolderItemsTable> {
-  $$StudyFolderItemsTableOrderingComposer({
+class $$StudyCollectionItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StudyCollectionItemsTable> {
+  $$StudyCollectionItemsTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -5043,9 +5071,9 @@ class $$StudyFolderItemsTableOrderingComposer
   );
 }
 
-class $$StudyFolderItemsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $StudyFolderItemsTable> {
-  $$StudyFolderItemsTableAnnotationComposer({
+class $$StudyCollectionItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StudyCollectionItemsTable> {
+  $$StudyCollectionItemsTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -5074,7 +5102,7 @@ class $$StudyFolderItemsTableAnnotationComposer
       composer: this,
       getCurrentColumn: (t) => t.id,
       referencedTable: $db.sourceItems,
-      getReferencedColumn: (t) => t.folderId,
+      getReferencedColumn: (t) => t.collectionId,
       builder:
           (
             joinBuilder, {
@@ -5099,7 +5127,7 @@ class $$StudyFolderItemsTableAnnotationComposer
       composer: this,
       getCurrentColumn: (t) => t.id,
       referencedTable: $db.deckItems,
-      getReferencedColumn: (t) => t.folderId,
+      getReferencedColumn: (t) => t.collectionId,
       builder:
           (
             joinBuilder, {
@@ -5118,34 +5146,40 @@ class $$StudyFolderItemsTableAnnotationComposer
   }
 }
 
-class $$StudyFolderItemsTableTableManager
+class $$StudyCollectionItemsTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $StudyFolderItemsTable,
-          StudyFolderItem,
-          $$StudyFolderItemsTableFilterComposer,
-          $$StudyFolderItemsTableOrderingComposer,
-          $$StudyFolderItemsTableAnnotationComposer,
-          $$StudyFolderItemsTableCreateCompanionBuilder,
-          $$StudyFolderItemsTableUpdateCompanionBuilder,
-          (StudyFolderItem, $$StudyFolderItemsTableReferences),
-          StudyFolderItem,
+          $StudyCollectionItemsTable,
+          StudyCollectionItem,
+          $$StudyCollectionItemsTableFilterComposer,
+          $$StudyCollectionItemsTableOrderingComposer,
+          $$StudyCollectionItemsTableAnnotationComposer,
+          $$StudyCollectionItemsTableCreateCompanionBuilder,
+          $$StudyCollectionItemsTableUpdateCompanionBuilder,
+          (StudyCollectionItem, $$StudyCollectionItemsTableReferences),
+          StudyCollectionItem,
           PrefetchHooks Function({bool sourceItemsRefs, bool deckItemsRefs})
         > {
-  $$StudyFolderItemsTableTableManager(
+  $$StudyCollectionItemsTableTableManager(
     _$AppDatabase db,
-    $StudyFolderItemsTable table,
+    $StudyCollectionItemsTable table,
   ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$StudyFolderItemsTableFilterComposer($db: db, $table: table),
+              $$StudyCollectionItemsTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$StudyFolderItemsTableOrderingComposer($db: db, $table: table),
+              $$StudyCollectionItemsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
           createComputedFieldComposer: () =>
-              $$StudyFolderItemsTableAnnotationComposer($db: db, $table: table),
+              $$StudyCollectionItemsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -5154,7 +5188,7 @@ class $$StudyFolderItemsTableTableManager
                 Value<String> updatedAt = const Value.absent(),
                 Value<bool> isPinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => StudyFolderItemsCompanion(
+              }) => StudyCollectionItemsCompanion(
                 id: id,
                 name: name,
                 createdAt: createdAt,
@@ -5170,7 +5204,7 @@ class $$StudyFolderItemsTableTableManager
                 required String updatedAt,
                 Value<bool> isPinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => StudyFolderItemsCompanion.insert(
+              }) => StudyCollectionItemsCompanion.insert(
                 id: id,
                 name: name,
                 createdAt: createdAt,
@@ -5182,7 +5216,7 @@ class $$StudyFolderItemsTableTableManager
               .map(
                 (e) => (
                   e.readTable(table),
-                  $$StudyFolderItemsTableReferences(db, table, e),
+                  $$StudyCollectionItemsTableReferences(db, table, e),
                 ),
               )
               .toList(),
@@ -5199,43 +5233,43 @@ class $$StudyFolderItemsTableTableManager
                     return [
                       if (sourceItemsRefs)
                         await $_getPrefetchedData<
-                          StudyFolderItem,
-                          $StudyFolderItemsTable,
+                          StudyCollectionItem,
+                          $StudyCollectionItemsTable,
                           SourceItem
                         >(
                           currentTable: table,
-                          referencedTable: $$StudyFolderItemsTableReferences
+                          referencedTable: $$StudyCollectionItemsTableReferences
                               ._sourceItemsRefsTable(db),
                           managerFromTypedResult: (p0) =>
-                              $$StudyFolderItemsTableReferences(
+                              $$StudyCollectionItemsTableReferences(
                                 db,
                                 table,
                                 p0,
                               ).sourceItemsRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
-                                (e) => e.folderId == item.id,
+                                (e) => e.collectionId == item.id,
                               ),
                           typedResults: items,
                         ),
                       if (deckItemsRefs)
                         await $_getPrefetchedData<
-                          StudyFolderItem,
-                          $StudyFolderItemsTable,
+                          StudyCollectionItem,
+                          $StudyCollectionItemsTable,
                           DeckItem
                         >(
                           currentTable: table,
-                          referencedTable: $$StudyFolderItemsTableReferences
+                          referencedTable: $$StudyCollectionItemsTableReferences
                               ._deckItemsRefsTable(db),
                           managerFromTypedResult: (p0) =>
-                              $$StudyFolderItemsTableReferences(
+                              $$StudyCollectionItemsTableReferences(
                                 db,
                                 table,
                                 p0,
                               ).deckItemsRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
-                                (e) => e.folderId == item.id,
+                                (e) => e.collectionId == item.id,
                               ),
                           typedResults: items,
                         ),
@@ -5247,24 +5281,24 @@ class $$StudyFolderItemsTableTableManager
       );
 }
 
-typedef $$StudyFolderItemsTableProcessedTableManager =
+typedef $$StudyCollectionItemsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $StudyFolderItemsTable,
-      StudyFolderItem,
-      $$StudyFolderItemsTableFilterComposer,
-      $$StudyFolderItemsTableOrderingComposer,
-      $$StudyFolderItemsTableAnnotationComposer,
-      $$StudyFolderItemsTableCreateCompanionBuilder,
-      $$StudyFolderItemsTableUpdateCompanionBuilder,
-      (StudyFolderItem, $$StudyFolderItemsTableReferences),
-      StudyFolderItem,
+      $StudyCollectionItemsTable,
+      StudyCollectionItem,
+      $$StudyCollectionItemsTableFilterComposer,
+      $$StudyCollectionItemsTableOrderingComposer,
+      $$StudyCollectionItemsTableAnnotationComposer,
+      $$StudyCollectionItemsTableCreateCompanionBuilder,
+      $$StudyCollectionItemsTableUpdateCompanionBuilder,
+      (StudyCollectionItem, $$StudyCollectionItemsTableReferences),
+      StudyCollectionItem,
       PrefetchHooks Function({bool sourceItemsRefs, bool deckItemsRefs})
     >;
 typedef $$SourceItemsTableCreateCompanionBuilder =
     SourceItemsCompanion Function({
       required String id,
-      Value<String?> folderId,
+      Value<String?> collectionId,
       required String label,
       Value<String?> path,
       required MediaType type,
@@ -5275,7 +5309,7 @@ typedef $$SourceItemsTableCreateCompanionBuilder =
 typedef $$SourceItemsTableUpdateCompanionBuilder =
     SourceItemsCompanion Function({
       Value<String> id,
-      Value<String?> folderId,
+      Value<String?> collectionId,
       Value<String> label,
       Value<String?> path,
       Value<MediaType> type,
@@ -5288,19 +5322,22 @@ final class $$SourceItemsTableReferences
     extends BaseReferences<_$AppDatabase, $SourceItemsTable, SourceItem> {
   $$SourceItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $StudyFolderItemsTable _folderIdTable(_$AppDatabase db) =>
-      db.studyFolderItems.createAlias(
-        $_aliasNameGenerator(db.sourceItems.folderId, db.studyFolderItems.id),
+  static $StudyCollectionItemsTable _collectionIdTable(_$AppDatabase db) =>
+      db.studyCollectionItems.createAlias(
+        $_aliasNameGenerator(
+          db.sourceItems.collectionId,
+          db.studyCollectionItems.id,
+        ),
       );
 
-  $$StudyFolderItemsTableProcessedTableManager? get folderId {
-    final $_column = $_itemColumn<String>('folder_id');
+  $$StudyCollectionItemsTableProcessedTableManager? get collectionId {
+    final $_column = $_itemColumn<String>('collection_id');
     if ($_column == null) return null;
-    final manager = $$StudyFolderItemsTableTableManager(
+    final manager = $$StudyCollectionItemsTableTableManager(
       $_db,
-      $_db.studyFolderItems,
+      $_db.studyCollectionItems,
     ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_folderIdTable($_db));
+    final item = $_typedResult.readTableOrNull(_collectionIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -5348,20 +5385,20 @@ class $$SourceItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  $$StudyFolderItemsTableFilterComposer get folderId {
-    final $$StudyFolderItemsTableFilterComposer composer = $composerBuilder(
+  $$StudyCollectionItemsTableFilterComposer get collectionId {
+    final $$StudyCollectionItemsTableFilterComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.folderId,
-      referencedTable: $db.studyFolderItems,
+      getCurrentColumn: (t) => t.collectionId,
+      referencedTable: $db.studyCollectionItems,
       getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$StudyFolderItemsTableFilterComposer(
+          }) => $$StudyCollectionItemsTableFilterComposer(
             $db: $db,
-            $table: $db.studyFolderItems,
+            $table: $db.studyCollectionItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5411,26 +5448,27 @@ class $$SourceItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  $$StudyFolderItemsTableOrderingComposer get folderId {
-    final $$StudyFolderItemsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.folderId,
-      referencedTable: $db.studyFolderItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$StudyFolderItemsTableOrderingComposer(
-            $db: $db,
-            $table: $db.studyFolderItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
+  $$StudyCollectionItemsTableOrderingComposer get collectionId {
+    final $$StudyCollectionItemsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.collectionId,
+          referencedTable: $db.studyCollectionItems,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-          ),
-    );
+              }) => $$StudyCollectionItemsTableOrderingComposer(
+                $db: $db,
+                $table: $db.studyCollectionItems,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return composer;
   }
 }
@@ -5464,26 +5502,27 @@ class $$SourceItemsTableAnnotationComposer
   GeneratedColumn<bool> get isPinned =>
       $composableBuilder(column: $table.isPinned, builder: (column) => column);
 
-  $$StudyFolderItemsTableAnnotationComposer get folderId {
-    final $$StudyFolderItemsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.folderId,
-      referencedTable: $db.studyFolderItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$StudyFolderItemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.studyFolderItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
+  $$StudyCollectionItemsTableAnnotationComposer get collectionId {
+    final $$StudyCollectionItemsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.collectionId,
+          referencedTable: $db.studyCollectionItems,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-          ),
-    );
+              }) => $$StudyCollectionItemsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.studyCollectionItems,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return composer;
   }
 }
@@ -5501,7 +5540,7 @@ class $$SourceItemsTableTableManager
           $$SourceItemsTableUpdateCompanionBuilder,
           (SourceItem, $$SourceItemsTableReferences),
           SourceItem,
-          PrefetchHooks Function({bool folderId})
+          PrefetchHooks Function({bool collectionId})
         > {
   $$SourceItemsTableTableManager(_$AppDatabase db, $SourceItemsTable table)
     : super(
@@ -5517,7 +5556,7 @@ class $$SourceItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String?> folderId = const Value.absent(),
+                Value<String?> collectionId = const Value.absent(),
                 Value<String> label = const Value.absent(),
                 Value<String?> path = const Value.absent(),
                 Value<MediaType> type = const Value.absent(),
@@ -5526,7 +5565,7 @@ class $$SourceItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => SourceItemsCompanion(
                 id: id,
-                folderId: folderId,
+                collectionId: collectionId,
                 label: label,
                 path: path,
                 type: type,
@@ -5537,7 +5576,7 @@ class $$SourceItemsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                Value<String?> folderId = const Value.absent(),
+                Value<String?> collectionId = const Value.absent(),
                 required String label,
                 Value<String?> path = const Value.absent(),
                 required MediaType type,
@@ -5546,7 +5585,7 @@ class $$SourceItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => SourceItemsCompanion.insert(
                 id: id,
-                folderId: folderId,
+                collectionId: collectionId,
                 label: label,
                 path: path,
                 type: type,
@@ -5562,7 +5601,7 @@ class $$SourceItemsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({folderId = false}) {
+          prefetchHooksCallback: ({collectionId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -5582,15 +5621,15 @@ class $$SourceItemsTableTableManager
                       dynamic
                     >
                   >(state) {
-                    if (folderId) {
+                    if (collectionId) {
                       state =
                           state.withJoin(
                                 currentTable: table,
-                                currentColumn: table.folderId,
+                                currentColumn: table.collectionId,
                                 referencedTable: $$SourceItemsTableReferences
-                                    ._folderIdTable(db),
+                                    ._collectionIdTable(db),
                                 referencedColumn: $$SourceItemsTableReferences
-                                    ._folderIdTable(db)
+                                    ._collectionIdTable(db)
                                     .id,
                               )
                               as T;
@@ -5619,12 +5658,12 @@ typedef $$SourceItemsTableProcessedTableManager =
       $$SourceItemsTableUpdateCompanionBuilder,
       (SourceItem, $$SourceItemsTableReferences),
       SourceItem,
-      PrefetchHooks Function({bool folderId})
+      PrefetchHooks Function({bool collectionId})
     >;
 typedef $$DeckItemsTableCreateCompanionBuilder =
     DeckItemsCompanion Function({
       required String id,
-      required String folderId,
+      required String collectionId,
       required String name,
       Value<String?> description,
       Value<bool> isPinned,
@@ -5633,7 +5672,7 @@ typedef $$DeckItemsTableCreateCompanionBuilder =
 typedef $$DeckItemsTableUpdateCompanionBuilder =
     DeckItemsCompanion Function({
       Value<String> id,
-      Value<String> folderId,
+      Value<String> collectionId,
       Value<String> name,
       Value<String?> description,
       Value<bool> isPinned,
@@ -5644,19 +5683,22 @@ final class $$DeckItemsTableReferences
     extends BaseReferences<_$AppDatabase, $DeckItemsTable, DeckItem> {
   $$DeckItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $StudyFolderItemsTable _folderIdTable(_$AppDatabase db) =>
-      db.studyFolderItems.createAlias(
-        $_aliasNameGenerator(db.deckItems.folderId, db.studyFolderItems.id),
+  static $StudyCollectionItemsTable _collectionIdTable(_$AppDatabase db) =>
+      db.studyCollectionItems.createAlias(
+        $_aliasNameGenerator(
+          db.deckItems.collectionId,
+          db.studyCollectionItems.id,
+        ),
       );
 
-  $$StudyFolderItemsTableProcessedTableManager get folderId {
-    final $_column = $_itemColumn<String>('folder_id')!;
+  $$StudyCollectionItemsTableProcessedTableManager get collectionId {
+    final $_column = $_itemColumn<String>('collection_id')!;
 
-    final manager = $$StudyFolderItemsTableTableManager(
+    final manager = $$StudyCollectionItemsTableTableManager(
       $_db,
-      $_db.studyFolderItems,
+      $_db.studyCollectionItems,
     ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_folderIdTable($_db));
+    final item = $_typedResult.readTableOrNull(_collectionIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -5711,20 +5753,20 @@ class $$DeckItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  $$StudyFolderItemsTableFilterComposer get folderId {
-    final $$StudyFolderItemsTableFilterComposer composer = $composerBuilder(
+  $$StudyCollectionItemsTableFilterComposer get collectionId {
+    final $$StudyCollectionItemsTableFilterComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.folderId,
-      referencedTable: $db.studyFolderItems,
+      getCurrentColumn: (t) => t.collectionId,
+      referencedTable: $db.studyCollectionItems,
       getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$StudyFolderItemsTableFilterComposer(
+          }) => $$StudyCollectionItemsTableFilterComposer(
             $db: $db,
-            $table: $db.studyFolderItems,
+            $table: $db.studyCollectionItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5789,26 +5831,27 @@ class $$DeckItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  $$StudyFolderItemsTableOrderingComposer get folderId {
-    final $$StudyFolderItemsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.folderId,
-      referencedTable: $db.studyFolderItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$StudyFolderItemsTableOrderingComposer(
-            $db: $db,
-            $table: $db.studyFolderItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
+  $$StudyCollectionItemsTableOrderingComposer get collectionId {
+    final $$StudyCollectionItemsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.collectionId,
+          referencedTable: $db.studyCollectionItems,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-          ),
-    );
+              }) => $$StudyCollectionItemsTableOrderingComposer(
+                $db: $db,
+                $table: $db.studyCollectionItems,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return composer;
   }
 }
@@ -5836,26 +5879,27 @@ class $$DeckItemsTableAnnotationComposer
   GeneratedColumn<bool> get isPinned =>
       $composableBuilder(column: $table.isPinned, builder: (column) => column);
 
-  $$StudyFolderItemsTableAnnotationComposer get folderId {
-    final $$StudyFolderItemsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.folderId,
-      referencedTable: $db.studyFolderItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$StudyFolderItemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.studyFolderItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
+  $$StudyCollectionItemsTableAnnotationComposer get collectionId {
+    final $$StudyCollectionItemsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.collectionId,
+          referencedTable: $db.studyCollectionItems,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-          ),
-    );
+              }) => $$StudyCollectionItemsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.studyCollectionItems,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return composer;
   }
 
@@ -5898,7 +5942,7 @@ class $$DeckItemsTableTableManager
           $$DeckItemsTableUpdateCompanionBuilder,
           (DeckItem, $$DeckItemsTableReferences),
           DeckItem,
-          PrefetchHooks Function({bool folderId, bool cardItemsRefs})
+          PrefetchHooks Function({bool collectionId, bool cardItemsRefs})
         > {
   $$DeckItemsTableTableManager(_$AppDatabase db, $DeckItemsTable table)
     : super(
@@ -5914,14 +5958,14 @@ class $$DeckItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> folderId = const Value.absent(),
+                Value<String> collectionId = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<bool> isPinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DeckItemsCompanion(
                 id: id,
-                folderId: folderId,
+                collectionId: collectionId,
                 name: name,
                 description: description,
                 isPinned: isPinned,
@@ -5930,14 +5974,14 @@ class $$DeckItemsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String folderId,
+                required String collectionId,
                 required String name,
                 Value<String?> description = const Value.absent(),
                 Value<bool> isPinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DeckItemsCompanion.insert(
                 id: id,
-                folderId: folderId,
+                collectionId: collectionId,
                 name: name,
                 description: description,
                 isPinned: isPinned,
@@ -5951,67 +5995,70 @@ class $$DeckItemsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({folderId = false, cardItemsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (cardItemsRefs) db.cardItems],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (folderId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.folderId,
-                                referencedTable: $$DeckItemsTableReferences
-                                    ._folderIdTable(db),
-                                referencedColumn: $$DeckItemsTableReferences
-                                    ._folderIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({collectionId = false, cardItemsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [if (cardItemsRefs) db.cardItems],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (collectionId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.collectionId,
+                                    referencedTable: $$DeckItemsTableReferences
+                                        ._collectionIdTable(db),
+                                    referencedColumn: $$DeckItemsTableReferences
+                                        ._collectionIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (cardItemsRefs)
+                        await $_getPrefetchedData<
+                          DeckItem,
+                          $DeckItemsTable,
+                          CardItem
+                        >(
+                          currentTable: table,
+                          referencedTable: $$DeckItemsTableReferences
+                              ._cardItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$DeckItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).cardItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.deckId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (cardItemsRefs)
-                    await $_getPrefetchedData<
-                      DeckItem,
-                      $DeckItemsTable,
-                      CardItem
-                    >(
-                      currentTable: table,
-                      referencedTable: $$DeckItemsTableReferences
-                          ._cardItemsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$DeckItemsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).cardItemsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.deckId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -6028,7 +6075,7 @@ typedef $$DeckItemsTableProcessedTableManager =
       $$DeckItemsTableUpdateCompanionBuilder,
       (DeckItem, $$DeckItemsTableReferences),
       DeckItem,
-      PrefetchHooks Function({bool folderId, bool cardItemsRefs})
+      PrefetchHooks Function({bool collectionId, bool cardItemsRefs})
     >;
 typedef $$SourceItemBlobsTableCreateCompanionBuilder =
     SourceItemBlobsCompanion Function({
@@ -6244,7 +6291,7 @@ typedef $$SourceItemBlobsTableProcessedTableManager =
 typedef $$CardCreationDraftItemsTableCreateCompanionBuilder =
     CardCreationDraftItemsCompanion Function({
       required String id,
-      required String folderId,
+      required String collectionId,
       required String deckId,
       required String createdAt,
       required String updatedAt,
@@ -6255,7 +6302,7 @@ typedef $$CardCreationDraftItemsTableCreateCompanionBuilder =
 typedef $$CardCreationDraftItemsTableUpdateCompanionBuilder =
     CardCreationDraftItemsCompanion Function({
       Value<String> id,
-      Value<String> folderId,
+      Value<String> collectionId,
       Value<String> deckId,
       Value<String> createdAt,
       Value<String> updatedAt,
@@ -6313,8 +6360,8 @@ class $$CardCreationDraftItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get folderId => $composableBuilder(
-    column: $table.folderId,
+  ColumnFilters<String> get collectionId => $composableBuilder(
+    column: $table.collectionId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6383,8 +6430,8 @@ class $$CardCreationDraftItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get folderId => $composableBuilder(
-    column: $table.folderId,
+  ColumnOrderings<String> get collectionId => $composableBuilder(
+    column: $table.collectionId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6426,8 +6473,10 @@ class $$CardCreationDraftItemsTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get folderId =>
-      $composableBuilder(column: $table.folderId, builder: (column) => column);
+  GeneratedColumn<String> get collectionId => $composableBuilder(
+    column: $table.collectionId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get deckId =>
       $composableBuilder(column: $table.deckId, builder: (column) => column);
@@ -6514,7 +6563,7 @@ class $$CardCreationDraftItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> folderId = const Value.absent(),
+                Value<String> collectionId = const Value.absent(),
                 Value<String> deckId = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
                 Value<String> updatedAt = const Value.absent(),
@@ -6523,7 +6572,7 @@ class $$CardCreationDraftItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => CardCreationDraftItemsCompanion(
                 id: id,
-                folderId: folderId,
+                collectionId: collectionId,
                 deckId: deckId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -6534,7 +6583,7 @@ class $$CardCreationDraftItemsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String folderId,
+                required String collectionId,
                 required String deckId,
                 required String createdAt,
                 required String updatedAt,
@@ -6543,7 +6592,7 @@ class $$CardCreationDraftItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => CardCreationDraftItemsCompanion.insert(
                 id: id,
-                folderId: folderId,
+                collectionId: collectionId,
                 deckId: deckId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -8318,8 +8367,8 @@ typedef $$AssetItemsTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$StudyFolderItemsTableTableManager get studyFolderItems =>
-      $$StudyFolderItemsTableTableManager(_db, _db.studyFolderItems);
+  $$StudyCollectionItemsTableTableManager get studyCollectionItems =>
+      $$StudyCollectionItemsTableTableManager(_db, _db.studyCollectionItems);
   $$SourceItemsTableTableManager get sourceItems =>
       $$SourceItemsTableTableManager(_db, _db.sourceItems);
   $$DeckItemsTableTableManager get deckItems =>

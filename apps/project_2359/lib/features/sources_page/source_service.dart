@@ -25,18 +25,18 @@ class SourceService {
     )..where((t) => t.isPinned.equals(true))).watch();
   }
 
-  Future<List<SourceItem>> getSourcesByFolderId(String folderId) async {
-    AppLogger.debug('Fetching sources for folder: $folderId', tag: _tag);
+  Future<List<SourceItem>> getSourcesByCollectionId(String collectionId) async {
+    AppLogger.debug('Fetching sources for collection: $collectionId', tag: _tag);
     return await (_db.select(
       _db.sourceItems,
-    )..where((t) => t.folderId.equals(folderId))).get();
+    )..where((t) => t.collectionId.equals(collectionId))).get();
   }
 
-  Stream<List<SourceItem>> watchSourcesByFolderId(String folderId) {
-    AppLogger.debug('Watching sources for folder: $folderId', tag: _tag);
+  Stream<List<SourceItem>> watchSourcesByCollectionId(String collectionId) {
+    AppLogger.debug('Watching sources for collection: $collectionId', tag: _tag);
     return (_db.select(
       _db.sourceItems,
-    )..where((t) => t.folderId.equals(folderId))).watch();
+    )..where((t) => t.collectionId.equals(collectionId))).watch();
   }
 
   Future<SourceItem?> getSourceById(String id) async {

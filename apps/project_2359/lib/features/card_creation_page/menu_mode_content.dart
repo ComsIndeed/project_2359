@@ -7,7 +7,7 @@ import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
-import 'package:project_2359/features/folder_page/widgets/shared_widgets.dart';
+import 'package:project_2359/features/collection_page/widgets/shared_widgets.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/core/widgets/widget_stage.dart';
 

@@ -243,13 +243,13 @@ extension AppThemeExtension on ThemeData {
   /// Returns an alternative scaffold background color that is adaptive to the current theme.
   ///
   /// This color is specifically designed for pages that need a distinct, solid feel
-  /// (like folder pages) while still feeling part of the same theme family correctly.
+  /// (like collection pages) while still feeling part of the same theme family correctly.
   ///
   /// RULES FOR ALTERNATIVE COLORS (for future developers):
   /// 1. ADAPTIVE: They must be derived from the base colors (e.g., via [Color.lerp])
   ///    to ensure they automatically change when the user shifts BackgroundTones (Ocean, Stark, etc.).
   /// 2. CONTRAST: They should provide a subtle but noticeable shift from the main background
-  ///    to signify a change in context (like entering a specific folder or sub-page).
+  ///    to signify a change in context (like entering a specific collection or sub-page).
   /// 3. SOLIDITY: For this specific "alt" background, we aim for a "solid dark grey" feel
   ///    in dark mode, which is achieved by lerping the theme's base background with a neutral grey.
   Color get scaffoldBackgroundAlt {

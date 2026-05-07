@@ -4,13 +4,13 @@ import 'package:project_2359/app_theme.dart';
 class DueCardsOverview extends StatelessWidget {
   final int totalDue;
   final Map<String, int> items; // Name -> Count
-  final bool isFolderPage;
+  final bool isCollectionPage;
 
   const DueCardsOverview({
     super.key,
     required this.totalDue,
     required this.items,
-    this.isFolderPage = false,
+    this.isCollectionPage = false,
   });
 
   @override

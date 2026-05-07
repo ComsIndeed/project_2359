@@ -23,7 +23,7 @@ class DraftService {
   /// The [draftId] and [targetDeckId] should be generated and managed by the UI.
   Future<void> syncDraft({
     required String draftId,
-    required String folderId,
+    required String collectionId,
     required String targetDeckId,
     required List<CardItemsCompanion> cards,
   }) async {
@@ -40,7 +40,7 @@ class DraftService {
           .insertOnConflictUpdate(
             CardCreationDraftItemsCompanion.insert(
               id: draftId,
-              folderId: folderId,
+              collectionId: collectionId,
               deckId: targetDeckId,
               createdAt: createdAt,
               updatedAt: now,
@@ -77,12 +77,12 @@ class DraftService {
   /// Commits a draft to a real deck.
   ///
   /// The cards are moved to the provided [deckId]. If the deck does not exist,
-  /// it is created with the [deckName] and [folderId] Fallbacks to draft values.
+  /// it is created with the [deckName] and [collectionId] Fallbacks to draft values.
   Future<void> saveDraft({
     required String draftId,
     required String deckId,
     String? deckName,
-    String? folderId,
+    String? collectionId,
   }) async {
     AppLogger.info('Promoting draft $draftId to deck $deckId', tag: _tag);
 
@@ -113,19 +113,19 @@ class DraftService {
             .insert(
               DeckItemsCompanion.insert(
                 id: deckId,
-                folderId: folderId ?? draft.folderId,
+                collectionId: collectionId ?? draft.collectionId,
                 name:
                     deckName ??
                     'New Deck ${DateTime.now().toIso8601String().substring(0, 10)}',
               ),
             );
-      } else if (deckName != null || folderId != null) {
+      } else if (deckName != null || collectionId != null) {
         await (_db.update(
           _db.deckItems,
         )..where((t) => t.id.equals(deckId))).write(
           DeckItemsCompanion(
             name: deckName != null ? Value(deckName) : const Value.absent(),
-            folderId: folderId != null ? Value(folderId) : const Value.absent(),
+            collectionId: collectionId != null ? Value(collectionId) : const Value.absent(),
           ),
         );
       }
@@ -207,10 +207,10 @@ class DraftService {
     )..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])).watch();
   }
 
-  /// Watches all active draft sessions for a specific folder.
-  Stream<List<CardCreationDraftItem>> watchDraftsByFolderId(String folderId) {
+  /// Watches all active draft sessions for a specific collection.
+  Stream<List<CardCreationDraftItem>> watchDraftsByCollectionId(String collectionId) {
     return (_db.select(_db.cardCreationDraftItems)
-          ..where((t) => t.folderId.equals(folderId))
+          ..where((t) => t.collectionId.equals(collectionId))
           ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
         .watch();
   }

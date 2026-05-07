@@ -339,7 +339,7 @@ class SettingsPage extends StatelessWidget {
                         _SettingsTile(
                           icon: FontAwesomeIcons.trashCan,
                           title: 'Reset App Data',
-                          subtitle: 'Wipe all folders, packs, and cards',
+                          subtitle: 'Wipe all collections, packs, and cards',
                           onTap: () => _showResetConfirmation(context),
                         ),
                       ],
@@ -543,7 +543,7 @@ class SettingsPage extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Reset All Data?'),
         content: const Text(
-          'This will permanently delete all your folders, study materials, and cards. This action cannot be undone.',
+          'This will permanently delete all your collections, study materials, and cards. This action cannot be undone.',
         ),
         actions: [
           TextButton(

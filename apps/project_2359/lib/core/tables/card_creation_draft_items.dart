@@ -7,7 +7,7 @@ import 'package:drift/drift.dart';
 
 class CardCreationDraftItems extends Table {
   TextColumn get id => text()();
-  TextColumn get folderId => text()();
+  TextColumn get collectionId => text()();
   TextColumn get deckId => text()(); // Stable ID, even for new decks
   TextColumn get createdAt => text()();
   TextColumn get updatedAt => text()();

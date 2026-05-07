@@ -197,7 +197,7 @@ class _SourcesPageState extends State<SourcesPage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 FaIcon(
-                                  FontAwesomeIcons.folderOpen,
+                                  FontAwesomeIcons.boxOpen,
                                   size: 48,
                                   color: cs.onSurface.withValues(alpha: 0.2),
                                 ),

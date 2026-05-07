@@ -141,7 +141,7 @@ class _HomePageLandscapeLayoutState extends State<HomePageLandscapeLayout> {
           ),
         ),
 
-        // Sidebar B: Folder Contents
+        // Sidebar B: Collection Contents
         if (widget.sidebarB != null)
           AnimatedContainer(
             duration: 300.ms,

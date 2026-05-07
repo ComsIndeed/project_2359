@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-class StudyFolderItems extends Table {
+class StudyCollectionItems extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
 

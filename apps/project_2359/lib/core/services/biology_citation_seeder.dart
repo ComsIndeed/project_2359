@@ -15,11 +15,11 @@ class BiologyCitationSeeder {
     final uuid = const Uuid();
     AppLogger.info('Starting Biology Citation Seeding (Download from GitHub)...', tag: 'BiologySeeder');
 
-    // 1. Create Folder
-    final folderId = uuid.v4();
-    await db.into(db.studyFolderItems).insert(
-      StudyFolderItemsCompanion(
-        id: Value(folderId),
+    // 1. Create Collection
+    final collectionId = uuid.v4();
+    await db.into(db.studyCollectionItems).insert(
+      StudyCollectionItemsCompanion(
+        id: Value(collectionId),
         name: const Value('Biology (CITATION DEMOs)'),
         isPinned: const Value(true),
         createdAt: Value(DateTime.now().toIso8601String()),
@@ -52,7 +52,7 @@ class BiologyCitationSeeder {
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
         id: Value(sourceId_bio_heavy_bullets_v1_pdf),
-        folderId: Value(folderId),
+        collectionId: Value(collectionId),
         label: const Value('bio_heavy_bullets-v1.pdf'),
         type: const Value(MediaType.document),
       ),
@@ -81,7 +81,7 @@ class BiologyCitationSeeder {
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
         id: Value(sourceId_bio_wall_of_text_v1_pdf),
-        folderId: Value(folderId),
+        collectionId: Value(collectionId),
         label: const Value('bio_wall_of_text-v1.pdf'),
         type: const Value(MediaType.document),
       ),
@@ -110,7 +110,7 @@ class BiologyCitationSeeder {
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
         id: Value(sourceId_cardiovascular_dynamics_v1_pdf),
-        folderId: Value(folderId),
+        collectionId: Value(collectionId),
         label: const Value('cardiovascular_dynamics-v1.pdf'),
         type: const Value(MediaType.document),
       ),
@@ -139,7 +139,7 @@ class BiologyCitationSeeder {
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
         id: Value(sourceId_cellular_respiration_v1_pdf),
-        folderId: Value(folderId),
+        collectionId: Value(collectionId),
         label: const Value('cellular_respiration-v1.pdf'),
         type: const Value(MediaType.document),
       ),
@@ -168,7 +168,7 @@ class BiologyCitationSeeder {
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
         id: Value(sourceId_immunology_basics_v1_pdf),
-        folderId: Value(folderId),
+        collectionId: Value(collectionId),
         label: const Value('immunology_basics-v1.pdf'),
         type: const Value(MediaType.document),
       ),
@@ -197,7 +197,7 @@ class BiologyCitationSeeder {
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
         id: Value(sourceId_molecular_genetics_v1_pdf),
-        folderId: Value(folderId),
+        collectionId: Value(collectionId),
         label: const Value('molecular_genetics-v1.pdf'),
         type: const Value(MediaType.document),
       ),
@@ -226,7 +226,7 @@ class BiologyCitationSeeder {
     await db.into(db.sourceItems).insert(
       SourceItemsCompanion(
         id: Value(sourceId_population_ecology_v1_pdf),
-        folderId: Value(folderId),
+        collectionId: Value(collectionId),
         label: const Value('population_ecology-v1.pdf'),
         type: const Value(MediaType.document),
       ),
@@ -237,7 +237,7 @@ class BiologyCitationSeeder {
     await db.into(db.deckItems).insert(
       DeckItemsCompanion(
         id: Value(deck1Id),
-        folderId: Value(folderId),
+        collectionId: Value(collectionId),
         name: const Value('Cellular & Molecular Foundation'),
         description: const Value('Core biology concepts with varied mastery states.'),
       ),
@@ -246,7 +246,7 @@ class BiologyCitationSeeder {
     await db.into(db.deckItems).insert(
       DeckItemsCompanion(
         id: Value(deck2Id),
-        folderId: Value(folderId),
+        collectionId: Value(collectionId),
         name: const Value('Systems & Ecology'),
         description: const Value('Dynamics of populations and internal systems.'),
       ),
@@ -255,7 +255,7 @@ class BiologyCitationSeeder {
     await db.into(db.deckItems).insert(
       DeckItemsCompanion(
         id: Value(deck3Id),
-        folderId: Value(folderId),
+        collectionId: Value(collectionId),
         name: const Value('Immunology Basics'),
         description: const Value('Foundational immunology for new learners.'),
       ),
@@ -264,7 +264,7 @@ class BiologyCitationSeeder {
     await db.into(db.deckItems).insert(
       DeckItemsCompanion(
         id: Value(deck4Id),
-        folderId: Value(folderId),
+        collectionId: Value(collectionId),
         name: const Value('Genetic Architecture'),
         description: const Value('Molecular genetics and inheritance patterns.'),
       ),

@@ -19,7 +19,7 @@ class CardCreationToolbarController extends ChangeNotifier {
   // Drafting Identity
   String? _draftId;
   String? _targetDeckId;
-  String? _folderId;
+  String? _collectionId;
   final List<CardItemsCompanion> _cards = [];
 
   String? _selectedText;
@@ -54,7 +54,7 @@ class CardCreationToolbarController extends ChangeNotifier {
 
   String? get draftId => _draftId;
   String? get targetDeckId => _targetDeckId;
-  String? get folderId => _folderId;
+  String? get collectionId => _collectionId;
   List<CardItemsCompanion> get cards => List.unmodifiable(_cards);
 
   CardCreationToolbarMode get mode => _mode;
@@ -81,11 +81,11 @@ class CardCreationToolbarController extends ChangeNotifier {
   void setDraftDetails({
     required String draftId,
     required String targetDeckId,
-    required String folderId,
+    required String collectionId,
   }) {
     _draftId = draftId;
     _targetDeckId = targetDeckId;
-    _folderId = folderId;
+    _collectionId = collectionId;
     notifyListeners();
   }
 
@@ -133,14 +133,14 @@ class CardCreationToolbarController extends ChangeNotifier {
     if (_draftService == null ||
         _draftId == null ||
         _targetDeckId == null ||
-        _folderId == null) {
+        _collectionId == null) {
       return;
     }
 
     await _draftService.syncDraft(
       draftId: _draftId!,
       targetDeckId: _targetDeckId!,
-      folderId: _folderId!,
+      collectionId: _collectionId!,
       cards: cards,
     );
   }
@@ -156,7 +156,7 @@ class CardCreationToolbarController extends ChangeNotifier {
     await _draftService.saveDraft(
       draftId: _draftId!,
       deckName: deckNameController.text,
-      folderId: _folderId,
+      collectionId: _collectionId,
       deckId: _targetDeckId!,
     );
 

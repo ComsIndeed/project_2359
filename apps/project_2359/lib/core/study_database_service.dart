@@ -2,98 +2,98 @@ import 'package:drift/drift.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/utils/logger.dart';
 
-/// Service for CRUD operations on study folders, materials (packs), and cards.
+/// Service for CRUD operations on study collections, materials (packs), and cards.
 class StudyDatabaseService {
   final AppDatabase _db;
   static const String _tag = 'StudyDatabaseService';
 
   StudyDatabaseService(this._db);
 
-  // --- Folders ---
+  // --- Collections ---
 
-  Future<List<StudyFolderItem>> getAllFolders() async {
-    AppLogger.debug('Fetching all folders', tag: _tag);
-    return await _db.select(_db.studyFolderItems).get();
+  Future<List<StudyCollectionItem>> getAllCollections() async {
+    AppLogger.debug('Fetching all collections', tag: _tag);
+    return await _db.select(_db.studyCollectionItems).get();
   }
 
-  Stream<List<StudyFolderItem>> watchAllFolders() {
-    AppLogger.debug('Watching all folders', tag: _tag);
+  Stream<List<StudyCollectionItem>> watchAllCollections() {
+    AppLogger.debug('Watching all collections', tag: _tag);
     return (_db.select(
-      _db.studyFolderItems,
+      _db.studyCollectionItems,
     )..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])).watch();
   }
 
-  Stream<List<(StudyFolderItem, int)>> watchPinnedFoldersWithStats() {
+  Stream<List<(StudyCollectionItem, int)>> watchPinnedCollectionsWithStats() {
     final cardsCount = CustomExpression<int>(
-      '(SELECT COUNT(*) FROM card_items c JOIN deck_items d ON c.deck_id = d.id WHERE d.folder_id = study_folder_items.id)',
+      '(SELECT COUNT(*) FROM card_items c JOIN deck_items d ON c.deck_id = d.id WHERE d.collection_id = study_collection_items.id)',
     );
 
-    final query = _db.select(_db.studyFolderItems).addColumns([cardsCount])
-      ..where(_db.studyFolderItems.isPinned.equals(true))
-      ..orderBy([OrderingTerm.desc(_db.studyFolderItems.updatedAt)]);
+    final query = _db.select(_db.studyCollectionItems).addColumns([cardsCount])
+      ..where(_db.studyCollectionItems.isPinned.equals(true))
+      ..orderBy([OrderingTerm.desc(_db.studyCollectionItems.updatedAt)]);
 
     return query.watch().map((rows) {
       return rows.map((row) {
-        final folder = row.readTable(_db.studyFolderItems);
+        final collection = row.readTable(_db.studyCollectionItems);
         final count = row.read(cardsCount) ?? 0;
-        return (folder, count);
+        return (collection, count);
       }).toList();
     });
   }
 
-  Stream<List<(StudyFolderItem, int)>> watchUnpinnedFoldersWithStats() {
+  Stream<List<(StudyCollectionItem, int)>> watchUnpinnedCollectionsWithStats() {
     final cardsCount = CustomExpression<int>(
-      '(SELECT COUNT(*) FROM card_items c JOIN deck_items d ON c.deck_id = d.id WHERE d.folder_id = study_folder_items.id)',
+      '(SELECT COUNT(*) FROM card_items c JOIN deck_items d ON c.deck_id = d.id WHERE d.collection_id = study_collection_items.id)',
     );
 
-    final query = _db.select(_db.studyFolderItems).addColumns([cardsCount])
-      ..where(_db.studyFolderItems.isPinned.equals(false))
-      ..orderBy([OrderingTerm.desc(_db.studyFolderItems.updatedAt)]);
+    final query = _db.select(_db.studyCollectionItems).addColumns([cardsCount])
+      ..where(_db.studyCollectionItems.isPinned.equals(false))
+      ..orderBy([OrderingTerm.desc(_db.studyCollectionItems.updatedAt)]);
 
     return query.watch().map((rows) {
       return rows.map((row) {
-        final folder = row.readTable(_db.studyFolderItems);
+        final collection = row.readTable(_db.studyCollectionItems);
         final count = row.read(cardsCount) ?? 0;
-        return (folder, count);
+        return (collection, count);
       }).toList();
     });
   }
 
-  Future<StudyFolderItem?> getFolderById(String id) async {
-    AppLogger.debug('Fetching folder by ID: $id', tag: _tag);
+  Future<StudyCollectionItem?> getCollectionById(String id) async {
+    AppLogger.debug('Fetching collection by ID: $id', tag: _tag);
     return await (_db.select(
-      _db.studyFolderItems,
+      _db.studyCollectionItems,
     )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
-  Future<void> insertFolder(StudyFolderItemsCompanion folder) async {
-    AppLogger.info('Inserting new folder: ${folder.name.value}', tag: _tag);
-    await _db.into(_db.studyFolderItems).insert(folder);
+  Future<void> insertCollection(StudyCollectionItemsCompanion collection) async {
+    AppLogger.info('Inserting new collection: ${collection.name.value}', tag: _tag);
+    await _db.into(_db.studyCollectionItems).insert(collection);
   }
 
-  Future<void> updateFolder(StudyFolderItemsCompanion folder) async {
-    AppLogger.info('Updating folder: ${folder.id.value}', tag: _tag);
+  Future<void> updateCollection(StudyCollectionItemsCompanion collection) async {
+    AppLogger.info('Updating collection: ${collection.id.value}', tag: _tag);
     await (_db.update(
-      _db.studyFolderItems,
-    )..where((t) => t.id.equals(folder.id.value))).write(folder);
+      _db.studyCollectionItems,
+    )..where((t) => t.id.equals(collection.id.value))).write(collection);
   }
 
-  Future<void> toggleFolderPin(String id, bool isPinned) async {
+  Future<void> toggleCollectionPin(String id, bool isPinned) async {
     AppLogger.info(
-      '${isPinned ? 'Pinning' : 'Unpinning'} folder: $id',
+      '${isPinned ? 'Pinning' : 'Unpinning'} collection: $id',
       tag: _tag,
     );
-    await (_db.update(_db.studyFolderItems)..where((t) => t.id.equals(id)))
-        .write(StudyFolderItemsCompanion(isPinned: Value(isPinned)));
+    await (_db.update(_db.studyCollectionItems)..where((t) => t.id.equals(id)))
+        .write(StudyCollectionItemsCompanion(isPinned: Value(isPinned)));
   }
 
-  Future<void> deleteFolder(String id) async {
-    AppLogger.warning('Deleting folder and all its contents: $id', tag: _tag);
+  Future<void> deleteCollection(String id) async {
+    AppLogger.warning('Deleting collection and all its contents: $id', tag: _tag);
     await _db.transaction(() async {
-      // 1. Get all decks in this folder
+      // 1. Get all decks in this collection
       final materials = await (_db.select(
         _db.deckItems,
-      )..where((t) => t.folderId.equals(id))).get();
+      )..where((t) => t.collectionId.equals(id))).get();
 
       // 2. For each deck, delete its cards
       for (final material in materials) {
@@ -105,32 +105,32 @@ class StudyDatabaseService {
       // 3. Delete decks
       await (_db.delete(
         _db.deckItems,
-      )..where((t) => t.folderId.equals(id))).go();
+      )..where((t) => t.collectionId.equals(id))).go();
 
-      // 4. Delete sources (if they also belong to folders)
+      // 4. Delete sources (if they also belong to collections)
       await (_db.delete(
         _db.sourceItems,
-      )..where((t) => t.folderId.equals(id))).go();
+      )..where((t) => t.collectionId.equals(id))).go();
 
-      // 5. Finally, delete the folder
+      // 5. Finally, delete the collection
       await (_db.delete(
-        _db.studyFolderItems,
+        _db.studyCollectionItems,
       )..where((t) => t.id.equals(id))).go();
     });
   }
 
-  /// Fetches all folders and joins them with their associated sources.
-  Future<List<(StudyFolderItem, List<SourceItem>)>>
-  getFoldersWithSources() async {
-    AppLogger.debug('Fetching folders with sources', tag: _tag);
-    final folders = await getAllFolders();
-    final result = <(StudyFolderItem, List<SourceItem>)>[];
+  /// Fetches all collections and joins them with their associated sources.
+  Future<List<(StudyCollectionItem, List<SourceItem>)>>
+  getCollectionsWithSources() async {
+    AppLogger.debug('Fetching collections with sources', tag: _tag);
+    final collections = await getAllCollections();
+    final result = <(StudyCollectionItem, List<SourceItem>)>[];
 
-    for (final folder in folders) {
+    for (final collection in collections) {
       final sources = await (_db.select(
         _db.sourceItems,
-      )..where((t) => t.folderId.equals(folder.id))).get();
-      result.add((folder, sources));
+      )..where((t) => t.collectionId.equals(collection.id))).get();
+      result.add((collection, sources));
     }
     return result;
   }
@@ -144,18 +144,18 @@ class StudyDatabaseService {
     )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
-  Future<List<DeckItem>> getDecksByFolderId(String folderId) async {
-    AppLogger.debug('Fetching decks for folder: $folderId', tag: _tag);
+  Future<List<DeckItem>> getDecksByCollectionId(String collectionId) async {
+    AppLogger.debug('Fetching decks for collection: $collectionId', tag: _tag);
     return await (_db.select(
       _db.deckItems,
-    )..where((t) => t.folderId.equals(folderId))).get();
+    )..where((t) => t.collectionId.equals(collectionId))).get();
   }
 
-  Stream<List<DeckItem>> watchDecksByFolderId(String folderId) {
-    AppLogger.debug('Watching decks for folder: $folderId', tag: _tag);
+  Stream<List<DeckItem>> watchDecksByCollectionId(String collectionId) {
+    AppLogger.debug('Watching decks for collection: $collectionId', tag: _tag);
     return (_db.select(
       _db.deckItems,
-    )..where((t) => t.folderId.equals(folderId))).watch();
+    )..where((t) => t.collectionId.equals(collectionId))).watch();
   }
 
   Stream<List<DeckItem>> watchPinnedDecks() {
@@ -260,10 +260,10 @@ class StudyDatabaseService {
         .getSingleOrNull();
   }
 
-  /// Checks if mock data has already been injected by looking for the Demo folder.
+  /// Checks if mock data has already been injected by looking for the Demo collection.
   Stream<bool> watchHasMockData() {
-    return _db.select(_db.studyFolderItems).watch().map(
-      (folders) => folders.any((f) => f.name == 'Biology & Medicine (DEMO)'),
+    return _db.select(_db.studyCollectionItems).watch().map(
+      (collections) => collections.any((f) => f.name == 'Biology & Medicine (DEMO)'),
     );
   }
 }

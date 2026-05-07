@@ -16,44 +16,44 @@ import 'package:project_2359/features/sources_page/sources_page_bloc/sources_pag
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_state.dart';
 
-class FolderSourcesPage extends StatefulWidget {
-  final String folderId;
-  final String folderName;
+class CollectionSourcesPage extends StatefulWidget {
+  final String collectionId;
+  final String collectionName;
 
-  const FolderSourcesPage({
+  const CollectionSourcesPage({
     super.key,
-    required this.folderId,
-    required this.folderName,
+    required this.collectionId,
+    required this.collectionName,
   });
 
   static Future<void> show(
     BuildContext context,
-    String folderId,
-    String folderName,
+    String collectionId,
+    String collectionName,
   ) {
     return Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>
-            FolderSourcesPage(folderId: folderId, folderName: folderName),
+            CollectionSourcesPage(collectionId: collectionId, collectionName: collectionName),
         fullscreenDialog: true,
       ),
     );
   }
 
   @override
-  State<FolderSourcesPage> createState() => _FolderSourcesPageState();
+  State<CollectionSourcesPage> createState() => _CollectionSourcesPageState();
 }
 
-class _FolderSourcesPageState extends State<FolderSourcesPage> {
+class _CollectionSourcesPageState extends State<CollectionSourcesPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
   @override
   void initState() {
     super.initState();
-    // Load sources for this folder
+    // Load sources for this collection
     context.read<SourcesPageBloc>().add(
-      LoadSourcesEvent(folderId: widget.folderId),
+      LoadSourcesEvent(collectionId: widget.collectionId),
     );
   }
 
@@ -107,7 +107,7 @@ class _FolderSourcesPageState extends State<FolderSourcesPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    widget.folderName,
+                                    widget.collectionName,
                                     style: Theme.of(context)
                                         .textTheme
                                         .labelSmall
@@ -118,7 +118,7 @@ class _FolderSourcesPageState extends State<FolderSourcesPage> {
                                         ),
                                   ),
                                   Text(
-                                    "Folder Sources",
+                                    "Collection Sources",
                                     style: Theme.of(context)
                                         .textTheme
                                         .displaySmall
@@ -140,7 +140,7 @@ class _FolderSourcesPageState extends State<FolderSourcesPage> {
                       ),
                       const SizedBox(height: 24),
                       SectionHeader(
-                        title: "Import to Folder",
+                        title: "Import to Collection",
                         onViewAllTap: null,
                       ),
                       const SizedBox(height: 8),
@@ -220,14 +220,14 @@ class _FolderSourcesPageState extends State<FolderSourcesPage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 FaIcon(
-                                  FontAwesomeIcons.folderOpen,
+                                  FontAwesomeIcons.boxOpen,
                                   size: 48,
                                   color: cs.onSurface.withValues(alpha: 0.1),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
                                   _searchQuery.isNotEmpty
-                                      ? "No matching sources in folder."
+                                      ? "No matching sources in collection."
                                       : "No sources in this collection.",
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
@@ -264,7 +264,7 @@ class _FolderSourcesPageState extends State<FolderSourcesPage> {
 
     if (context.mounted) {
       context.read<SourcesPageBloc>().add(
-        ImportDocumentsEvent(result.files, folderId: widget.folderId),
+        ImportDocumentsEvent(result.files, collectionId: widget.collectionId),
       );
     }
   }

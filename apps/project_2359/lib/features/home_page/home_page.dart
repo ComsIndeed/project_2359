@@ -14,12 +14,12 @@ import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/core/utils/logger.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
-import 'package:project_2359/features/home_page/widgets/folder_list_view.dart';
+import 'package:project_2359/features/home_page/widgets/collection_list_view.dart';
 import 'package:project_2359/core/widgets/selection_action_bar.dart';
 import 'package:project_2359/features/home_page/widgets/home_header.dart';
 import 'package:project_2359/features/home_page/widgets/new_item_menu.dart';
 import 'package:project_2359/core/widgets/adaptive_pane_layout.dart';
-import 'package:project_2359/features/folder_page/folder_page.dart';
+import 'package:project_2359/features/collection_page/collection_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
 import 'package:project_2359/core/widgets/due_cards_tiles.dart';
 
@@ -33,14 +33,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final Set<String> _selectedFolderIds = {};
+  final Set<String> _selectedCollectionIds = {};
   final Set<String> _selectedDeckIds = {};
-  List<StudyFolderItem> _allFolders = [];
-  StreamSubscription? _folderSub;
+  List<StudyCollectionItem> _allCollections = [];
+  StreamSubscription? _collectionSub;
   StreamSubscription? _deckSub;
 
   // New state for responsive desktop layout
-  String? _selectedFolderId;
+  String? _selectedCollectionId;
   String? _selectedDeckId;
   String? _selectedDeckName;
   MainContentType _mainContentType = MainContentType.empty;
@@ -49,29 +49,29 @@ class _HomePageState extends State<HomePage> {
   String _searchQuery = "";
 
   bool get _isSelecting =>
-      _selectedFolderIds.isNotEmpty || _selectedDeckIds.isNotEmpty;
+      _selectedCollectionIds.isNotEmpty || _selectedDeckIds.isNotEmpty;
 
-  void _toggleFolderSelection(String id) {
+  void _toggleCollectionSelection(String id) {
     setState(() {
-      if (_selectedFolderIds.contains(id)) {
-        _selectedFolderIds.remove(id);
+      if (_selectedCollectionIds.contains(id)) {
+        _selectedCollectionIds.remove(id);
       } else {
-        _selectedFolderIds.add(id);
+        _selectedCollectionIds.add(id);
       }
     });
   }
 
   void _clearSelection() {
     setState(() {
-      _selectedFolderIds.clear();
+      _selectedCollectionIds.clear();
       _selectedDeckIds.clear();
     });
   }
 
   Future<void> _handlePinSelected({required bool pin}) async {
     final service = context.read<StudyDatabaseService>();
-    for (final id in _selectedFolderIds) {
-      await service.toggleFolderPin(id, pin);
+    for (final id in _selectedCollectionIds) {
+      await service.toggleCollectionPin(id, pin);
     }
     for (final id in _selectedDeckIds) {
       await service.toggleDeckPin(id, pin);
@@ -80,15 +80,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _handleDeleteSelected() async {
-    final count = _selectedFolderIds.length + _selectedDeckIds.length;
+    final count = _selectedCollectionIds.length + _selectedDeckIds.length;
     if (count == 0) return;
 
     final confirmed = await _showDeleteConfirmation(context, count: count);
     if (!confirmed || !mounted) return;
 
     final service = context.read<StudyDatabaseService>();
-    for (final id in _selectedFolderIds) {
-      await service.deleteFolder(id);
+    for (final id in _selectedCollectionIds) {
+      await service.deleteCollection(id);
     }
     // TODO: handle decks if we ever allow multiselecting them on home
     for (final id in _selectedDeckIds) {
@@ -126,25 +126,25 @@ class _HomePageState extends State<HomePage> {
         false;
   }
 
-  late Stream<List<(StudyFolderItem, int)>> _foldersStream;
-  late Stream<List<(StudyFolderItem, int)>> _pinnedFoldersStream;
+  late Stream<List<(StudyCollectionItem, int)>> _collectionsStream;
+  late Stream<List<(StudyCollectionItem, int)>> _pinnedCollectionsStream;
 
   @override
   void initState() {
     super.initState();
     AppLogger.info('Initializing HomePage...', tag: 'HomePage');
     final service = context.read<StudyDatabaseService>();
-    _foldersStream = service.watchUnpinnedFoldersWithStats();
-    _pinnedFoldersStream = service.watchPinnedFoldersWithStats();
+    _collectionsStream = service.watchUnpinnedCollectionsWithStats();
+    _pinnedCollectionsStream = service.watchPinnedCollectionsWithStats();
 
-    _folderSub = service.watchAllFolders().listen((folders) {
-      if (mounted) setState(() => _allFolders = folders);
+    _collectionSub = service.watchAllCollections().listen((collections) {
+      if (mounted) setState(() => _allCollections = collections);
     });
   }
 
   @override
   void dispose() {
-    _folderSub?.cancel();
+    _collectionSub?.cancel();
     _deckSub?.cancel();
     _searchController.dispose();
     super.dispose();
@@ -172,7 +172,7 @@ class _HomePageState extends State<HomePage> {
           collapsedBuilder: (context, isOpen, expand, close) {
             if (_isSelecting) {
               final selectedCount =
-                  _selectedFolderIds.length + _selectedDeckIds.length;
+                  _selectedCollectionIds.length + _selectedDeckIds.length;
               return SelectionActionBar(
                 selectedCount: selectedCount,
                 onClose: _clearSelection,
@@ -222,30 +222,30 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 16),
                     const HomeDueCardsTile(),
                     const SizedBox(height: 32),
-                    PinnedFoldersSection(
-                      stream: _pinnedFoldersStream,
+                    PinnedCollectionsSection(
+                      stream: _pinnedCollectionsStream,
                       searchQuery: _searchQuery,
-                      selectedIds: _selectedFolderIds,
-                      onToggleSelection: _toggleFolderSelection,
-                      onSelect: _handleFolderSelect,
-                      activeFolderId: _selectedFolderId,
+                      selectedIds: _selectedCollectionIds,
+                      onToggleSelection: _toggleCollectionSelection,
+                      onSelect: _handleCollectionSelect,
+                      activeCollectionId: _selectedCollectionId,
                       isSelecting: _isSelecting,
-                      onContextMenu: (pos, id, isF) =>
-                          _showCoolContextMenu(context, pos, id, isFolder: isF),
+                      onContextMenu: (pos, id, isC) =>
+                          _showCoolContextMenu(context, pos, id, isCollection: isC),
                     ),
                     const SizedBox(height: 24),
                     const SectionHeader(title: "Collections"),
                     const SizedBox(height: 8),
-                    FolderList(
-                      stream: _foldersStream,
+                    CollectionList(
+                      stream: _collectionsStream,
                       searchQuery: _searchQuery,
-                      selectedIds: _selectedFolderIds,
-                      onToggleSelection: _toggleFolderSelection,
-                      onSelect: _handleFolderSelect,
-                      activeFolderId: _selectedFolderId,
+                      selectedIds: _selectedCollectionIds,
+                      onToggleSelection: _toggleCollectionSelection,
+                      onSelect: _handleCollectionSelect,
+                      activeCollectionId: _selectedCollectionId,
                       isSelecting: _isSelecting,
-                      onContextMenu: (pos, id, isF) =>
-                          _showCoolContextMenu(context, pos, id, isFolder: isF),
+                      onContextMenu: (pos, id, isC) =>
+                          _showCoolContextMenu(context, pos, id, isCollection: isC),
                     ),
                     const SizedBox(height: 48),
                     const _DevInjectionTile(),
@@ -261,16 +261,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildDetailView() {
-    if (_selectedFolderId != null) {
-      final folder = _allFolders.any((f) => f.id == _selectedFolderId)
-          ? _allFolders.firstWhere((f) => f.id == _selectedFolderId)
+    if (_selectedCollectionId != null) {
+      final collection = _allCollections.any((f) => f.id == _selectedCollectionId)
+          ? _allCollections.firstWhere((f) => f.id == _selectedCollectionId)
           : null;
 
-      if (folder != null) {
-        return FolderPage(
-          key: ValueKey(_selectedFolderId),
-          folderId: _selectedFolderId!,
-          initialFolderName: folder.name,
+      if (collection != null) {
+        return CollectionPage(
+          key: ValueKey(_selectedCollectionId),
+          collectionId: _selectedCollectionId!,
+          initialCollectionName: collection.name,
           isNested: true,
         );
       }
@@ -300,7 +300,7 @@ class _HomePageState extends State<HomePage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           FaIcon(
-            FontAwesomeIcons.folderOpen,
+            FontAwesomeIcons.layerGroup,
             size: 64,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
           ),
@@ -316,19 +316,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _handleFolderSelect(String id) {
+  void _handleCollectionSelect(String id) {
     if (!ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
-      final folder = _allFolders.firstWhere((f) => f.id == id);
+      final collection = _allCollections.firstWhere((f) => f.id == id);
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) =>
-              FolderPage(folderId: id, initialFolderName: folder.name),
+              CollectionPage(collectionId: id, initialCollectionName: collection.name),
         ),
       );
     } else {
       setState(() {
-        _selectedFolderId = id;
+        _selectedCollectionId = id;
         _mainContentType = MainContentType.empty;
       });
     }
@@ -365,7 +365,7 @@ class _HomePageState extends State<HomePage> {
     BuildContext context,
     Offset position,
     String id, {
-    bool isFolder = false,
+    bool isCollection = false,
   }) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
@@ -409,8 +409,8 @@ class _HomePageState extends State<HomePage> {
                             label: "Multi-select",
                             onTap: () {
                               Navigator.pop(context);
-                              if (isFolder) {
-                                _toggleFolderSelection(id);
+                              if (isCollection) {
+                                _toggleCollectionSelection(id);
                               } else {
                                 setState(() {
                                   if (_selectedDeckIds.contains(id)) {

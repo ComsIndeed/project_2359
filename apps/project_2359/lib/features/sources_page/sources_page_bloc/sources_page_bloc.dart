@@ -13,7 +13,7 @@ import 'package:project_2359/core/tables/source_item_blobs.dart';
 class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
   final SourceService sourceService;
   static const String _tag = 'SourcesPageBloc';
-  String? _currentFolderId;
+  String? _currentCollectionId;
 
   SourcesPageBloc(this.sourceService) : super(const SourcesPageStateInitial()) {
     on<LoadSourcesEvent>(_onLoad);
@@ -25,10 +25,10 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
     LoadSourcesEvent event,
     Emitter<SourcesPageState> emit,
   ) async {
-    AppLogger.debug('Loading sources for folder: ${event.folderId}', tag: _tag);
-    _currentFolderId = event.folderId;
-    final sources = event.folderId != null
-        ? await sourceService.getSourcesByFolderId(event.folderId!)
+    AppLogger.debug('Loading sources for collection: ${event.collectionId}', tag: _tag);
+    _currentCollectionId = event.collectionId;
+    final sources = event.collectionId != null
+        ? await sourceService.getSourcesByCollectionId(event.collectionId!)
         : await sourceService.getAllSources();
     emit(SourcesPageStateLoaded(sources: sources));
   }
@@ -37,7 +37,7 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
     ImportDocumentsEvent event,
     Emitter<SourcesPageState> emit,
   ) async {
-    final effectiveFolderId = event.folderId ?? _currentFolderId;
+    final effectiveCollectionId = event.collectionId ?? _currentCollectionId;
     const uuid = Uuid();
 
     AppLogger.info('Importing ${event.files.length} documents', tag: _tag);
@@ -66,7 +66,7 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
       await sourceService.insertSource(
         SourceItemsCompanion.insert(
           id: sourceId,
-          folderId: Value(effectiveFolderId),
+          collectionId: Value(effectiveCollectionId),
           label: file.name,
           path: Value(file.path),
           type: MediaType.document,
@@ -85,7 +85,7 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
     }
 
     // Reload sources
-    add(LoadSourcesEvent(folderId: effectiveFolderId));
+    add(LoadSourcesEvent(collectionId: effectiveCollectionId));
   }
 
   Future<void> _onDelete(
@@ -97,6 +97,6 @@ class SourcesPageBloc extends Bloc<SourcesPageEvent, SourcesPageState> {
     await sourceService.deleteSourceBlobBySourceId(event.sourceId);
 
     // Reload sources
-    add(LoadSourcesEvent(folderId: _currentFolderId));
+    add(LoadSourcesEvent(collectionId: _currentCollectionId));
   }
 }

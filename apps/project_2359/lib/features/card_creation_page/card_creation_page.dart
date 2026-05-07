@@ -21,7 +21,7 @@ import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
 class CardCreationPage extends StatefulWidget {
-  final String folderId;
+  final String collectionId;
   final String? deckId;
 
   /// Leave null for new
@@ -29,7 +29,7 @@ class CardCreationPage extends StatefulWidget {
 
   const CardCreationPage({
     super.key,
-    required this.folderId,
+    required this.collectionId,
     this.deckId,
     this.draftId,
   });
@@ -75,7 +75,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
         )..setDraftDetails(
           draftId: _currentDraftId,
           targetDeckId: _targetDeckId,
-          folderId: widget.folderId,
+          collectionId: widget.collectionId,
         );
 
     // Container Controller
@@ -115,7 +115,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
 
   void _initSources() {
     final service = context.read<SourceService>();
-    _sourcesSub = service.watchSourcesByFolderId(widget.folderId).listen((
+    _sourcesSub = service.watchSourcesByCollectionId(widget.collectionId).listen((
       sources,
     ) {
       if (mounted) {

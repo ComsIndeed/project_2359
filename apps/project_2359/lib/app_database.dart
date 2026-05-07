@@ -12,7 +12,7 @@ import 'package:project_2359/core/tables/asset_items.dart';
 import 'package:project_2359/core/tables/source_item_blobs.dart';
 import 'package:project_2359/core/tables/source_items.dart';
 import 'package:project_2359/core/tables/deck_items.dart';
-import 'package:project_2359/core/tables/study_folder_items.dart';
+import 'package:project_2359/core/tables/study_collection_items.dart';
 import 'package:project_2359/core/tables/card_items.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
 import 'package:project_2359/core/tables/citation_items.dart';
@@ -25,7 +25,7 @@ part 'app_database.g.dart';
   tables: [
     SourceItems,
     DeckItems,
-    StudyFolderItems,
+    StudyCollectionItems,
     SourceItemBlobs,
     CardItems,
     StudySessionEvents,

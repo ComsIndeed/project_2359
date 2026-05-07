@@ -205,12 +205,12 @@ class SchedulingService {
     return row.read<int>(_db.cardItems.id.count()) ?? 0;
   }
 
-  /// Watch due count for an entire folder (joins decks and cards)
-  Stream<int> watchDueCountForFolder({
-    required String folderId,
+  /// Watch due count for an entire collection (joins decks and cards)
+  Stream<int> watchDueCountForCollection({
+    required String collectionId,
     StudySessionMode mode = StudySessionMode.spaced,
   }) {
-    AppLogger.debug('Watching due count for folder $folderId', tag: _tag);
+    AppLogger.debug('Watching due count for collection $collectionId', tag: _tag);
     final now = DateTime.now();
     final count = _db.cardItems.id.count();
 
@@ -222,7 +222,7 @@ class SchedulingService {
             ),
           ])
           ..addColumns([count])
-          ..where(_db.deckItems.folderId.equals(folderId));
+          ..where(_db.deckItems.collectionId.equals(collectionId));
 
     if (mode == StudySessionMode.spaced) {
       query.where(_db.cardItems.spacedDue.isSmallerOrEqualValue(now));
@@ -255,13 +255,13 @@ class SchedulingService {
 
   // --- Query Support (Lists of Task/Card IDs for flexibility) ---
 
-  /// Watch due card items for an entire folder
-  Stream<List<CardItem>> watchDueCardItemsForFolder({
-    required String folderId,
+  /// Watch due card items for an entire collection
+  Stream<List<CardItem>> watchDueCardItemsForCollection({
+    required String collectionId,
     StudySessionMode mode = StudySessionMode.spaced,
   }) {
     AppLogger.debug(
-      'Watching due card items for folder $folderId ($mode)',
+      'Watching due card items for collection $collectionId ($mode)',
       tag: _tag,
     );
     final now = DateTime.now();
@@ -271,7 +271,7 @@ class SchedulingService {
         _db.deckItems,
         _db.deckItems.id.equalsExp(_db.cardItems.deckId),
       ),
-    ])..where(_db.deckItems.folderId.equals(folderId));
+    ])..where(_db.deckItems.collectionId.equals(collectionId));
 
     if (mode == StudySessionMode.spaced) {
       query.where(_db.cardItems.spacedDue.isSmallerOrEqualValue(now));

@@ -461,7 +461,7 @@ class _DatabaseInspectorPageState extends State<DatabaseInspectorPage> {
 
     if (isLikelyFK) {
       // Try to find target table by guessing from column name prefix
-      // e.g. folder_id -> study_folder_items, deck_id -> deck_items
+      // e.g. collection_id -> collection_items, deck_id -> deck_items
       final colName = col.$name;
       final prefix = colName.substring(0, colName.length - 3); // remove _id
 
