@@ -2538,6 +2538,632 @@ class CitationItemsCompanion extends UpdateCompanion<CitationItem> {
   }
 }
 
+class $NoteItemsTable extends NoteItems
+    with TableInfo<$NoteItemsTable, NoteItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NoteItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<NoteType, int> noteType =
+      GeneratedColumn<int>(
+        'note_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<NoteType>($NoteItemsTable.$converternoteType);
+  static const VerificationMeta _deckIdMeta = const VerificationMeta('deckId');
+  @override
+  late final GeneratedColumn<String> deckId = GeneratedColumn<String>(
+    'deck_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES deck_items (id)',
+    ),
+  );
+  static const VerificationMeta _frontMeta = const VerificationMeta('front');
+  @override
+  late final GeneratedColumn<String> front = GeneratedColumn<String>(
+    'front',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _backMeta = const VerificationMeta('back');
+  @override
+  late final GeneratedColumn<String> back = GeneratedColumn<String>(
+    'back',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+    'content',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _citationIdMeta = const VerificationMeta(
+    'citationId',
+  );
+  @override
+  late final GeneratedColumn<String> citationId = GeneratedColumn<String>(
+    'citation_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES citation_items (id)',
+    ),
+  );
+  static const VerificationMeta _draftIdMeta = const VerificationMeta(
+    'draftId',
+  );
+  @override
+  late final GeneratedColumn<String> draftId = GeneratedColumn<String>(
+    'draft_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES card_creation_draft_items (id)',
+    ),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    noteType,
+    deckId,
+    front,
+    back,
+    content,
+    citationId,
+    draftId,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'note_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<NoteItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('deck_id')) {
+      context.handle(
+        _deckIdMeta,
+        deckId.isAcceptableOrUnknown(data['deck_id']!, _deckIdMeta),
+      );
+    }
+    if (data.containsKey('front')) {
+      context.handle(
+        _frontMeta,
+        front.isAcceptableOrUnknown(data['front']!, _frontMeta),
+      );
+    }
+    if (data.containsKey('back')) {
+      context.handle(
+        _backMeta,
+        back.isAcceptableOrUnknown(data['back']!, _backMeta),
+      );
+    }
+    if (data.containsKey('content')) {
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    }
+    if (data.containsKey('citation_id')) {
+      context.handle(
+        _citationIdMeta,
+        citationId.isAcceptableOrUnknown(data['citation_id']!, _citationIdMeta),
+      );
+    }
+    if (data.containsKey('draft_id')) {
+      context.handle(
+        _draftIdMeta,
+        draftId.isAcceptableOrUnknown(data['draft_id']!, _draftIdMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  NoteItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NoteItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      noteType: $NoteItemsTable.$converternoteType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}note_type'],
+        )!,
+      ),
+      deckId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deck_id'],
+      ),
+      front: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}front'],
+      ),
+      back: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}back'],
+      ),
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content'],
+      ),
+      citationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}citation_id'],
+      ),
+      draftId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}draft_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+    );
+  }
+
+  @override
+  $NoteItemsTable createAlias(String alias) {
+    return $NoteItemsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<NoteType, int, int> $converternoteType =
+      const EnumIndexConverter<NoteType>(NoteType.values);
+}
+
+class NoteItem extends DataClass implements Insertable<NoteItem> {
+  final String id;
+  final NoteType noteType;
+  final String? deckId;
+  final String? front;
+  final String? back;
+  final String? content;
+  final String? citationId;
+  final String? draftId;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  const NoteItem({
+    required this.id,
+    required this.noteType,
+    this.deckId,
+    this.front,
+    this.back,
+    this.content,
+    this.citationId,
+    this.draftId,
+    this.createdAt,
+    this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    {
+      map['note_type'] = Variable<int>(
+        $NoteItemsTable.$converternoteType.toSql(noteType),
+      );
+    }
+    if (!nullToAbsent || deckId != null) {
+      map['deck_id'] = Variable<String>(deckId);
+    }
+    if (!nullToAbsent || front != null) {
+      map['front'] = Variable<String>(front);
+    }
+    if (!nullToAbsent || back != null) {
+      map['back'] = Variable<String>(back);
+    }
+    if (!nullToAbsent || content != null) {
+      map['content'] = Variable<String>(content);
+    }
+    if (!nullToAbsent || citationId != null) {
+      map['citation_id'] = Variable<String>(citationId);
+    }
+    if (!nullToAbsent || draftId != null) {
+      map['draft_id'] = Variable<String>(draftId);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    return map;
+  }
+
+  NoteItemsCompanion toCompanion(bool nullToAbsent) {
+    return NoteItemsCompanion(
+      id: Value(id),
+      noteType: Value(noteType),
+      deckId: deckId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deckId),
+      front: front == null && nullToAbsent
+          ? const Value.absent()
+          : Value(front),
+      back: back == null && nullToAbsent ? const Value.absent() : Value(back),
+      content: content == null && nullToAbsent
+          ? const Value.absent()
+          : Value(content),
+      citationId: citationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(citationId),
+      draftId: draftId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(draftId),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory NoteItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NoteItem(
+      id: serializer.fromJson<String>(json['id']),
+      noteType: $NoteItemsTable.$converternoteType.fromJson(
+        serializer.fromJson<int>(json['noteType']),
+      ),
+      deckId: serializer.fromJson<String?>(json['deckId']),
+      front: serializer.fromJson<String?>(json['front']),
+      back: serializer.fromJson<String?>(json['back']),
+      content: serializer.fromJson<String?>(json['content']),
+      citationId: serializer.fromJson<String?>(json['citationId']),
+      draftId: serializer.fromJson<String?>(json['draftId']),
+      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'noteType': serializer.toJson<int>(
+        $NoteItemsTable.$converternoteType.toJson(noteType),
+      ),
+      'deckId': serializer.toJson<String?>(deckId),
+      'front': serializer.toJson<String?>(front),
+      'back': serializer.toJson<String?>(back),
+      'content': serializer.toJson<String?>(content),
+      'citationId': serializer.toJson<String?>(citationId),
+      'draftId': serializer.toJson<String?>(draftId),
+      'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+    };
+  }
+
+  NoteItem copyWith({
+    String? id,
+    NoteType? noteType,
+    Value<String?> deckId = const Value.absent(),
+    Value<String?> front = const Value.absent(),
+    Value<String?> back = const Value.absent(),
+    Value<String?> content = const Value.absent(),
+    Value<String?> citationId = const Value.absent(),
+    Value<String?> draftId = const Value.absent(),
+    Value<DateTime?> createdAt = const Value.absent(),
+    Value<DateTime?> updatedAt = const Value.absent(),
+  }) => NoteItem(
+    id: id ?? this.id,
+    noteType: noteType ?? this.noteType,
+    deckId: deckId.present ? deckId.value : this.deckId,
+    front: front.present ? front.value : this.front,
+    back: back.present ? back.value : this.back,
+    content: content.present ? content.value : this.content,
+    citationId: citationId.present ? citationId.value : this.citationId,
+    draftId: draftId.present ? draftId.value : this.draftId,
+    createdAt: createdAt.present ? createdAt.value : this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+  );
+  NoteItem copyWithCompanion(NoteItemsCompanion data) {
+    return NoteItem(
+      id: data.id.present ? data.id.value : this.id,
+      noteType: data.noteType.present ? data.noteType.value : this.noteType,
+      deckId: data.deckId.present ? data.deckId.value : this.deckId,
+      front: data.front.present ? data.front.value : this.front,
+      back: data.back.present ? data.back.value : this.back,
+      content: data.content.present ? data.content.value : this.content,
+      citationId: data.citationId.present
+          ? data.citationId.value
+          : this.citationId,
+      draftId: data.draftId.present ? data.draftId.value : this.draftId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NoteItem(')
+          ..write('id: $id, ')
+          ..write('noteType: $noteType, ')
+          ..write('deckId: $deckId, ')
+          ..write('front: $front, ')
+          ..write('back: $back, ')
+          ..write('content: $content, ')
+          ..write('citationId: $citationId, ')
+          ..write('draftId: $draftId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    noteType,
+    deckId,
+    front,
+    back,
+    content,
+    citationId,
+    draftId,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NoteItem &&
+          other.id == this.id &&
+          other.noteType == this.noteType &&
+          other.deckId == this.deckId &&
+          other.front == this.front &&
+          other.back == this.back &&
+          other.content == this.content &&
+          other.citationId == this.citationId &&
+          other.draftId == this.draftId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class NoteItemsCompanion extends UpdateCompanion<NoteItem> {
+  final Value<String> id;
+  final Value<NoteType> noteType;
+  final Value<String?> deckId;
+  final Value<String?> front;
+  final Value<String?> back;
+  final Value<String?> content;
+  final Value<String?> citationId;
+  final Value<String?> draftId;
+  final Value<DateTime?> createdAt;
+  final Value<DateTime?> updatedAt;
+  final Value<int> rowid;
+  const NoteItemsCompanion({
+    this.id = const Value.absent(),
+    this.noteType = const Value.absent(),
+    this.deckId = const Value.absent(),
+    this.front = const Value.absent(),
+    this.back = const Value.absent(),
+    this.content = const Value.absent(),
+    this.citationId = const Value.absent(),
+    this.draftId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  NoteItemsCompanion.insert({
+    required String id,
+    required NoteType noteType,
+    this.deckId = const Value.absent(),
+    this.front = const Value.absent(),
+    this.back = const Value.absent(),
+    this.content = const Value.absent(),
+    this.citationId = const Value.absent(),
+    this.draftId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       noteType = Value(noteType);
+  static Insertable<NoteItem> custom({
+    Expression<String>? id,
+    Expression<int>? noteType,
+    Expression<String>? deckId,
+    Expression<String>? front,
+    Expression<String>? back,
+    Expression<String>? content,
+    Expression<String>? citationId,
+    Expression<String>? draftId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (noteType != null) 'note_type': noteType,
+      if (deckId != null) 'deck_id': deckId,
+      if (front != null) 'front': front,
+      if (back != null) 'back': back,
+      if (content != null) 'content': content,
+      if (citationId != null) 'citation_id': citationId,
+      if (draftId != null) 'draft_id': draftId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  NoteItemsCompanion copyWith({
+    Value<String>? id,
+    Value<NoteType>? noteType,
+    Value<String?>? deckId,
+    Value<String?>? front,
+    Value<String?>? back,
+    Value<String?>? content,
+    Value<String?>? citationId,
+    Value<String?>? draftId,
+    Value<DateTime?>? createdAt,
+    Value<DateTime?>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return NoteItemsCompanion(
+      id: id ?? this.id,
+      noteType: noteType ?? this.noteType,
+      deckId: deckId ?? this.deckId,
+      front: front ?? this.front,
+      back: back ?? this.back,
+      content: content ?? this.content,
+      citationId: citationId ?? this.citationId,
+      draftId: draftId ?? this.draftId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (noteType.present) {
+      map['note_type'] = Variable<int>(
+        $NoteItemsTable.$converternoteType.toSql(noteType.value),
+      );
+    }
+    if (deckId.present) {
+      map['deck_id'] = Variable<String>(deckId.value);
+    }
+    if (front.present) {
+      map['front'] = Variable<String>(front.value);
+    }
+    if (back.present) {
+      map['back'] = Variable<String>(back.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (citationId.present) {
+      map['citation_id'] = Variable<String>(citationId.value);
+    }
+    if (draftId.present) {
+      map['draft_id'] = Variable<String>(draftId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NoteItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('noteType: $noteType, ')
+          ..write('deckId: $deckId, ')
+          ..write('front: $front, ')
+          ..write('back: $back, ')
+          ..write('content: $content, ')
+          ..write('citationId: $citationId, ')
+          ..write('draftId: $draftId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $CardItemsTable extends CardItems
     with TableInfo<$CardItemsTable, CardItem> {
   @override
@@ -2786,6 +3412,30 @@ class $CardItemsTable extends CardItems
       'REFERENCES citation_items (id)',
     ),
   );
+  static const VerificationMeta _noteIdMeta = const VerificationMeta('noteId');
+  @override
+  late final GeneratedColumn<String> noteId = GeneratedColumn<String>(
+    'note_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES note_items (id)',
+    ),
+  );
+  static const VerificationMeta _templateOrdinalMeta = const VerificationMeta(
+    'templateOrdinal',
+  );
+  @override
+  late final GeneratedColumn<int> templateOrdinal = GeneratedColumn<int>(
+    'template_ordinal',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -2833,6 +3483,8 @@ class $CardItemsTable extends CardItems
     deckId,
     draftId,
     citationId,
+    noteId,
+    templateOrdinal,
     createdAt,
     updatedAt,
   ];
@@ -3003,6 +3655,21 @@ class $CardItemsTable extends CardItems
         citationId.isAcceptableOrUnknown(data['citation_id']!, _citationIdMeta),
       );
     }
+    if (data.containsKey('note_id')) {
+      context.handle(
+        _noteIdMeta,
+        noteId.isAcceptableOrUnknown(data['note_id']!, _noteIdMeta),
+      );
+    }
+    if (data.containsKey('template_ordinal')) {
+      context.handle(
+        _templateOrdinalMeta,
+        templateOrdinal.isAcceptableOrUnknown(
+          data['template_ordinal']!,
+          _templateOrdinalMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -3110,6 +3777,14 @@ class $CardItemsTable extends CardItems
         DriftSqlType.string,
         data['${effectivePrefix}citation_id'],
       ),
+      noteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note_id'],
+      ),
+      templateOrdinal: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}template_ordinal'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -3154,6 +3829,8 @@ class CardItem extends DataClass implements Insertable<CardItem> {
   final String? deckId;
   final String? draftId;
   final String? citationId;
+  final String? noteId;
+  final int? templateOrdinal;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   const CardItem({
@@ -3178,6 +3855,8 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     this.deckId,
     this.draftId,
     this.citationId,
+    this.noteId,
+    this.templateOrdinal,
     this.createdAt,
     this.updatedAt,
   });
@@ -3246,6 +3925,12 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     }
     if (!nullToAbsent || citationId != null) {
       map['citation_id'] = Variable<String>(citationId);
+    }
+    if (!nullToAbsent || noteId != null) {
+      map['note_id'] = Variable<String>(noteId);
+    }
+    if (!nullToAbsent || templateOrdinal != null) {
+      map['template_ordinal'] = Variable<int>(templateOrdinal);
     }
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<DateTime>(createdAt);
@@ -3319,6 +4004,12 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       citationId: citationId == null && nullToAbsent
           ? const Value.absent()
           : Value(citationId),
+      noteId: noteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(noteId),
+      templateOrdinal: templateOrdinal == null && nullToAbsent
+          ? const Value.absent()
+          : Value(templateOrdinal),
       createdAt: createdAt == null && nullToAbsent
           ? const Value.absent()
           : Value(createdAt),
@@ -3363,6 +4054,8 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       deckId: serializer.fromJson<String?>(json['deckId']),
       draftId: serializer.fromJson<String?>(json['draftId']),
       citationId: serializer.fromJson<String?>(json['citationId']),
+      noteId: serializer.fromJson<String?>(json['noteId']),
+      templateOrdinal: serializer.fromJson<int?>(json['templateOrdinal']),
       createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
     );
@@ -3394,6 +4087,8 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       'deckId': serializer.toJson<String?>(deckId),
       'draftId': serializer.toJson<String?>(draftId),
       'citationId': serializer.toJson<String?>(citationId),
+      'noteId': serializer.toJson<String?>(noteId),
+      'templateOrdinal': serializer.toJson<int?>(templateOrdinal),
       'createdAt': serializer.toJson<DateTime?>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
     };
@@ -3421,6 +4116,8 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     Value<String?> deckId = const Value.absent(),
     Value<String?> draftId = const Value.absent(),
     Value<String?> citationId = const Value.absent(),
+    Value<String?> noteId = const Value.absent(),
+    Value<int?> templateOrdinal = const Value.absent(),
     Value<DateTime?> createdAt = const Value.absent(),
     Value<DateTime?> updatedAt = const Value.absent(),
   }) => CardItem(
@@ -3465,6 +4162,10 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     deckId: deckId.present ? deckId.value : this.deckId,
     draftId: draftId.present ? draftId.value : this.draftId,
     citationId: citationId.present ? citationId.value : this.citationId,
+    noteId: noteId.present ? noteId.value : this.noteId,
+    templateOrdinal: templateOrdinal.present
+        ? templateOrdinal.value
+        : this.templateOrdinal,
     createdAt: createdAt.present ? createdAt.value : this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
   );
@@ -3521,6 +4222,10 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       citationId: data.citationId.present
           ? data.citationId.value
           : this.citationId,
+      noteId: data.noteId.present ? data.noteId.value : this.noteId,
+      templateOrdinal: data.templateOrdinal.present
+          ? data.templateOrdinal.value
+          : this.templateOrdinal,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -3550,6 +4255,8 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           ..write('deckId: $deckId, ')
           ..write('draftId: $draftId, ')
           ..write('citationId: $citationId, ')
+          ..write('noteId: $noteId, ')
+          ..write('templateOrdinal: $templateOrdinal, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -3579,6 +4286,8 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     deckId,
     draftId,
     citationId,
+    noteId,
+    templateOrdinal,
     createdAt,
     updatedAt,
   ]);
@@ -3607,6 +4316,8 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           other.deckId == this.deckId &&
           other.draftId == this.draftId &&
           other.citationId == this.citationId &&
+          other.noteId == this.noteId &&
+          other.templateOrdinal == this.templateOrdinal &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -3633,6 +4344,8 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
   final Value<String?> deckId;
   final Value<String?> draftId;
   final Value<String?> citationId;
+  final Value<String?> noteId;
+  final Value<int?> templateOrdinal;
   final Value<DateTime?> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<int> rowid;
@@ -3658,6 +4371,8 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     this.deckId = const Value.absent(),
     this.draftId = const Value.absent(),
     this.citationId = const Value.absent(),
+    this.noteId = const Value.absent(),
+    this.templateOrdinal = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3684,6 +4399,8 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     this.deckId = const Value.absent(),
     this.draftId = const Value.absent(),
     this.citationId = const Value.absent(),
+    this.noteId = const Value.absent(),
+    this.templateOrdinal = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3710,6 +4427,8 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Expression<String>? deckId,
     Expression<String>? draftId,
     Expression<String>? citationId,
+    Expression<String>? noteId,
+    Expression<int>? templateOrdinal,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -3739,6 +4458,8 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
       if (deckId != null) 'deck_id': deckId,
       if (draftId != null) 'draft_id': draftId,
       if (citationId != null) 'citation_id': citationId,
+      if (noteId != null) 'note_id': noteId,
+      if (templateOrdinal != null) 'template_ordinal': templateOrdinal,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -3767,6 +4488,8 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Value<String?>? deckId,
     Value<String?>? draftId,
     Value<String?>? citationId,
+    Value<String?>? noteId,
+    Value<int?>? templateOrdinal,
     Value<DateTime?>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<int>? rowid,
@@ -3793,6 +4516,8 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
       deckId: deckId ?? this.deckId,
       draftId: draftId ?? this.draftId,
       citationId: citationId ?? this.citationId,
+      noteId: noteId ?? this.noteId,
+      templateOrdinal: templateOrdinal ?? this.templateOrdinal,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -3871,6 +4596,12 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     if (citationId.present) {
       map['citation_id'] = Variable<String>(citationId.value);
     }
+    if (noteId.present) {
+      map['note_id'] = Variable<String>(noteId.value);
+    }
+    if (templateOrdinal.present) {
+      map['template_ordinal'] = Variable<int>(templateOrdinal.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -3907,6 +4638,8 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
           ..write('deckId: $deckId, ')
           ..write('draftId: $draftId, ')
           ..write('citationId: $citationId, ')
+          ..write('noteId: $noteId, ')
+          ..write('templateOrdinal: $templateOrdinal, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -4855,6 +5588,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CardCreationDraftItemsTable cardCreationDraftItems =
       $CardCreationDraftItemsTable(this);
   late final $CitationItemsTable citationItems = $CitationItemsTable(this);
+  late final $NoteItemsTable noteItems = $NoteItemsTable(this);
   late final $CardItemsTable cardItems = $CardItemsTable(this);
   late final $StudySessionEventsTable studySessionEvents =
       $StudySessionEventsTable(this);
@@ -4870,6 +5604,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     sourceItemBlobs,
     cardCreationDraftItems,
     citationItems,
+    noteItems,
     cardItems,
     studySessionEvents,
     assetItems,
@@ -5705,6 +6440,24 @@ final class $$DeckItemsTableReferences
     );
   }
 
+  static MultiTypedResultKey<$NoteItemsTable, List<NoteItem>>
+  _noteItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.noteItems,
+    aliasName: $_aliasNameGenerator(db.deckItems.id, db.noteItems.deckId),
+  );
+
+  $$NoteItemsTableProcessedTableManager get noteItemsRefs {
+    final manager = $$NoteItemsTableTableManager(
+      $_db,
+      $_db.noteItems,
+    ).filter((f) => f.deckId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_noteItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$CardItemsTable, List<CardItem>>
   _cardItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.cardItems,
@@ -5774,6 +6527,31 @@ class $$DeckItemsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> noteItemsRefs(
+    Expression<bool> Function($$NoteItemsTableFilterComposer f) f,
+  ) {
+    final $$NoteItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.noteItems,
+      getReferencedColumn: (t) => t.deckId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NoteItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.noteItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 
   Expression<bool> cardItemsRefs(
@@ -5903,6 +6681,31 @@ class $$DeckItemsTableAnnotationComposer
     return composer;
   }
 
+  Expression<T> noteItemsRefs<T extends Object>(
+    Expression<T> Function($$NoteItemsTableAnnotationComposer a) f,
+  ) {
+    final $$NoteItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.noteItems,
+      getReferencedColumn: (t) => t.deckId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NoteItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.noteItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> cardItemsRefs<T extends Object>(
     Expression<T> Function($$CardItemsTableAnnotationComposer a) f,
   ) {
@@ -5942,7 +6745,11 @@ class $$DeckItemsTableTableManager
           $$DeckItemsTableUpdateCompanionBuilder,
           (DeckItem, $$DeckItemsTableReferences),
           DeckItem,
-          PrefetchHooks Function({bool collectionId, bool cardItemsRefs})
+          PrefetchHooks Function({
+            bool collectionId,
+            bool noteItemsRefs,
+            bool cardItemsRefs,
+          })
         > {
   $$DeckItemsTableTableManager(_$AppDatabase db, $DeckItemsTable table)
     : super(
@@ -5996,10 +6803,17 @@ class $$DeckItemsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({collectionId = false, cardItemsRefs = false}) {
+              ({
+                collectionId = false,
+                noteItemsRefs = false,
+                cardItemsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
-                  explicitlyWatchedTables: [if (cardItemsRefs) db.cardItems],
+                  explicitlyWatchedTables: [
+                    if (noteItemsRefs) db.noteItems,
+                    if (cardItemsRefs) db.cardItems,
+                  ],
                   addJoins:
                       <
                         T extends TableManagerState<
@@ -6034,6 +6848,27 @@ class $$DeckItemsTableTableManager
                       },
                   getPrefetchedDataCallback: (items) async {
                     return [
+                      if (noteItemsRefs)
+                        await $_getPrefetchedData<
+                          DeckItem,
+                          $DeckItemsTable,
+                          NoteItem
+                        >(
+                          currentTable: table,
+                          referencedTable: $$DeckItemsTableReferences
+                              ._noteItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$DeckItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).noteItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.deckId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                       if (cardItemsRefs)
                         await $_getPrefetchedData<
                           DeckItem,
@@ -6075,7 +6910,11 @@ typedef $$DeckItemsTableProcessedTableManager =
       $$DeckItemsTableUpdateCompanionBuilder,
       (DeckItem, $$DeckItemsTableReferences),
       DeckItem,
-      PrefetchHooks Function({bool collectionId, bool cardItemsRefs})
+      PrefetchHooks Function({
+        bool collectionId,
+        bool noteItemsRefs,
+        bool cardItemsRefs,
+      })
     >;
 typedef $$SourceItemBlobsTableCreateCompanionBuilder =
     SourceItemBlobsCompanion Function({
@@ -6324,6 +7163,27 @@ final class $$CardCreationDraftItemsTableReferences
     super.$_typedResult,
   );
 
+  static MultiTypedResultKey<$NoteItemsTable, List<NoteItem>>
+  _noteItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.noteItems,
+    aliasName: $_aliasNameGenerator(
+      db.cardCreationDraftItems.id,
+      db.noteItems.draftId,
+    ),
+  );
+
+  $$NoteItemsTableProcessedTableManager get noteItemsRefs {
+    final manager = $$NoteItemsTableTableManager(
+      $_db,
+      $_db.noteItems,
+    ).filter((f) => f.draftId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_noteItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$CardItemsTable, List<CardItem>>
   _cardItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.cardItems,
@@ -6389,6 +7249,31 @@ class $$CardCreationDraftItemsTableFilterComposer
     column: $table.lastOpenedPage,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> noteItemsRefs(
+    Expression<bool> Function($$NoteItemsTableFilterComposer f) f,
+  ) {
+    final $$NoteItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.noteItems,
+      getReferencedColumn: (t) => t.draftId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NoteItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.noteItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 
   Expression<bool> cardItemsRefs(
     Expression<bool> Function($$CardItemsTableFilterComposer f) f,
@@ -6497,6 +7382,31 @@ class $$CardCreationDraftItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  Expression<T> noteItemsRefs<T extends Object>(
+    Expression<T> Function($$NoteItemsTableAnnotationComposer a) f,
+  ) {
+    final $$NoteItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.noteItems,
+      getReferencedColumn: (t) => t.draftId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NoteItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.noteItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> cardItemsRefs<T extends Object>(
     Expression<T> Function($$CardItemsTableAnnotationComposer a) f,
   ) {
@@ -6536,7 +7446,7 @@ class $$CardCreationDraftItemsTableTableManager
           $$CardCreationDraftItemsTableUpdateCompanionBuilder,
           (CardCreationDraftItem, $$CardCreationDraftItemsTableReferences),
           CardCreationDraftItem,
-          PrefetchHooks Function({bool cardItemsRefs})
+          PrefetchHooks Function({bool noteItemsRefs, bool cardItemsRefs})
         > {
   $$CardCreationDraftItemsTableTableManager(
     _$AppDatabase db,
@@ -6608,36 +7518,65 @@ class $$CardCreationDraftItemsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({cardItemsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (cardItemsRefs) db.cardItems],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (cardItemsRefs)
-                    await $_getPrefetchedData<
-                      CardCreationDraftItem,
-                      $CardCreationDraftItemsTable,
-                      CardItem
-                    >(
-                      currentTable: table,
-                      referencedTable: $$CardCreationDraftItemsTableReferences
-                          ._cardItemsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$CardCreationDraftItemsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).cardItemsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.draftId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({noteItemsRefs = false, cardItemsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (noteItemsRefs) db.noteItems,
+                    if (cardItemsRefs) db.cardItems,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (noteItemsRefs)
+                        await $_getPrefetchedData<
+                          CardCreationDraftItem,
+                          $CardCreationDraftItemsTable,
+                          NoteItem
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$CardCreationDraftItemsTableReferences
+                                  ._noteItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CardCreationDraftItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).noteItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.draftId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (cardItemsRefs)
+                        await $_getPrefetchedData<
+                          CardCreationDraftItem,
+                          $CardCreationDraftItemsTable,
+                          CardItem
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$CardCreationDraftItemsTableReferences
+                                  ._cardItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CardCreationDraftItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).cardItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.draftId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -6654,7 +7593,7 @@ typedef $$CardCreationDraftItemsTableProcessedTableManager =
       $$CardCreationDraftItemsTableUpdateCompanionBuilder,
       (CardCreationDraftItem, $$CardCreationDraftItemsTableReferences),
       CardCreationDraftItem,
-      PrefetchHooks Function({bool cardItemsRefs})
+      PrefetchHooks Function({bool noteItemsRefs, bool cardItemsRefs})
     >;
 typedef $$CitationItemsTableCreateCompanionBuilder =
     CitationItemsCompanion Function({
@@ -6684,6 +7623,27 @@ final class $$CitationItemsTableReferences
     super.$_table,
     super.$_typedResult,
   );
+
+  static MultiTypedResultKey<$NoteItemsTable, List<NoteItem>>
+  _noteItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.noteItems,
+    aliasName: $_aliasNameGenerator(
+      db.citationItems.id,
+      db.noteItems.citationId,
+    ),
+  );
+
+  $$NoteItemsTableProcessedTableManager get noteItemsRefs {
+    final manager = $$NoteItemsTableTableManager(
+      $_db,
+      $_db.noteItems,
+    ).filter((f) => f.citationId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_noteItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 
   static MultiTypedResultKey<$CardItemsTable, List<CardItem>>
   _cardItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
@@ -6753,6 +7713,31 @@ class $$CitationItemsTableFilterComposer
     column: $table.rects,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
+
+  Expression<bool> noteItemsRefs(
+    Expression<bool> Function($$NoteItemsTableFilterComposer f) f,
+  ) {
+    final $$NoteItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.noteItems,
+      getReferencedColumn: (t) => t.citationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NoteItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.noteItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 
   Expression<bool> cardItemsRefs(
     Expression<bool> Function($$CardItemsTableFilterComposer f) f,
@@ -6853,6 +7838,31 @@ class $$CitationItemsTableAnnotationComposer
   GeneratedColumnWithTypeConverter<List<ProjectRect>?, String> get rects =>
       $composableBuilder(column: $table.rects, builder: (column) => column);
 
+  Expression<T> noteItemsRefs<T extends Object>(
+    Expression<T> Function($$NoteItemsTableAnnotationComposer a) f,
+  ) {
+    final $$NoteItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.noteItems,
+      getReferencedColumn: (t) => t.citationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NoteItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.noteItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> cardItemsRefs<T extends Object>(
     Expression<T> Function($$CardItemsTableAnnotationComposer a) f,
   ) {
@@ -6892,7 +7902,7 @@ class $$CitationItemsTableTableManager
           $$CitationItemsTableUpdateCompanionBuilder,
           (CitationItem, $$CitationItemsTableReferences),
           CitationItem,
-          PrefetchHooks Function({bool cardItemsRefs})
+          PrefetchHooks Function({bool noteItemsRefs, bool cardItemsRefs})
         > {
   $$CitationItemsTableTableManager(_$AppDatabase db, $CitationItemsTable table)
     : super(
@@ -6951,36 +7961,63 @@ class $$CitationItemsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({cardItemsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (cardItemsRefs) db.cardItems],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (cardItemsRefs)
-                    await $_getPrefetchedData<
-                      CitationItem,
-                      $CitationItemsTable,
-                      CardItem
-                    >(
-                      currentTable: table,
-                      referencedTable: $$CitationItemsTableReferences
-                          ._cardItemsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$CitationItemsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).cardItemsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.citationId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({noteItemsRefs = false, cardItemsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (noteItemsRefs) db.noteItems,
+                    if (cardItemsRefs) db.cardItems,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (noteItemsRefs)
+                        await $_getPrefetchedData<
+                          CitationItem,
+                          $CitationItemsTable,
+                          NoteItem
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CitationItemsTableReferences
+                              ._noteItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CitationItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).noteItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.citationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (cardItemsRefs)
+                        await $_getPrefetchedData<
+                          CitationItem,
+                          $CitationItemsTable,
+                          CardItem
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CitationItemsTableReferences
+                              ._cardItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CitationItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).cardItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.citationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -6997,7 +8034,708 @@ typedef $$CitationItemsTableProcessedTableManager =
       $$CitationItemsTableUpdateCompanionBuilder,
       (CitationItem, $$CitationItemsTableReferences),
       CitationItem,
-      PrefetchHooks Function({bool cardItemsRefs})
+      PrefetchHooks Function({bool noteItemsRefs, bool cardItemsRefs})
+    >;
+typedef $$NoteItemsTableCreateCompanionBuilder =
+    NoteItemsCompanion Function({
+      required String id,
+      required NoteType noteType,
+      Value<String?> deckId,
+      Value<String?> front,
+      Value<String?> back,
+      Value<String?> content,
+      Value<String?> citationId,
+      Value<String?> draftId,
+      Value<DateTime?> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$NoteItemsTableUpdateCompanionBuilder =
+    NoteItemsCompanion Function({
+      Value<String> id,
+      Value<NoteType> noteType,
+      Value<String?> deckId,
+      Value<String?> front,
+      Value<String?> back,
+      Value<String?> content,
+      Value<String?> citationId,
+      Value<String?> draftId,
+      Value<DateTime?> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$NoteItemsTableReferences
+    extends BaseReferences<_$AppDatabase, $NoteItemsTable, NoteItem> {
+  $$NoteItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $DeckItemsTable _deckIdTable(_$AppDatabase db) => db.deckItems
+      .createAlias($_aliasNameGenerator(db.noteItems.deckId, db.deckItems.id));
+
+  $$DeckItemsTableProcessedTableManager? get deckId {
+    final $_column = $_itemColumn<String>('deck_id');
+    if ($_column == null) return null;
+    final manager = $$DeckItemsTableTableManager(
+      $_db,
+      $_db.deckItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_deckIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CitationItemsTable _citationIdTable(_$AppDatabase db) =>
+      db.citationItems.createAlias(
+        $_aliasNameGenerator(db.noteItems.citationId, db.citationItems.id),
+      );
+
+  $$CitationItemsTableProcessedTableManager? get citationId {
+    final $_column = $_itemColumn<String>('citation_id');
+    if ($_column == null) return null;
+    final manager = $$CitationItemsTableTableManager(
+      $_db,
+      $_db.citationItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_citationIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CardCreationDraftItemsTable _draftIdTable(_$AppDatabase db) =>
+      db.cardCreationDraftItems.createAlias(
+        $_aliasNameGenerator(
+          db.noteItems.draftId,
+          db.cardCreationDraftItems.id,
+        ),
+      );
+
+  $$CardCreationDraftItemsTableProcessedTableManager? get draftId {
+    final $_column = $_itemColumn<String>('draft_id');
+    if ($_column == null) return null;
+    final manager = $$CardCreationDraftItemsTableTableManager(
+      $_db,
+      $_db.cardCreationDraftItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_draftIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$CardItemsTable, List<CardItem>>
+  _cardItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.cardItems,
+    aliasName: $_aliasNameGenerator(db.noteItems.id, db.cardItems.noteId),
+  );
+
+  $$CardItemsTableProcessedTableManager get cardItemsRefs {
+    final manager = $$CardItemsTableTableManager(
+      $_db,
+      $_db.cardItems,
+    ).filter((f) => f.noteId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_cardItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$NoteItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $NoteItemsTable> {
+  $$NoteItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<NoteType, NoteType, int> get noteType =>
+      $composableBuilder(
+        column: $table.noteType,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get front => $composableBuilder(
+    column: $table.front,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get back => $composableBuilder(
+    column: $table.back,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$DeckItemsTableFilterComposer get deckId {
+    final $$DeckItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.deckId,
+      referencedTable: $db.deckItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DeckItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.deckItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CitationItemsTableFilterComposer get citationId {
+    final $$CitationItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.citationId,
+      referencedTable: $db.citationItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CardCreationDraftItemsTableFilterComposer get draftId {
+    final $$CardCreationDraftItemsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.draftId,
+          referencedTable: $db.cardCreationDraftItems,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CardCreationDraftItemsTableFilterComposer(
+                $db: $db,
+                $table: $db.cardCreationDraftItems,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<bool> cardItemsRefs(
+    Expression<bool> Function($$CardItemsTableFilterComposer f) f,
+  ) {
+    final $$CardItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cardItems,
+      getReferencedColumn: (t) => t.noteId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CardItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.cardItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$NoteItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $NoteItemsTable> {
+  $$NoteItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get noteType => $composableBuilder(
+    column: $table.noteType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get front => $composableBuilder(
+    column: $table.front,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get back => $composableBuilder(
+    column: $table.back,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$DeckItemsTableOrderingComposer get deckId {
+    final $$DeckItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.deckId,
+      referencedTable: $db.deckItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DeckItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.deckItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CitationItemsTableOrderingComposer get citationId {
+    final $$CitationItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.citationId,
+      referencedTable: $db.citationItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CardCreationDraftItemsTableOrderingComposer get draftId {
+    final $$CardCreationDraftItemsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.draftId,
+          referencedTable: $db.cardCreationDraftItems,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CardCreationDraftItemsTableOrderingComposer(
+                $db: $db,
+                $table: $db.cardCreationDraftItems,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$NoteItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $NoteItemsTable> {
+  $$NoteItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<NoteType, int> get noteType =>
+      $composableBuilder(column: $table.noteType, builder: (column) => column);
+
+  GeneratedColumn<String> get front =>
+      $composableBuilder(column: $table.front, builder: (column) => column);
+
+  GeneratedColumn<String> get back =>
+      $composableBuilder(column: $table.back, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$DeckItemsTableAnnotationComposer get deckId {
+    final $$DeckItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.deckId,
+      referencedTable: $db.deckItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DeckItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.deckItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CitationItemsTableAnnotationComposer get citationId {
+    final $$CitationItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.citationId,
+      referencedTable: $db.citationItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CitationItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CardCreationDraftItemsTableAnnotationComposer get draftId {
+    final $$CardCreationDraftItemsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.draftId,
+          referencedTable: $db.cardCreationDraftItems,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CardCreationDraftItemsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.cardCreationDraftItems,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<T> cardItemsRefs<T extends Object>(
+    Expression<T> Function($$CardItemsTableAnnotationComposer a) f,
+  ) {
+    final $$CardItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cardItems,
+      getReferencedColumn: (t) => t.noteId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CardItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.cardItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$NoteItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $NoteItemsTable,
+          NoteItem,
+          $$NoteItemsTableFilterComposer,
+          $$NoteItemsTableOrderingComposer,
+          $$NoteItemsTableAnnotationComposer,
+          $$NoteItemsTableCreateCompanionBuilder,
+          $$NoteItemsTableUpdateCompanionBuilder,
+          (NoteItem, $$NoteItemsTableReferences),
+          NoteItem,
+          PrefetchHooks Function({
+            bool deckId,
+            bool citationId,
+            bool draftId,
+            bool cardItemsRefs,
+          })
+        > {
+  $$NoteItemsTableTableManager(_$AppDatabase db, $NoteItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NoteItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NoteItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NoteItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<NoteType> noteType = const Value.absent(),
+                Value<String?> deckId = const Value.absent(),
+                Value<String?> front = const Value.absent(),
+                Value<String?> back = const Value.absent(),
+                Value<String?> content = const Value.absent(),
+                Value<String?> citationId = const Value.absent(),
+                Value<String?> draftId = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => NoteItemsCompanion(
+                id: id,
+                noteType: noteType,
+                deckId: deckId,
+                front: front,
+                back: back,
+                content: content,
+                citationId: citationId,
+                draftId: draftId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required NoteType noteType,
+                Value<String?> deckId = const Value.absent(),
+                Value<String?> front = const Value.absent(),
+                Value<String?> back = const Value.absent(),
+                Value<String?> content = const Value.absent(),
+                Value<String?> citationId = const Value.absent(),
+                Value<String?> draftId = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => NoteItemsCompanion.insert(
+                id: id,
+                noteType: noteType,
+                deckId: deckId,
+                front: front,
+                back: back,
+                content: content,
+                citationId: citationId,
+                draftId: draftId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$NoteItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                deckId = false,
+                citationId = false,
+                draftId = false,
+                cardItemsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [if (cardItemsRefs) db.cardItems],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (deckId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.deckId,
+                                    referencedTable: $$NoteItemsTableReferences
+                                        ._deckIdTable(db),
+                                    referencedColumn: $$NoteItemsTableReferences
+                                        ._deckIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+                        if (citationId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.citationId,
+                                    referencedTable: $$NoteItemsTableReferences
+                                        ._citationIdTable(db),
+                                    referencedColumn: $$NoteItemsTableReferences
+                                        ._citationIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+                        if (draftId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.draftId,
+                                    referencedTable: $$NoteItemsTableReferences
+                                        ._draftIdTable(db),
+                                    referencedColumn: $$NoteItemsTableReferences
+                                        ._draftIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (cardItemsRefs)
+                        await $_getPrefetchedData<
+                          NoteItem,
+                          $NoteItemsTable,
+                          CardItem
+                        >(
+                          currentTable: table,
+                          referencedTable: $$NoteItemsTableReferences
+                              ._cardItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$NoteItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).cardItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.noteId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$NoteItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $NoteItemsTable,
+      NoteItem,
+      $$NoteItemsTableFilterComposer,
+      $$NoteItemsTableOrderingComposer,
+      $$NoteItemsTableAnnotationComposer,
+      $$NoteItemsTableCreateCompanionBuilder,
+      $$NoteItemsTableUpdateCompanionBuilder,
+      (NoteItem, $$NoteItemsTableReferences),
+      NoteItem,
+      PrefetchHooks Function({
+        bool deckId,
+        bool citationId,
+        bool draftId,
+        bool cardItemsRefs,
+      })
     >;
 typedef $$CardItemsTableCreateCompanionBuilder =
     CardItemsCompanion Function({
@@ -7022,6 +8760,8 @@ typedef $$CardItemsTableCreateCompanionBuilder =
       Value<String?> deckId,
       Value<String?> draftId,
       Value<String?> citationId,
+      Value<String?> noteId,
+      Value<int?> templateOrdinal,
       Value<DateTime?> createdAt,
       Value<DateTime?> updatedAt,
       Value<int> rowid,
@@ -7049,6 +8789,8 @@ typedef $$CardItemsTableUpdateCompanionBuilder =
       Value<String?> deckId,
       Value<String?> draftId,
       Value<String?> citationId,
+      Value<String?> noteId,
+      Value<int?> templateOrdinal,
       Value<DateTime?> createdAt,
       Value<DateTime?> updatedAt,
       Value<int> rowid,
@@ -7110,6 +8852,23 @@ final class $$CardItemsTableReferences
       $_db.citationItems,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_citationIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $NoteItemsTable _noteIdTable(_$AppDatabase db) => db.noteItems
+      .createAlias($_aliasNameGenerator(db.cardItems.noteId, db.noteItems.id));
+
+  $$NoteItemsTableProcessedTableManager? get noteId {
+    final $_column = $_itemColumn<String>('note_id');
+    if ($_column == null) return null;
+    final manager = $$NoteItemsTableTableManager(
+      $_db,
+      $_db.noteItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_noteIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -7217,6 +8976,11 @@ class $$CardItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get templateOrdinal => $composableBuilder(
+    column: $table.templateOrdinal,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -7288,6 +9052,29 @@ class $$CardItemsTableFilterComposer
           }) => $$CitationItemsTableFilterComposer(
             $db: $db,
             $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$NoteItemsTableFilterComposer get noteId {
+    final $$NoteItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.noteId,
+      referencedTable: $db.noteItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NoteItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.noteItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -7397,6 +9184,11 @@ class $$CardItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get templateOrdinal => $composableBuilder(
+    column: $table.templateOrdinal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -7468,6 +9260,29 @@ class $$CardItemsTableOrderingComposer
           }) => $$CitationItemsTableOrderingComposer(
             $db: $db,
             $table: $db.citationItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$NoteItemsTableOrderingComposer get noteId {
+    final $$NoteItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.noteId,
+      referencedTable: $db.noteItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NoteItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.noteItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -7570,6 +9385,11 @@ class $$CardItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get templateOrdinal => $composableBuilder(
+    column: $table.templateOrdinal,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -7645,6 +9465,29 @@ class $$CardItemsTableAnnotationComposer
     );
     return composer;
   }
+
+  $$NoteItemsTableAnnotationComposer get noteId {
+    final $$NoteItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.noteId,
+      referencedTable: $db.noteItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NoteItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.noteItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$CardItemsTableTableManager
@@ -7660,7 +9503,12 @@ class $$CardItemsTableTableManager
           $$CardItemsTableUpdateCompanionBuilder,
           (CardItem, $$CardItemsTableReferences),
           CardItem,
-          PrefetchHooks Function({bool deckId, bool draftId, bool citationId})
+          PrefetchHooks Function({
+            bool deckId,
+            bool draftId,
+            bool citationId,
+            bool noteId,
+          })
         > {
   $$CardItemsTableTableManager(_$AppDatabase db, $CardItemsTable table)
     : super(
@@ -7696,6 +9544,8 @@ class $$CardItemsTableTableManager
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
                 Value<String?> citationId = const Value.absent(),
+                Value<String?> noteId = const Value.absent(),
+                Value<int?> templateOrdinal = const Value.absent(),
                 Value<DateTime?> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -7721,6 +9571,8 @@ class $$CardItemsTableTableManager
                 deckId: deckId,
                 draftId: draftId,
                 citationId: citationId,
+                noteId: noteId,
+                templateOrdinal: templateOrdinal,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -7748,6 +9600,8 @@ class $$CardItemsTableTableManager
                 Value<String?> deckId = const Value.absent(),
                 Value<String?> draftId = const Value.absent(),
                 Value<String?> citationId = const Value.absent(),
+                Value<String?> noteId = const Value.absent(),
+                Value<int?> templateOrdinal = const Value.absent(),
                 Value<DateTime?> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -7773,6 +9627,8 @@ class $$CardItemsTableTableManager
                 deckId: deckId,
                 draftId: draftId,
                 citationId: citationId,
+                noteId: noteId,
+                templateOrdinal: templateOrdinal,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -7786,7 +9642,12 @@ class $$CardItemsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({deckId = false, draftId = false, citationId = false}) {
+              ({
+                deckId = false,
+                draftId = false,
+                citationId = false,
+                noteId = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [],
@@ -7845,6 +9706,19 @@ class $$CardItemsTableTableManager
                                   )
                                   as T;
                         }
+                        if (noteId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.noteId,
+                                    referencedTable: $$CardItemsTableReferences
+                                        ._noteIdTable(db),
+                                    referencedColumn: $$CardItemsTableReferences
+                                        ._noteIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
 
                         return state;
                       },
@@ -7869,7 +9743,12 @@ typedef $$CardItemsTableProcessedTableManager =
       $$CardItemsTableUpdateCompanionBuilder,
       (CardItem, $$CardItemsTableReferences),
       CardItem,
-      PrefetchHooks Function({bool deckId, bool draftId, bool citationId})
+      PrefetchHooks Function({
+        bool deckId,
+        bool draftId,
+        bool citationId,
+        bool noteId,
+      })
     >;
 typedef $$StudySessionEventsTableCreateCompanionBuilder =
     StudySessionEventsCompanion Function({
@@ -8382,6 +10261,8 @@ class $AppDatabaseManager {
       );
   $$CitationItemsTableTableManager get citationItems =>
       $$CitationItemsTableTableManager(_db, _db.citationItems);
+  $$NoteItemsTableTableManager get noteItems =>
+      $$NoteItemsTableTableManager(_db, _db.noteItems);
   $$CardItemsTableTableManager get cardItems =>
       $$CardItemsTableTableManager(_db, _db.cardItems);
   $$StudySessionEventsTableTableManager get studySessionEvents =>

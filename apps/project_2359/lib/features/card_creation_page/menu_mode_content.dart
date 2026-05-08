@@ -8,6 +8,7 @@ import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar.dart';
 import 'package:project_2359/features/card_creation_page/card_creation_toolbar_controller.dart';
 import 'package:project_2359/features/collection_page/widgets/shared_widgets.dart';
+import 'package:project_2359/core/models/note_type.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/core/widgets/widget_stage.dart';
 
@@ -74,7 +75,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: "Search ${isPdfMode ? 'PDFs' : 'Cards'}...",
+                      hintText: "Search ${isPdfMode ? 'PDFs' : 'Notes'}...",
                       prefixIcon: Icon(
                         Icons.search,
                         size: 20,
@@ -121,10 +122,10 @@ class _MenuModeContentState extends State<MenuModeContent> {
                           textTheme,
                           key: const ValueKey('pdf_list'),
                         )
-                      : _buildCardList(
+                      : _buildNoteList(
                           cs,
                           textTheme,
-                          key: const ValueKey('card_list'),
+                          key: const ValueKey('note_list'),
                         ),
                 ),
               ),
@@ -231,7 +232,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
               ),
               const SizedBox(width: 8),
               Text(
-                isPdfMode ? "PDFs" : "Cards",
+                isPdfMode ? "PDFs" : "Notes",
                 style: TextStyle(
                   color: cs.primary,
                   fontWeight: FontWeight.bold,
@@ -305,23 +306,16 @@ class _MenuModeContentState extends State<MenuModeContent> {
     );
   }
 
-  Widget _buildCardList(ColorScheme cs, TextTheme textTheme, {Key? key}) {
+  Widget _buildNoteList(ColorScheme cs, TextTheme textTheme, {Key? key}) {
     return FutureBuilder(
       key: key,
-      future: context.read<AppController>().draftService.getCardsByDraftId(
+      future: context.read<AppController>().draftService.getNotesByDraftId(
         widget.toolbarController.draftId,
       ),
       builder: (context, snapshot) {
         final data = snapshot.data;
-        if (data == null) {
-          return const Center(
-            child: Column(
-              children: [
-                Icon(Icons.description_outlined, size: 48),
-                Text("No cards found"),
-              ],
-            ),
-          );
+        if (data == null || data.isEmpty) {
+          return _buildEmptyState("No notes found", cs);
         }
         return ListView.builder(
           shrinkWrap: true,
@@ -332,13 +326,26 @@ class _MenuModeContentState extends State<MenuModeContent> {
             final isSelected = widget.toolbarController.selectedItemIds
                 .contains(item.id);
 
+            String title = item.noteType == NoteType.cloze 
+                ? (item.content ?? "") 
+                : (item.front ?? "");
+            String subtitle = item.noteType == NoteType.cloze 
+                ? "Cloze" 
+                : (item.back ?? "");
+
             final tile = Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: ProjectCardTile(
                 title: Text(
-                  item.frontText ?? "",
-                ), // TODO: Might want to do something about nullable texts, maybe non-nullable but can be empty instead? Or would that be unnecessary?
-                subtitle: Text(item.backText ?? ""),
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 leading: const WizardFlashcardPreview(),
                 backgroundColor: cs.surface.withValues(alpha: 0.4),
                 isSelected: isSelected,
@@ -347,7 +354,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
                   if (widget.toolbarController.selectedItemIds.isNotEmpty) {
                     widget.toolbarController.toggleSelection(item.id);
                   } else {
-                    widget.toolbarController.requestCard(item.id);
+                    // TODO: Request Note editing or preview
                   }
                 },
                 onLongTap: () =>

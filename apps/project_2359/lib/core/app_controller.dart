@@ -3,6 +3,7 @@ import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/services/card_service.dart';
 import 'package:project_2359/core/services/draft_service.dart';
 import 'package:project_2359/core/services/scheduling_service.dart';
+import 'package:project_2359/core/services/note_service.dart';
 import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 
@@ -12,6 +13,7 @@ class AppController extends ChangeNotifier {
   final DraftService draftService;
   final CardService cardService;
   final SourceService sourceService;
+  final NoteService noteService;
   final StudyDatabaseService studyDatabaseService;
   final SchedulingService schedulingService;
 
@@ -19,6 +21,7 @@ class AppController extends ChangeNotifier {
     : draftService = DraftService(appDatabase),
       cardService = CardService(),
       sourceService = SourceService(appDatabase),
+      noteService = NoteService(appDatabase),
       studyDatabaseService = StudyDatabaseService(appDatabase),
       schedulingService = SchedulingService(appDatabase);
 }

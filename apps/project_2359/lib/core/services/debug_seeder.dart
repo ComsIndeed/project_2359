@@ -6,6 +6,8 @@ import 'package:uuid/uuid.dart';
 import 'package:project_2359/core/enums/media_type.dart';
 import 'package:project_2359/core/tables/source_item_blobs.dart';
 import 'package:project_2359/core/services/biology_citation_seeder.dart';
+import 'package:project_2359/core/services/note_service.dart';
+import 'package:project_2359/core/models/note_type.dart';
 
 class DebugSeeder {
   static const String _baseUrl =
@@ -117,8 +119,8 @@ class DebugSeeder {
       ]);
     });
 
-    // 4. Create 40 Cards
-    final List<CardItemsCompanion> cards = [];
+    // 4. Create Notes (which generates cards)
+    final noteService = NoteService(db);
 
     // --- Deck 1: Cell Bio & Pathology (6 New) ---
     final cellBioData = [
@@ -143,16 +145,17 @@ class DebugSeeder {
     ];
 
     for (var data in cellBioData) {
-      cards.add(
-        CardItemsCompanion(
-          id: Value(uuid.v4()),
+      final noteId = uuid.v4();
+      await noteService.createNote(
+        NoteItemsCompanion.insert(
+          id: noteId,
           deckId: Value(deck1Id),
-          frontText: Value(data[0]),
-          backText: Value(data[1]),
-          spacedDue: Value(DateTime.now().add(const Duration(days: 1))),
-          spacedState: const Value(0), // New
+          noteType: NoteType.basic,
+          front: Value(data[0]),
+          back: Value(data[1]),
         ),
       );
+      // New cards don't need FSRS override
     }
 
     // --- Deck 2: High-Yield Micro (7 Mixed, 3 Due) ---
@@ -203,12 +206,26 @@ class DebugSeeder {
     ];
 
     for (var data in microData) {
-      cards.add(
-        CardItemsCompanion(
-          id: Value(uuid.v4()),
+      final noteId = uuid.v4();
+      await noteService.createNote(
+        NoteItemsCompanion.insert(
+          id: noteId,
           deckId: Value(deck2Id),
-          frontText: Value(data[0] as String),
-          backText: Value(data[1] as String),
+          noteType: NoteType.basic,
+          front: Value(data[0] as String),
+          back: Value(data[1] as String),
+        ),
+      );
+
+      // Apply FSRS data to the generated card
+      final generatedCard = await (db.select(
+        db.cardItems,
+      )..where((t) => t.noteId.equals(noteId))).getSingle();
+
+      await (db.update(
+        db.cardItems,
+      )..where((t) => t.id.equals(generatedCard.id))).write(
+        CardItemsCompanion(
           spacedState: Value(data[2] as int),
           spacedDue: Value(DateTime.now().add(Duration(days: data[4] as int))),
           spacedStability: Value(data[3] as bool ? 2.0 : 0.0),
@@ -270,12 +287,25 @@ class DebugSeeder {
     ];
 
     for (var data in biochemData) {
-      cards.add(
-        CardItemsCompanion(
-          id: Value(uuid.v4()),
+      final noteId = uuid.v4();
+      await noteService.createNote(
+        NoteItemsCompanion.insert(
+          id: noteId,
           deckId: Value(deck3Id),
-          frontText: Value(data[0] as String),
-          backText: Value(data[1] as String),
+          noteType: NoteType.basic,
+          front: Value(data[0] as String),
+          back: Value(data[1] as String),
+        ),
+      );
+
+      final generatedCard = await (db.select(
+        db.cardItems,
+      )..where((t) => t.noteId.equals(noteId))).getSingle();
+
+      await (db.update(
+        db.cardItems,
+      )..where((t) => t.id.equals(generatedCard.id))).write(
+        CardItemsCompanion(
           spacedState: Value(data[2] as int),
           spacedDue: Value(DateTime.now().add(Duration(days: data[4] as int))),
           spacedStability: const Value(100.0),
@@ -398,12 +428,25 @@ class DebugSeeder {
     ];
 
     for (var data in compData) {
-      cards.add(
-        CardItemsCompanion(
-          id: Value(uuid.v4()),
+      final noteId = uuid.v4();
+      await noteService.createNote(
+        NoteItemsCompanion.insert(
+          id: noteId,
           deckId: Value(deck4Id),
-          frontText: Value(data[0] as String),
-          backText: Value(data[1] as String),
+          noteType: NoteType.basic,
+          front: Value(data[0] as String),
+          back: Value(data[1] as String),
+        ),
+      );
+
+      final generatedCard = await (db.select(
+        db.cardItems,
+      )..where((t) => t.noteId.equals(noteId))).getSingle();
+
+      await (db.update(
+        db.cardItems,
+      )..where((t) => t.id.equals(generatedCard.id))).write(
+        CardItemsCompanion(
           spacedState: Value(data[2] as int),
           spacedDue: Value(DateTime.now().add(Duration(days: data[4] as int))),
           spacedStability: Value(data[3] as bool ? 5.0 : 0.0),
@@ -411,8 +454,6 @@ class DebugSeeder {
       );
     }
 
-    await db.batch((batch) {
-      batch.insertAll(db.cardItems, cards);
-    });
+    // Batched insertions removed in favor of NoteService lifecycle
   }
 }

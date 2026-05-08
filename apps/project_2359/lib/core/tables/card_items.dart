@@ -3,6 +3,7 @@ import 'package:project_2359/core/tables/deck_items.dart';
 import 'package:project_2359/core/tables/card_creation_draft_items.dart';
 import 'package:project_2359/core/tables/citation_items.dart';
 import 'package:project_2359/core/models/card_occlusion.dart';
+import 'package:project_2359/core/tables/note_items.dart';
 
 class CardItems extends Table {
   TextColumn get id => text()();
@@ -42,6 +43,10 @@ class CardItems extends Table {
   TextColumn get draftId =>
       text().nullable().references(CardCreationDraftItems, #id)();
   TextColumn get citationId => text().nullable().references(CitationItems, #id)();
+
+  TextColumn get noteId => text().nullable().references(NoteItems, #id)();
+  IntColumn get templateOrdinal =>
+      integer().nullable().withDefault(const Constant(0))();
 
   DateTimeColumn get createdAt =>
       dateTime().nullable().withDefault(currentDateAndTime)();

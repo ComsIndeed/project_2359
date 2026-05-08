@@ -4,8 +4,8 @@ import 'package:project_2359/core/utils/logger.dart';
 
 /// Service for managing card creation drafts.
 ///
-/// This service allows syncing temporary sessions (drafts) for card creation,
-/// and later committing these cards to a real deck or discarding them.
+/// This service allows syncing temporary sessions (drafts) for note creation,
+/// and later committing these notes to a real deck or discarding them.
 class DraftService {
   final AppDatabase _db;
   static const String _tag = 'DraftService';
@@ -17,15 +17,15 @@ class DraftService {
   /// Synchronizes a draft session.
   ///
   /// This is the primary method for "autosaving" card creation progress.
-  /// It upserts the draft session metadata and then REPLACES all temporary cards
-  /// for that [draftId] with the provided [cards] list.
+  /// It upserts the draft session metadata and then REPLACES all temporary notes
+  /// for that [draftId] with the provided [notes] list.
   ///
   /// The [draftId] and [targetDeckId] should be generated and managed by the UI.
   Future<void> syncDraft({
     required String draftId,
     required String collectionId,
     required String targetDeckId,
-    required List<CardItemsCompanion> cards,
+    required List<NoteItemsCompanion> notes,
   }) async {
     final now = DateTime.now().toIso8601String();
 
@@ -47,18 +47,18 @@ class DraftService {
             ),
           );
 
-      // 3. WIPE all currently buffered cards for this session
+      // 3. WIPE all currently buffered notes for this session
       await (_db.delete(
-        _db.cardItems,
+        _db.noteItems,
       )..where((t) => t.draftId.equals(draftId))).go();
 
-      // 4. INSERT the updated list of cards
+      // 4. INSERT the updated list of notes
       await _db.batch((batch) {
         batch.insertAll(
-          _db.cardItems,
-          cards
+          _db.noteItems,
+          notes
               .map(
-                (c) => c.copyWith(
+                (n) => n.copyWith(
                   draftId: Value(draftId),
                   deckId: Value(targetDeckId),
                 ),
@@ -69,14 +69,14 @@ class DraftService {
     });
 
     AppLogger.debug(
-      'Synced draft $draftId with ${cards.length} cards',
+      'Synced draft $draftId with ${notes.length} notes',
       tag: _tag,
     );
   }
 
   /// Commits a draft to a real deck.
   ///
-  /// The cards are moved to the provided [deckId]. If the deck does not exist,
+  /// The notes are moved to the provided [deckId]. If the deck does not exist,
   /// it is created with the [deckName] and [collectionId] Fallbacks to draft values.
   Future<void> saveDraft({
     required String draftId,
@@ -93,12 +93,12 @@ class DraftService {
     }
 
     await _db.transaction(() async {
-      // 1. Move all cards associated with this draft to the target deckId
+      // 1. Move all notes associated with this draft to the target deckId
       // and clear the draft association.
       await (_db.update(
-        _db.cardItems,
+        _db.noteItems,
       )..where((t) => t.draftId.equals(draftId))).write(
-        CardItemsCompanion(deckId: Value(deckId), draftId: const Value(null)),
+        NoteItemsCompanion(deckId: Value(deckId), draftId: const Value(null)),
       );
 
       // 2. Fetch existing deck to see if we need to create it
@@ -163,18 +163,18 @@ class DraftService {
     );
   }
 
-  /// Deletes a draft and all its associated cards.
+  /// Deletes a draft and all its associated notes.
   ///
   /// Use this to discard a card creation session without saving anything.
   Future<void> deleteDraft(String draftId) async {
     AppLogger.warning(
-      'Discarding draft $draftId and associated cards',
+      'Discarding draft $draftId and associated notes',
       tag: _tag,
     );
     await _db.transaction(() async {
-      // 1. Delete associated cards
+      // 1. Delete associated notes
       await (_db.delete(
-        _db.cardItems,
+        _db.noteItems,
       )..where((t) => t.draftId.equals(draftId))).go();
       // 2. Delete draft session record
       await (_db.delete(
@@ -183,13 +183,13 @@ class DraftService {
     });
   }
 
-  /// Retrieves all cards currently associated with a draft session. Returns empty list if draft not found.
-  Future<List<CardItem>> getCardsByDraftId(String? draftId) async {
+  /// Retrieves all notes currently associated with a draft session. Returns empty list if draft not found.
+  Future<List<NoteItem>> getNotesByDraftId(String? draftId) async {
     if (draftId == null) {
       return [];
     }
     return await (_db.select(
-      _db.cardItems,
+      _db.noteItems,
     )..where((t) => t.draftId.equals(draftId))).get();
   }
 

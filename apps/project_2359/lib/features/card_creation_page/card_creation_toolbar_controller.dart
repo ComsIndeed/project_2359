@@ -6,6 +6,7 @@ import 'package:project_2359/app_database.dart';
 import 'package:drift/drift.dart';
 import 'package:project_2359/core/widgets/widget_stage.dart';
 import 'package:project_2359/core/models/project_rect.dart';
+import 'package:project_2359/core/models/note_type.dart';
 import 'package:uuid/uuid.dart';
 
 class CardCreationToolbarController extends ChangeNotifier {
@@ -20,12 +21,14 @@ class CardCreationToolbarController extends ChangeNotifier {
   String? _draftId;
   String? _targetDeckId;
   String? _collectionId;
-  final List<CardItemsCompanion> _cards = [];
+  NoteType _selectedNoteType = NoteType.basic;
+  final List<NoteItemsCompanion> _notes = [];
 
   String? _selectedText;
   String? _feedbackText;
   String _frontText = '';
   String _backText = '';
+  String _contentText = '';
 
   // Image Occlusion State
   Rect? _occlusionRect;
@@ -55,7 +58,8 @@ class CardCreationToolbarController extends ChangeNotifier {
   String? get draftId => _draftId;
   String? get targetDeckId => _targetDeckId;
   String? get collectionId => _collectionId;
-  List<CardItemsCompanion> get cards => List.unmodifiable(_cards);
+  NoteType get selectedNoteType => _selectedNoteType;
+  List<NoteItemsCompanion> get notes => List.unmodifiable(_notes);
 
   CardCreationToolbarMode get mode => _mode;
   String? get selectedText => _selectedText;
@@ -64,6 +68,7 @@ class CardCreationToolbarController extends ChangeNotifier {
 
   String get frontText => _frontText;
   String get backText => _backText;
+  String get contentText => _contentText;
 
   Rect? get occlusionRect => _occlusionRect;
   Uint8List? get capturedOcclusionImage => _capturedOcclusionImage;
@@ -89,16 +94,21 @@ class CardCreationToolbarController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sets the initial list of cards for a resumed draft.
-  void setInitialCards(List<CardItemsCompanion> initialCards) {
-    _cards.clear();
-    _cards.addAll(initialCards);
+  /// Sets the initial list of notes for a resumed draft.
+  void setInitialNotes(List<NoteItemsCompanion> initialNotes) {
+    _notes.clear();
+    _notes.addAll(initialNotes);
     notifyListeners();
   }
 
-  /// Adds a new card to the draft and triggers an automatic sync.
-  Future<void> addCard(CardItemsCompanion card) async {
-    CardItemsCompanion cardToInsert = card;
+  void setSelectedNoteType(NoteType type) {
+    _selectedNoteType = type;
+    notifyListeners();
+  }
+
+  /// Adds a new note to the draft and triggers an automatic sync.
+  Future<void> addNote(NoteItemsCompanion note) async {
+    NoteItemsCompanion noteToInsert = note;
 
     // Handle Citation if metadata exists
     if (_sourceId != null && (_pageNumbers != null || _rects != null)) {
@@ -115,21 +125,21 @@ class CardCreationToolbarController extends ChangeNotifier {
       if (_draftService != null) {
         await _draftService.insertCitation(citation);
       }
-      cardToInsert = cardToInsert.copyWith(citationId: Value(citationId));
+      noteToInsert = noteToInsert.copyWith(citationId: Value(citationId));
     }
 
-    _cards.add(cardToInsert);
+    _notes.add(noteToInsert);
     notifyListeners();
-    _feedbackText = "Saved Card!";
+    _feedbackText = "Saved Note!";
     stageController.flash(
       'card_action',
       duration: const Duration(milliseconds: 800),
     );
-    await syncDraft(_cards);
+    await syncDraft(_notes);
   }
 
-  /// Synchronizes the current card list with the database draft.
-  Future<void> syncDraft(List<CardItemsCompanion> cards) async {
+  /// Synchronizes the current note list with the database draft.
+  Future<void> syncDraft(List<NoteItemsCompanion> notes) async {
     if (_draftService == null ||
         _draftId == null ||
         _targetDeckId == null ||
@@ -141,7 +151,7 @@ class CardCreationToolbarController extends ChangeNotifier {
       draftId: _draftId!,
       targetDeckId: _targetDeckId!,
       collectionId: _collectionId!,
-      cards: cards,
+      notes: notes,
     );
   }
 
@@ -197,6 +207,11 @@ class CardCreationToolbarController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setContentText(String text) {
+    _contentText = text;
+    notifyListeners();
+  }
+
   void updateCitationMetadata({
     String? sourceId,
     List<int>? pageNumbers,
@@ -211,6 +226,7 @@ class CardCreationToolbarController extends ChangeNotifier {
   void resetCardFields() {
     _frontText = '';
     _backText = '';
+    _contentText = '';
     notifyListeners();
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:uuid/uuid.dart';
+import 'package:project_2359/core/models/note_type.dart';
 
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
@@ -23,8 +24,10 @@ class CardCreationModeContent extends StatefulWidget {
 class _CardCreationModeContentState extends State<CardCreationModeContent> {
   late final TextEditingController _frontController;
   late final TextEditingController _backController;
+  late final TextEditingController _contentController;
   final FocusNode _frontFocusNode = FocusNode();
   final FocusNode _backFocusNode = FocusNode();
+  final FocusNode _contentFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -35,12 +38,18 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
     _backController = TextEditingController(
       text: widget.toolbarController.backText,
     );
+    _contentController = TextEditingController(
+      text: widget.toolbarController.contentText,
+    );
 
     _frontController.addListener(() {
       widget.toolbarController.setFrontText(_frontController.text);
     });
     _backController.addListener(() {
       widget.toolbarController.setBackText(_backController.text);
+    });
+    _contentController.addListener(() {
+      widget.toolbarController.setContentText(_contentController.text);
     });
 
     _registerShortcuts();
@@ -65,11 +74,11 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
     );
     ProjectShortcutManager.registerShortcut(
       const ShortcutInfo(
-        label: 'Save Card',
+        label: 'Save Note',
         key: LogicalKeyboardKey.keyS,
         modifiers: [ShortcutModifier.alt],
       ),
-      _addCard,
+      _addNote,
     );
     ProjectShortcutManager.registerShortcut(
       const ShortcutInfo(
@@ -81,22 +90,28 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
     );
   }
 
-  void _addCard() {
-    final frontText = _frontController.text;
-    final backText = _backController.text;
+  void _addNote() {
+    final noteType = widget.toolbarController.selectedNoteType;
 
-    if (frontText.isEmpty || backText.isEmpty) return;
+    if (noteType == NoteType.cloze) {
+      if (_contentController.text.isEmpty) return;
+    } else {
+      if (_frontController.text.isEmpty || _backController.text.isEmpty) return;
+    }
 
-    widget.toolbarController.addCard(
-      CardItemsCompanion.insert(
+    widget.toolbarController.addNote(
+      NoteItemsCompanion.insert(
         id: const Uuid().v4(),
-        frontText: drift.Value(frontText),
-        backText: drift.Value(backText),
+        noteType: noteType,
+        front: drift.Value(_frontController.text),
+        back: drift.Value(_backController.text),
+        content: drift.Value(_contentController.text),
       ),
     );
 
     _frontController.clear();
     _backController.clear();
+    _contentController.clear();
   }
 
   void _cancel() {
@@ -107,8 +122,10 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
   void dispose() {
     _frontController.dispose();
     _backController.dispose();
+    _contentController.dispose();
     _frontFocusNode.dispose();
     _backFocusNode.dispose();
+    _contentFocusNode.dispose();
     _unregisterShortcuts();
     super.dispose();
   }
@@ -205,33 +222,71 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
 
         const SizedBox(height: 20),
 
-        // Front Field
-        _buildTextField(
-          controller: _frontController,
-          focusNode: _frontFocusNode,
-          label: "Front",
-          cs: cs,
-          shortcut: const ShortcutInfo(
-            label: 'Focus Front',
-            key: LogicalKeyboardKey.keyF,
-            modifiers: [ShortcutModifier.alt],
+        // Note Type Chips
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: NoteType.values.map((type) {
+              final isSelected =
+                  widget.toolbarController.selectedNoteType == type;
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(
+                  label: Text(type.label),
+                  selected: isSelected,
+                  onSelected: (val) {
+                    if (val) widget.toolbarController.setSelectedNoteType(type);
+                  },
+                ),
+              );
+            }).toList(),
           ),
-        ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
+        ).animate().fadeIn(delay: 150.ms).slideX(begin: 0.1),
 
-        const SizedBox(height: 4),
+        const SizedBox(height: 16),
 
-        // Back Field
-        _buildTextField(
-          controller: _backController,
-          focusNode: _backFocusNode,
-          label: "Back",
-          cs: cs,
-          shortcut: const ShortcutInfo(
-            label: 'Focus Back',
-            key: LogicalKeyboardKey.keyB,
-            modifiers: [ShortcutModifier.alt],
-          ),
-        ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
+        // Dynamic Fields
+        if (widget.toolbarController.selectedNoteType == NoteType.cloze)
+          _buildTextField(
+            controller: _contentController,
+            focusNode: _contentFocusNode,
+            label: "Text (use {{c1::...}} for clozes)",
+            cs: cs,
+            shortcut: const ShortcutInfo(
+              label: 'Focus Text',
+              key: LogicalKeyboardKey.keyT,
+              modifiers: [ShortcutModifier.alt],
+            ),
+          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1)
+        else ...[
+          // Front Field
+          _buildTextField(
+            controller: _frontController,
+            focusNode: _frontFocusNode,
+            label: "Front",
+            cs: cs,
+            shortcut: const ShortcutInfo(
+              label: 'Focus Front',
+              key: LogicalKeyboardKey.keyF,
+              modifiers: [ShortcutModifier.alt],
+            ),
+          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
+
+          const SizedBox(height: 8),
+
+          // Back Field
+          _buildTextField(
+            controller: _backController,
+            focusNode: _backFocusNode,
+            label: "Back",
+            cs: cs,
+            shortcut: const ShortcutInfo(
+              label: 'Focus Back',
+              key: LogicalKeyboardKey.keyB,
+              modifiers: [ShortcutModifier.alt],
+            ),
+          ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
+        ],
 
         const SizedBox(height: 8),
 
@@ -291,7 +346,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
             const SizedBox(width: 12),
             ShortcutDisplay(
               info: const ShortcutInfo(
-                label: 'Add Card',
+                label: 'Add Note',
                 key: LogicalKeyboardKey.keyS,
                 modifiers: [ShortcutModifier.alt],
               ),
@@ -325,13 +380,13 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
                   ),
                 ),
                 child: FilledButton.icon(
-                  onPressed: _addCard,
+                  onPressed: _addNote,
                   style: FilledButton.styleFrom(
                     backgroundColor: cs.primary.withAlpha(50),
                     minimumSize: const Size(0, 42),
                   ),
                   icon: const Icon(Icons.add_rounded, size: 22),
-                  label: const Text("Add Card"),
+                  label: const Text("Add Note"),
                 ),
               ),
             ),
