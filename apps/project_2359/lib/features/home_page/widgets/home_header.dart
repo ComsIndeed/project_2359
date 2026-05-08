@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 class HomeHeader extends StatelessWidget {
   final bool isLandscape;
@@ -16,30 +18,34 @@ class HomeHeader extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Compact App Icon
-        Hero(
-          tag: 'app_icon',
-          child: Image.asset(
-            isDark
-                ? 'assets/images/app_icon_light_nobg.png'
-                : 'assets/images/app_icon_nobg.png',
-            height: 28, // More compact icon
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            "Project 2359",
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.4,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.95),
+        if (kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)) ...[
+          // Compact App Icon
+          Hero(
+            tag: 'app_icon',
+            child: Image.asset(
+              isDark
+                  ? 'assets/images/app_icon_light_nobg.png'
+                  : 'assets/images/app_icon_nobg.png',
+              height: 28, // More compact icon
             ),
           ),
-        ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              "Project 2359",
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.4,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.95),
+              ),
+            ),
+          ),
+        ] else
+          const Spacer(),
         // Settings Action
-        if (!isLandscape) const _HeaderActions(),
-        if (isLandscape)
+        if (!isLandscape && (kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS))) 
+          const _HeaderActions(),
+        if (isLandscape && (kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)))
           IconButton(
             onPressed: onPlusTap,
             icon: const FaIcon(FontAwesomeIcons.circlePlus, size: 18),

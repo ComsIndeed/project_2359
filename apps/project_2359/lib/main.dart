@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
@@ -18,9 +19,28 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:flutter/services.dart';
+import 'package:window_manager/window_manager.dart';
+import 'package:project_2359/core/widgets/desktop_title_bar.dart';
+import 'package:project_2359/core/utils/navigator_utils.dart';
+import 'dart:io';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    await windowManager.ensureInitialized();
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(1200, 800),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.hidden,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
 
   AppLogger.info('--- Application starting ---', tag: 'Main');
 
@@ -127,6 +147,7 @@ class _MainAppState extends State<MainApp> {
       listenable: themeNotifier,
       builder: (context, _) {
         return MaterialApp(
+          navigatorKey: rootNavigatorKey,
           debugShowCheckedModeBanner: false,
           themeMode: themeNotifier.themeMode,
           theme: AppTheme.buildTheme(
@@ -139,13 +160,26 @@ class _MainAppState extends State<MainApp> {
             themeNotifier.accentColor,
             backgroundTone: themeNotifier.backgroundTone,
           ),
-          builder: (context, child) => ResponsiveBreakpoints.builder(
-            child: child!,
-            breakpoints: [
-              const Breakpoint(start: 0, end: 450, name: MOBILE),
-              const Breakpoint(start: 451, end: 800, name: TABLET),
-              const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-              const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+          builder: (context, child) => Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder: (context) => Material(
+                  child: ResponsiveBreakpoints.builder(
+                    child: Column(
+                      children: [
+                        const DesktopTitleBar(),
+                        Expanded(child: child!),
+                      ],
+                    ),
+                    breakpoints: [
+                      const Breakpoint(start: 0, end: 450, name: MOBILE),
+                      const Breakpoint(start: 451, end: 800, name: TABLET),
+                      const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                      const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
           home: const HomePage(),

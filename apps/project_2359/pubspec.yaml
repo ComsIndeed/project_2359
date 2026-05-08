@@ -42,6 +42,7 @@ dependencies:
   responsive_framework: ^1.5.1
   shared_core:
     path: ../../packages/shared_core
+  window_manager: ^0.5.1
 
 dev_dependencies:
   flutter_test:
