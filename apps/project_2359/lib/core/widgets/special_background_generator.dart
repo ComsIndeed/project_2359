@@ -250,6 +250,12 @@ class SpecialBackgroundGenerator extends StatefulWidget {
   /// to adjust the colors/patterns instead of the theme's brightness.
   final Brightness? overrideBrightness;
 
+  /// Whether the background should be animated.
+  final bool isAnimated;
+
+  /// Whether to show the abstract art pattern layer.
+  final bool showPattern;
+
   const SpecialBackgroundGenerator({
     super.key,
     required this.seed,
@@ -267,6 +273,8 @@ class SpecialBackgroundGenerator extends StatefulWidget {
     required this.child,
     this.backgroundColor,
     this.overrideBrightness,
+    this.isAnimated = true,
+    this.showPattern = true,
   });
 
   @override
@@ -293,19 +301,25 @@ class _SpecialBackgroundGeneratorState extends State<SpecialBackgroundGenerator>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 30),
-    )..repeat();
+    );
+    
+    if (widget.isAnimated) {
+      _controller.repeat();
+    }
 
-    _sensorSubscription = accelerometerEventStream().listen((event) {
-      if (mounted) {
-        setState(() {
-          // Low-pass filter for smoothness
-          _sensorOffset = Offset(
-            (_sensorOffset.dx * 0.9) + (event.x * 0.1),
-            (_sensorOffset.dy * 0.9) + (event.y * 0.1),
-          );
-        });
-      }
-    });
+    if (widget.isAnimated) {
+      _sensorSubscription = accelerometerEventStream().listen((event) {
+        if (mounted) {
+          setState(() {
+            // Low-pass filter for smoothness
+            _sensorOffset = Offset(
+              (_sensorOffset.dx * 0.9) + (event.x * 0.1),
+              (_sensorOffset.dy * 0.9) + (event.y * 0.1),
+            );
+          });
+        }
+      });
+    }
   }
 
   @override
@@ -424,7 +438,7 @@ class _SpecialBackgroundGeneratorState extends State<SpecialBackgroundGenerator>
       subLabel: widget.subLabel,
     );
 
-    final decoration = BoxDecoration(
+    final decoration = ShapeDecoration(
       color: widget.backgroundColor,
       gradient: widget.backgroundColor != null
           ? null
@@ -433,16 +447,18 @@ class _SpecialBackgroundGeneratorState extends State<SpecialBackgroundGenerator>
               end: Alignment.bottomRight,
               colors: [colors.primary, colors.secondary],
             ),
-      borderRadius: BorderRadius.circular(widget.borderRadius),
-      border: widget.showBorder
-          ? Border.all(
-              color: (isDark ? Colors.white : Colors.black).withValues(
-                alpha: widget.isDisabled ? 0.05 : 0.08,
-              ),
-              width: 1,
-            )
-          : null,
-      boxShadow: [
+      shape: RoundedSuperellipseBorder(
+        borderRadius: BorderRadius.circular(widget.borderRadius),
+        side: widget.showBorder
+            ? BorderSide(
+                color: (isDark ? Colors.white : Colors.black).withValues(
+                  alpha: widget.isDisabled ? 0.04 : 0.08,
+                ),
+                width: 1.2,
+              )
+            : BorderSide.none,
+      ),
+      shadows: [
         if (!widget.isDisabled && widget.showShadow)
           BoxShadow(
             color: colors.primary.withValues(alpha: isDark ? 0.2 : 0.05),
@@ -453,14 +469,14 @@ class _SpecialBackgroundGeneratorState extends State<SpecialBackgroundGenerator>
     );
 
     return Container(
+      clipBehavior: Clip.antiAlias,
       decoration: decoration,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(widget.borderRadius),
-        child: Stack(
-          children: [
+      child: Stack(
+        children: [
             // Abstract art pattern layer – rendered from cached image
-            Positioned.fill(
-              child: RepaintBoundary(
+            if (widget.showPattern)
+              Positioned.fill(
+                child: RepaintBoundary(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final size = Size(
@@ -474,23 +490,38 @@ class _SpecialBackgroundGeneratorState extends State<SpecialBackgroundGenerator>
                       // to avoid lag. Instead, we paint them directly every frame.
                       if (widget.type ==
                           SpecialBackgroundType.geometricSquares) {
-                        return AnimatedBuilder(
-                          animation: _controller,
-                          builder: (context, _) {
-                            return CustomPaint(
-                              painter: AbstractArtPainter(
-                                hash,
-                                colors.primary,
-                                widget.type,
-                                brightness,
-                                sensorOffset: _sensorOffset,
-                                flowValue: _controller.value,
-                              ),
-                              isComplex: true,
-                              willChange: true,
-                            );
-                          },
-                        );
+                        if (widget.isAnimated) {
+                          return AnimatedBuilder(
+                            animation: _controller,
+                            builder: (context, _) {
+                              return CustomPaint(
+                                painter: AbstractArtPainter(
+                                  hash,
+                                  colors.primary,
+                                  widget.type,
+                                  brightness,
+                                  sensorOffset: _sensorOffset,
+                                  flowValue: _controller.value,
+                                ),
+                                isComplex: true,
+                                willChange: true,
+                              );
+                            },
+                          );
+                        } else {
+                          return CustomPaint(
+                            painter: AbstractArtPainter(
+                              hash,
+                              colors.primary,
+                              widget.type,
+                              brightness,
+                              sensorOffset: Offset.zero,
+                              flowValue: 0.0,
+                            ),
+                            isComplex: false,
+                            willChange: false,
+                          );
+                        }
                       }
 
                       // Synchronously build/fetch the cached image for static patterns.
@@ -564,9 +595,8 @@ class _SpecialBackgroundGeneratorState extends State<SpecialBackgroundGenerator>
               widget.child,
           ],
         ),
-      ),
-    );
-  }
+      );
+    }
 
   /// Builds a shadow clone + the real child in a Stack.
   List<Widget> _buildShadowedContent(bool isDark) {

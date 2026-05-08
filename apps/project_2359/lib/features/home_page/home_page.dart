@@ -158,6 +158,8 @@ class _HomePageState extends State<HomePage> {
         masterWidth: 350,
         master: _buildMasterView(),
         detail: _buildDetailView(),
+        wrapDetail: _selectedCollectionId == null,
+        padding: const EdgeInsets.all(12),
       ),
     );
   }

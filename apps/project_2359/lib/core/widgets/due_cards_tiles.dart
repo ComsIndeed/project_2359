@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/app_controller.dart';
-import 'package:project_2359/core/widgets/project_important_tile.dart';
 import 'package:project_2359/features/home_page/widgets/due_cards_overview.dart';
 import 'package:project_2359/core/widgets/sensor_reactive_border.dart';
 import 'package:project_2359/features/study_page/study_page.dart';

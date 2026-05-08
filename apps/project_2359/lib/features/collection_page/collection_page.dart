@@ -283,6 +283,7 @@ class _CollectionPageState extends State<CollectionPage> {
 
   Widget _buildContent() {
     return AdaptivePaneLayout(
+      isNested: widget.isNested,
       masterWidth: 350,
       master: _buildMasterView(),
       detail: _selectedDeckId != null
@@ -463,16 +464,23 @@ class _CollectionPageState extends State<CollectionPage> {
         body: Stack(
           children: [
             Positioned.fill(
-              child: SpecialBackgroundGenerator(
-                type: SpecialBackgroundType.geometricSquares,
-                seed: GenerationSeed.fromString(collectionName),
-                label: collectionName,
-                icon: FontAwesomeIcons.layerGroup,
-                showBorder: false,
-                showShadow: false,
-                backgroundColor: null,
-                borderRadius: 0,
-                child: const SizedBox.expand(),
+              child: Builder(
+                builder: (context) {
+                  final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
+                  return SpecialBackgroundGenerator(
+                    type: SpecialBackgroundType.geometricSquares,
+                    seed: GenerationSeed.fromString(collectionName),
+                    label: collectionName,
+                    icon: FontAwesomeIcons.layerGroup,
+                    showBorder: false,
+                    showShadow: false,
+                    backgroundColor: isDesktop ? Theme.of(context).colorScheme.surface : null,
+                    borderRadius: 0,
+                    isAnimated: !isDesktop,
+                    showPattern: !isDesktop,
+                    child: const SizedBox.expand(),
+                  );
+                }
               ),
             ),
             NestedScrollView(
