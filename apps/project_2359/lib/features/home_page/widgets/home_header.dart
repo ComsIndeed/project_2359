@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class HomeHeader extends StatelessWidget {
   final bool isLandscape;
@@ -15,10 +16,12 @@ class HomeHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        if (kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)) ...[
+        if (isMobile || kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)) ...[
           // Compact App Icon
           Hero(
             tag: 'app_icon',
@@ -43,9 +46,9 @@ class HomeHeader extends StatelessWidget {
         ] else
           const Spacer(),
         // Settings Action
-        if (!isLandscape && (kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS))) 
+        if (!isLandscape && (isMobile || kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS))) 
           const _HeaderActions(),
-        if (isLandscape && (kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)))
+        if (isLandscape && (isMobile || kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)))
           IconButton(
             onPressed: onPlusTap,
             icon: const FaIcon(FontAwesomeIcons.circlePlus, size: 18),
