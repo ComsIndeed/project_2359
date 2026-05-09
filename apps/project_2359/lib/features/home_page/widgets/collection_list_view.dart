@@ -35,7 +35,7 @@ class PinnedCollectionsSection extends StatelessWidget {
   final Function(String) onToggleSelection;
   final Function(String) onSelect;
   final bool isSelecting;
-  final bool isLandscape;
+  final bool isDesktop;
   final String? activeCollectionId;
   final Function(Offset, String, bool)? onContextMenu;
 
@@ -47,7 +47,7 @@ class PinnedCollectionsSection extends StatelessWidget {
     required this.onToggleSelection,
     required this.onSelect,
     required this.isSelecting,
-    this.isLandscape = false,
+    this.isDesktop = false,
     this.activeCollectionId,
     this.onContextMenu,
   });
@@ -115,14 +115,12 @@ class PinnedCollectionsSection extends StatelessWidget {
                     ),
                     isSelected:
                         selectedIds.contains(pair.$1.id) ||
-                        (isLandscape && activeCollectionId == pair.$1.id),
-                    isCompact: isLandscape,
+                        activeCollectionId == pair.$1.id,
+                    isCompact: isDesktop,
                     onTap: isSelecting
                         ? () => onToggleSelection(pair.$1.id)
                         : () {
-                            if (ResponsiveBreakpoints.of(
-                              context,
-                            ).largerThan(MOBILE)) {
+                            if (isDesktop) {
                               onSelect(pair.$1.id);
                             } else {
                               Navigator.push(
@@ -155,7 +153,7 @@ class CollectionList extends StatelessWidget {
   final Function(String) onToggleSelection;
   final Function(String) onSelect;
   final bool isSelecting;
-  final bool isLandscape;
+  final bool isDesktop;
   final String? activeCollectionId;
   final Function(Offset, String, bool)? onContextMenu;
 
@@ -168,7 +166,7 @@ class CollectionList extends StatelessWidget {
     required this.onToggleSelection,
     required this.onSelect,
     required this.isSelecting,
-    this.isLandscape = false,
+    this.isDesktop = false,
     this.activeCollectionId,
     this.onContextMenu,
   });
@@ -251,14 +249,12 @@ class CollectionList extends StatelessWidget {
                     ),
                     isSelected:
                         selectedIds.contains(pair.$1.id) ||
-                        (isLandscape && activeCollectionId == pair.$1.id),
-                    isCompact: isLandscape,
+                        activeCollectionId == pair.$1.id,
+                    isCompact: isDesktop,
                     onTap: isSelecting
                         ? () => onToggleSelection(pair.$1.id)
                         : () {
-                            if (ResponsiveBreakpoints.of(
-                              context,
-                            ).largerThan(MOBILE)) {
+                            if (isDesktop) {
                               onSelect(pair.$1.id);
                             } else {
                               Navigator.push(

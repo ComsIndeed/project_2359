@@ -231,6 +231,7 @@ class _HomePageState extends State<HomePage> {
                       onToggleSelection: _toggleCollectionSelection,
                       onSelect: _handleCollectionSelect,
                       activeCollectionId: _selectedCollectionId,
+                      isDesktop: ResponsiveBreakpoints.of(context).largerThan(MOBILE),
                       isSelecting: _isSelecting,
                       onContextMenu: (pos, id, isC) =>
                           _showCoolContextMenu(context, pos, id, isCollection: isC),
@@ -245,6 +246,7 @@ class _HomePageState extends State<HomePage> {
                       onToggleSelection: _toggleCollectionSelection,
                       onSelect: _handleCollectionSelect,
                       activeCollectionId: _selectedCollectionId,
+                      isDesktop: ResponsiveBreakpoints.of(context).largerThan(MOBILE),
                       isSelecting: _isSelecting,
                       onContextMenu: (pos, id, isC) =>
                           _showCoolContextMenu(context, pos, id, isCollection: isC),
