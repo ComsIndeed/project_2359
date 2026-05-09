@@ -295,9 +295,121 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
+  Widget _buildBackground(String collectionName, bool isDesktop) {
+    return Positioned.fill(
+      child: SpecialBackgroundGenerator(
+        type: SpecialBackgroundType.geometricSquares,
+        seed: GenerationSeed.fromString(collectionName),
+        label: collectionName,
+        icon: FontAwesomeIcons.layerGroup,
+        showBorder: false,
+        showShadow: false,
+        backgroundColor: isDesktop ? Theme.of(context).colorScheme.surface : null,
+        borderRadius: 0,
+        isAnimated: !isDesktop,
+        showPattern: !isDesktop,
+        child: const SizedBox.expand(),
+      ),
+    );
+  }
+
+  Widget _buildPageView() {
+    final collectionName = widget.initialCollectionName;
+    return PageView(
+      controller: _pageController,
+      onPageChanged: _onPageChanged,
+      children: [
+        _CardsPage(
+          decks: _allDecks,
+          drafts: _allDrafts,
+          collectionId: widget.collectionId,
+          selectedIds: _selectedDeckIds,
+          onToggleSelection: _toggleDeckSelection,
+          isSelecting: _isSelecting,
+          selectedDeckId: _selectedDeckId,
+          onStudyCollectionRequested: (id) {
+            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
+              setState(() {
+                _isStudyingCollection = true;
+                _selectedDeckId = null;
+              });
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => StudyPage(
+                    collectionId: id,
+                    title: "Collection Review",
+                  ),
+                ),
+              );
+            }
+          },
+          onDeckTap: (id) async {
+            final deck = _allDecks.firstWhere((d) => d.id == id);
+
+            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
+              setState(() {
+                _selectedDeckId = id;
+                _isStudyingCollection = false;
+              });
+              return;
+            }
+
+            setState(() {
+              _selectedDeckId = id;
+              _isStudyingCollection = false;
+            });
+
+            final schedulingService =
+                context.read<AppController>().schedulingService;
+
+            // Get counts for the setup sheet
+            final dueCount = await schedulingService.getDueCount(deckId: id);
+            final allCards = await schedulingService.getAllCardsForDeck(id);
+            final totalCount = allCards.length;
+
+            if (!mounted) return;
+
+            // If on mobile, push the setup sheet.
+            if (!ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
+              StudySessionSetupSheet.show(
+                context: context,
+                deckName: deck.name,
+                dueCount: dueCount,
+                totalCount: totalCount,
+                onStart: (mode) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => StudyPage(
+                        deckId: id,
+                        title: deck.name,
+                        mode: mode,
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
+          },
+        ),
+        _SourcesPage(
+          collectionId: widget.collectionId,
+          sources: _currentSources ?? [],
+        ),
+        _SettingsPage(
+          collectionId: widget.collectionId,
+          collectionName: collectionName,
+        ),
+      ],
+    );
+  }
+
   Widget _buildMasterView() {
     final theme = Theme.of(context);
     final collectionName = widget.initialCollectionName;
+    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -467,32 +579,31 @@ class _CollectionPageState extends State<CollectionPage> {
         },
         body: Stack(
           children: [
-            Positioned.fill(
-              child: Builder(
-                builder: (context) {
-                  final isDesktop = ResponsiveBreakpoints.of(
-                    context,
-                  ).largerThan(MOBILE);
-                  return SpecialBackgroundGenerator(
-                    type: SpecialBackgroundType.geometricSquares,
-                    seed: GenerationSeed.fromString(collectionName),
-                    label: collectionName,
-                    icon: FontAwesomeIcons.layerGroup,
-                    showBorder: false,
-                    showShadow: false,
-                    backgroundColor: isDesktop
-                        ? Theme.of(context).colorScheme.surface
-                        : null,
-                    borderRadius: 0,
-                    isAnimated: !isDesktop,
-                    showPattern: !isDesktop,
-                    child: const SizedBox.expand(),
-                  );
-                },
-              ),
-            ),
+            _buildBackground(collectionName, isDesktop),
             NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) {
+                if (isDesktop) {
+                  return [
+                    SliverToBoxAdapter(
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.08),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: _HeaderContent(
+                          collectionName: collectionName,
+                          currentIndex: _currentPageIndex,
+                          onPageRequested: _requestPage,
+                        ),
+                      ),
+                    ),
+                  ];
+                }
                 return [
                   SliverPersistentHeader(
                     pinned: true,
@@ -510,111 +621,14 @@ class _CollectionPageState extends State<CollectionPage> {
                   ),
                 ];
               },
-              body: PageView(
-                controller: _pageController,
-                onPageChanged: _onPageChanged,
-                children: [
-                  _CardsPage(
-                    decks: _allDecks,
-                    drafts: _allDrafts,
-                    collectionId: widget.collectionId,
-                    selectedIds: _selectedDeckIds,
-                    onToggleSelection: _toggleDeckSelection,
-                    isSelecting: _isSelecting,
-                    selectedDeckId: _selectedDeckId,
-                    onStudyCollectionRequested: (id) {
-                      if (ResponsiveBreakpoints.of(
-                        context,
-                      ).largerThan(MOBILE)) {
-                        setState(() {
-                          _isStudyingCollection = true;
-                          _selectedDeckId = null;
-                        });
-                      } else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => StudyPage(
-                              collectionId: id,
-                              title: "Collection Review",
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                    onDeckTap: (id) async {
-                      final deck = _allDecks.firstWhere((d) => d.id == id);
-
-                      if (ResponsiveBreakpoints.of(
-                        context,
-                      ).largerThan(MOBILE)) {
-                        setState(() {
-                          _selectedDeckId = id;
-                          _isStudyingCollection = false;
-                        });
-                        return;
-                      }
-
-                      setState(() {
-                        _selectedDeckId = id;
-                        _isStudyingCollection = false;
-                      });
-
-                      final schedulingService = context
-                          .read<AppController>()
-                          .schedulingService;
-
-                      // Get counts for the setup sheet
-                      final dueCount = await schedulingService.getDueCount(
-                        deckId: id,
-                      );
-                      final allCards = await schedulingService
-                          .getAllCardsForDeck(id);
-                      final totalCount = allCards.length;
-
-                      if (!mounted) return;
-
-                      // If on mobile, push the setup sheet.
-                      if (!ResponsiveBreakpoints.of(
-                        context,
-                      ).largerThan(MOBILE)) {
-                        StudySessionSetupSheet.show(
-                          context: context,
-                          deckName: deck.name,
-                          dueCount: dueCount,
-                          totalCount: totalCount,
-                          onStart: (mode) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => StudyPage(
-                                  deckId: id,
-                                  title: deck.name,
-                                  mode: mode,
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      }
-                    },
-                  ),
-                  _SourcesPage(
-                    collectionId: widget.collectionId,
-                    sources: _currentSources ?? [],
-                  ),
-                  _SettingsPage(
-                    collectionId: widget.collectionId,
-                    collectionName: collectionName,
-                  ),
-                ],
-              ),
+              body: _buildPageView(),
             ),
           ],
         ),
       ),
     );
   }
+
 
   Widget _buildDetailView() {
     final deck = _allDecks.firstWhere((d) => d.id == _selectedDeckId);
@@ -659,6 +673,90 @@ class _CollectionPageState extends State<CollectionPage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _HeaderContent extends StatelessWidget {
+  final String collectionName;
+  final int currentIndex;
+  final ValueChanged<int> onPageRequested;
+
+  const _HeaderContent({
+    required this.collectionName,
+    required this.currentIndex,
+    required this.onPageRequested,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "COLLECTION",
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: Colors.white.withValues(alpha: 0.4),
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2.0,
+            fontSize: 9,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 4,
+              height: 32,
+              margin: const EdgeInsets.only(top: 4, right: 12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                collectionName,
+                style: theme.textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: -0.8,
+                  fontSize: 28,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            _HeaderCircleAction(
+              icon: FontAwesomeIcons.solidClone,
+              onTap: () => onPageRequested(0),
+              label: "Decks",
+              isActive: currentIndex == 0,
+            ),
+            const SizedBox(width: 16),
+            _HeaderCircleAction(
+              icon: FontAwesomeIcons.layerGroup,
+              onTap: () => onPageRequested(1),
+              label: "Sources",
+              isActive: currentIndex == 1,
+            ),
+            const SizedBox(width: 16),
+            _HeaderCircleAction(
+              icon: FontAwesomeIcons.gear,
+              onTap: () => onPageRequested(2),
+              label: "Settings",
+              isActive: currentIndex == 2,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -727,72 +825,10 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                 ignoring: t > 0.4,
                 child: SingleChildScrollView(
                   physics: const NeverScrollableScrollPhysics(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "COLLECTION",
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.4),
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 2.0,
-                          fontSize: 9,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 4,
-                            height: 32,
-                            margin: const EdgeInsets.only(top: 4, right: 12),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              collectionName,
-                              style: theme.textTheme.displaySmall?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                letterSpacing: -0.8,
-                                fontSize: 28,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          _HeaderCircleAction(
-                            icon: FontAwesomeIcons.solidClone,
-                            onTap: () => onPageRequested(0),
-                            label: "Decks",
-                            isActive: currentIndex == 0,
-                          ),
-                          const SizedBox(width: 16),
-                          _HeaderCircleAction(
-                            icon: FontAwesomeIcons.layerGroup,
-                            onTap: () => onPageRequested(1),
-                            label: "Sources",
-                            isActive: currentIndex == 1,
-                          ),
-                          const SizedBox(width: 16),
-                          _HeaderCircleAction(
-                            icon: FontAwesomeIcons.gear,
-                            onTap: () => onPageRequested(2),
-                            label: "Settings",
-                            isActive: currentIndex == 2,
-                          ),
-                        ],
-                      ),
-                    ],
+                  child: _HeaderContent(
+                    collectionName: collectionName,
+                    currentIndex: currentIndex,
+                    onPageRequested: onPageRequested,
                   ),
                 ),
               ),
@@ -856,6 +892,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 }
+
 
 class _HeaderCircleAction extends StatelessWidget {
   final IconData icon;

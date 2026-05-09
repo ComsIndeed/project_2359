@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/shortcut_widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class ProjectBackButton extends StatefulWidget {
   final VoidCallback? onPressed;
@@ -48,6 +49,11 @@ class _ProjectBackButtonState extends State<ProjectBackButton> {
 
   @override
   Widget build(BuildContext context) {
+    // Hide back button on desktop
+    if (ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
+      return const SizedBox.shrink();
+    }
+
     final theme = Theme.of(context);
     final buttonColor =
         widget.color ??
