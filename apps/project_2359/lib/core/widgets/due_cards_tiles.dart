@@ -8,7 +8,8 @@ import 'package:project_2359/core/widgets/sensor_reactive_border.dart';
 import 'package:project_2359/features/study_page/study_page.dart';
 
 class HomeDueCardsTile extends StatelessWidget {
-  const HomeDueCardsTile({super.key});
+  final VoidCallback? onTap;
+  const HomeDueCardsTile({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -32,16 +33,17 @@ class HomeDueCardsTile extends StatelessWidget {
             return Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const StudyPage(
-                        title: "Global Review",
-                      ),
-                    ),
-                  );
-                },
+                onTap: onTap ??
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const StudyPage(
+                            title: "Global Review",
+                          ),
+                        ),
+                      );
+                    },
                 borderRadius: BorderRadius.circular(24),
                 child: Ink(
                   width: double.infinity,
@@ -99,7 +101,12 @@ class HomeDueCardsTile extends StatelessWidget {
 
 class CollectionDueCardsTile extends StatelessWidget {
   final String collectionId;
-  const CollectionDueCardsTile({super.key, required this.collectionId});
+  final VoidCallback? onTap;
+  const CollectionDueCardsTile({
+    super.key,
+    required this.collectionId,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -123,17 +130,18 @@ class CollectionDueCardsTile extends StatelessWidget {
             return Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => StudyPage(
-                        collectionId: collectionId,
-                        title: "Collection Review",
-                      ),
-                    ),
-                  );
-                },
+                onTap: onTap ??
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StudyPage(
+                            collectionId: collectionId,
+                            title: "Collection Review",
+                          ),
+                        ),
+                      );
+                    },
                 borderRadius: BorderRadius.circular(24),
                 child: Ink(
                   width: double.infinity,

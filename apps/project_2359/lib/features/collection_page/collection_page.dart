@@ -60,6 +60,7 @@ class _CollectionPageState extends State<CollectionPage> {
   StreamSubscription? _sourcesSub;
   final PageController _pageController = PageController();
   int _currentPageIndex = 0;
+  bool _isStudyingCollection = false;
 
   void _onPageChanged(int index) {
     if (mounted) {
@@ -219,18 +220,18 @@ class _CollectionPageState extends State<CollectionPage> {
     });
 
     final draftService = context.read<AppController>().draftService;
-    _draftSub = draftService.watchDraftsByCollectionId(widget.collectionId).listen((
-      drafts,
-    ) {
-      if (mounted) setState(() => _allDrafts = drafts);
-    });
+    _draftSub = draftService
+        .watchDraftsByCollectionId(widget.collectionId)
+        .listen((drafts) {
+          if (mounted) setState(() => _allDrafts = drafts);
+        });
 
     final sourceService = context.read<SourceService>();
-    _sourcesSub = sourceService.watchSourcesByCollectionId(widget.collectionId).listen((
-      sources,
-    ) {
-      if (mounted) setState(() => _currentSources = sources);
-    });
+    _sourcesSub = sourceService
+        .watchSourcesByCollectionId(widget.collectionId)
+        .listen((sources) {
+          if (mounted) setState(() => _currentSources = sources);
+        });
   }
 
   @override
@@ -248,11 +249,11 @@ class _CollectionPageState extends State<CollectionPage> {
 
       _draftSub?.cancel();
       final draftService = context.read<AppController>().draftService;
-      _draftSub = draftService.watchDraftsByCollectionId(widget.collectionId).listen((
-        drafts,
-      ) {
-        if (mounted) setState(() => _allDrafts = drafts);
-      });
+      _draftSub = draftService
+          .watchDraftsByCollectionId(widget.collectionId)
+          .listen((drafts) {
+            if (mounted) setState(() => _allDrafts = drafts);
+          });
 
       final sourceService = context.read<SourceService>();
       _sourcesSub = sourceService
@@ -286,9 +287,11 @@ class _CollectionPageState extends State<CollectionPage> {
       isNested: widget.isNested,
       masterWidth: 350,
       master: _buildMasterView(),
-      detail: _selectedDeckId != null
-          ? _buildDetailView()
-          : _buildEmptyDetail(),
+      detail: _isStudyingCollection
+          ? _buildCollectionStudyView()
+          : (_selectedDeckId != null
+                ? _buildDetailView()
+                : _buildEmptyDetail()),
     );
   }
 
@@ -345,8 +348,9 @@ class _CollectionPageState extends State<CollectionPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                CardCreationPage(collectionId: widget.collectionId),
+                            builder: (context) => CardCreationPage(
+                              collectionId: widget.collectionId,
+                            ),
                           ),
                         );
                       }
@@ -466,7 +470,9 @@ class _CollectionPageState extends State<CollectionPage> {
             Positioned.fill(
               child: Builder(
                 builder: (context) {
-                  final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
+                  final isDesktop = ResponsiveBreakpoints.of(
+                    context,
+                  ).largerThan(MOBILE);
                   return SpecialBackgroundGenerator(
                     type: SpecialBackgroundType.geometricSquares,
                     seed: GenerationSeed.fromString(collectionName),
@@ -474,13 +480,15 @@ class _CollectionPageState extends State<CollectionPage> {
                     icon: FontAwesomeIcons.layerGroup,
                     showBorder: false,
                     showShadow: false,
-                    backgroundColor: isDesktop ? Theme.of(context).colorScheme.surface : null,
+                    backgroundColor: isDesktop
+                        ? Theme.of(context).colorScheme.surface
+                        : null,
                     borderRadius: 0,
                     isAnimated: !isDesktop,
                     showPattern: !isDesktop,
                     child: const SizedBox.expand(),
                   );
-                }
+                },
               ),
             ),
             NestedScrollView(
@@ -514,8 +522,31 @@ class _CollectionPageState extends State<CollectionPage> {
                     onToggleSelection: _toggleDeckSelection,
                     isSelecting: _isSelecting,
                     selectedDeckId: _selectedDeckId,
+                    onStudyCollectionRequested: (id) {
+                      if (ResponsiveBreakpoints.of(
+                        context,
+                      ).largerThan(MOBILE)) {
+                        setState(() {
+                          _isStudyingCollection = true;
+                          _selectedDeckId = null;
+                        });
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StudyPage(
+                              collectionId: id,
+                              title: "Collection Review",
+                            ),
+                          ),
+                        );
+                      }
+                    },
                     onDeckTap: (id) async {
-                      setState(() => _selectedDeckId = id);
+                      setState(() {
+                        _selectedDeckId = id;
+                        _isStudyingCollection = false;
+                      });
                       final deck = _allDecks.firstWhere((d) => d.id == id);
                       final schedulingService = context
                           .read<AppController>()
@@ -576,8 +607,19 @@ class _CollectionPageState extends State<CollectionPage> {
   Widget _buildDetailView() {
     final deck = _allDecks.firstWhere((d) => d.id == _selectedDeckId);
     return StudyPage(
+      key: ValueKey(deck.id),
       deckId: deck.id,
       title: deck.name,
+      isNested: true,
+      mode: _currentMode,
+    );
+  }
+
+  Widget _buildCollectionStudyView() {
+    return StudyPage(
+      key: ValueKey("collection_${widget.collectionId}"),
+      collectionId: widget.collectionId,
+      title: "Collection Review",
       isNested: true,
       mode: _currentMode,
     );
@@ -910,6 +952,7 @@ class _CardsPage extends StatelessWidget {
   final bool isSelecting;
   final ValueChanged<String>? onDeckTap;
   final String? selectedDeckId;
+  final ValueChanged<String>? onStudyCollectionRequested;
 
   const _CardsPage({
     required this.decks,
@@ -920,6 +963,7 @@ class _CardsPage extends StatelessWidget {
     required this.isSelecting,
     this.onDeckTap,
     this.selectedDeckId,
+    this.onStudyCollectionRequested,
   });
 
   @override
@@ -930,7 +974,12 @@ class _CardsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CollectionDueCardsTile(collectionId: collectionId),
+          CollectionDueCardsTile(
+            collectionId: collectionId,
+            onTap: onStudyCollectionRequested != null
+                ? () => onStudyCollectionRequested!(collectionId)
+                : null,
+          ),
           const SizedBox(height: 16),
           if (drafts.isNotEmpty) ...[
             const _SectionLabel(title: "Resume Projects"),
@@ -1123,7 +1172,10 @@ class _SettingsPage extends StatelessWidget {
   final String collectionId;
   final String collectionName;
 
-  const _SettingsPage({required this.collectionId, required this.collectionName});
+  const _SettingsPage({
+    required this.collectionId,
+    required this.collectionName,
+  });
 
   @override
   Widget build(BuildContext context) {

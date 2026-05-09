@@ -222,7 +222,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 16),
                     _buildSearchBar(),
                     const SizedBox(height: 16),
-                    const HomeDueCardsTile(),
+                    HomeDueCardsTile(onTap: _handleStudyGlobal),
                     const SizedBox(height: 32),
                     PinnedCollectionsSection(
                       stream: _pinnedCollectionsStream,
@@ -263,10 +263,32 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildDetailView() {
+    if (_mainContentType == MainContentType.study) {
+      if (_selectedDeckId != null) {
+        return StudyPage(
+          key: ValueKey(_selectedDeckId),
+          deckId: _selectedDeckId!,
+          title: _selectedDeckName ?? "Study",
+          isNested: true,
+        );
+      } else {
+        return StudyPage(
+          key: ValueKey(_selectedCollectionId ?? 'global_study'),
+          collectionId: _selectedCollectionId,
+          title:
+              _selectedCollectionId != null
+                  ? "Collection Review"
+                  : "Global Review",
+          isNested: true,
+        );
+      }
+    }
+
     if (_selectedCollectionId != null) {
-      final collection = _allCollections.any((f) => f.id == _selectedCollectionId)
-          ? _allCollections.firstWhere((f) => f.id == _selectedCollectionId)
-          : null;
+      final collection =
+          _allCollections.any((f) => f.id == _selectedCollectionId)
+              ? _allCollections.firstWhere((f) => f.id == _selectedCollectionId)
+              : null;
 
       if (collection != null) {
         return CollectionPage(
@@ -280,16 +302,6 @@ class _HomePageState extends State<HomePage> {
 
     if (_mainContentType == MainContentType.settings) {
       return const SettingsPage();
-    }
-
-    // New case: Global study if needed
-    if (_mainContentType == MainContentType.study && _selectedDeckId != null) {
-      return StudyPage(
-        key: ValueKey(_selectedDeckId),
-        deckId: _selectedDeckId!,
-        title: _selectedDeckName ?? "Study",
-        isNested: true,
-      );
     }
 
     return _buildEmptyDetail();
@@ -316,6 +328,23 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  void _handleStudyGlobal() {
+    if (!ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const StudyPage(title: "Global Review"),
+        ),
+      );
+    } else {
+      setState(() {
+        _selectedCollectionId = null;
+        _mainContentType = MainContentType.study;
+        _selectedDeckId = null;
+      });
+    }
   }
 
   void _handleCollectionSelect(String id) {
