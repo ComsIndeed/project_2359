@@ -9,12 +9,14 @@ class ProjectBackButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final Color? color;
   final bool useFullWidth;
+  final bool forceShowOnDesktop;
 
   const ProjectBackButton({
     super.key,
     this.onPressed,
     this.color,
     this.useFullWidth = false,
+    this.forceShowOnDesktop = false,
   });
 
   @override
@@ -49,8 +51,9 @@ class _ProjectBackButtonState extends State<ProjectBackButton> {
 
   @override
   Widget build(BuildContext context) {
-    // Hide back button on desktop
-    if (ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
+    // Hide back button on desktop unless forced
+    if (ResponsiveBreakpoints.of(context).largerThan(MOBILE) &&
+        !widget.forceShowOnDesktop) {
       return const SizedBox.shrink();
     }
 

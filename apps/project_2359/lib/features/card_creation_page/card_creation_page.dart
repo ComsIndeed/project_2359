@@ -365,6 +365,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
                 leadingWidth: ProjectShortcutManager.isShortcutsEnabled ? 120 : 56, // accommodate 'Back' text + shortcut only on desktop
                 leading: ProjectBackButton(
                   color: Colors.white,
+                  forceShowOnDesktop: true,
                   onPressed: () {
                     if (_pdfBytes != null) {
                       setState(() {
