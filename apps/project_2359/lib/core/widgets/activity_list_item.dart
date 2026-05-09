@@ -109,24 +109,21 @@ class _ActivityListItemState extends State<ActivityListItem>
     if (hasBackground) {
       return Padding(
         padding: EdgeInsets.only(bottom: widget.bottomMargin),
-        child: PressableScale(
-          onTap: widget.onTap,
-          child: SpecialBackgroundGenerator(
-            seed: widget.backgroundSeed!,
-            label: widget.backgroundLabel!,
-            icon: widget.backgroundIcon!,
-            style: widget.backgroundStyle,
-            isDisabled: isDisabled,
-            type: widget.backgroundType,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: widget.onTap,
-                customBorder: AppTheme.cardShape,
-                child: Opacity(
-                  opacity: isDisabled ? 0.5 : 1.0,
-                  child: Padding(padding: contentPadding, child: content),
-                ),
+        child: SpecialBackgroundGenerator(
+          seed: widget.backgroundSeed!,
+          label: widget.backgroundLabel!,
+          icon: widget.backgroundIcon!,
+          style: widget.backgroundStyle,
+          isDisabled: isDisabled,
+          type: widget.backgroundType,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: widget.onTap,
+              customBorder: AppTheme.cardShape,
+              child: Opacity(
+                opacity: isDisabled ? 0.5 : 1.0,
+                child: Padding(padding: contentPadding, child: content),
               ),
             ),
           ),
@@ -137,17 +134,14 @@ class _ActivityListItemState extends State<ActivityListItem>
     // Default Card implementation
     return Card(
       margin: EdgeInsets.only(bottom: widget.bottomMargin),
-      child: PressableScale(
-        onTap: widget.onTap,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: widget.onTap,
-            customBorder: AppTheme.cardShape,
-            child: Opacity(
-              opacity: isDisabled ? 0.5 : 1.0,
-              child: Padding(padding: contentPadding, child: content),
-            ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.onTap,
+          customBorder: AppTheme.cardShape,
+          child: Opacity(
+            opacity: isDisabled ? 0.5 : 1.0,
+            child: Padding(padding: contentPadding, child: content),
           ),
         ),
       ),

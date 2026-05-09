@@ -4,8 +4,14 @@ import 'package:project_2359/app_theme.dart';
 class ProjectImportantTile extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
+  final VoidCallback? onTap;
 
-  const ProjectImportantTile({super.key, required this.child, this.padding});
+  const ProjectImportantTile({
+    super.key,
+    required this.child,
+    this.padding,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +24,20 @@ class ProjectImportantTile extends StatelessWidget {
       side: BorderSide(color: borderColor, width: 1.0),
     );
 
-    return Container(
-      width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 92),
-      padding:
-          padding ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: ShapeDecoration(color: backgroundColor, shape: shape),
-      child: child,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Ink(
+          width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 92),
+          padding:
+              padding ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: ShapeDecoration(color: backgroundColor, shape: shape),
+          child: child,
+        ),
+      ),
     );
   }
 }

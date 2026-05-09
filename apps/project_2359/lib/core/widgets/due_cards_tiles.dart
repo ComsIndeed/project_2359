@@ -29,50 +29,36 @@ class HomeDueCardsTile extends StatelessWidget {
             final collectionCounts = collectionSnapshot.data ?? {};
             if (collectionCounts.isEmpty) return const SizedBox.shrink();
 
-            return Container(
-              decoration: ShapeDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.6, // Slightly cloudier
-                ),
-                shape: RoundedSuperellipseBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: DueCardsOverview(
-                      totalDue: cards.length,
-                      items: collectionCounts,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  SensorReactiveBorder(
-                    isCircle: true,
-                    innerColor: theme.colorScheme.surfaceContainerHighest,
-                    shineColor: theme.colorScheme.primary,
-                    baseColor: theme.colorScheme.primary.withValues(alpha: 0.6),
-                    child: IconButton(
-                      padding: const EdgeInsets.all(12),
-                      icon: const FaIcon(
-                        FontAwesomeIcons.play,
-                        size: 14,
-                        color: Colors.white,
+            return Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const StudyPage(
+                        title: "Global Review",
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const StudyPage(
-                              title: "Global Review",
-                            ),
-                          ),
-                        );
-                      },
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(24),
+                child: Ink(
+                  width: double.infinity,
+                  decoration: ShapeDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.6,
+                    ),
+                    shape: RoundedSuperellipseBorder(
+                      borderRadius: BorderRadius.circular(24),
                     ),
                   ),
-                ],
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: DueCardsOverview(
+                    totalDue: cards.length,
+                    items: collectionCounts,
+                  ),
+                ),
               ),
             );
           },
@@ -134,52 +120,38 @@ class CollectionDueCardsTile extends StatelessWidget {
             final deckCounts = deckSnapshot.data ?? {};
             if (deckCounts.isEmpty) return const SizedBox.shrink();
 
-            return Container(
-              decoration: ShapeDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.6, // Slightly cloudier
-                ),
-                shape: RoundedSuperellipseBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: DueCardsOverview(
-                      totalDue: cards.length,
-                      items: deckCounts,
-                      isCollectionPage: true,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  SensorReactiveBorder(
-                    isCircle: true,
-                    innerColor: theme.colorScheme.surfaceContainerHighest,
-                    shineColor: theme.colorScheme.primary,
-                    baseColor: theme.colorScheme.primary.withValues(alpha: 0.6),
-                    child: IconButton(
-                      padding: const EdgeInsets.all(12),
-                      icon: const FaIcon(
-                        FontAwesomeIcons.play,
-                        size: 14,
-                        color: Colors.white,
+            return Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => StudyPage(
+                        collectionId: collectionId,
+                        title: "Collection Review",
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => StudyPage(
-                              collectionId: collectionId,
-                              title: "Collection Review",
-                            ),
-                          ),
-                        );
-                      },
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(24),
+                child: Ink(
+                  width: double.infinity,
+                  decoration: ShapeDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.6,
+                    ),
+                    shape: RoundedSuperellipseBorder(
+                      borderRadius: BorderRadius.circular(24),
                     ),
                   ),
-                ],
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: DueCardsOverview(
+                    totalDue: cards.length,
+                    items: deckCounts,
+                    isCollectionPage: true,
+                  ),
+                ),
               ),
             );
           },

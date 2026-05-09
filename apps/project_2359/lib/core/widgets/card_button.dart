@@ -111,61 +111,57 @@ class CardButton extends StatelessWidget {
     final effectiveSeed =
         backgroundGenerator ?? GenerationSeed.fromString("idle");
 
-    return PressableScale(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        decoration: BoxDecoration(
-          color: cs.surface.withValues(alpha: hasBackground ? 0.0 : 0.6),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color:
-                (hasBackground
-                        ? Colors.transparent
-                        : Colors.white.withValues(alpha: 0.08))
-                    .withValues(alpha: isDisabled ? 0.04 : null),
-            width: 1,
-          ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      decoration: BoxDecoration(
+        color: cs.surface.withValues(alpha: hasBackground ? 0.0 : 0.6),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color:
+              (hasBackground
+                      ? Colors.transparent
+                      : Colors.white.withValues(alpha: 0.08))
+                  .withValues(alpha: isDisabled ? 0.04 : null),
+          width: 1,
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Stack(
-            children: [
-              // Background Layer
-              Positioned.fill(
-                child: AnimatedOpacity(
-                  opacity: hasBackground ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeInOut,
-                  child: SpecialBackgroundGenerator(
-                    seed: effectiveSeed,
-                    label: label,
-                    icon: icon,
-                    subLabel: subLabel,
-                    style: style,
-                    isDisabled: isDisabled,
-                    type: backgroundType,
-                    showBorder: false,
-                    child: const SizedBox.expand(),
-                  ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            // Background Layer
+            Positioned.fill(
+              child: AnimatedOpacity(
+                opacity: hasBackground ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeInOut,
+                child: SpecialBackgroundGenerator(
+                  seed: effectiveSeed,
+                  label: label,
+                  icon: icon,
+                  subLabel: subLabel,
+                  style: style,
+                  isDisabled: isDisabled,
+                  type: backgroundType,
+                  showBorder: false,
+                  child: const SizedBox.expand(),
                 ),
               ),
-              // Content Layer
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: onTap,
-                  onLongPress: onLongPress,
-                  customBorder: AppTheme.cardShape,
-                  child: Opacity(
-                    opacity: isDisabled ? 0.4 : 1.0,
-                    child: contentWidget,
-                  ),
+            ),
+            // Content Layer
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                onLongPress: onLongPress,
+                customBorder: AppTheme.cardShape,
+                child: Opacity(
+                  opacity: isDisabled ? 0.4 : 1.0,
+                  child: contentWidget,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

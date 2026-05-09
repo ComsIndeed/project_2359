@@ -41,10 +41,10 @@ class ProjectCardTile extends StatelessWidget {
         : (backgroundColor ?? cs.surface);
 
     final Color effectiveBorderColor = isSelected
-        ? cs.primary
+        ? cs.primary.withValues(alpha: 0.7)
         : cs.onSurface.withValues(alpha: 0.1);
 
-    final double effectiveBorderWidth = isSelected ? 3.0 : 1.0;
+    final double effectiveBorderWidth = isSelected ? 1.5 : 1.0;
 
     // We cast to OutlinedBorder to use copyWith(side: ...)
     // AppTheme.cardShape is a ShapeBorder but RoundedSuperellipseBorder is an OutlinedBorder.
@@ -56,57 +56,61 @@ class ProjectCardTile extends StatelessWidget {
           ),
         );
 
-    return PressableScale(
-      onTap: onTap,
-      onLongPress: onLongTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        decoration: ShapeDecoration(color: effectiveBg, shape: effectiveShape),
-        clipBehavior: Clip.antiAlias,
-        child: Container(
-          constraints: BoxConstraints(
-            minHeight: minHeight ?? (isCompact ? 68 : 92),
-          ),
-          padding:
-              padding ??
-              EdgeInsets.symmetric(
-                horizontal: isCompact ? 16 : 20,
-                vertical: isCompact ? 10 : 16,
-              ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (leading != null) ...[leading!, const SizedBox(width: 16)],
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (title != null)
-                      DefaultTextStyle(
-                        style: theme.textTheme.titleMedium!.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 17,
-                          letterSpacing: -0.3,
-                          color: cs.onSurface.withValues(alpha: 0.9),
-                        ),
-                        child: title!,
-                      ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 3),
-                      DefaultTextStyle(
-                        style: theme.textTheme.bodyMedium!.copyWith(
-                          color: cs.onSurface.withValues(alpha: 0.4),
-                        ),
-                        child: subtitle!,
-                      ),
-                    ],
-                  ],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongTap,
+        borderRadius: BorderRadius.circular(24),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          decoration: ShapeDecoration(color: effectiveBg, shape: effectiveShape),
+          clipBehavior: Clip.antiAlias,
+          child: Container(
+            constraints: BoxConstraints(
+              minHeight: minHeight ?? (isCompact ? 68 : 92),
+            ),
+            padding:
+                padding ??
+                EdgeInsets.symmetric(
+                  horizontal: isCompact ? 16 : 20,
+                  vertical: isCompact ? 10 : 16,
                 ),
-              ),
-              if (trailing != null) ...[const SizedBox(width: 12), trailing!],
-            ],
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (leading != null) ...[leading!, const SizedBox(width: 16)],
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (title != null)
+                        DefaultTextStyle(
+                          style: theme.textTheme.titleMedium!.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                            letterSpacing: -0.3,
+                            color: cs.onSurface.withValues(alpha: 0.9),
+                          ),
+                          child: title!,
+                        ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 3),
+                        DefaultTextStyle(
+                          style: theme.textTheme.bodyMedium!.copyWith(
+                            color: cs.onSurface.withValues(alpha: 0.4),
+                          ),
+                          child: subtitle!,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (trailing != null) ...[const SizedBox(width: 12), trailing!],
+              ],
+            ),
           ),
         ),
       ),

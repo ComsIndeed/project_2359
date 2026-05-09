@@ -338,22 +338,14 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildSearchBar() {
     final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
-        ),
-      ),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
-        decoration: InputDecoration(
-          hintText: "Search collections...",
-          border: InputBorder.none,
-          icon: FaIcon(
+    return TextField(
+      controller: _searchController,
+      onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+      decoration: InputDecoration(
+        hintText: "Search collections...",
+        prefixIcon: Container(
+          padding: const EdgeInsets.all(12),
+          child: FaIcon(
             FontAwesomeIcons.magnifyingGlass,
             size: 14,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
