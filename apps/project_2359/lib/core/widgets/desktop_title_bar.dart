@@ -5,6 +5,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
 import 'package:project_2359/core/utils/navigator_utils.dart';
+import 'package:project_2359/core/widgets/desktop_title_bar_controller.dart';
+import 'package:provider/provider.dart';
 
 class DesktopTitleBar extends StatelessWidget {
   const DesktopTitleBar({super.key});
@@ -17,20 +19,48 @@ class DesktopTitleBar extends StatelessWidget {
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final controller = context.watch<DesktopTitleBarController>();
 
-    return Container(
+    final canPop = rootNavigatorKey.currentState?.canPop() ?? false;
+    final showBackButton = !controller.hideBack && (controller.onBack != null || canPop);
+    final onBack = controller.onBack ?? () => rootNavigatorKey.currentState?.pop();
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       height: 40,
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.8),
+        color: controller.isTransparent
+            ? Colors.transparent
+            : theme.colorScheme.surface.withValues(alpha: 0.8),
         border: Border(
           bottom: BorderSide(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+            color: controller.isTransparent
+                ? Colors.transparent
+                : theme.colorScheme.onSurface.withValues(alpha: 0.05),
           ),
         ),
       ),
       child: Row(
         children: [
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
+          // Animated Back Button
+          AnimatedSize(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            child: showBackButton
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _TitleBarAction(
+                        icon: Icons.arrow_back,
+                        onTap: onBack,
+                        tooltip: "Back",
+                      ),
+                      const SizedBox(width: 4),
+                    ],
+                  )
+                : const SizedBox.shrink(),
+          ),
           Image.asset(
             isDark
                 ? 'assets/images/app_icon_light_nobg.png'
@@ -46,7 +76,26 @@ class DesktopTitleBar extends StatelessWidget {
               color: theme.colorScheme.onSurface.withValues(alpha: 0.95),
             ),
           ),
-          const Expanded(child: DragToMoveArea(child: SizedBox.expand())),
+          // Centered Title
+          Expanded(
+            child: DragToMoveArea(
+              child: Center(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: controller.centeredTitle != null
+                      ? Text(
+                          controller.centeredTitle!,
+                          key: ValueKey(controller.centeredTitle),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ),
+            ),
+          ),
           // Settings Action
           _TitleBarAction(
             icon: FontAwesomeIcons.gear,

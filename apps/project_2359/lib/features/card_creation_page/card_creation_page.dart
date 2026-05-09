@@ -17,6 +17,7 @@ import 'package:project_2359/features/card_creation_page/card_creation_toolbar_c
 import 'package:project_2359/features/card_creation_page/card_creation_pdf_view.dart';
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
+import 'package:project_2359/core/widgets/desktop_title_bar_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:uuid/uuid.dart';
@@ -112,6 +113,45 @@ class _CardCreationPageState extends State<CardCreationPage> {
     AppLogger.info(
       'CardCreationPage: opened draft $_currentDraftId of deck $_targetDeckId as ${widget.draftId != null ? 'RESUMING' : 'NEW'}',
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateTitleBar();
+    });
+  }
+
+  void _updateTitleBar() {
+    if (!mounted) return;
+    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
+    if (!isDesktop) return;
+
+    final titleBar = context.read<DesktopTitleBarController>();
+    titleBar.setCenteredTitle(_pdfTitle ?? 'Card Creation');
+    
+    // "no top bar" look - make it transparent
+    titleBar.setIsTransparent(true);
+    
+    // Always show back button so user can exit list
+    titleBar.setHideBack(false);
+    titleBar.setOnBack(_handleBack);
+  }
+
+  void _handleBack() {
+    if (_pdfBytes != null) {
+      setState(() {
+        _controller = PdfViewerController();
+        _pdfBytes = null;
+        _pdfTitle = null;
+        _currentSourceId = null;
+        _selectionNotifier.value = null;
+        _selectedTextNotifier.value = null;
+        _containerController.setVisible(true);
+        _toolbarController.setMode(CardCreationToolbarMode.sourcesList);
+      });
+      _updateTitleBar();
+    } else {
+      context.read<DesktopTitleBarController>().reset();
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -236,6 +276,13 @@ class _CardCreationPageState extends State<CardCreationPage> {
     _selectionNotifier.dispose();
     _selectedTextNotifier.dispose();
     _toolbarController.dispose();
+    // Use addPostFrameCallback or a microtask to reset title bar because dispose is called during build/navigation
+    Future.microtask(() {
+      if (mounted) {
+        final titleBar = context.read<DesktopTitleBarController>();
+        titleBar.reset();
+      }
+    });
     super.dispose();
   }
 
@@ -297,6 +344,7 @@ class _CardCreationPageState extends State<CardCreationPage> {
           _currentSourceId = source.id;
           _containerController.setVisible(true);
         });
+        _updateTitleBar();
       }
     } catch (e) {
       if (mounted) {
@@ -343,72 +391,55 @@ class _CardCreationPageState extends State<CardCreationPage> {
               resizeToAvoidBottomInset: false,
               backgroundColor: Colors.black,
               extendBodyBehindAppBar: true,
-              appBar: AppBar(
-                elevation: 0,
-                backgroundColor: Colors.transparent,
-                centerTitle: true,
-                title: Text(
-                  _pdfTitle ?? 'Create Card',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Colors.white,
-                  ),
-                ),
-                flexibleSpace: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.25),
-                            width: 1,
-                          ),
-                        ),
-                        color: Colors.black.withValues(alpha: 0.6),
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.7),
-                            Colors.black.withValues(alpha: 0.7),
-                          ],
+              appBar: isDesktop
+                  ? null
+                  : AppBar(
+                      elevation: 0,
+                      backgroundColor: Colors.transparent,
+                      centerTitle: true,
+                      title: Text(
+                        _pdfTitle ?? 'Create Card',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Colors.white,
                         ),
                       ),
+                      flexibleSpace: ClipRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface.withValues(alpha: 0.25),
+                                  width: 1,
+                                ),
+                              ),
+                              color: Colors.black.withValues(alpha: 0.6),
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.black.withValues(alpha: 0.7),
+                                  Colors.black.withValues(alpha: 0.7),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      leadingWidth: ProjectShortcutManager.isShortcutsEnabled
+                          ? 120
+                          : 56, // accommodate 'Back' text + shortcut only on desktop
+                      leading: ProjectBackButton(
+                        color: Colors.white,
+                        forceShowOnDesktop: true,
+                        onPressed: _handleBack,
+                      ),
                     ),
-                  ),
-                ),
-                leadingWidth: ProjectShortcutManager.isShortcutsEnabled
-                    ? 120
-                    : 56, // accommodate 'Back' text + shortcut only on desktop
-                leading: ProjectBackButton(
-                  color: Colors.white,
-                  forceShowOnDesktop: true,
-                  onPressed: () {
-                    if (_pdfBytes != null) {
-                      setState(() {
-                        _controller = PdfViewerController();
-                        _pdfBytes = null;
-                        _pdfTitle = null;
-                        _currentSourceId = null;
-                        _selectionNotifier.value = null;
-                        _selectedTextNotifier.value = null;
-                        _containerController.setVisible(
-                          true,
-                        ); // Don't hide, stay in list mode
-                        _toolbarController.setMode(
-                          CardCreationToolbarMode.sourcesList,
-                        );
-                      });
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-              ),
               body: CardCreationPdfView(
                 pdfBytes: _pdfBytes,
                 pdfKey: _pdfKey,

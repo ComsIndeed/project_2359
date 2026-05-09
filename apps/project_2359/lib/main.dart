@@ -22,6 +22,7 @@ import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:project_2359/core/widgets/desktop_title_bar.dart';
 import 'package:project_2359/core/utils/navigator_utils.dart';
+import 'package:project_2359/core/widgets/desktop_title_bar_controller.dart';
 import 'dart:io';
 
 Future<void> main() async {
@@ -77,6 +78,7 @@ Future<void> main() async {
           value: studyDatabaseService,
         ),
         ChangeNotifierProvider.value(value: appController),
+        ChangeNotifierProvider(create: (_) => DesktopTitleBarController()),
       ],
       child: MultiBlocProvider(
         providers: [
