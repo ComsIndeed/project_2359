@@ -40,7 +40,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
     // Disable staggered animation after initial render
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        Future.delayed(800.ms, () {
+        Future.delayed(400.ms, () {
           if (mounted) {
             setState(() {
               _shouldAnimate = false;
@@ -70,7 +70,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
             CardCreationToolbarMode.sourcesList;
 
         final listContent = AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 150),
           child: isPdfMode
               ? _buildPdfList(
                   cs,
@@ -132,7 +132,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
             if (widget.fillHeight)
               Expanded(
                 child: AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 150),
                   curve: Curves.easeInOut,
                   child: listContent,
                 ),
@@ -141,7 +141,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 540),
                 child: AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 150),
                   curve: Curves.easeInOut,
                   child: listContent,
                 ),
@@ -257,8 +257,8 @@ class _MenuModeContentState extends State<MenuModeContent> {
             if (!_shouldAnimate) return tile;
 
             return tile
-                .animate(delay: (index * 50).ms)
-                .fadeIn(duration: 400.ms)
+                .animate(delay: (index * 25).ms)
+                .fadeIn(duration: 200.ms)
                 .slideX(begin: 0.1, curve: Curves.easeOutCubic);
           },
         );
@@ -325,8 +325,8 @@ class _MenuModeContentState extends State<MenuModeContent> {
             if (!_shouldAnimate) return tile;
 
             return tile
-                .animate(delay: (index * 50).ms)
-                .fadeIn(duration: 400.ms)
+                .animate(delay: (index * 25).ms)
+                .fadeIn(duration: 200.ms)
                 .slideX(begin: 0.1, curve: Curves.easeOutCubic);
           },
         );

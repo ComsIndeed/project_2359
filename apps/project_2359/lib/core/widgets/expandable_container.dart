@@ -24,7 +24,7 @@ class ExpandableContainer extends StatefulWidget {
   const ExpandableContainer({
     super.key,
     required this.child,
-    this.duration = const Duration(milliseconds: 400),
+    this.duration = const Duration(milliseconds: 200),
     this.curve = Curves.easeInOutCubicEmphasized,
     required this.builder,
     this.controller,

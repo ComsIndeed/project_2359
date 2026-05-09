@@ -136,7 +136,7 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
                           ),
                           icon: const Icon(Icons.close),
                         ),
-                      ).animate().scale().fadeIn(),
+                      ).animate().scale(duration: 150.ms).fadeIn(duration: 150.ms),
                     ),
                   Padding(
                     padding:
@@ -156,7 +156,7 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
                               right: 16.0,
                             ),
                             child: _buildTabBar(context),
-                          ).animate().fadeIn().slideY(begin: -0.1),
+                          ).animate().fadeIn(duration: 150.ms).slideY(begin: -0.1, duration: 150.ms),
                       ],
                     ),
                   ),
@@ -211,7 +211,7 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
                 CardCreationToolbarMode.imageOcclusion,
               ),
               icon: const ImageOcclusionIcon(),
-            ).animate().fadeIn().scale(delay: 100.ms),
+            ).animate().fadeIn().scale(delay: 50.ms),
           if (hasSelection ||
               widget.toolbarController.stageController.isActive('card_action'))
             Expanded(child: _buildTextButtonContent())
@@ -234,7 +234,7 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
               }
             },
             icon: const FaIcon(FontAwesomeIcons.barsStaggered),
-          ).animate().fadeIn().scale(delay: 200.ms),
+          ).animate().fadeIn().scale(delay: 100.ms),
         ],
       ),
     );
@@ -249,7 +249,7 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
       id: 'card_action',
       alternate: _buildFeedbackWidget(cs),
       child: AnimatedSwitcher(
-        duration: 400.ms,
+        duration: 200.ms,
         switchInCurve: Curves.easeOutCubic,
         switchOutCurve: Curves.easeInCubic,
         transitionBuilder: (child, animation) {
@@ -313,7 +313,7 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
         children: [
           // Sliding Highlight
           AnimatedAlign(
-            duration: 400.ms,
+            duration: 200.ms,
             curve: Curves.easeOutCubic,
             alignment: Alignment(
               currentIndex == 0

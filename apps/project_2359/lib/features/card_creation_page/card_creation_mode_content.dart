@@ -158,7 +158,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
               ),
             ),
           ],
-        ).animate().fadeIn(duration: 300.ms).slideX(begin: -0.1),
+        ).animate().fadeIn(duration: 150.ms).slideX(begin: -0.1),
 
         const SizedBox(height: 8),
 
@@ -217,7 +217,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
               },
             )
             .animate()
-            .fadeIn(delay: 100.ms)
+            .fadeIn(delay: 50.ms)
             .scale(begin: const Offset(0.98, 0.98)),
 
         const SizedBox(height: 20),
@@ -241,7 +241,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
               );
             }).toList(),
           ),
-        ).animate().fadeIn(delay: 150.ms).slideX(begin: 0.1),
+        ).animate().fadeIn(delay: 75.ms).slideX(begin: 0.1),
 
         const SizedBox(height: 16),
 
@@ -257,7 +257,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
               key: LogicalKeyboardKey.keyT,
               modifiers: [ShortcutModifier.alt],
             ),
-          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1)
+          ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1)
         else ...[
           // Front Field
           _buildTextField(
@@ -270,7 +270,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
               key: LogicalKeyboardKey.keyF,
               modifiers: [ShortcutModifier.alt],
             ),
-          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
+          ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1),
 
           const SizedBox(height: 8),
 
@@ -285,7 +285,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
               key: LogicalKeyboardKey.keyB,
               modifiers: [ShortcutModifier.alt],
             ),
-          ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
+          ).animate().fadeIn(delay: 150.ms).slideY(begin: 0.1),
         ],
 
         const SizedBox(height: 8),
@@ -391,7 +391,7 @@ class _CardCreationModeContentState extends State<CardCreationModeContent> {
               ),
             ),
           ],
-        ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
+        ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2),
       ],
     );
   }
