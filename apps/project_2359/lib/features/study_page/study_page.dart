@@ -6,7 +6,7 @@ import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/app_controller.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
-import 'package:project_2359/features/study_page/flippable_card.dart';
+import 'package:project_2359/features/study_page/widgets/study_card.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
 import 'package:project_2359/core/services/continuous_session_controller.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
@@ -37,7 +37,7 @@ class StudyPage extends StatefulWidget {
 
 class _StudyPageState extends State<StudyPage> {
   int _currentIndex = 0;
-  bool _isFlipped = false;
+  bool _isAnswerRevealed = false;
   bool _isTransitioning = false;
   List<CardItem>? _cards;
   ContinuousSessionController? _continuousController;
@@ -144,7 +144,7 @@ class _StudyPageState extends State<StudyPage> {
   void _flipCard() {
     if (_currentCard == null) return;
     setState(() {
-      _isFlipped = !_isFlipped;
+      _isAnswerRevealed = !_isAnswerRevealed;
     });
   }
 
@@ -190,7 +190,7 @@ class _StudyPageState extends State<StudyPage> {
         if (_currentIndex < _cards!.length - 1) {
           setState(() {
             _currentIndex++;
-            _isFlipped = false;
+            _isAnswerRevealed = false;
             _isTransitioning = false;
           });
           _swipeKey.currentState?.resetImmediate();
@@ -207,7 +207,7 @@ class _StudyPageState extends State<StudyPage> {
       _continuousController!.submitRating(rating);
       if (mounted) {
         setState(() {
-          _isFlipped = false;
+          _isAnswerRevealed = false;
           _isTransitioning = false;
         });
         _swipeKey.currentState?.resetImmediate();
@@ -291,10 +291,10 @@ class _StudyPageState extends State<StudyPage> {
         if (event is KeyDownEvent) {
           if (event.logicalKey == LogicalKeyboardKey.space ||
               event.logicalKey == LogicalKeyboardKey.enter) {
-            if (!_isFlipped) {
+            if (!_isAnswerRevealed) {
               _flipCard();
             }
-          } else if (_isFlipped) {
+          } else if (_isAnswerRevealed) {
             if (event.logicalKey == LogicalKeyboardKey.digit1) {
               _rateCard(fsrs.Rating.again);
             }
@@ -364,7 +364,7 @@ class _StudyPageState extends State<StudyPage> {
             // Immersive Card Stack (Now at the very top of the Z-order)
             _SwipeableCardStack(
               key: _swipeKey,
-              isFlipped: _isFlipped,
+              isAnswerRevealed: _isAnswerRevealed,
               isTransitioning: _isTransitioning,
               onSwipeLeft: () => _rateCard(fsrs.Rating.again),
               onSwipeRight: () => _rateCard(fsrs.Rating.good),
@@ -372,9 +372,9 @@ class _StudyPageState extends State<StudyPage> {
               onSwipeDown: () => _rateCard(fsrs.Rating.hard),
               backgroundCard: _nextCard == null
                   ? null
-                  : FlippableCard(
+                  : StudyCard(
                       key: ValueKey('bg_${_nextCard!.id}'),
-                      isFlipped: false,
+                      isAnswerRevealed: false,
                       frontText: _nextCard!.frontText ?? '',
                       backText: _nextCard!.backText ?? '',
                       onTap: () {},
@@ -386,7 +386,7 @@ class _StudyPageState extends State<StudyPage> {
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
-                  child: !_isFlipped
+                  child: !_isAnswerRevealed
                       ? _FlipButton(label: 'Show Answer', onPressed: _flipCard)
                       : Row(
                           children: [
@@ -421,9 +421,9 @@ class _StudyPageState extends State<StudyPage> {
                         ),
                 ),
               ),
-              child: FlippableCard(
+              child: StudyCard(
                 key: ValueKey('top_${card.id}'),
-                isFlipped: _isFlipped,
+                isAnswerRevealed: _isAnswerRevealed,
                 frontText: card.frontText ?? '',
                 backText: card.backText ?? '',
                 onTap: _flipCard,
@@ -536,7 +536,7 @@ class _SwipeableCardStack extends StatefulWidget {
   final Widget child;
   final Widget? backgroundCard;
   final Widget? overlay;
-  final bool isFlipped;
+  final bool isAnswerRevealed;
   final bool isTransitioning;
   final VoidCallback onSwipeLeft;
   final VoidCallback onSwipeRight;
@@ -548,7 +548,7 @@ class _SwipeableCardStack extends StatefulWidget {
     required this.child,
     this.backgroundCard,
     this.overlay,
-    required this.isFlipped,
+    required this.isAnswerRevealed,
     required this.isTransitioning,
     required this.onSwipeLeft,
     required this.onSwipeRight,
@@ -586,7 +586,7 @@ class _SwipeableCardStackState extends State<_SwipeableCardStack>
   }
 
   void _onPanStart(DragStartDetails details) {
-    if (!widget.isFlipped || widget.isTransitioning) return;
+    if (!widget.isAnswerRevealed || widget.isTransitioning) return;
 
     final RenderBox? box = context.findRenderObject() as RenderBox?;
     if (box != null) {
@@ -602,7 +602,7 @@ class _SwipeableCardStackState extends State<_SwipeableCardStack>
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    if (!widget.isFlipped || widget.isTransitioning) return;
+    if (!widget.isAnswerRevealed || widget.isTransitioning) return;
     setState(() {
       _offset += details.delta;
       _currentPosition = details.globalPosition;
@@ -613,7 +613,7 @@ class _SwipeableCardStackState extends State<_SwipeableCardStack>
   }
 
   void _onPanEnd(DragEndDetails details) {
-    if (!widget.isFlipped || widget.isTransitioning) return;
+    if (!widget.isAnswerRevealed || widget.isTransitioning) return;
 
     final velocity = details.velocity.pixelsPerSecond;
 
@@ -736,6 +736,8 @@ class _SwipeableCardStackState extends State<_SwipeableCardStack>
           activeRating = fsrs.Rating.hard;
         }
 
+        final isDesktop = constraints.maxWidth > 700;
+        
         return Stack(
           clipBehavior: Clip.none,
           children: [
@@ -775,12 +777,12 @@ class _SwipeableCardStackState extends State<_SwipeableCardStack>
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: 400,
-                    maxHeight: 520,
+                  constraints: BoxConstraints(
+                    maxWidth: isDesktop ? 800 : 450,
+                    maxHeight: isDesktop ? 500 : 650,
                   ),
                   child: AspectRatio(
-                    aspectRatio: 0.72,
+                    aspectRatio: isDesktop ? 1.6 : 0.75,
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
