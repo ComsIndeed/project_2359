@@ -19,6 +19,7 @@ class StudyPage extends StatefulWidget {
   final String title;
   final bool isNested;
   final StudySessionMode mode;
+  final VoidCallback? onBack;
 
   const StudyPage({
     super.key,
@@ -27,6 +28,7 @@ class StudyPage extends StatefulWidget {
     required this.title,
     this.isNested = false,
     this.mode = StudySessionMode.spaced,
+    this.onBack,
   });
 
   @override
@@ -194,7 +196,11 @@ class _StudyPageState extends State<StudyPage> {
           _swipeKey.currentState?.resetImmediate();
           _updatePreviews();
         } else {
-          Navigator.pop(context);
+          if (widget.onBack != null) {
+            widget.onBack!();
+          } else {
+            Navigator.pop(context);
+          }
         }
       }
     } else {
@@ -234,11 +240,8 @@ class _StudyPageState extends State<StudyPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder:
-          (context) => SourcePreviewSheet(
-            pdfBytes: sourceBlob.bytes,
-            citation: citation,
-          ),
+      builder: (context) =>
+          SourcePreviewSheet(pdfBytes: sourceBlob.bytes, citation: citation),
     );
   }
 
@@ -266,7 +269,13 @@ class _StudyPageState extends State<StudyPage> {
               Text("Deck Finished!", style: theme.textTheme.headlineSmall),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  if (widget.onBack != null) {
+                    widget.onBack!();
+                  } else {
+                    Navigator.pop(context);
+                  }
+                },
                 child: const Text("Back to Collection"),
               ),
             ],
@@ -311,7 +320,10 @@ class _StudyPageState extends State<StudyPage> {
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     children: [
-                      const ProjectBackButton(),
+                      ProjectBackButton(
+                        onPressed:
+                            widget.onBack ?? () => Navigator.pop(context),
+                      ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
@@ -373,10 +385,9 @@ class _StudyPageState extends State<StudyPage> {
                       frontText: _nextCard!.frontText ?? '',
                       backText: _nextCard!.backText ?? '',
                       onTap: () {},
-                      onViewSource:
-                          _nextCard!.citationId != null
-                              ? _onViewSourcePressed
-                              : null,
+                      onViewSource: _nextCard!.citationId != null
+                          ? _onViewSourcePressed
+                          : null,
                     ),
               overlay: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
@@ -423,8 +434,9 @@ class _StudyPageState extends State<StudyPage> {
                 frontText: card.frontText ?? '',
                 backText: card.backText ?? '',
                 onTap: _flipCard,
-                onViewSource:
-                    card.citationId != null ? _onViewSourcePressed : null,
+                onViewSource: card.citationId != null
+                    ? _onViewSourcePressed
+                    : null,
               ),
             ),
           ],

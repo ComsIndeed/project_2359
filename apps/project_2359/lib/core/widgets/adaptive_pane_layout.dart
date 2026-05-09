@@ -72,21 +72,40 @@ class AdaptivePaneLayout extends StatelessWidget {
           
           // Detail Panel
           Expanded(
-            child: detail != null
-                ? (!wrapDetail
-                    ? detail!
-                    : Container(
-                        clipBehavior: Clip.antiAlias,
-                        decoration: panelDecoration,
-                        child: detail,
-                      ))
-                : (emptyDetail != null
-                    ? Container(
-                        clipBehavior: Clip.antiAlias,
-                        decoration: panelDecoration,
-                        child: emptyDetail,
-                      )
-                    : const SizedBox.shrink()),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 400),
+              switchInCurve: Curves.easeOutQuart,
+              switchOutCurve: Curves.easeInQuart,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.02, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: detail != null
+                  ? (!wrapDetail
+                      ? SizedBox.expand(key: ValueKey(detail.hashCode), child: detail!)
+                      : Container(
+                          key: ValueKey(detail.hashCode),
+                          clipBehavior: Clip.antiAlias,
+                          decoration: panelDecoration,
+                          child: detail,
+                        ))
+                  : (emptyDetail != null
+                      ? Container(
+                          key: ValueKey('empty_detail'),
+                          clipBehavior: Clip.antiAlias,
+                          decoration: panelDecoration,
+                          child: emptyDetail,
+                        )
+                      : const SizedBox.shrink(key: ValueKey('none'))),
+            ),
           ),
         ],
       ),

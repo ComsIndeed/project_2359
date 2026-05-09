@@ -35,12 +35,14 @@ class CollectionPage extends StatefulWidget {
   final String collectionId;
   final String initialCollectionName;
   final bool isNested;
+  final Function(String deckId, String deckName)? onDeckSelected;
 
   const CollectionPage({
     super.key,
     required this.collectionId,
     required this.initialCollectionName,
     this.isNested = false,
+    this.onDeckSelected,
   });
 
   @override
@@ -543,11 +545,27 @@ class _CollectionPageState extends State<CollectionPage> {
                       }
                     },
                     onDeckTap: (id) async {
+                      final deck = _allDecks.firstWhere((d) => d.id == id);
+
+                      if (ResponsiveBreakpoints.of(
+                        context,
+                      ).largerThan(MOBILE)) {
+                        if (widget.onDeckSelected != null) {
+                          widget.onDeckSelected!(id, deck.name);
+                        } else {
+                          setState(() {
+                            _selectedDeckId = id;
+                            _isStudyingCollection = false;
+                          });
+                        }
+                        return;
+                      }
+
                       setState(() {
                         _selectedDeckId = id;
                         _isStudyingCollection = false;
                       });
-                      final deck = _allDecks.firstWhere((d) => d.id == id);
+
                       final schedulingService = context
                           .read<AppController>()
                           .schedulingService;
