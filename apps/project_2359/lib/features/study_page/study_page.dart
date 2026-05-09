@@ -357,14 +357,7 @@ class _StudyPageState extends State<StudyPage> {
                     ],
                   ),
                 ),
-                if (widget.mode == StudySessionMode.spaced)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: LinearProgressIndicator(
-                      value: (_currentIndex + 1) / _cards!.length,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
+
               ],
             ),
 
