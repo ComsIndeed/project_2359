@@ -136,7 +136,7 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
                           ),
                           icon: const Icon(Icons.close),
                         ),
-                      ).animate().scale(duration: 150.ms).fadeIn(duration: 150.ms),
+                      ).animate().scale(duration: 100.ms).fadeIn(duration: 100.ms),
                     ),
                   Padding(
                     padding:
@@ -156,7 +156,7 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
                               right: 16.0,
                             ),
                             child: _buildTabBar(context),
-                          ).animate().fadeIn(duration: 150.ms).slideY(begin: -0.1, duration: 150.ms),
+                          ).animate().fadeIn(duration: 100.ms).slideY(begin: -0.05, duration: 100.ms),
                       ],
                     ),
                   ),
