@@ -14,6 +14,7 @@ class ProjectCardTile extends StatelessWidget {
   final double? minHeight;
   final bool isSelected;
   final bool isCompact;
+  final bool isCollapsed;
 
   const ProjectCardTile({
     super.key,
@@ -28,6 +29,7 @@ class ProjectCardTile extends StatelessWidget {
     this.minHeight,
     this.isSelected = false,
     this.isCompact = false,
+    this.isCollapsed = false,
   });
 
   @override
@@ -71,43 +73,58 @@ class ProjectCardTile extends StatelessWidget {
           padding:
               padding ??
               EdgeInsets.symmetric(
-                horizontal: isCompact ? 16 : 20,
+                horizontal: isCollapsed ? 0 : (isCompact ? 16 : 20),
                 vertical: isCompact ? 10 : 16,
               ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (leading != null) ...[leading!, const SizedBox(width: 16)],
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          child: isCollapsed
+              ? Center(
+                  child: leading != null
+                      ? Transform.scale(
+                          scale: 0.85,
+                          child: leading,
+                        )
+                      : const SizedBox.shrink(),
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    if (title != null)
-                      DefaultTextStyle(
-                        style: theme.textTheme.titleMedium!.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 17,
-                          letterSpacing: -0.3,
-                          color: cs.onSurface.withValues(alpha: 0.9),
-                        ),
-                        child: title!,
+                    if (leading != null) ...[
+                      leading!,
+                      const SizedBox(width: 16),
+                    ],
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (title != null)
+                            DefaultTextStyle(
+                              style: theme.textTheme.titleMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17,
+                                letterSpacing: -0.3,
+                                color: cs.onSurface.withValues(alpha: 0.9),
+                              ),
+                              child: title!,
+                            ),
+                          if (subtitle != null) ...[
+                            const SizedBox(height: 3),
+                            DefaultTextStyle(
+                              style: theme.textTheme.bodyMedium!.copyWith(
+                                color: cs.onSurface.withValues(alpha: 0.4),
+                              ),
+                              child: subtitle!,
+                            ),
+                          ],
+                        ],
                       ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 3),
-                      DefaultTextStyle(
-                        style: theme.textTheme.bodyMedium!.copyWith(
-                          color: cs.onSurface.withValues(alpha: 0.4),
-                        ),
-                        child: subtitle!,
-                      ),
+                    ),
+                    if (trailing != null) ...[
+                      const SizedBox(width: 12),
+                      trailing!,
                     ],
                   ],
                 ),
-              ),
-              if (trailing != null) ...[const SizedBox(width: 12), trailing!],
-            ],
-          ),
         ),
       ),
     );

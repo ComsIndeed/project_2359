@@ -36,6 +36,7 @@ class PinnedCollectionsSection extends StatelessWidget {
   final Function(String) onSelect;
   final bool isSelecting;
   final bool isDesktop;
+  final bool isCollapsed;
   final String? activeCollectionId;
   final Function(Offset, String, bool)? onContextMenu;
 
@@ -48,6 +49,7 @@ class PinnedCollectionsSection extends StatelessWidget {
     required this.onSelect,
     required this.isSelecting,
     this.isDesktop = false,
+    this.isCollapsed = false,
     this.activeCollectionId,
     this.onContextMenu,
   });
@@ -68,9 +70,9 @@ class PinnedCollectionsSection extends StatelessWidget {
 
         return Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: isCollapsed ? CrossAxisAlignment.center : CrossAxisAlignment.start,
           children: [
-            const SectionHeader(title: "Pinned"),
+            if (!isCollapsed) const SectionHeader(title: "Pinned"),
             for (final pair in collectionPairs)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -83,21 +85,15 @@ class PinnedCollectionsSection extends StatelessWidget {
                   child: ProjectCardTile(
                     backgroundColor: theme.colorScheme.surfaceContainerHighest
                         .withValues(alpha: 0.5),
-                    title: Row(
-                      children: [
-                        FaIcon(
-                          FontAwesomeIcons.thumbtack,
-                          size: 14,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            pair.$1.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    isCollapsed: isCollapsed,
+                    leading: FaIcon(
+                      FontAwesomeIcons.thumbtack,
+                      size: 14,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    title: Text(
+                      pair.$1.name,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -154,6 +150,7 @@ class CollectionList extends StatelessWidget {
   final Function(String) onSelect;
   final bool isSelecting;
   final bool isDesktop;
+  final bool isCollapsed;
   final String? activeCollectionId;
   final Function(Offset, String, bool)? onContextMenu;
 
@@ -167,6 +164,7 @@ class CollectionList extends StatelessWidget {
     required this.onSelect,
     required this.isSelecting,
     this.isDesktop = false,
+    this.isCollapsed = false,
     this.activeCollectionId,
     this.onContextMenu,
   });
@@ -184,6 +182,7 @@ class CollectionList extends StatelessWidget {
         }).toList();
 
         if (collectionPairs.isEmpty) {
+          if (isCollapsed) return const SizedBox.shrink();
           final isSearching = searchQuery.isNotEmpty;
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
@@ -215,23 +214,19 @@ class CollectionList extends StatelessWidget {
                   child: ProjectCardTile(
                     backgroundColor: theme.colorScheme.surfaceContainerHighest
                         .withValues(alpha: 0.5),
-                    title: Row(
-                      children: [
-                        if (pair.$1.isPinned) ...[
-                          FaIcon(
-                            FontAwesomeIcons.thumbtack,
-                            size: 14,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                        Expanded(
-                          child: Text(
-                            pair.$1.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    isCollapsed: isCollapsed,
+                    leading: FaIcon(
+                      pair.$1.isPinned
+                          ? FontAwesomeIcons.thumbtack
+                          : FontAwesomeIcons.layerGroup,
+                      size: 14,
+                      color: pair.$1.isPinned
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                    ),
+                    title: Text(
+                      pair.$1.name,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Row(
                       mainAxisSize: MainAxisSize.min,

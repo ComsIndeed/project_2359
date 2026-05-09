@@ -157,7 +157,8 @@ class _HomePageState extends State<HomePage> {
       body: AdaptivePaneLayout(
         key: const ValueKey('home_pane_layout'),
         masterWidth: 350,
-        master: (context, controller) => _buildMasterView(controller),
+        master: (context, controller) => _buildMasterView(controller, false),
+        masterCollapsed: (context, controller) => _buildMasterView(controller, true),
         detail: (context, controller) => _buildDetailView(),
         wrapDetail: _selectedCollectionId == null,
         padding: const EdgeInsets.all(12),
@@ -165,7 +166,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildMasterView(AdaptivePaneController controller) {
+  Widget _buildMasterView(AdaptivePaneController controller, bool isCollapsed) {
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -173,99 +174,189 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: Stack(
           children: [
-            ExpandableFab(
-              collapsedBuilder: (context, isOpen, expand, close) {
-                if (_isSelecting) {
-                  final selectedCount =
-                      _selectedCollectionIds.length + _selectedDeckIds.length;
-                  return SelectionActionBar(
-                    selectedCount: selectedCount,
-                    onClose: _clearSelection,
-                    onPin: () => _handlePinSelected(pin: true),
-                    onUnpin: () => _handlePinSelected(pin: false),
-                    onDelete: _handleDeleteSelected,
+            if (!isCollapsed)
+              ExpandableFab(
+                collapsedBuilder: (context, isOpen, expand, close) {
+                  if (_isSelecting) {
+                    final selectedCount =
+                        _selectedCollectionIds.length + _selectedDeckIds.length;
+                    return SelectionActionBar(
+                      selectedCount: selectedCount,
+                      onClose: _clearSelection,
+                      onPin: () => _handlePinSelected(pin: true),
+                      onUnpin: () => _handlePinSelected(pin: false),
+                      onDelete: _handleDeleteSelected,
+                    );
+                  }
+                  return InkWell(
+                    onTap: expand,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const FaIcon(FontAwesomeIcons.plus, size: 14),
+                          const SizedBox(width: 8),
+                          Text(
+                            "New",
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
-                }
-                return InkWell(
-                  onTap: expand,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const FaIcon(FontAwesomeIcons.plus, size: 14),
-                        const SizedBox(width: 8),
-                        Text(
-                          "New",
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
+                },
+                expandedBuilder: (context, isOpen, expand, close) {
+                  return const NewItemMenu();
+                },
+                body: CustomScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  slivers: [
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: HomeHeader(),
+                      ),
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          const SizedBox(height: 16),
+                          _buildSearchBar(),
+                          const SizedBox(height: 16),
+                          HomeDueCardsTile(onTap: _handleStudyGlobal),
+                          const SizedBox(height: 32),
+                          PinnedCollectionsSection(
+                            stream: _pinnedCollectionsStream,
+                            searchQuery: _searchQuery,
+                            selectedIds: _selectedCollectionIds,
+                            onToggleSelection: _toggleCollectionSelection,
+                            onSelect: _handleCollectionSelect,
+                            activeCollectionId: _selectedCollectionId,
+                            isCollapsed: isCollapsed,
+                            isDesktop: ResponsiveBreakpoints.of(
+                              context,
+                            ).largerThan(MOBILE),
+                            isSelecting: _isSelecting,
+                            onContextMenu: (pos, id, isC) =>
+                                _showCoolContextMenu(
+                                  context,
+                                  pos,
+                                  id,
+                                  isCollection: isC,
+                                ),
+                          ),
+                          const SizedBox(height: 24),
+                          const SectionHeader(title: "Collections"),
+                          const SizedBox(height: 8),
+                          CollectionList(
+                            stream: _collectionsStream,
+                            searchQuery: _searchQuery,
+                            selectedIds: _selectedCollectionIds,
+                            onToggleSelection: _toggleCollectionSelection,
+                            onSelect: _handleCollectionSelect,
+                            activeCollectionId: _selectedCollectionId,
+                            isCollapsed: isCollapsed,
+                            isDesktop: ResponsiveBreakpoints.of(
+                              context,
+                            ).largerThan(MOBILE),
+                            isSelecting: _isSelecting,
+                            onContextMenu: (pos, id, isC) =>
+                                _showCoolContextMenu(
+                                  context,
+                                  pos,
+                                  id,
+                                  isCollection: isC,
+                                ),
+                          ),
+                          const SizedBox(height: 48),
+                          const _DevInjectionTile(),
+                          const SizedBox(height: 100),
+                        ]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (isCollapsed)
+              Column(
+                children: [
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: CustomScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          sliver: SliverList(
+                            delegate: SliverChildListDelegate([
+                              PinnedCollectionsSection(
+                                stream: _pinnedCollectionsStream,
+                                searchQuery: _searchQuery,
+                                selectedIds: _selectedCollectionIds,
+                                onToggleSelection: _toggleCollectionSelection,
+                                onSelect: _handleCollectionSelect,
+                                activeCollectionId: _selectedCollectionId,
+                                isCollapsed: isCollapsed,
+                                isDesktop: ResponsiveBreakpoints.of(
+                                  context,
+                                ).largerThan(MOBILE),
+                                isSelecting: _isSelecting,
+                                onContextMenu: (pos, id, isC) =>
+                                    _showCoolContextMenu(
+                                      context,
+                                      pos,
+                                      id,
+                                      isCollection: isC,
+                                    ),
+                              ),
+                              const SizedBox(height: 12),
+                              CollectionList(
+                                stream: _collectionsStream,
+                                searchQuery: _searchQuery,
+                                selectedIds: _selectedCollectionIds,
+                                onToggleSelection: _toggleCollectionSelection,
+                                onSelect: _handleCollectionSelect,
+                                activeCollectionId: _selectedCollectionId,
+                                isCollapsed: isCollapsed,
+                                isDesktop: ResponsiveBreakpoints.of(
+                                  context,
+                                ).largerThan(MOBILE),
+                                isSelecting: _isSelecting,
+                                onContextMenu: (pos, id, isC) =>
+                                    _showCoolContextMenu(
+                                      context,
+                                      pos,
+                                      id,
+                                      isCollection: isC,
+                                    ),
+                              ),
+                            ]),
                           ),
                         ),
                       ],
                     ),
                   ),
-                );
-              },
-              expandedBuilder: (context, isOpen, expand, close) {
-                return const NewItemMenu();
-              },
-              body: CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: [
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: HomeHeader(),
-                    ),
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        const SizedBox(height: 16),
-                        _buildSearchBar(),
-                        const SizedBox(height: 16),
-                        HomeDueCardsTile(onTap: _handleStudyGlobal),
-                        const SizedBox(height: 32),
-                        PinnedCollectionsSection(
-                          stream: _pinnedCollectionsStream,
-                          searchQuery: _searchQuery,
-                          selectedIds: _selectedCollectionIds,
-                          onToggleSelection: _toggleCollectionSelection,
-                          onSelect: _handleCollectionSelect,
-                          activeCollectionId: _selectedCollectionId,
-                          isDesktop:
-                              ResponsiveBreakpoints.of(context).largerThan(MOBILE),
-                          isSelecting: _isSelecting,
-                          onContextMenu: (pos, id, isC) =>
-                              _showCoolContextMenu(context, pos, id, isCollection: isC),
-                        ),
-                        const SizedBox(height: 24),
-                        const SectionHeader(title: "Collections"),
-                        const SizedBox(height: 8),
-                        CollectionList(
-                          stream: _collectionsStream,
-                          searchQuery: _searchQuery,
-                          selectedIds: _selectedCollectionIds,
-                          onToggleSelection: _toggleCollectionSelection,
-                          onSelect: _handleCollectionSelect,
-                          activeCollectionId: _selectedCollectionId,
-                          isDesktop:
-                              ResponsiveBreakpoints.of(context).largerThan(MOBILE),
-                          isSelecting: _isSelecting,
-                          onContextMenu: (pos, id, isC) =>
-                              _showCoolContextMenu(context, pos, id, isCollection: isC),
-                        ),
-                        const SizedBox(height: 48),
-                        const _DevInjectionTile(),
-                        const SizedBox(height: 100),
-                      ]),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: IconButton(
+                      onPressed: controller.toggleCollapsed,
+                      icon: const FaIcon(
+                        FontAwesomeIcons.chevronRight,
+                        size: 16,
+                      ),
+                      style: IconButton.styleFrom(
+                        backgroundColor: theme.colorScheme.surfaceContainer,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE) &&
+                !isCollapsed)
               Positioned(
                 bottom: 16,
                 right: 16,
