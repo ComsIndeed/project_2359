@@ -127,9 +127,6 @@ class _CardCreationPageState extends State<CardCreationPage> {
     final titleBar = context.read<DesktopTitleBarController>();
     titleBar.setCenteredTitle(_pdfTitle ?? 'Card Creation');
     
-    // "no top bar" look - make it transparent
-    titleBar.setIsTransparent(true);
-    
     // Always show back button so user can exit list
     titleBar.setHideBack(false);
     titleBar.setOnBack(_handleBack);

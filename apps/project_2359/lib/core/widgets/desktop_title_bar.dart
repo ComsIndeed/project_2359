@@ -13,7 +13,8 @@ class DesktopTitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)) {
+    if (kIsWeb ||
+        (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)) {
       return const SizedBox.shrink();
     }
 
@@ -22,21 +23,19 @@ class DesktopTitleBar extends StatelessWidget {
     final controller = context.watch<DesktopTitleBarController>();
 
     final canPop = rootNavigatorKey.currentState?.canPop() ?? false;
-    final showBackButton = !controller.hideBack && (controller.onBack != null || canPop);
-    final onBack = controller.onBack ?? () => rootNavigatorKey.currentState?.pop();
+    final showBackButton =
+        !controller.hideBack && (controller.onBack != null || canPop);
+    final onBack =
+        controller.onBack ?? () => rootNavigatorKey.currentState?.pop();
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       height: 40,
       decoration: BoxDecoration(
-        color: controller.isTransparent
-            ? Colors.transparent
-            : theme.colorScheme.surface.withValues(alpha: 0.8),
+        color: theme.colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: controller.isTransparent
-                ? Colors.transparent
-                : theme.colorScheme.onSurface.withValues(alpha: 0.05),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
           ),
         ),
       ),
@@ -88,7 +87,9 @@ class DesktopTitleBar extends StatelessWidget {
                           key: ValueKey(controller.centeredTitle),
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.7,
+                            ),
                           ),
                         )
                       : const SizedBox.shrink(),
@@ -196,7 +197,9 @@ class _WindowButton extends StatelessWidget {
     final theme = Theme.of(context);
     return InkWell(
       onTap: onPressed,
-      hoverColor: isClose ? Colors.red.withValues(alpha: 0.8) : theme.colorScheme.onSurface.withValues(alpha: 0.1),
+      hoverColor: isClose
+          ? Colors.red.withValues(alpha: 0.8)
+          : theme.colorScheme.onSurface.withValues(alpha: 0.1),
       child: Container(
         width: 46,
         height: 40,

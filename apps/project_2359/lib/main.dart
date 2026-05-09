@@ -167,11 +167,27 @@ class _MainAppState extends State<MainApp> {
               OverlayEntry(
                 builder: (context) => Material(
                   child: ResponsiveBreakpoints.builder(
-                    child: Column(
-                      children: [
-                        const DesktopTitleBar(),
-                        Expanded(child: child!),
-                      ],
+                    child: Builder(
+                      builder: (context) {
+                        final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
+                        return Stack(
+                          children: [
+                            Positioned.fill(
+                              child: Padding(
+                                padding: EdgeInsets.only(top: isDesktop ? 40 : 0),
+                                child: child!,
+                              ),
+                            ),
+                            if (isDesktop)
+                              const Positioned(
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                child: DesktopTitleBar(),
+                              ),
+                          ],
+                        );
+                      },
                     ),
                     breakpoints: [
                       const Breakpoint(start: 0, end: 450, name: MOBILE),
