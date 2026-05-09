@@ -35,14 +35,12 @@ class CollectionPage extends StatefulWidget {
   final String collectionId;
   final String initialCollectionName;
   final bool isNested;
-  final Function(String deckId, String deckName)? onDeckSelected;
 
   const CollectionPage({
     super.key,
     required this.collectionId,
     required this.initialCollectionName,
     this.isNested = false,
-    this.onDeckSelected,
   });
 
   @override
@@ -550,14 +548,10 @@ class _CollectionPageState extends State<CollectionPage> {
                       if (ResponsiveBreakpoints.of(
                         context,
                       ).largerThan(MOBILE)) {
-                        if (widget.onDeckSelected != null) {
-                          widget.onDeckSelected!(id, deck.name);
-                        } else {
-                          setState(() {
-                            _selectedDeckId = id;
-                            _isStudyingCollection = false;
-                          });
-                        }
+                        setState(() {
+                          _selectedDeckId = id;
+                          _isStudyingCollection = false;
+                        });
                         return;
                       }
 
@@ -630,6 +624,7 @@ class _CollectionPageState extends State<CollectionPage> {
       title: deck.name,
       isNested: true,
       mode: _currentMode,
+      onBack: () => setState(() => _selectedDeckId = null),
     );
   }
 
@@ -640,6 +635,7 @@ class _CollectionPageState extends State<CollectionPage> {
       title: "Collection Review",
       isNested: true,
       mode: _currentMode,
+      onBack: () => setState(() => _isStudyingCollection = false),
     );
   }
 

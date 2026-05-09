@@ -307,7 +307,6 @@ class _HomePageState extends State<HomePage> {
           collectionId: _selectedCollectionId!,
           initialCollectionName: collection.name,
           isNested: true,
-          onDeckSelected: _handleDeckSelect,
         );
       }
     }
@@ -365,8 +364,10 @@ class _HomePageState extends State<HomePage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              CollectionPage(collectionId: id, initialCollectionName: collection.name),
+          builder: (context) => CollectionPage(
+            collectionId: id,
+            initialCollectionName: collection.name,
+          ),
         ),
       );
     } else {
@@ -376,14 +377,6 @@ class _HomePageState extends State<HomePage> {
         _selectedDeckId = null;
       });
     }
-  }
-
-  void _handleDeckSelect(String deckId, String deckName) {
-    setState(() {
-      _selectedDeckId = deckId;
-      _selectedDeckName = deckName;
-      _mainContentType = MainContentType.study;
-    });
   }
 
   Widget _buildSearchBar() {
