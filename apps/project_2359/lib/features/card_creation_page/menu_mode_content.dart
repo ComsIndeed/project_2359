@@ -95,8 +95,6 @@ class _MenuModeContentState extends State<MenuModeContent> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                _buildModeToggleButton(cs),
-                const SizedBox(width: 8),
                 WidgetStageSlot(
                   controller: widget.toolbarController.stageController,
                   id: 'save_status',
@@ -186,62 +184,6 @@ class _MenuModeContentState extends State<MenuModeContent> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildModeToggleButton(ColorScheme cs) {
-    final isPdfMode =
-        widget.toolbarController.mode == CardCreationToolbarMode.sourcesList;
-    return Material(
-      color: cs.primary.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _shouldAnimate = true;
-          });
-          widget.toolbarController.setMode(
-            isPdfMode
-                ? CardCreationToolbarMode.cardsList
-                : CardCreationToolbarMode.sourcesList,
-          );
-          // Register post frame callback to disable animation after the new list renders
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              Future.delayed(800.ms, () {
-                if (mounted) {
-                  setState(() {
-                    _shouldAnimate = false;
-                  });
-                }
-              });
-            }
-          });
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                isPdfMode ? Icons.picture_as_pdf_rounded : Icons.style_rounded,
-                size: 18,
-                color: cs.primary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                isPdfMode ? "PDFs" : "Notes",
-                style: TextStyle(
-                  color: cs.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

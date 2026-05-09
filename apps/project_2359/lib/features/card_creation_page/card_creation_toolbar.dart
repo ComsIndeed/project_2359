@@ -105,7 +105,7 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
         final isMobile = ResponsiveBreakpoints.of(context).isMobile;
         return ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: isMobile ? double.infinity : 720,
+            maxWidth: isMobile ? double.infinity : 450,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -114,7 +114,8 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
               Stack(
                 children: [
                   if (widget.toolbarController.mode !=
-                      CardCreationToolbarMode.collapsed)
+                          CardCreationToolbarMode.collapsed &&
+                      !ResponsiveBreakpoints.of(context).largerThan(MOBILE))
                     Align(
                       alignment: Alignment.topRight,
                       child: ShortcutDisplay(
@@ -136,9 +137,24 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
                     padding:
                         widget.toolbarController.mode !=
                             CardCreationToolbarMode.collapsed
-                        ? const EdgeInsets.only(top: 32.0)
+                        ? const EdgeInsets.only(top: 12.0)
                         : EdgeInsets.zero,
-                    child: _buildContent(context),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (widget.toolbarController.mode !=
+                            CardCreationToolbarMode.collapsed)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: 16.0,
+                              left: 16.0,
+                              right: 16.0,
+                            ),
+                            child: _buildTabBar(context),
+                          ).animate().fadeIn().slideY(begin: -0.1),
+                        _buildContent(context),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -258,6 +274,135 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
                   ),
                 ),
               ),
+      ),
+    );
+  }
+
+  Widget _buildTabBar(BuildContext context) {
+    final mode = widget.toolbarController.mode;
+    final cs = Theme.of(context).colorScheme;
+
+    int currentIndex = 0;
+    if (mode == CardCreationToolbarMode.sourcesList) {
+      currentIndex = 1;
+    } else if (mode == CardCreationToolbarMode.cardsList) {
+      currentIndex = 2;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      height: 44,
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Stack(
+        children: [
+          // Sliding Highlight
+          AnimatedAlign(
+            duration: 400.ms,
+            curve: Curves.easeOutCubic,
+            alignment: Alignment(
+              currentIndex == 0
+                  ? -1.0
+                  : currentIndex == 1
+                  ? 0.0
+                  : 1.0,
+              0.0,
+            ),
+            child: FractionallySizedBox(
+              widthFactor: 1 / 3,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _buildTabButton(
+                  context,
+                  icon: Icons.edit_note_rounded,
+                  label: 'Draft',
+                  isActive: currentIndex == 0,
+                  onTap: () => widget.toolbarController.setMode(
+                    CardCreationToolbarMode.cardCreation,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: _buildTabButton(
+                  context,
+                  icon: Icons.description_rounded,
+                  label: 'Sources',
+                  isActive: currentIndex == 1,
+                  onTap: () => widget.toolbarController.setMode(
+                    CardCreationToolbarMode.sourcesList,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: _buildTabButton(
+                  context,
+                  icon: Icons.style_rounded,
+                  label: 'Cards',
+                  isActive: currentIndex == 2,
+                  onTap: () => widget.toolbarController.setMode(
+                    CardCreationToolbarMode.cardsList,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isActive
+                    ? cs.primary
+                    : cs.onSurfaceVariant.withValues(alpha: 0.6),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: isActive
+                      ? cs.primary
+                      : cs.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

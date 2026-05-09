@@ -18,6 +18,7 @@ import 'package:project_2359/features/card_creation_page/card_creation_pdf_view.
 import 'package:project_2359/core/utils/shortcut_system.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:flutter/services.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:uuid/uuid.dart';
 
 class CardCreationPage extends StatefulWidget {
@@ -113,17 +114,28 @@ class _CardCreationPageState extends State<CardCreationPage> {
     );
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
+    if (isDesktop) {
+      _containerController.setAlignment(Alignment.centerRight);
+    } else {
+      _containerController.setAlignment(Alignment.bottomCenter);
+    }
+  }
+
   void _initSources() {
     final service = context.read<SourceService>();
-    _sourcesSub = service.watchSourcesByCollectionId(widget.collectionId).listen((
-      sources,
-    ) {
-      if (mounted) {
-        setState(() {
-          _availableSources = sources;
+    _sourcesSub = service
+        .watchSourcesByCollectionId(widget.collectionId)
+        .listen((sources) {
+          if (mounted) {
+            setState(() {
+              _availableSources = sources;
+            });
+          }
         });
-      }
-    });
 
     _registerNumericShortcuts();
   }
@@ -243,7 +255,9 @@ class _CardCreationPageState extends State<CardCreationPage> {
 
       if (source != null && mounted) {
         _loadSource(source);
-        _toolbarController.setMode(CardCreationToolbarMode.collapsed);
+        if (!ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
+          _toolbarController.setMode(CardCreationToolbarMode.collapsed);
+        }
       }
     }
   }
@@ -362,7 +376,9 @@ class _CardCreationPageState extends State<CardCreationPage> {
                     ),
                   ),
                 ),
-                leadingWidth: ProjectShortcutManager.isShortcutsEnabled ? 120 : 56, // accommodate 'Back' text + shortcut only on desktop
+                leadingWidth: ProjectShortcutManager.isShortcutsEnabled
+                    ? 120
+                    : 56, // accommodate 'Back' text + shortcut only on desktop
                 leading: ProjectBackButton(
                   color: Colors.white,
                   forceShowOnDesktop: true,

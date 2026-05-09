@@ -132,7 +132,7 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
                     duration: widget.duration,
                     curve: widget.curve,
                     scale: _controller.isVisible ? 1.0 : 0.9,
-                    alignment: Alignment.bottomCenter,
+                    alignment: _controller.alignment,
                     child: ClipPath(
                       clipper: ShapeBorderClipper(
                         shape: RoundedSuperellipseBorder(
