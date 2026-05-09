@@ -81,6 +81,8 @@ class PinnedCollectionsSection extends StatelessWidget {
                     }
                   },
                   child: ProjectCardTile(
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
                     title: Row(
                       children: [
                         FaIcon(
@@ -213,6 +215,8 @@ class CollectionList extends StatelessWidget {
                     }
                   },
                   child: ProjectCardTile(
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
                     title: Row(
                       children: [
                         if (pair.$1.isPinned) ...[

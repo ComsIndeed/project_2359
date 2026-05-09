@@ -31,7 +31,6 @@ class ProjectImportantTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: Ink(
           width: double.infinity,
-          height: 92,
           padding:
               padding ??
               const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

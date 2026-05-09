@@ -68,9 +68,9 @@ class ProjectCardTile extends StatelessWidget {
           decoration: ShapeDecoration(color: effectiveBg, shape: effectiveShape),
           clipBehavior: Clip.antiAlias,
           child: Container(
-            constraints: BoxConstraints(
-              minHeight: minHeight ?? (isCompact ? 68 : 92),
-            ),
+            constraints: minHeight != null
+                ? BoxConstraints(minHeight: minHeight!)
+                : null,
             padding:
                 padding ??
                 EdgeInsets.symmetric(

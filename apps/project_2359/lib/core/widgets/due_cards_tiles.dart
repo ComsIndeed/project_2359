@@ -6,6 +6,7 @@ import 'package:project_2359/core/app_controller.dart';
 import 'package:project_2359/features/home_page/widgets/due_cards_overview.dart';
 import 'package:project_2359/core/widgets/sensor_reactive_border.dart';
 import 'package:project_2359/features/study_page/study_page.dart';
+import 'package:project_2359/core/widgets/project_important_tile.dart';
 
 class HomeDueCardsTile extends StatelessWidget {
   final VoidCallback? onTap;
@@ -30,37 +31,21 @@ class HomeDueCardsTile extends StatelessWidget {
             final collectionCounts = collectionSnapshot.data ?? {};
             if (collectionCounts.isEmpty) return const SizedBox.shrink();
 
-            return Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onTap ??
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const StudyPage(
-                            title: "Global Review",
-                          ),
+            return ProjectImportantTile(
+              onTap: onTap ??
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const StudyPage(
+                          title: "Global Review",
                         ),
-                      );
-                    },
-                borderRadius: BorderRadius.circular(24),
-                child: Ink(
-                  width: double.infinity,
-                  decoration: ShapeDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.6,
-                    ),
-                    shape: RoundedSuperellipseBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: DueCardsOverview(
-                    totalDue: cards.length,
-                    items: collectionCounts,
-                  ),
-                ),
+                      ),
+                    );
+                  },
+              child: DueCardsOverview(
+                totalDue: cards.length,
+                items: collectionCounts,
               ),
             );
           },
@@ -127,39 +112,23 @@ class CollectionDueCardsTile extends StatelessWidget {
             final deckCounts = deckSnapshot.data ?? {};
             if (deckCounts.isEmpty) return const SizedBox.shrink();
 
-            return Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onTap ??
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StudyPage(
-                            collectionId: collectionId,
-                            title: "Collection Review",
-                          ),
+            return ProjectImportantTile(
+              onTap: onTap ??
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StudyPage(
+                          collectionId: collectionId,
+                          title: "Collection Review",
                         ),
-                      );
-                    },
-                borderRadius: BorderRadius.circular(24),
-                child: Ink(
-                  width: double.infinity,
-                  decoration: ShapeDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.6,
-                    ),
-                    shape: RoundedSuperellipseBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: DueCardsOverview(
-                    totalDue: cards.length,
-                    items: deckCounts,
-                    isCollectionPage: true,
-                  ),
-                ),
+                      ),
+                    );
+                  },
+              child: DueCardsOverview(
+                totalDue: cards.length,
+                items: deckCounts,
+                isCollectionPage: true,
               ),
             );
           },
