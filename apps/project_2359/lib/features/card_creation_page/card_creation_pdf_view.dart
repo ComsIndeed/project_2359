@@ -9,6 +9,7 @@ import 'package:project_2359/features/card_creation_page/smart_text_selection_ha
 import 'package:project_2359/features/card_creation_page/pdf_occlusion_overlay.dart';
 import 'package:project_2359/core/models/project_rect.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:project_2359/core/widgets/dot_grid_background.dart';
 
 class CardCreationPdfView extends StatelessWidget {
   final Uint8List? pdfBytes;
@@ -35,7 +36,7 @@ class CardCreationPdfView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (pdfBytes == null) {
-      return Container(color: Colors.black);
+      return const DotGridBackground();
     }
 
     return KeyedSubtree(
@@ -43,8 +44,10 @@ class CardCreationPdfView extends StatelessWidget {
       child: ListenableBuilder(
         listenable: toolbarController,
         builder: (context, _) {
-          return Stack(
-            children: [
+          return DotGridBackground(
+            transform: controller,
+            child: Stack(
+              children: [
               PdfViewer.data(
                 pdfBytes!,
                 sourceName: 'pdf_$currentSourceId',
@@ -116,7 +119,7 @@ class CardCreationPdfView extends StatelessWidget {
                   },
                   boundaryMargin: const EdgeInsets.symmetric(horizontal: 2096),
                   margin: 8,
-                  backgroundColor: Colors.black,
+                  backgroundColor: Colors.transparent,
                   textSelectionParams: PdfTextSelectionParams(
                     enabled: true,
                     onTextSelectionChange: (pdfTextSelection) async {
@@ -172,7 +175,8 @@ class CardCreationPdfView extends StatelessWidget {
                   controller: controller,
                   toolbarController: toolbarController,
                 ),
-            ],
+              ],
+            ),
           );
         },
       ),

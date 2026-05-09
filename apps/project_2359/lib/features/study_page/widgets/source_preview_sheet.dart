@@ -4,8 +4,9 @@ import 'package:pdfrx/pdfrx.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/features/source_page/source_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/core/widgets/dot_grid_background.dart';
 
-class SourcePreviewSheet extends StatelessWidget {
+class SourcePreviewSheet extends StatefulWidget {
   final Uint8List pdfBytes;
   final CitationItem citation;
 
@@ -16,10 +17,24 @@ class SourcePreviewSheet extends StatelessWidget {
   });
 
   @override
+  State<SourcePreviewSheet> createState() => _SourcePreviewSheetState();
+}
+
+class _SourcePreviewSheetState extends State<SourcePreviewSheet> {
+  final _controller = PdfViewerController();
+
+  @override
+  void dispose() {
+    // PdfViewerController doesn't have a dispose method currently,
+    // but keeping it here for future-proofing or if it gets one.
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final pageNumber = citation.pageNumbers?.isNotEmpty == true
-        ? citation.pageNumbers!.first
+    final pageNumber = widget.citation.pageNumbers?.isNotEmpty == true
+        ? widget.citation.pageNumbers!.first
         : 1;
 
     return Container(
@@ -71,41 +86,45 @@ class SourcePreviewSheet extends StatelessWidget {
           // PDF View
           Expanded(
             child: ClipRect(
-              child: PdfViewer.data(
-                sourceName: "Source Preview",
-                pdfBytes,
-                params: PdfViewerParams(
-                  calculateInitialPageNumber: (document, controller) =>
-                      pageNumber,
-                  backgroundColor: theme.colorScheme.surface,
-                  textSelectionParams: const PdfTextSelectionParams(
-                    enabled: true,
-                  ),
-                  // Draw highlights if rects exist
-                  pagePaintCallbacks: [
-                    (canvas, pageRect, page) {
-                      if (page.pageNumber == pageNumber &&
-                          citation.rects != null) {
-                        final paint = Paint()
-                          ..color = theme.colorScheme.primary.withValues(
-                            alpha: 0.3,
-                          )
-                          ..style = PaintingStyle.fill;
+              child: DotGridBackground(
+                transform: _controller,
+                child: PdfViewer.data(
+                  sourceName: "Source Preview",
+                  widget.pdfBytes,
+                  controller: _controller,
+                  params: PdfViewerParams(
+                    calculateInitialPageNumber: (document, controller) =>
+                        pageNumber,
+                    backgroundColor: Colors.transparent,
+                    textSelectionParams: const PdfTextSelectionParams(
+                      enabled: true,
+                    ),
+                    // Draw highlights if rects exist
+                    pagePaintCallbacks: [
+                      (canvas, pageRect, page) {
+                        if (page.pageNumber == pageNumber &&
+                            widget.citation.rects != null) {
+                          final paint = Paint()
+                            ..color = theme.colorScheme.primary.withValues(
+                              alpha: 0.3,
+                            )
+                            ..style = PaintingStyle.fill;
 
-                        for (final rect in citation.rects!) {
-                          canvas.drawRect(
-                            Rect.fromLTRB(
-                              rect.left,
-                              rect.top,
-                              rect.right,
-                              rect.bottom,
-                            ),
-                            paint,
-                          );
+                          for (final rect in widget.citation.rects!) {
+                            canvas.drawRect(
+                              Rect.fromLTRB(
+                                rect.left,
+                                rect.top,
+                                rect.right,
+                                rect.bottom,
+                              ),
+                              paint,
+                            );
+                          }
                         }
-                      }
-                    },
-                  ],
+                      },
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -133,10 +152,10 @@ class SourcePreviewSheet extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => SourcePage(
-                            fileBytes: pdfBytes,
+                            fileBytes: widget.pdfBytes,
                             title: "Full Source",
                             initialPage: pageNumber,
-                            highlightRects: citation.rects,
+                            highlightRects: widget.citation.rects,
                           ),
                         ),
                       );

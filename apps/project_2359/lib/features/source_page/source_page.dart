@@ -8,6 +8,7 @@ import 'package:pdfrx/pdfrx.dart' as pdfrx;
 import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/core/models/project_rect.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
+import 'package:project_2359/core/widgets/dot_grid_background.dart';
 
 // ═══════════════════════════════════════════════════════════════════
 // Background PDF parsing (runs in isolate via compute)
@@ -398,26 +399,24 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
             clipper: _SuperellipseClipper(),
             child: Container(
               decoration: BoxDecoration(
-                color: isDark
-                    ? cs.surfaceContainerHighest.withValues(alpha: 0.3)
-                    : cs.surfaceContainer.withValues(alpha: 0.8),
+                color: Colors.transparent,
               ),
               child: _pdfReady
-                  ? pdfrx.PdfViewer.data(
-                      widget.fileBytes,
-                      sourceName: widget.title ?? 'pdf',
-                      controller: _pdfController,
-                      params: pdfrx.PdfViewerParams(
-                        onViewerReady: (doc, controller) {
-                          setState(() {
-                            _totalPages = doc.pages.length;
-                            _pdfDocumentLoaded = true;
-                          });
-                        },
-                        onPageChanged: _onPageChanged,
-                        backgroundColor: isDark
-                            ? cs.surfaceContainer
-                            : cs.surfaceContainerHighest,
+                  ? DotGridBackground(
+                      transform: _pdfController,
+                      child: pdfrx.PdfViewer.data(
+                        widget.fileBytes,
+                        sourceName: widget.title ?? 'pdf',
+                        controller: _pdfController,
+                        params: pdfrx.PdfViewerParams(
+                          onViewerReady: (doc, controller) {
+                            setState(() {
+                              _totalPages = doc.pages.length;
+                              _pdfDocumentLoaded = true;
+                            });
+                          },
+                          onPageChanged: _onPageChanged,
+                          backgroundColor: Colors.transparent,
                         calculateInitialPageNumber: (document, controller) =>
                             widget.initialPage ?? 1,
                         pagePaintCallbacks: [
@@ -444,7 +443,8 @@ class _SourcePageState extends State<SourcePage> with TickerProviderStateMixin {
                           },
                         ],
                       ),
-                    )
+                    ),
+                  )
                   : Center(
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
