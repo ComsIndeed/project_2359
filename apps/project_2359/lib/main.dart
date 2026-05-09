@@ -24,24 +24,24 @@ import 'package:project_2359/core/widgets/desktop_title_bar.dart';
 import 'package:project_2359/core/utils/navigator_utils.dart';
 import 'package:project_2359/core/widgets/desktop_title_bar_controller.dart';
 import 'dart:io';
+import 'package:project_2359/core/utils/window_state_manager.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     await windowManager.ensureInitialized();
-    WindowOptions windowOptions = const WindowOptions(
-      size: Size(1200, 800),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.hidden,
-    );
+    await windowStateManager.init();
+    final windowOptions = await windowStateManager.loadWindowOptions();
+    
     windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowStateManager.applyAfterShow();
       await windowManager.show();
       await windowManager.focus();
     });
   }
+
 
   AppLogger.info('--- Application starting ---', tag: 'Main');
 
