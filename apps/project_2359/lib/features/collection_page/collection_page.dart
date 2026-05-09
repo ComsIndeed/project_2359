@@ -284,14 +284,16 @@ class _CollectionPageState extends State<CollectionPage> {
 
   Widget _buildContent() {
     return AdaptivePaneLayout(
+      key: ValueKey('collection_pane_${widget.collectionId}'),
       isNested: widget.isNested,
       masterWidth: 350,
-      master: _buildMasterView(),
-      detail: _isStudyingCollection
-          ? _buildCollectionStudyView()
-          : (_selectedDeckId != null
-                ? _buildDetailView()
-                : _buildEmptyDetail()),
+      master: (context, controller) => _buildMasterView(controller),
+      detail: (context, controller) =>
+          _isStudyingCollection
+              ? _buildCollectionStudyView()
+              : (_selectedDeckId != null
+                  ? _buildDetailView()
+                  : _buildEmptyDetail()),
     );
   }
 
@@ -406,225 +408,241 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
-  Widget _buildMasterView() {
+  Widget _buildMasterView(AdaptivePaneController controller) {
     final theme = Theme.of(context);
     final collectionName = widget.initialCollectionName;
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: ExpandableFab(
-        isVisible: _currentPageIndex != 2,
-        collapsedBuilder: (context, isOpen, expand, close) {
-          if (_isSelecting) {
-            final selectedDecks = _allDecks
-                .where((m) => _selectedDeckIds.contains(m.id))
-                .toList();
+      body: Stack(
+        children: [
+          ExpandableFab(
+            isVisible: _currentPageIndex != 2,
+            collapsedBuilder: (context, isOpen, expand, close) {
+              if (_isSelecting) {
+                final selectedDecks = _allDecks
+                    .where((m) => _selectedDeckIds.contains(m.id))
+                    .toList();
 
-            final allPinned =
-                selectedDecks.isNotEmpty &&
-                selectedDecks.every((m) => m.isPinned);
-            final allUnpinned =
-                selectedDecks.isNotEmpty &&
-                selectedDecks.every((m) => !m.isPinned);
-            final isMixed = !allPinned && !allUnpinned;
+                final allPinned =
+                    selectedDecks.isNotEmpty &&
+                    selectedDecks.every((m) => m.isPinned);
+                final allUnpinned =
+                    selectedDecks.isNotEmpty &&
+                    selectedDecks.every((m) => !m.isPinned);
+                final isMixed = !allPinned && !allUnpinned;
 
-            return SelectionActionBar(
-              selectedCount: _selectedDeckIds.length,
-              onClose: _clearSelection,
-              onPin: () => _handlePinSelected(pin: true),
-              onUnpin: () => _handlePinSelected(pin: false),
-              isUnpin: allPinned,
-              isPinDisabled: isMixed,
-              onDelete: _handleDeleteSelected,
-            );
-          }
+                return SelectionActionBar(
+                  selectedCount: _selectedDeckIds.length,
+                  onClose: _clearSelection,
+                  onPin: () => _handlePinSelected(pin: true),
+                  onUnpin: () => _handlePinSelected(pin: false),
+                  isUnpin: allPinned,
+                  isPinDisabled: isMixed,
+                  onDelete: _handleDeleteSelected,
+                );
+              }
 
-          final isSources = _currentPageIndex == 1;
-          final String title = isSources ? "Import Sources" : "Create Cards";
-          final IconData mainIcon = isSources
-              ? FontAwesomeIcons.layerGroup
-              : FontAwesomeIcons.plus;
+              final isSources = _currentPageIndex == 1;
+              final String title = isSources ? "Import Sources" : "Create Cards";
+              final IconData mainIcon = isSources
+                  ? FontAwesomeIcons.layerGroup
+                  : FontAwesomeIcons.plus;
 
-          return IntrinsicHeight(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      if (isSources) {
-                        _importSources();
-                      } else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CardCreationPage(
-                              collectionId: widget.collectionId,
-                            ),
+              return IntrinsicHeight(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          if (isSources) {
+                            _importSources();
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CardCreationPage(
+                                  collectionId: widget.collectionId,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(24),
+                          bottomLeft: Radius.circular(24),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 14, 16, 14),
+                          child: Row(
+                            children: [
+                              FaIcon(mainIcon, size: 14),
+                              const SizedBox(width: 12),
+                              Text(
+                                title,
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ],
                           ),
-                        );
-                      }
-                    },
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      bottomLeft: Radius.circular(24),
+                        ),
+                      ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 14, 16, 14),
+                    Container(
+                      width: 1,
+                      margin: const EdgeInsets.symmetric(vertical: 12),
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: expand,
+                        borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(24),
+                          bottomRight: Radius.circular(24),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          child: FaIcon(
+                            FontAwesomeIcons.chevronUp,
+                            size: 14,
+                            color: Colors.white54,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+            expandedBuilder: (context, isOpen, expand, close) {
+              final isSources = _currentPageIndex == 1;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12, top: 4),
                       child: Row(
                         children: [
-                          FaIcon(mainIcon, size: 14),
-                          const SizedBox(width: 12),
                           Text(
-                            title,
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.2,
+                            isSources ? "IMPORT OPTIONS" : "CREATION TOOLS",
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white.withValues(alpha: 0.4),
+                              letterSpacing: 1.5,
                             ),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            icon: const FaIcon(FontAwesomeIcons.xmark, size: 16),
+                            onPressed: close,
+                            color: Colors.white24,
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ),
-                Container(
-                  width: 1,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  color: Colors.white.withValues(alpha: 0.1),
-                ),
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: expand,
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(24),
-                      bottomRight: Radius.circular(24),
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
+                    const SizedBox(height: 8),
+                    if (isSources) ...[
+                      _FabMenuItem(
+                        label: "Import from Text",
+                        icon: FontAwesomeIcons.fileLines,
+                        onTap: () {
+                          close();
+                        },
                       ),
-                      child: FaIcon(
-                        FontAwesomeIcons.chevronUp,
-                        size: 14,
-                        color: Colors.white54,
+                      _FabMenuItem(
+                        label: "Import from YouTube",
+                        icon: FontAwesomeIcons.youtube,
+                        onTap: () {
+                          close();
+                        },
                       ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-        expandedBuilder: (context, isOpen, expand, close) {
-          final isSources = _currentPageIndex == 1;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 12, top: 4),
-                  child: Row(
-                    children: [
-                      Text(
-                        isSources ? "IMPORT OPTIONS" : "CREATION TOOLS",
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white.withValues(alpha: 0.4),
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const FaIcon(FontAwesomeIcons.xmark, size: 16),
-                        onPressed: close,
-                        color: Colors.white24,
+                    ] else ...[
+                      _FabMenuItem(
+                        label: "Quick AI Card Gen",
+                        icon: FontAwesomeIcons.wandMagicSparkles,
+                        onTap: () {
+                          close();
+                        },
                       ),
                     ],
-                  ),
+                    const SizedBox(height: 6),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                if (isSources) ...[
-                  _FabMenuItem(
-                    label: "Import from Text",
-                    icon: FontAwesomeIcons.fileLines,
-                    onTap: () {
-                      close();
-                    },
-                  ),
-                  _FabMenuItem(
-                    label: "Import from YouTube",
-                    icon: FontAwesomeIcons.youtube,
-                    onTap: () {
-                      close();
-                    },
-                  ),
-                ] else ...[
-                  _FabMenuItem(
-                    label: "Quick AI Card Gen",
-                    icon: FontAwesomeIcons.wandMagicSparkles,
-                    onTap: () {
-                      close();
-                    },
-                  ),
-                ],
-                const SizedBox(height: 6),
-              ],
-            ),
-          );
-        },
-        body: Stack(
-          children: [
-            _buildBackground(collectionName, isDesktop),
-            NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                if (isDesktop) {
-                  return [
-                    SliverToBoxAdapter(
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.08),
-                              width: 1,
+              );
+            },
+            body: Stack(
+              children: [
+                _buildBackground(collectionName, isDesktop),
+                NestedScrollView(
+                  headerSliverBuilder: (context, innerBoxIsScrolled) {
+                    if (isDesktop) {
+                      return [
+                        SliverToBoxAdapter(
+                          child: Container(
+                            padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: Colors.white.withValues(alpha: 0.08),
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            child: _HeaderContent(
+                              collectionName: collectionName,
+                              currentIndex: _currentPageIndex,
+                              onPageRequested: _requestPage,
                             ),
                           ),
                         ),
-                        child: _HeaderContent(
+                      ];
+                    }
+                    return [
+                      SliverPersistentHeader(
+                        pinned: true,
+                        delegate: _CollapsingHeaderDelegate(
                           collectionName: collectionName,
+                          topPadding: widget.isNested
+                              ? 0
+                              : MediaQuery.of(context).padding.top,
+                          onBack: widget.isNested
+                              ? null
+                              : () => Navigator.pop(context),
                           currentIndex: _currentPageIndex,
                           onPageRequested: _requestPage,
                         ),
                       ),
-                    ),
-                  ];
-                }
-                return [
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _CollapsingHeaderDelegate(
-                      collectionName: collectionName,
-                      topPadding: widget.isNested
-                          ? 0
-                          : MediaQuery.of(context).padding.top,
-                      onBack: widget.isNested
-                          ? null
-                          : () => Navigator.pop(context),
-                      currentIndex: _currentPageIndex,
-                      onPageRequested: _requestPage,
-                    ),
-                  ),
-                ];
-              },
-              body: _buildPageView(),
+                    ];
+                  },
+                  body: _buildPageView(),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          if (isDesktop)
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: IconButton(
+                onPressed: controller.toggleCollapsed,
+                icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 16),
+                style: IconButton.styleFrom(
+                  backgroundColor: theme.colorScheme.surfaceContainer,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
