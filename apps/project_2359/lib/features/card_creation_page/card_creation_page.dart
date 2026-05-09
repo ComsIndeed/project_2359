@@ -120,8 +120,10 @@ class _CardCreationPageState extends State<CardCreationPage> {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
     if (isDesktop) {
       _containerController.setAlignment(Alignment.centerRight);
+      _containerController.setFillHeight(true);
     } else {
       _containerController.setAlignment(Alignment.bottomCenter);
+      _containerController.setFillHeight(false);
     }
   }
 
@@ -314,11 +316,14 @@ class _CardCreationPageState extends State<CardCreationPage> {
       body: ListenableBuilder(
         listenable: labsSettings,
         builder: (context, _) {
+          final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
           return ExpandableContainer(
             initialAlignment: Alignment.bottomCenter,
-            boundaryMargins: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 2,
+            boundaryMargins: EdgeInsets.only(
+              left: 12,
+              right: 12,
+              bottom: 12,
+              top: isDesktop ? 80 : 12,
             ),
             initialBorder: BorderSide(
               color: Theme.of(

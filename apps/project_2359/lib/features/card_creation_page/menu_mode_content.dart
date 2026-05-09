@@ -14,7 +14,12 @@ import 'package:project_2359/core/widgets/widget_stage.dart';
 
 class MenuModeContent extends StatefulWidget {
   final CardCreationToolbarController toolbarController;
-  const MenuModeContent({super.key, required this.toolbarController});
+  final bool fillHeight;
+  const MenuModeContent({
+    super.key,
+    required this.toolbarController,
+    this.fillHeight = false,
+  });
 
   @override
   State<MenuModeContent> createState() => _MenuModeContentState();
@@ -64,8 +69,24 @@ class _MenuModeContentState extends State<MenuModeContent> {
             widget.toolbarController.mode ==
             CardCreationToolbarMode.sourcesList;
 
+        final listContent = AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: isPdfMode
+              ? _buildPdfList(
+                  cs,
+                  textTheme,
+                  key: const ValueKey('pdf_list'),
+                )
+              : _buildNoteList(
+                  cs,
+                  textTheme,
+                  key: const ValueKey('note_list'),
+                ),
+        );
+
         return Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize:
+              widget.fillHeight ? MainAxisSize.max : MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Header: Search + Mode Toggle
@@ -82,7 +103,8 @@ class _MenuModeContentState extends State<MenuModeContent> {
                         color: cs.primary,
                       ),
                       isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 12),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -107,27 +129,23 @@ class _MenuModeContentState extends State<MenuModeContent> {
             const SizedBox(height: 16),
 
             // List Content
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 540),
-              child: AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: AnimatedSwitcher(
+            if (widget.fillHeight)
+              Expanded(
+                child: AnimatedSize(
                   duration: const Duration(milliseconds: 300),
-                  child: isPdfMode
-                      ? _buildPdfList(
-                          cs,
-                          textTheme,
-                          key: const ValueKey('pdf_list'),
-                        )
-                      : _buildNoteList(
-                          cs,
-                          textTheme,
-                          key: const ValueKey('note_list'),
-                        ),
+                  curve: Curves.easeInOut,
+                  child: listContent,
+                ),
+              )
+            else
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 540),
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: listContent,
                 ),
               ),
-            ),
           ],
         );
       },
@@ -207,7 +225,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
         }
 
         return ListView.builder(
-          shrinkWrap: true,
+          shrinkWrap: !widget.fillHeight,
           itemCount: items.length,
           padding: const EdgeInsets.only(bottom: 8),
           itemBuilder: (context, index) {
@@ -260,7 +278,7 @@ class _MenuModeContentState extends State<MenuModeContent> {
           return _buildEmptyState("No notes found", cs);
         }
         return ListView.builder(
-          shrinkWrap: true,
+          shrinkWrap: !widget.fillHeight,
           itemCount: data.length,
           padding: const EdgeInsets.only(bottom: 8),
           itemBuilder: (context, index) {

@@ -103,12 +103,17 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
       listenable: widget.toolbarController,
       builder: (context, _) {
         final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+        final isDesktop = !isMobile;
+        final isExpanded =
+            widget.toolbarController.mode !=
+            CardCreationToolbarMode.collapsed;
+        final fillHeight = isDesktop && isExpanded;
         return ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: isMobile ? double.infinity : 450,
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: fillHeight ? MainAxisSize.max : MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Stack(
@@ -152,12 +157,15 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
                             ),
                             child: _buildTabBar(context),
                           ).animate().fadeIn().slideY(begin: -0.1),
-                        _buildContent(context),
                       ],
                     ),
                   ),
                 ],
               ),
+              if (fillHeight)
+                Expanded(child: _buildContent(context))
+              else
+                _buildContent(context),
             ],
           ),
         );
@@ -174,7 +182,12 @@ class _CardCreationToolbarState extends State<CardCreationToolbar> {
     if (widget.toolbarController.mode == CardCreationToolbarMode.menu ||
         widget.toolbarController.mode == CardCreationToolbarMode.cardsList ||
         widget.toolbarController.mode == CardCreationToolbarMode.sourcesList) {
-      return MenuModeContent(toolbarController: widget.toolbarController);
+      final isDesktop =
+          !ResponsiveBreakpoints.of(context).isMobile;
+      return MenuModeContent(
+        toolbarController: widget.toolbarController,
+        fillHeight: isDesktop,
+      );
     }
 
     if (widget.toolbarController.mode == CardCreationToolbarMode.cardCreation) {

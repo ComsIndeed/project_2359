@@ -172,33 +172,57 @@ class _ExpandableContainerState extends State<ExpandableContainer> {
                           clipBehavior: Clip.antiAlias,
                           child: Material(
                             type: MaterialType.transparency,
-                            child: AnimatedSize(
-                              duration: widget.duration,
-                              curve: widget.curve,
-                              child: AnimatedPadding(
-                                duration: widget.duration,
-                                curve: widget.curve,
-                                padding: padding,
-                                child: (_controller.size == null)
-                                    ? SingleChildScrollView(
-                                        physics: const ClampingScrollPhysics(),
-                                        child: widget.builder(context, _controller),
-                                      )
-                                    : AnimatedContainer(
-                                        duration: widget.duration,
-                                        curve: widget.curve,
-                                        width: _controller.size!.$1,
-                                        height: _controller.size!.$2,
-                                        child: SingleChildScrollView(
-                                          physics: const ClampingScrollPhysics(),
+                            child: _controller.fillHeight
+                                ? AnimatedPadding(
+                                    duration: widget.duration,
+                                    curve: widget.curve,
+                                    padding: padding,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.max,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
                                           child: widget.builder(
                                             context,
                                             _controller,
                                           ),
                                         ),
-                                      ),
-                              ),
-                            ),
+                                      ],
+                                    ),
+                                  )
+                                : AnimatedSize(
+                                    duration: widget.duration,
+                                    curve: widget.curve,
+                                    child: AnimatedPadding(
+                                      duration: widget.duration,
+                                      curve: widget.curve,
+                                      padding: padding,
+                                      child: (_controller.size == null)
+                                          ? SingleChildScrollView(
+                                              physics:
+                                                  const ClampingScrollPhysics(),
+                                              child: widget.builder(
+                                                context,
+                                                _controller,
+                                              ),
+                                            )
+                                          : AnimatedContainer(
+                                              duration: widget.duration,
+                                              curve: widget.curve,
+                                              width: _controller.size!.$1,
+                                              height: _controller.size!.$2,
+                                              child: SingleChildScrollView(
+                                                physics:
+                                                    const ClampingScrollPhysics(),
+                                                child: widget.builder(
+                                                  context,
+                                                  _controller,
+                                                ),
+                                              ),
+                                            ),
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
@@ -222,6 +246,7 @@ class ExpandableContainerController extends ChangeNotifier {
   Color? _color;
   BorderSide? _border;
   bool _isVisible;
+  bool _fillHeight;
 
   ExpandableContainerController({
     Alignment initialAlignment = Alignment.bottomCenter,
@@ -230,12 +255,14 @@ class ExpandableContainerController extends ChangeNotifier {
     Color? color,
     BorderSide? border,
     bool isVisible = true,
+    bool fillHeight = false,
   }) : _alignment = initialAlignment,
        _padding = padding,
        _blur = blur,
        _color = color,
        _border = border,
-       _isVisible = isVisible;
+       _isVisible = isVisible,
+       _fillHeight = fillHeight;
 
   (double, double)? get size => _size;
   Alignment get alignment => _alignment;
@@ -244,6 +271,7 @@ class ExpandableContainerController extends ChangeNotifier {
   Color? get color => _color;
   BorderSide? get border => _border;
   bool get isVisible => _isVisible;
+  bool get fillHeight => _fillHeight;
 
   void setSize({double? width, double? height}) {
     if (width != null && height != null) {
@@ -291,6 +319,11 @@ class ExpandableContainerController extends ChangeNotifier {
 
   void unsetSize() {
     _size = null;
+    notifyListeners();
+  }
+
+  void setFillHeight(bool fillHeight) {
+    _fillHeight = fillHeight;
     notifyListeners();
   }
 
