@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
+import 'package:project_2359/app_theme.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/core/utils/logger.dart';
@@ -153,7 +154,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       body: AdaptivePaneLayout(
         key: const ValueKey('home_pane_layout'),
         masterWidth: 350,
@@ -614,7 +614,8 @@ class _HomePageState extends State<HomePage> {
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final color = isDestructive ? cs.error : cs.onSurface;
 
     return InkWell(
@@ -627,10 +628,8 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(width: 12),
             Text(
               label,
-              style: TextStyle(
+              style: theme.textTheme.labelLarge?.copyWith(
                 color: color,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -651,46 +650,49 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
   bool _isSeeding = false;
 
   Future<void> _handleSeed() async {
+    final theme = Theme.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Colors.deepPurpleAccent, width: 0.5),
-        ),
+        shape: AppTheme.cardShape,
         title: Row(
           children: [
-            const Icon(FontAwesomeIcons.terminal, color: Colors.deepPurpleAccent, size: 18),
+            Icon(FontAwesomeIcons.terminal, color: theme.colorScheme.primary, size: 18),
             const SizedBox(width: 12),
-            const Text(
+            Text(
               'DEVELOPER_INJECTION',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontFamily: 'Courier',
               ),
             ),
           ],
         ),
-        content: const Text(
+        content: Text(
           'INJECTION_REQUESTED: This will download ~16MB of study materials from GitHub.\n\nPROCEED?',
-          style: TextStyle(color: Colors.white70, fontFamily: 'Courier', fontSize: 13),
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontFamily: 'Courier',
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'CANCEL',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontFamily: 'Courier'),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                fontFamily: 'Courier',
+              ),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
+            child: Text(
               'EXECUTE',
-              style: TextStyle(color: Colors.deepPurpleAccent, fontWeight: FontWeight.bold, fontFamily: 'Courier'),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Courier',
+              ),
             ),
           ),
         ],
@@ -739,7 +741,7 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
                 borderRadius: BorderRadius.circular(16),
                 color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
                 border: Border.all(
-                  color: Colors.deepPurpleAccent.withValues(alpha: 0.2),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.2),
                 ),
               ),
               child: Padding(
@@ -749,12 +751,12 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.deepPurpleAccent.withValues(alpha: 0.1),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         _isSeeding ? FontAwesomeIcons.gear : FontAwesomeIcons.bug,
-                        color: Colors.deepPurpleAccent,
+                        color: theme.colorScheme.primary,
                         size: 16,
                       ).animate(
                         onPlay: (c) => _isSeeding ? c.repeat() : null,
@@ -768,7 +770,7 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
                           Text(
                             _isSeeding ? 'INJECTING_PAYLOAD...' : 'INJECT_MOCK_DATA',
                             style: theme.textTheme.labelLarge?.copyWith(
-                              color: Colors.deepPurpleAccent,
+                              color: theme.colorScheme.primary,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.1,
                               fontFamily: 'Courier',
@@ -786,12 +788,12 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
                       ),
                     ),
                     if (_isSeeding)
-                      const SizedBox(
+                      SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation(Colors.deepPurpleAccent),
+                          valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
                         ),
                       )
                     else

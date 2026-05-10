@@ -79,9 +79,11 @@ class _SourceListItemState extends State<SourceListItem> {
     final isIndexing = status == SourceIndexingStatus.indexing;
 
     // Background colors
-    final backgroundColor = isDark
-        ? Colors.white.withValues(alpha: isIndexing ? 0.15 : 0.1)
-        : Colors.black.withValues(alpha: isIndexing ? 0.12 : 0.08);
+    final backgroundColor = Color.lerp(
+      cs.surface,
+      cs.onSurface,
+      isIndexing ? 0.08 : 0.04,
+    );
 
     Widget itemContent = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -94,17 +96,13 @@ class _SourceListItemState extends State<SourceListItem> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.black.withValues(alpha: 0.05),
+                  color: cs.onSurface.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: FaIcon(
                   widget.icon,
                   size: 18,
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.7)
-                      : Colors.black.withValues(alpha: 0.7),
+                  color: cs.onSurface.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(width: 12),
@@ -228,9 +226,7 @@ class _SourceListItemState extends State<SourceListItem> {
                       decoration: BoxDecoration(
                         color: isFilled
                             ? AppTheme.warning.withValues(alpha: 0.8)
-                            : (isDark ? Colors.white : Colors.black).withValues(
-                                alpha: 0.05,
-                              ),
+                            : cs.onSurface.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -310,13 +306,11 @@ class _SourceListItemState extends State<SourceListItem> {
     final textColor = color ?? cs.onSurface.withValues(alpha: 0.8);
     final bgColor = isGhost
         ? (color ?? cs.onSurface).withValues(alpha: 0.1)
-        : highlighted
-        ? (isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : Colors.black.withValues(alpha: 0.12))
-        : (isDark
-              ? Colors.white.withValues(alpha: 0.08)
-              : Colors.black.withValues(alpha: 0.08));
+        : Color.lerp(
+            cs.surface,
+            cs.onSurface,
+            highlighted ? 0.1 : 0.05,
+          );
 
     Widget chip = Container(
       key: key,

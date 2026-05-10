@@ -8,6 +8,12 @@ class AppTheme {
   static const Color warning = Color(0xFFFFAB40);
   static const Color important = Color(0xFFFF4C52);
 
+  // FSRS Rating Colors
+  static const Color again = Color(0xFFFF5252);
+  static const Color hard = Color(0xFFFFAB40);
+  static const Color good = Color(0xFF00E676);
+  static const Color easy = Color(0xFF448AFF);
+
   /// `RoundedSuperellipseBorder` is a border shape that exists within the Flutter library. Do not bother looking up its definition, it just exists as a shape.
 
   static ShapeBorder defaultShape = RoundedSuperellipseBorder(
@@ -104,13 +110,44 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           fontSize: 20,
         ),
+        titleLarge: GoogleFonts.outfit(
+          color: textPrimary,
+          fontWeight: FontWeight.w600,
+          fontSize: 18,
+        ),
         titleMedium: GoogleFonts.inter(
-          color: textSecondary,
-          fontWeight: FontWeight.w500,
+          color: textPrimary,
+          fontWeight: FontWeight.w600,
           fontSize: 16,
         ),
-        bodyLarge: GoogleFonts.inter(color: textPrimary, fontSize: 16),
-        bodyMedium: GoogleFonts.inter(color: textSecondary, fontSize: 14),
+        titleSmall: GoogleFonts.inter(
+          color: textSecondary,
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
+        ),
+        bodyLarge: GoogleFonts.inter(
+          color: textPrimary,
+          fontSize: 16,
+        ),
+        bodyMedium: GoogleFonts.inter(
+          color: textSecondary,
+          fontSize: 14,
+        ),
+        labelLarge: GoogleFonts.inter(
+          color: textPrimary,
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+        ),
+        labelMedium: GoogleFonts.inter(
+          color: textSecondary,
+          fontWeight: FontWeight.w500,
+          fontSize: 12,
+        ),
+        labelSmall: GoogleFonts.inter(
+          color: textSecondary,
+          fontWeight: FontWeight.w500,
+          fontSize: 10,
+        ),
       ),
       cardTheme: CardThemeData(
         color: surface,

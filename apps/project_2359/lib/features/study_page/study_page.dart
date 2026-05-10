@@ -393,28 +393,28 @@ class _StudyPageState extends State<StudyPage> {
                             _FsrsButton(
                               label: 'Again',
                               subtitle: _previews[fsrs.Rating.again],
-                              color: Colors.red.shade400,
+                              color: AppTheme.again,
                               onPressed: () => _rateCard(fsrs.Rating.again),
                             ),
                             const SizedBox(width: 8),
                             _FsrsButton(
                               label: 'Hard',
                               subtitle: _previews[fsrs.Rating.hard],
-                              color: Colors.orange.shade400,
+                              color: AppTheme.hard,
                               onPressed: () => _rateCard(fsrs.Rating.hard),
                             ),
                             const SizedBox(width: 8),
                             _FsrsButton(
                               label: 'Good',
                               subtitle: _previews[fsrs.Rating.good],
-                              color: Colors.green.shade400,
+                              color: AppTheme.good,
                               onPressed: () => _rateCard(fsrs.Rating.good),
                             ),
                             const SizedBox(width: 8),
                             _FsrsButton(
                               label: 'Easy',
                               subtitle: _previews[fsrs.Rating.easy],
-                              color: Colors.blue.shade400,
+                              color: AppTheme.easy,
                               onPressed: () => _rateCard(fsrs.Rating.easy),
                             ),
                           ],
@@ -464,10 +464,9 @@ class _FlipButton extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: theme.textTheme.labelLarge?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 16,
             ),
           ),
         ),
@@ -744,25 +743,25 @@ class _SwipeableCardStackState extends State<_SwipeableCardStack>
             // Radial Edge Gradients
             _RadialGradientOverlay(
               direction: Alignment.centerLeft,
-              color: Colors.red.shade400,
+              color: AppTheme.again,
               intensity: leftIntensity,
               isVisible: _isDragging,
             ),
             _RadialGradientOverlay(
               direction: Alignment.centerRight,
-              color: Colors.green.shade400,
+              color: AppTheme.good,
               intensity: rightIntensity,
               isVisible: _isDragging,
             ),
             _RadialGradientOverlay(
               direction: Alignment.topCenter,
-              color: Colors.blue.shade400,
+              color: AppTheme.easy,
               intensity: upIntensity,
               isVisible: _isDragging,
             ),
             _RadialGradientOverlay(
               direction: Alignment.bottomCenter,
-              color: Colors.orange.shade400,
+              color: AppTheme.hard,
               intensity: downIntensity,
               isVisible: _isDragging,
             ),
@@ -894,19 +893,19 @@ class _TopSelectionOverlay extends StatelessWidget {
     switch (rating) {
       case fsrs.Rating.again:
         label = 'AGAIN';
-        color = Colors.red.shade400;
+        color = AppTheme.again;
         break;
       case fsrs.Rating.hard:
         label = 'HARD';
-        color = Colors.orange.shade400;
+        color = AppTheme.hard;
         break;
       case fsrs.Rating.good:
         label = 'GOOD';
-        color = Colors.green.shade400;
+        color = AppTheme.good;
         break;
       case fsrs.Rating.easy:
         label = 'EASY';
-        color = Colors.blue.shade400;
+        color = AppTheme.easy;
         break;
     }
 
@@ -931,9 +930,8 @@ class _TopSelectionOverlay extends StatelessWidget {
             ),
             child: Text(
               label,
-              style: const TextStyle(
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: Colors.white,
-                fontWeight: FontWeight.bold,
                 letterSpacing: 2,
               ),
             ),

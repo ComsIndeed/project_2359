@@ -31,8 +31,8 @@ class StudyCard extends StatelessWidget {
 
     final revealedColor = Color.lerp(
       theme.colorScheme.surface,
-      Colors.blue.shade100,
-      0.25, // Slightly more blue
+      theme.colorScheme.primary,
+      0.1, // Subtle tint
     );
 
     return GestureDetector(
@@ -45,9 +45,9 @@ class StudyCard extends StatelessWidget {
           shape: AppTheme.cardShape,
           shadows: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
             ),
           ],
         ),

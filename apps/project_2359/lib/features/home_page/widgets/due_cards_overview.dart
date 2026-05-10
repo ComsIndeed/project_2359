@@ -62,6 +62,7 @@ class _DueChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: Row(
@@ -69,9 +70,8 @@ class _DueChip extends StatelessWidget {
         children: [
           Text(
             "$count",
-            style: const TextStyle(
+            style: theme.textTheme.labelLarge?.copyWith(
               color: AppTheme.important,
-              fontSize: 14,
               fontWeight: FontWeight.w900,
             ),
           ),
@@ -79,10 +79,8 @@ class _DueChip extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              style: TextStyle(
+              style: theme.textTheme.labelMedium?.copyWith(
                 color: onColor.withValues(alpha: 0.5),
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
               ),
               overflow: TextOverflow.ellipsis,
             ),

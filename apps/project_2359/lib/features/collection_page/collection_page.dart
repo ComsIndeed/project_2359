@@ -279,7 +279,7 @@ class _CollectionPageState extends State<CollectionPage> {
       return _buildContent();
     }
 
-    return Scaffold(backgroundColor: Colors.black, body: _buildContent());
+    return Scaffold(body: _buildContent());
   }
 
   Widget _buildContent() {
@@ -504,7 +504,7 @@ class _CollectionPageState extends State<CollectionPage> {
                       Container(
                         width: 1,
                         margin: const EdgeInsets.symmetric(vertical: 12),
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
                       ),
                       Material(
                         color: Colors.transparent,
@@ -514,7 +514,7 @@ class _CollectionPageState extends State<CollectionPage> {
                             topRight: Radius.circular(24),
                             bottomRight: Radius.circular(24),
                           ),
-                          child: const Padding(
+                          child: Padding(
                             padding: EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 14,
@@ -522,7 +522,7 @@ class _CollectionPageState extends State<CollectionPage> {
                             child: FaIcon(
                               FontAwesomeIcons.chevronUp,
                               size: 14,
-                              color: Colors.white54,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
                             ),
                           ),
                         ),
@@ -549,7 +549,7 @@ class _CollectionPageState extends State<CollectionPage> {
                               isSources ? "IMPORT OPTIONS" : "CREATION TOOLS",
                               style: theme.textTheme.labelSmall?.copyWith(
                                 fontWeight: FontWeight.w900,
-                                color: Colors.white.withValues(alpha: 0.4),
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                 letterSpacing: 1.5,
                               ),
                             ),
@@ -560,7 +560,7 @@ class _CollectionPageState extends State<CollectionPage> {
                                 size: 16,
                               ),
                               onPressed: close,
-                              color: Colors.white24,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.24),
                             ),
                           ],
                         ),
@@ -608,7 +608,7 @@ class _CollectionPageState extends State<CollectionPage> {
                               decoration: BoxDecoration(
                                 border: Border(
                                   bottom: BorderSide(
-                                    color: Colors.white.withValues(alpha: 0.08),
+                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
                                     width: 1,
                                   ),
                                 ),
@@ -772,7 +772,7 @@ class _HeaderContent extends StatelessWidget {
                 collectionName,
                 style: theme.textTheme.displaySmall?.copyWith(
                   fontWeight: FontWeight.w900,
-                  color: Colors.white,
+                  color: theme.colorScheme.onSurface,
                   letterSpacing: -0.8,
                   fontSize: 28,
                 ),
@@ -848,8 +848,8 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
     final theme = Theme.of(context);
     final t = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
     final bgColor = Color.lerp(
-      Colors.black.withValues(alpha: 0.0),
-      Colors.black,
+      theme.scaffoldBackgroundColor.withValues(alpha: 0.0),
+      theme.scaffoldBackgroundColor,
       (t * 1.5).clamp(0.0, 1.0),
     )!;
 
@@ -904,7 +904,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                         style: theme.textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                           fontSize: 18,
-                          color: Colors.white,
+                          color: theme.colorScheme.onSurface,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -975,12 +975,12 @@ class _HeaderCircleAction extends StatelessWidget {
             decoration: BoxDecoration(
               color: isActive
                   ? theme.colorScheme.primary
-                  : Colors.white.withValues(alpha: 0.05),
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.05),
               shape: BoxShape.circle,
               border: Border.all(
                 color: isActive
                     ? theme.colorScheme.primary
-                    : Colors.white.withValues(alpha: 0.08),
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.08),
                 width: 1,
               ),
               boxShadow: isActive
@@ -997,7 +997,7 @@ class _HeaderCircleAction extends StatelessWidget {
               child: FaIcon(
                 icon,
                 size: 16,
-                color: isActive ? Colors.black : Colors.white,
+                color: isActive ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -1006,8 +1006,8 @@ class _HeaderCircleAction extends StatelessWidget {
             label,
             style: theme.textTheme.labelSmall?.copyWith(
               color: isActive
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.4),
+                  ? theme.colorScheme.onSurface
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.4),
               fontWeight: FontWeight.bold,
               letterSpacing: 0.2,
             ),
@@ -1039,7 +1039,7 @@ class _CompactIconButton extends StatelessWidget {
         size: 16,
         color: isActive
             ? theme.colorScheme.primary
-            : Colors.white.withValues(alpha: 0.6),
+            : theme.colorScheme.onSurface.withValues(alpha: 0.6),
       ),
     );
   }
@@ -1073,6 +1073,7 @@ class _CardsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.symmetric(
@@ -1122,10 +1123,10 @@ class _CardsPage extends StatelessWidget {
                             "Last updated ${draft.updatedAt.split('T')[0]}",
                             style: const TextStyle(fontSize: 11),
                           ),
-                          leading: const FaIcon(
+                          leading: FaIcon(
                             FontAwesomeIcons.penToSquare,
                             size: 16,
-                            color: Colors.white38,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
                           ),
                           onTap: () {
                             Navigator.push(
@@ -1330,7 +1331,7 @@ class _SettingsPage extends StatelessWidget {
           const _SectionLabel(title: "General"),
           const SizedBox(height: 12),
           ProjectListGroup(
-            backgroundColor: Colors.white.withValues(alpha: 0.05),
+            backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
             children: [
               ProjectListTile.simple(
                 label: "Rename Collection",
@@ -1355,7 +1356,7 @@ class _SettingsPage extends StatelessWidget {
           const _SectionLabel(title: "Content & Data"),
           const SizedBox(height: 12),
           ProjectListGroup(
-            backgroundColor: Colors.white.withValues(alpha: 0.05),
+            backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
             children: [
               ProjectListTile.simple(
                 label: "Archive Collection",
@@ -1374,7 +1375,7 @@ class _SettingsPage extends StatelessWidget {
           const _SectionLabel(title: "Danger Zone"),
           const SizedBox(height: 12),
           ProjectListGroup(
-            backgroundColor: Colors.white.withValues(alpha: 0.05),
+            backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
             children: [
               ProjectListTile.simple(
                 label: "Delete Collection",
