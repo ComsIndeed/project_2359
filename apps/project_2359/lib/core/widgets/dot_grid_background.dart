@@ -57,11 +57,9 @@ class DotGridBackground extends StatelessWidget {
                       );
                     },
                   )
-                : CustomPaint(
-                    painter: _DotGridPainter(dotColor: dotColor),
-                  ),
+                : CustomPaint(painter: _DotGridPainter(dotColor: dotColor)),
           ),
-          if (child != null) child!,
+          ?child,
         ],
       ),
     );
@@ -70,16 +68,11 @@ class DotGridBackground extends StatelessWidget {
 
 class _DotGridPainter extends CustomPainter {
   final Color dotColor;
-  final double spacing;
-  final double dotSize;
+  final double spacing = 32.0;
+  final double dotSize = 2.0;
   final Matrix4? transform;
 
-  _DotGridPainter({
-    required this.dotColor,
-    this.spacing = 32.0,
-    this.dotSize = 2.0,
-    this.transform,
-  });
+  _DotGridPainter({required this.dotColor, this.transform});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -113,12 +106,16 @@ class _DotGridPainter extends CustomPainter {
       bottom = bottomRight.dy + spacing;
     }
 
-    for (double x = (left / spacing).floor() * spacing;
-        x < right;
-        x += spacing) {
-      for (double y = (top / spacing).floor() * spacing;
-          y < bottom;
-          y += spacing) {
+    for (
+      double x = (left / spacing).floor() * spacing;
+      x < right;
+      x += spacing
+    ) {
+      for (
+        double y = (top / spacing).floor() * spacing;
+        y < bottom;
+        y += spacing
+      ) {
         canvas.drawCircle(Offset(x, y), dotSize / 2, paint);
       }
     }

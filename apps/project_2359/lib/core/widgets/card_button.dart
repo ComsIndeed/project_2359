@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_theme.dart';
-import 'package:project_2359/core/widgets/pressable_scale.dart';
 import 'package:project_2359/core/widgets/special_background_generator.dart';
 
 /// The layout direction for a [CardButton]

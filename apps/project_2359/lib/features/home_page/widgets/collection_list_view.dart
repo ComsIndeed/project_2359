@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/features/collection_page/collection_page.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
