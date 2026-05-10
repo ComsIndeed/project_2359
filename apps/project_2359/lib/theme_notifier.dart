@@ -18,19 +18,27 @@ enum BackgroundTone {
     Color(0xFFFFFFFF),
     Color(0xFFF5F5F5),
   ),
-  neutral(
-    'Neutral',
-    Color(0xFF121212),
-    Color(0xFF1E1E1E),
-    Color(0xFFF5F6FA),
-    Color(0xFFFFFFFF),
+  solarized(
+    'Solarized',
+    Color(0xFF002B36),
+    Color(0xFF073642),
+    Color(0xFFFDF6E3),
+    Color(0xFFEEE8D5),
   ),
-  warm(
-    'Warm',
-    Color(0xFF1A1410),
-    Color(0xFF252018),
-    Color(0xFFFAF9F6),
+  highContrast(
+    'High Contrast',
+    Color(0xFF000000),
+    Color(0xFF000000),
     Color(0xFFFFFFFF),
+    Color(0xFFFFFFFF),
+    isHighContrast: true,
+  ),
+  vibrant(
+    'Vibrant',
+    Color(0xFF1A0B2E),
+    Color(0xFF261447),
+    Color(0xFFFFF0F5),
+    Color(0xFFFFE4E1),
   );
 
   final String label;
@@ -38,14 +46,16 @@ enum BackgroundTone {
   final Color darkSurface;
   final Color lightBackground;
   final Color lightSurface;
+  final bool isHighContrast;
 
   const BackgroundTone(
     this.label,
     this.darkBackground,
     this.darkSurface,
     this.lightBackground,
-    this.lightSurface,
-  );
+    this.lightSurface, {
+    this.isHighContrast = false,
+  });
 
   Color background(Brightness brightness) =>
       brightness == Brightness.dark ? darkBackground : lightBackground;

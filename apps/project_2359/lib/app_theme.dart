@@ -57,15 +57,27 @@ class AppTheme {
     final tone = backgroundTone ?? BackgroundTone.ocean;
     final bg = tone.background(brightness);
     final surface = tone.surface(brightness);
-    final secondarySurface = Color.lerp(
-      surface,
-      isDark ? Colors.white : Colors.black,
-      0.08,
-    )!;
-    final textPrimary = isDark ? Colors.white : const Color(0xFF1A1A2E);
-    final textSecondary = isDark
-        ? const Color(0xFF8F9BB3)
-        : const Color(0xFF6B7280);
+    final isHC = tone.isHighContrast;
+    final secondarySurface = isHC
+        ? (isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.15))
+        : Color.lerp(
+            surface,
+            isDark ? Colors.white : Colors.black,
+            0.08,
+          )!;
+    final textPrimary = isHC
+        ? (isDark ? Colors.white : Colors.black)
+        : (isDark ? Colors.white : const Color(0xFF1A1A2E));
+    final textSecondary = isHC
+        ? (isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7))
+        : (isDark ? const Color(0xFF8F9BB3) : const Color(0xFF6B7280));
+
+    final borderSide = isHC
+        ? BorderSide(
+            color: isDark ? Colors.white.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.3),
+            width: 2,
+          )
+        : BorderSide.none;
 
     return ThemeData(
       useMaterial3: true,
@@ -152,8 +164,12 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: surface,
         elevation: 0,
-        shape: cardShape,
-        margin: EdgeInsets.all(8),
+        shape: isHC
+            ? (cardShape as RoundedSuperellipseBorder).copyWith(
+                side: borderSide,
+              )
+            : cardShape,
+        margin: const EdgeInsets.all(8),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -191,15 +207,15 @@ class AppTheme {
         fillColor: secondarySurface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderSide: borderSide,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderSide: borderSide,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: accent, width: 1.5),
+          borderSide: BorderSide(color: accent, width: 2),
         ),
         labelStyle: TextStyle(color: textSecondary),
         hintStyle: TextStyle(color: textSecondary),
