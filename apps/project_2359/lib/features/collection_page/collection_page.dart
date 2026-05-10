@@ -26,7 +26,7 @@ import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:project_2359/core/enums/media_type.dart';
 import 'package:project_2359/core/tables/source_item_blobs.dart';
-import 'package:project_2359/features/card_creation_page/card_creation_page.dart';
+import 'package:project_2359/features/note_taking_page/note_taking_page.dart';
 import 'package:project_2359/features/study_page/study_page.dart';
 import 'package:project_2359/features/study_page/widgets/study_session_setup_sheet.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
@@ -472,7 +472,7 @@ class _CollectionPageState extends State<CollectionPage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => CardCreationPage(
+                                  builder: (context) => NoteTakingPage(
                                     collectionId: widget.collectionId,
                                   ),
                                 ),
@@ -1132,7 +1132,7 @@ class _CardsPage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => CardCreationPage(
+                                builder: (context) => NoteTakingPage(
                                   collectionId: collectionId,
                                   deckId: draft.deckId,
                                   draftId: draft.id,

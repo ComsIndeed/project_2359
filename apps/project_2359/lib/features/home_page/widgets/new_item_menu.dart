@@ -4,7 +4,7 @@ import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
-import 'package:project_2359/features/card_creation_page/card_creation_page.dart';
+import 'package:project_2359/features/note_taking_page/note_taking_page.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:provider/provider.dart';
@@ -233,7 +233,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CardCreationPage(
+                      builder: (context) => NoteTakingPage(
                         collectionId: widget.activeCollectionId ?? "default",
                       ),
                     ),
