@@ -14,6 +14,7 @@ import 'package:project_2359/core/enums/media_type.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_core/shared_core.dart';
 
 enum NoteType { basic, basicReversed, cloze, imageOcclusion }
@@ -54,6 +55,10 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   PdfPageText? _hoveredPageText;
   (int, int)? _hoveredSentenceBounds;
   (int, int)? _hoveredParagraphBounds;
+  String? _selectedText;
+  Timer? _quoteFadeTimer;
+  bool _isQuoteExpanded = false;
+  bool _isQuoteFaded = false;
 
   @override
   void initState() {
@@ -390,11 +395,101 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildQuoteWidget(),
         _buildNoteTypeSelector(),
         const SizedBox(height: 24),
         Expanded(child: SingleChildScrollView(child: _buildNoteFields())),
       ],
     );
+  }
+
+  Widget _buildQuoteWidget() {
+    if (_selectedText == null) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _isQuoteExpanded = !_isQuoteExpanded;
+          if (_isQuoteExpanded) {
+            _isQuoteFaded = false;
+            _quoteFadeTimer?.cancel();
+          } else {
+            _quoteFadeTimer?.cancel();
+            _quoteFadeTimer = Timer(const Duration(seconds: 5), () {
+              if (mounted) setState(() => _isQuoteFaded = true);
+            });
+          }
+        });
+      },
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 500),
+        opacity: _isQuoteFaded ? 0.3 : 1.0,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: cs.primary.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  FaIcon(
+                    FontAwesomeIcons.quoteLeft,
+                    size: 10,
+                    color: cs.primary.withValues(alpha: 0.5),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "Selected Text",
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: cs.primary.withValues(alpha: 0.8),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if (_isQuoteExpanded)
+                    Icon(
+                      Icons.keyboard_arrow_up,
+                      size: 14,
+                      color: cs.primary.withValues(alpha: 0.5),
+                    )
+                  else
+                    Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 14,
+                      color: cs.primary.withValues(alpha: 0.5),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: Text(
+                  _selectedText!,
+                  maxLines: _isQuoteExpanded ? null : 2,
+                  overflow: _isQuoteExpanded ? null : TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurface.withValues(alpha: 0.7),
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).animate().fadeIn().slideY(begin: 0.1, curve: Curves.easeOutQuart);
   }
 
   Widget _buildNoteFields() {
@@ -918,6 +1013,31 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     _pdfController.textSelectionDelegate.setTextSelectionPointRange(range);
   }
 
+  Future<void> _onSelectionChanged(PdfTextSelection selection) async {
+    _quoteFadeTimer?.cancel();
+    if (selection.hasSelectedText) {
+      final text = await selection.getSelectedText();
+      if (mounted) {
+        setState(() {
+          _selectedText = text;
+          _isQuoteFaded = false;
+          _isQuoteExpanded = false;
+        });
+        _quoteFadeTimer = Timer(const Duration(seconds: 5), () {
+          if (mounted) setState(() => _isQuoteFaded = true);
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _selectedText = null;
+          _isQuoteFaded = false;
+          _isQuoteExpanded = false;
+        });
+      }
+    }
+  }
+
   Widget _buildPdfHeader() {
     final theme = Theme.of(context);
     return ClipRect(
@@ -1007,7 +1127,48 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           vertical: 16,
           horizontal: 128,
         ),
-        textSelectionParams: const PdfTextSelectionParams(enabled: true),
+        textSelectionParams: PdfTextSelectionParams(
+          enabled: true,
+          onTextSelectionChange: _onSelectionChanged,
+        ),
+        buildContextMenu: (context, params) {
+          if (params.contextMenuFor != PdfViewerPart.selectedText) return null;
+
+          final items = [
+            ContextMenuButtonItem(
+              onPressed: () {
+                params.textSelectionDelegate.copyTextSelection();
+                params.dismissContextMenu();
+              },
+              type: ContextMenuButtonType.copy,
+            ),
+            ContextMenuButtonItem(
+              onPressed: () {
+                // TODO: Implement add to front
+                params.dismissContextMenu();
+              },
+              label: 'Add to Front',
+            ),
+            ContextMenuButtonItem(
+              onPressed: () {
+                // TODO: Implement add to back
+                params.dismissContextMenu();
+              },
+              label: 'Add to Back',
+            ),
+          ];
+
+          return Align(
+            alignment: Alignment.topLeft,
+            child: AdaptiveTextSelectionToolbar.buttonItems(
+              anchors: TextSelectionToolbarAnchors(
+                primaryAnchor: params.anchorA,
+                secondaryAnchor: params.anchorB,
+              ),
+              buttonItems: items,
+            ),
+          );
+        },
         pagePaintCallbacks: [_paintHoverHighlight],
         onGeneralTap: _onGeneralTap,
         pageBackgroundPaintCallbacks: [
