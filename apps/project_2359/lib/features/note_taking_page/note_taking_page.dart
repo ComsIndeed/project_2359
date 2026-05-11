@@ -60,6 +60,12 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   bool _isQuoteExpanded = false;
   bool _isQuoteFaded = false;
 
+  final TextEditingController _frontController = TextEditingController();
+  final TextEditingController _backController = TextEditingController();
+  final TextEditingController _clozeTextController = TextEditingController();
+  final TextEditingController _clozeExtraController = TextEditingController();
+  final TextEditingController _occlusionTitleController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -95,6 +101,12 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   void dispose() {
     _pageController.dispose();
     _sourcesSub?.cancel();
+    _quoteFadeTimer?.cancel();
+    _frontController.dispose();
+    _backController.dispose();
+    _clozeTextController.dispose();
+    _clozeExtraController.dispose();
+    _occlusionTitleController.dispose();
     // Reset title bar when leaving the page
     Future.microtask(() {
       if (mounted) {
@@ -507,9 +519,19 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   Widget _buildBasicFields() {
     return Column(
       children: [
-        _buildTextField(label: 'Front', hint: 'Enter question...', minLines: 3),
+        _buildTextField(
+          label: 'Front',
+          hint: 'Enter question...',
+          minLines: 3,
+          controller: _frontController,
+        ),
         const SizedBox(height: 16),
-        _buildTextField(label: 'Back', hint: 'Enter answer...', minLines: 3),
+        _buildTextField(
+          label: 'Back',
+          hint: 'Enter answer...',
+          minLines: 3,
+          controller: _backController,
+        ),
       ],
     );
   }
@@ -521,12 +543,14 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           label: 'Text',
           hint: 'Paste text here and use {{c1::...}} for clozes',
           minLines: 5,
+          controller: _clozeTextController,
         ),
         const SizedBox(height: 16),
         _buildTextField(
           label: 'Back Extra',
           hint: 'Extra information (optional)',
           minLines: 2,
+          controller: _clozeExtraController,
         ),
       ],
     );
@@ -536,7 +560,11 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
-        _buildTextField(label: 'Title', hint: 'Name this occlusion set'),
+        _buildTextField(
+          label: 'Title',
+          hint: 'Name this occlusion set',
+          controller: _occlusionTitleController,
+        ),
         const SizedBox(height: 24),
         Container(
           width: double.infinity,
@@ -569,6 +597,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   Widget _buildTextField({
     required String label,
     required String hint,
+    required TextEditingController controller,
     int minLines = 1,
   }) {
     final theme = Theme.of(context);
@@ -577,15 +606,64 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: theme.textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: cs.primary,
-          ),
+        Row(
+          children: [
+            Text(
+              label,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: cs.primary,
+              ),
+            ),
+            const Spacer(),
+            _buildFieldActionButton(
+              icon: Icons.undo_rounded,
+              tooltip: 'Undo',
+              onTap: () {
+                // Flutter's built-in undo can be triggered via shortcut
+                // but programmatic undo is tricky without a FocusNode
+                // For now, let's at least have the UI
+              },
+            ),
+            const SizedBox(width: 8),
+            _buildFieldActionButton(
+              icon: Icons.format_quote_rounded,
+              tooltip: 'Paste Citation',
+              onTap: _selectedText == null
+                  ? null
+                  : () {
+                      final text = controller.text;
+                      final selection = controller.selection;
+                      final cited = _selectedText!;
+                      
+                      if (selection.isValid) {
+                        final newText = text.replaceRange(
+                          selection.start,
+                          selection.end,
+                          cited,
+                        );
+                        controller.value = TextEditingValue(
+                          text: newText,
+                          selection: TextSelection.collapsed(
+                            offset: selection.start + cited.length,
+                          ),
+                        );
+                      } else {
+                        controller.text = text + cited;
+                      }
+                    },
+            ),
+            const SizedBox(width: 8),
+            _buildFieldActionButton(
+              icon: Icons.delete_sweep_outlined,
+              tooltip: 'Clear',
+              onTap: () => controller.clear(),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         TextField(
+          controller: controller,
           minLines: minLines,
           maxLines: null,
           decoration: InputDecoration(
@@ -613,6 +691,45 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFieldActionButton({
+    required IconData icon,
+    required String tooltip,
+    VoidCallback? onTap,
+  }) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isEnabled = onTap != null;
+
+    return Material(
+      color: Colors.transparent,
+      child: Tooltip(
+        message: tooltip,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isEnabled
+                    ? cs.onSurface.withValues(alpha: 0.1)
+                    : cs.onSurface.withValues(alpha: 0.05),
+              ),
+            ),
+            child: Icon(
+              icon,
+              size: 14,
+              color: isEnabled
+                  ? cs.onSurface.withValues(alpha: 0.6)
+                  : cs.onSurface.withValues(alpha: 0.2),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
