@@ -15,6 +15,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
+enum NoteType { basic, basicReversed, cloze, imageOcclusion }
+
 class NoteTakingPage extends StatefulWidget {
   final String collectionId;
   final String? deckId;
@@ -42,6 +44,8 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   bool _isLoadingPdf = false;
   bool _isInverted = false;
   late PdfViewerController _pdfController;
+  NoteType _selectedNoteType = NoteType.basic;
+  NoteType? _hoveredNoteType;
 
   @override
   void initState() {
@@ -359,12 +363,263 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   }
 
   Widget _buildTabContent(String placeholder) {
+    if (placeholder == 'Notes Content') {
+      return _buildNotesTab();
+    }
     return Center(
       child: Text(
         placeholder,
         style: const TextStyle(color: Colors.grey, fontSize: 16),
       ),
     );
+  }
+
+  Widget _buildNotesTab() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildNoteTypeSelector(),
+        const SizedBox(height: 24),
+        Expanded(
+          child: SingleChildScrollView(
+            child: _buildNoteFields(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNoteFields() {
+    switch (_selectedNoteType) {
+      case NoteType.basic:
+      case NoteType.basicReversed:
+        return _buildBasicFields();
+      case NoteType.cloze:
+        return _buildClozeFields();
+      case NoteType.imageOcclusion:
+        return _buildImageOcclusionFields();
+    }
+  }
+
+  Widget _buildBasicFields() {
+    return Column(
+      children: [
+        _buildTextField(label: 'Front', hint: 'Enter question...', minLines: 3),
+        const SizedBox(height: 16),
+        _buildTextField(label: 'Back', hint: 'Enter answer...', minLines: 3),
+      ],
+    );
+  }
+
+  Widget _buildClozeFields() {
+    return Column(
+      children: [
+        _buildTextField(
+          label: 'Text',
+          hint: 'Paste text here and use {{c1::...}} for clozes',
+          minLines: 5,
+        ),
+        const SizedBox(height: 16),
+        _buildTextField(
+          label: 'Back Extra',
+          hint: 'Extra information (optional)',
+          minLines: 2,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImageOcclusionFields() {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      children: [
+        _buildTextField(label: 'Title', hint: 'Name this occlusion set'),
+        const SizedBox(height: 24),
+        Container(
+          width: double.infinity,
+          height: 200,
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.image_outlined, size: 48, color: cs.primary.withValues(alpha: 0.5)),
+              const SizedBox(height: 12),
+              Text(
+                'Select an image or a PDF region',
+                style: TextStyle(color: cs.onSurface.withValues(alpha: 0.5)),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required String hint,
+    int minLines = 1,
+  }) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: cs.primary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          minLines: minLines,
+          maxLines: null,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: cs.onSurface.withValues(alpha: 0.3),
+            ),
+            filled: true,
+            fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.2),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.2)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: cs.primary.withValues(alpha: 0.5)),
+            ),
+            contentPadding: const EdgeInsets.all(16),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNoteTypeSelector() {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final types = NoteType.values;
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final itemWidth = constraints.maxWidth / types.length;
+          return Stack(
+            children: [
+              AnimatedAlign(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOutQuart,
+                alignment: Alignment(
+                  -1.0 + (_selectedNoteType.index * (2.0 / (types.length - 1))),
+                  0,
+                ),
+                child: Container(
+                  width: itemWidth,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: cs.primary.withValues(alpha: 0.15),
+                      width: 1,
+                    ),
+                  ),
+                ),
+              ),
+              Row(
+                children: types.map((type) {
+                    final isSelected = _selectedNoteType == type;
+                  final isHovered = _hoveredNoteType == type;
+
+                  return Expanded(
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _hoveredNoteType = type),
+                      onExit: (_) => setState(() => _hoveredNoteType = null),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => setState(() => _selectedNoteType = type),
+                          borderRadius: BorderRadius.circular(12),
+                          hoverColor: cs.primary.withValues(alpha: 0.04),
+                          splashColor: cs.primary.withValues(alpha: 0.08),
+                          highlightColor: Colors.transparent,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            height: 72,
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                AnimatedScale(
+                                  duration: const Duration(milliseconds: 200),
+                                  scale: isSelected || isHovered ? 1.05 : 1.0,
+                                  child: _NoteTypeIcon(
+                                    type: type,
+                                    isSelected: isSelected,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  _getNoteTypeLabel(type),
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isSelected
+                                        ? cs.primary
+                                        : cs.onSurfaceVariant.withValues(
+                                          alpha: isHovered ? 1 : 0.6,
+                                        ),
+                                    fontSize: 10,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  String _getNoteTypeLabel(NoteType type) {
+    switch (type) {
+      case NoteType.basic:
+        return "Basic";
+      case NoteType.basicReversed:
+        return "Reversed";
+      case NoteType.cloze:
+        return "Cloze";
+      case NoteType.imageOcclusion:
+        return "Occlusion";
+    }
   }
 
   Future<void> _loadPdf(SourceItem source) async {
@@ -636,6 +891,196 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           ),
         );
       },
+    );
+  }
+}
+
+class _NoteTypeIcon extends StatelessWidget {
+  final NoteType type;
+  final bool isSelected;
+
+  const _NoteTypeIcon({required this.type, required this.isSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final color = isSelected ? cs.primary : cs.onSurface.withValues(alpha: 0.2);
+
+    switch (type) {
+      case NoteType.basic:
+        return _BasicIcon(color: color);
+      case NoteType.basicReversed:
+        return _ReversedIcon(color: color);
+      case NoteType.cloze:
+        return _ClozeIcon(color: color);
+      case NoteType.imageOcclusion:
+        return _ImageOcclusionIcon(color: color);
+    }
+  }
+}
+
+class _BasicIcon extends StatelessWidget {
+  final Color color;
+  const _BasicIcon({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            height: 2,
+            width: 16,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            height: 2,
+            width: 12,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReversedIcon extends StatelessWidget {
+  final Color color;
+  const _ReversedIcon({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 32,
+      height: 32,
+      child: Stack(
+        children: [
+          Positioned(
+            left: 2,
+            top: 2,
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: color.withValues(alpha: 0.1)),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 2,
+            bottom: 2,
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: color.withValues(alpha: 0.3)),
+              ),
+              child: Center(
+                child: FaIcon(
+                  FontAwesomeIcons.rightLeft,
+                  size: 10,
+                  color: color.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ClozeIcon extends StatelessWidget {
+  final Color color;
+  const _ClozeIcon({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            "[...]",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 8,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ImageOcclusionIcon extends StatelessWidget {
+  final Color color;
+  const _ImageOcclusionIcon({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          FaIcon(
+            FontAwesomeIcons.image,
+            size: 14,
+            color: color.withValues(alpha: 0.2),
+          ),
+          Positioned(
+            top: 10,
+            left: 8,
+            child: Container(
+              width: 10,
+              height: 6,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

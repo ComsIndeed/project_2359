@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
+import 'package:project_2359/features/help_page/help_page.dart';
 import 'package:project_2359/core/utils/navigator_utils.dart';
 import 'package:project_2359/core/widgets/desktop_title_bar_controller.dart';
 import 'package:provider/provider.dart';
@@ -50,7 +51,7 @@ class DesktopTitleBar extends StatelessWidget {
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _TitleBarAction(
+                      TitleBarAction(
                         icon: Icons.arrow_back,
                         onTap: onBack,
                         tooltip: "Back",
@@ -97,8 +98,24 @@ class DesktopTitleBar extends StatelessWidget {
               ),
             ),
           ),
+          // Custom Actions
+          if (controller.actions != null) ...[
+            ...controller.actions!,
+            const SizedBox(width: 4),
+          ],
+          // Help Action
+          TitleBarAction(
+            icon: FontAwesomeIcons.question,
+            onTap: () {
+              rootNavigatorKey.currentState?.push(
+                MaterialPageRoute(builder: (context) => const HelpPage()),
+              );
+            },
+            tooltip: "Help",
+          ),
+          const SizedBox(width: 4),
           // Settings Action
-          _TitleBarAction(
+          TitleBarAction(
             icon: FontAwesomeIcons.gear,
             onTap: () {
               rootNavigatorKey.currentState?.push(
@@ -115,12 +132,13 @@ class DesktopTitleBar extends StatelessWidget {
   }
 }
 
-class _TitleBarAction extends StatelessWidget {
+class TitleBarAction extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final String tooltip;
 
-  const _TitleBarAction({
+  const TitleBarAction({
+    super.key,
     required this.icon,
     required this.onTap,
     required this.tooltip,
@@ -152,9 +170,6 @@ class WindowButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = theme.colorScheme.onSurface;
-
     return Row(
       children: [
         _WindowButton(
