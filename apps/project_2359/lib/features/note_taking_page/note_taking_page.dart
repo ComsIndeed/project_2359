@@ -108,6 +108,10 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
 
     return Scaffold(
       body: AdaptivePaneLayout(
+        transition: const AdaptivePaneTransition.only(
+          master: AdaptivePaneTransitionType.animate,
+          detail: AdaptivePaneTransitionType.fade,
+        ),
         masterWidth: masterWidth,
         master: (context, controller) =>
             _buildSidePanel(context, controller, isCollapsed: false),
@@ -380,11 +384,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
       children: [
         _buildNoteTypeSelector(),
         const SizedBox(height: 24),
-        Expanded(
-          child: SingleChildScrollView(
-            child: _buildNoteFields(),
-          ),
-        ),
+        Expanded(child: SingleChildScrollView(child: _buildNoteFields())),
       ],
     );
   }
@@ -446,7 +446,11 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.image_outlined, size: 48, color: cs.primary.withValues(alpha: 0.5)),
+              Icon(
+                Icons.image_outlined,
+                size: 48,
+                color: cs.primary.withValues(alpha: 0.5),
+              ),
               const SizedBox(height: 12),
               Text(
                 'Select an image or a PDF region',
@@ -494,7 +498,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.2)),
+              borderSide: BorderSide(
+                color: cs.outlineVariant.withValues(alpha: 0.2),
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -545,7 +551,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
               ),
               Row(
                 children: types.map((type) {
-                    final isSelected = _selectedNoteType == type;
+                  final isSelected = _selectedNoteType == type;
                   final isHovered = _hoveredNoteType == type;
 
                   return Expanded(
@@ -563,35 +569,132 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             height: 72,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: _isMaximized ? 12 : 0,
+                            ),
                             alignment: Alignment.center,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            child: Row(
+                              mainAxisAlignment: _isMaximized
+                                  ? MainAxisAlignment.start
+                                  : MainAxisAlignment.center,
                               children: [
-                                AnimatedScale(
-                                  duration: const Duration(milliseconds: 200),
-                                  scale: isSelected || isHovered ? 1.05 : 1.0,
-                                  child: _NoteTypeIcon(
-                                    type: type,
-                                    isSelected: isSelected,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  _getNoteTypeLabel(type),
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color: isSelected
-                                        ? cs.primary
-                                        : cs.onSurfaceVariant.withValues(
-                                          alpha: isHovered ? 1 : 0.6,
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        AnimatedScale(
+                                          duration: const Duration(
+                                            milliseconds: 200,
+                                          ),
+                                          scale: isSelected || isHovered
+                                              ? 1.05
+                                              : 1.0,
+                                          child: _NoteTypeIcon(
+                                            type: type,
+                                            isSelected: isSelected,
+                                          ),
                                         ),
-                                    fontSize: 10,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                        AnimatedSize(
+                                          duration: const Duration(
+                                            milliseconds: 400,
+                                          ),
+                                          curve: Curves.easeOutQuart,
+                                          child: _isMaximized
+                                              ? Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        left: 12.0,
+                                                      ),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        _getNoteTypeLabel(type),
+                                                        style: theme
+                                                            .textTheme
+                                                            .labelMedium
+                                                            ?.copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color: isSelected
+                                                                  ? cs.primary
+                                                                  : cs.onSurface,
+                                                            ),
+                                                      ),
+                                                      Text(
+                                                        _getNoteTypeDescription(
+                                                          type,
+                                                        ),
+                                                        style: theme
+                                                            .textTheme
+                                                            .bodySmall
+                                                            ?.copyWith(
+                                                              color: cs
+                                                                  .onSurfaceVariant
+                                                                  .withValues(
+                                                                    alpha: 0.7,
+                                                                  ),
+                                                              fontSize: 10,
+                                                            ),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                )
+                                              : const SizedBox.shrink(),
+                                        ),
+                                      ],
+                                    ),
+                                    AnimatedSize(
+                                      duration: const Duration(
+                                        milliseconds: 400,
+                                      ),
+                                      curve: Curves.easeOutQuart,
+                                      child: !_isMaximized
+                                          ? Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const SizedBox(height: 6),
+                                                Text(
+                                                  _getNoteTypeLabel(type),
+                                                  style: theme
+                                                      .textTheme
+                                                      .labelSmall
+                                                      ?.copyWith(
+                                                        fontWeight: isSelected
+                                                            ? FontWeight.bold
+                                                            : FontWeight.normal,
+                                                        color: isSelected
+                                                            ? cs.primary
+                                                            : cs.onSurfaceVariant
+                                                                  .withValues(
+                                                                    alpha:
+                                                                        isHovered
+                                                                        ? 1
+                                                                        : 0.6,
+                                                                  ),
+                                                        fontSize: 10,
+                                                      ),
+                                                  textAlign: TextAlign.center,
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            )
+                                          : const SizedBox.shrink(),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -619,6 +722,19 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
         return "Cloze";
       case NoteType.imageOcclusion:
         return "Occlusion";
+    }
+  }
+
+  String _getNoteTypeDescription(NoteType type) {
+    switch (type) {
+      case NoteType.basic:
+        return "Standard front/back card";
+      case NoteType.basicReversed:
+        return "Two-way front/back card";
+      case NoteType.cloze:
+        return "Fill-in-the-blanks card";
+      case NoteType.imageOcclusion:
+        return "Hide parts of an image";
     }
   }
 
@@ -741,10 +857,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
               ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
 
             // Draw a subtle shadow behind the page
-            canvas.drawRect(
-              pageRect.shift(const Offset(2, 4)),
-              paint,
-            );
+            canvas.drawRect(pageRect.shift(const Offset(2, 4)), paint);
           },
         ],
       ),

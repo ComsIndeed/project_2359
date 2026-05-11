@@ -7,6 +7,42 @@ typedef PaneBuilder = Widget Function(
   AdaptivePaneController controller,
 );
 
+enum AdaptivePaneTransitionType {
+  /// The layout of the content snaps to its target size immediately,
+  /// and the container clips it during the animation.
+  snap,
+
+  /// Allows the content to animate its layout along with the container.
+  animate,
+
+  /// Immediately changes the layout but fades between the old and new states.
+  /// For the detail panel, this fades between the content at its current size
+  /// and its target size.
+  fade,
+}
+
+class AdaptivePaneTransition {
+  final AdaptivePaneTransitionType master;
+  final AdaptivePaneTransitionType detail;
+
+  const AdaptivePaneTransition({required this.master, required this.detail});
+
+  const AdaptivePaneTransition.all(AdaptivePaneTransitionType type)
+    : master = type,
+      detail = type;
+
+  const AdaptivePaneTransition.only({
+    this.master = AdaptivePaneTransitionType.fade,
+    this.detail = AdaptivePaneTransitionType.fade,
+  });
+
+  static const fade = AdaptivePaneTransition.all(AdaptivePaneTransitionType.fade);
+  static const snap = AdaptivePaneTransition.all(AdaptivePaneTransitionType.snap);
+  static const animate = AdaptivePaneTransition.all(
+    AdaptivePaneTransitionType.animate,
+  );
+}
+
 class AdaptivePaneController extends ChangeNotifier {
   bool _isCollapsed;
 
@@ -26,7 +62,6 @@ class AdaptivePaneController extends ChangeNotifier {
     notifyListeners();
   }
 }
-
 class AdaptivePaneLayout extends StatefulWidget {
   final PaneBuilder master;
   final PaneBuilder? masterCollapsed;
@@ -38,6 +73,7 @@ class AdaptivePaneLayout extends StatefulWidget {
   final bool isNested;
   final bool wrapDetail;
   final AdaptivePaneController? controller;
+  final AdaptivePaneTransition transition;
 
   const AdaptivePaneLayout({
     super.key,
@@ -51,6 +87,7 @@ class AdaptivePaneLayout extends StatefulWidget {
     this.isNested = false,
     this.wrapDetail = true,
     this.controller,
+    this.transition = AdaptivePaneTransition.fade,
   });
 
   @override
@@ -130,43 +167,72 @@ class _AdaptivePaneLayoutState extends State<AdaptivePaneLayout> {
     final currentMasterWidth =
         _controller.isCollapsed ? widget.collapsedMasterWidth : widget.masterWidth;
 
-    return Padding(
-      padding: outerPadding,
-      child: Row(
-        children: [
-          // Master Panel
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeOutQuart,
-            width: currentMasterWidth,
-            child: Container(
-              clipBehavior: Clip.antiAlias,
-              decoration: panelDecoration,
-              child: _buildMasterContent(context),
-            ),
-          ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        final targetDetailWidth =
+            totalWidth -
+            (_controller.isCollapsed
+                ? widget.collapsedMasterWidth
+                : widget.masterWidth) -
+            panelSpacing;
 
-          const SizedBox(width: panelSpacing),
+        return Padding(
+          padding: outerPadding,
+          child: Row(
+            children: [
+              // Master Panel
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOutQuart,
+                width: currentMasterWidth,
+                child: Container(
+                  clipBehavior: Clip.antiAlias,
+                  decoration: panelDecoration,
+                  child: _buildMasterContent(context),
+                ),
+              ),
 
-          // Detail Panel
-          Expanded(
-            child: _buildDetailContent(context, panelDecoration),
+              const SizedBox(width: panelSpacing),
+
+              // Detail Panel
+              Expanded(
+                child: _buildDetailContent(
+                  context,
+                  panelDecoration,
+                  targetDetailWidth,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildMasterContent(BuildContext context) {
+    final isCollapsed = _controller.isCollapsed;
+
+    switch (widget.transition.master) {
+      case AdaptivePaneTransitionType.animate:
+        return _buildAnimatedContent(context, isCollapsed);
+      case AdaptivePaneTransitionType.snap:
+        return _buildSnapContent(context, isCollapsed);
+      case AdaptivePaneTransitionType.fade:
+        return _buildFadeContent(context, isCollapsed);
+    }
+  }
+
+  Widget _buildFadeContent(BuildContext context, bool isCollapsed) {
     return Stack(
       children: [
         // Expanded Content
         Positioned.fill(
           child: AnimatedOpacity(
             duration: const Duration(milliseconds: 300),
-            opacity: _controller.isCollapsed ? 0.0 : 1.0,
+            opacity: isCollapsed ? 0.0 : 1.0,
             child: IgnorePointer(
-              ignoring: _controller.isCollapsed,
+              ignoring: isCollapsed,
               child: OverflowBox(
                 alignment: Alignment.topLeft,
                 minWidth: widget.masterWidth,
@@ -181,9 +247,9 @@ class _AdaptivePaneLayoutState extends State<AdaptivePaneLayout> {
         Positioned.fill(
           child: AnimatedOpacity(
             duration: const Duration(milliseconds: 300),
-            opacity: _controller.isCollapsed ? 1.0 : 0.0,
+            opacity: isCollapsed ? 1.0 : 0.0,
             child: IgnorePointer(
-              ignoring: !_controller.isCollapsed,
+              ignoring: !isCollapsed,
               child: OverflowBox(
                 alignment: Alignment.topLeft,
                 minWidth: widget.collapsedMasterWidth,
@@ -199,10 +265,37 @@ class _AdaptivePaneLayoutState extends State<AdaptivePaneLayout> {
     );
   }
 
-  Widget _buildDetailContent(BuildContext context, Decoration decoration) {
+  Widget _buildSnapContent(BuildContext context, bool isCollapsed) {
+    return OverflowBox(
+      alignment: Alignment.topLeft,
+      minWidth: isCollapsed ? widget.collapsedMasterWidth : widget.masterWidth,
+      maxWidth: isCollapsed ? widget.collapsedMasterWidth : widget.masterWidth,
+      child:
+          isCollapsed
+              ? (widget.masterCollapsed?.call(context, _controller) ??
+                  _DefaultCollapsedMaster(controller: _controller))
+              : widget.master(context, _controller),
+    );
+  }
+
+  Widget _buildAnimatedContent(BuildContext context, bool isCollapsed) {
+    // For animated content, we don't use OverflowBox so that the child
+    // can respond to the constraints of the parent AnimatedContainer.
+    return isCollapsed
+        ? (widget.masterCollapsed?.call(context, _controller) ??
+            _DefaultCollapsedMaster(controller: _controller))
+        : widget.master(context, _controller);
+  }
+
+  Widget _buildDetailContent(
+    BuildContext context,
+    Decoration decoration,
+    double targetWidth,
+  ) {
     final detail = widget.detail?.call(context, _controller);
     final emptyDetail = widget.emptyDetail?.call(context, _controller);
-    final child = detail ?? emptyDetail ?? const SizedBox.shrink(key: ValueKey('none'));
+    final child =
+        detail ?? emptyDetail ?? const SizedBox.shrink(key: ValueKey('none'));
 
     final animatedChild = AnimatedSwitcher(
       duration: const Duration(milliseconds: 400),
@@ -223,14 +316,44 @@ class _AdaptivePaneLayoutState extends State<AdaptivePaneLayout> {
       child: child,
     );
 
+    Widget wrappedChild;
+    switch (widget.transition.detail) {
+      case AdaptivePaneTransitionType.animate:
+        wrappedChild = animatedChild;
+        break;
+      case AdaptivePaneTransitionType.snap:
+        wrappedChild = OverflowBox(
+          alignment: Alignment.topLeft,
+          minWidth: targetWidth,
+          maxWidth: targetWidth,
+          child: animatedChild,
+        );
+        break;
+      case AdaptivePaneTransitionType.fade:
+        // For detail fade, we cross-fade between target sizes.
+        // Since detail usually has one widget, we use a simple AnimatedOpacity
+        // over an OverflowBox with the target size.
+        wrappedChild = AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: OverflowBox(
+            key: ValueKey(targetWidth), // Trigger fade when target width changes
+            alignment: Alignment.topLeft,
+            minWidth: targetWidth,
+            maxWidth: targetWidth,
+            child: animatedChild,
+          ),
+        );
+        break;
+    }
+
     if (detail != null && !widget.wrapDetail) {
-      return SizedBox.expand(child: animatedChild);
+      return SizedBox.expand(child: wrappedChild);
     }
 
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: decoration,
-      child: animatedChild,
+      child: wrappedChild,
     );
   }
 }
