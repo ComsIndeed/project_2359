@@ -434,6 +434,67 @@ class PdfTextBoundaryDetector {
       c == 0x20 || c == 0x09 || c == 0x0A || c == 0x0D;
 
   static bool _isUppercase(int c) => c >= 0x41 && c <= 0x5A;
+
+  /// Finds the character index nearest to [point] on the given [text] page.
+  ///
+  /// Uses a two-pass approach:
+  /// 1. Find fragments that are vertically close to the point.
+  /// 2. Among those, find the character with the smallest horizontal distance.
+  ///
+  /// Returns null if no character is within [threshold] distance.
+  static int? findNearestCharIndex(
+    PdfPageText text,
+    PdfPoint point, {
+    double threshold = 32.0,
+  }) {
+    if (text.charRects.isEmpty) return null;
+
+    int? bestIndex;
+    double minDistanceSq = double.infinity;
+
+    // First pass: Try to find a direct hit.
+    for (int i = 0; i < text.charRects.length; i++) {
+      if (text.charRects[i].containsPoint(point)) return i;
+    }
+
+    // Second pass: Find the nearest character with heuristics.
+    // We prioritize vertical proximity (same line) over horizontal.
+    for (int i = 0; i < text.charRects.length; i++) {
+      final rect = text.charRects[i];
+
+      // Vertical distance to the "line" (the rect's vertical span)
+      double dy = 0;
+      if (point.y > rect.top) {
+        dy = point.y - rect.top;
+      } else if (point.y < rect.bottom) {
+        dy = rect.bottom - point.y;
+      }
+
+      // Horizontal distance
+      double dx = 0;
+      if (point.x > rect.right) {
+        dx = point.x - rect.right;
+      } else if (point.x < rect.left) {
+        dx = rect.left - point.x;
+      }
+
+      // We weight vertical distance more heavily to stay on the same line if possible.
+      // This prevents the selection from jumping between lines when the cursor
+      // is at the end of a line.
+      final distSq = (dx * dx) + (dy * dy * 4.0);
+
+      if (distSq < minDistanceSq) {
+        minDistanceSq = distSq;
+        bestIndex = i;
+      }
+    }
+
+    if (minDistanceSq < threshold * threshold) {
+      return bestIndex;
+    }
+
+    return null;
+  }
 }
 
 class _Line {

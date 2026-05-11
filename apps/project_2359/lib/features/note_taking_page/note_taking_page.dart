@@ -14,6 +14,7 @@ import 'package:project_2359/core/enums/media_type.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:shared_core/shared_core.dart';
 
 enum NoteType { basic, basicReversed, cloze, imageOcclusion }
 
@@ -46,6 +47,13 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   late PdfViewerController _pdfController;
   NoteType _selectedNoteType = NoteType.basic;
   NoteType? _hoveredNoteType;
+
+  // Hover highlighting state
+  int? _hoveredPageNumber;
+  int? _hoveredCharIndex;
+  PdfPageText? _hoveredPageText;
+  (int, int)? _hoveredSentenceBounds;
+  (int, int)? _hoveredParagraphBounds;
 
   @override
   void initState() {
@@ -752,8 +760,162 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
       setState(() {
         _pdfBytes = blob?.bytes;
         _isLoadingPdf = false;
+        _clearHover();
       });
     }
+  }
+
+  void _onHover(PointerEvent event) async {
+    if (_pdfBytes == null) return;
+
+    final result = _pdfController.getPdfPageHitTestResult(
+      event.localPosition,
+      useDocumentLayoutCoordinates: false,
+    );
+
+    if (result != null) {
+      final page = result.page;
+      final point = result.offset; // PDF coordinates
+
+      // Load text for the page
+      final pageText = await page.loadStructuredText();
+
+      // Find character index (even between gaps)
+      final charIndex = PdfTextBoundaryDetector.findNearestCharIndex(
+        pageText,
+        point,
+      );
+
+      if (charIndex != null) {
+        if (_hoveredPageNumber != page.pageNumber ||
+            _hoveredCharIndex != charIndex) {
+          final sentenceBounds = PdfTextBoundaryDetector.findSentenceBounds(
+            pageText,
+            charIndex,
+          );
+          final paragraphBounds = PdfTextBoundaryDetector.findParagraphBounds(
+            pageText,
+            charIndex,
+          );
+
+          if (mounted) {
+            setState(() {
+              _hoveredPageNumber = page.pageNumber;
+              _hoveredCharIndex = charIndex;
+              _hoveredPageText = pageText;
+              _hoveredSentenceBounds = sentenceBounds;
+              _hoveredParagraphBounds = paragraphBounds;
+            });
+          }
+        }
+      } else {
+        _clearHover();
+      }
+    } else {
+      _clearHover();
+    }
+  }
+
+  void _clearHover() {
+    if (_hoveredCharIndex != null) {
+      setState(() {
+        _hoveredPageNumber = null;
+        _hoveredCharIndex = null;
+        _hoveredPageText = null;
+        _hoveredSentenceBounds = null;
+        _hoveredParagraphBounds = null;
+      });
+    }
+  }
+
+  void _paintHoverHighlight(Canvas canvas, Rect pageRect, PdfPage page) {
+    if (_hoveredPageNumber != page.pageNumber || _hoveredPageText == null) {
+      return;
+    }
+
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+
+    // 1. Draw Paragraph (Subtle)
+    if (_hoveredParagraphBounds != null) {
+      final (start, end) = _hoveredParagraphBounds!;
+      final range = _hoveredPageText!.getRangeFromAB(start, end - 1);
+      final paint =
+          Paint()
+            ..color = primaryColor.withValues(alpha: 0.08)
+            ..style = PaintingStyle.fill;
+
+      for (final rect in range.enumerateFragmentBoundingRects()) {
+        final flutterRect = rect.bounds.toRectInDocument(
+          page: page,
+          pageRect: pageRect,
+        );
+        canvas.drawRect(flutterRect, paint);
+      }
+    }
+
+    // 2. Draw Sentence (More Visible)
+    if (_hoveredSentenceBounds != null) {
+      final (start, end) = _hoveredSentenceBounds!;
+      final range = _hoveredPageText!.getRangeFromAB(start, end - 1);
+      final paint =
+          Paint()
+            ..color = primaryColor.withValues(alpha: 0.2)
+            ..style = PaintingStyle.fill;
+
+      for (final rect in range.enumerateFragmentBoundingRects()) {
+        final flutterRect = rect.bounds.toRectInDocument(
+          page: page,
+          pageRect: pageRect,
+        );
+        canvas.drawRect(flutterRect, paint);
+      }
+    }
+  }
+
+  bool _onGeneralTap(
+    BuildContext context,
+    PdfViewerController controller,
+    PdfViewerGeneralTapHandlerDetails details,
+  ) {
+    if (details.type == PdfViewerGeneralTapType.tap ||
+        details.type == PdfViewerGeneralTapType.doubleTap) {
+      final result = _pdfController.getPdfPageHitTestResult(
+        details.documentPosition,
+        useDocumentLayoutCoordinates: true,
+      );
+
+      if (result != null) {
+        _selectSmartly(result.page, result.offset, details.type);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<void> _selectSmartly(
+    PdfPage page,
+    PdfPoint point,
+    PdfViewerGeneralTapType tapType,
+  ) async {
+    final pageText = await page.loadStructuredText();
+    final charIndex = PdfTextBoundaryDetector.findNearestCharIndex(
+      pageText,
+      point,
+    );
+    if (charIndex == null) return;
+
+    final bounds =
+        (tapType == PdfViewerGeneralTapType.doubleTap)
+            ? PdfTextBoundaryDetector.findParagraphBounds(pageText, charIndex)
+            : PdfTextBoundaryDetector.findSentenceBounds(pageText, charIndex);
+
+    final range = PdfTextSelectionRange.fromPoints(
+      PdfTextSelectionPoint(pageText, bounds.$1),
+      PdfTextSelectionPoint(pageText, bounds.$2 - 1),
+    );
+
+    _pdfController.textSelectionDelegate.setTextSelectionPointRange(range);
   }
 
   Widget _buildPdfHeader() {
@@ -846,6 +1008,8 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           horizontal: 128,
         ),
         textSelectionParams: const PdfTextSelectionParams(enabled: true),
+        pagePaintCallbacks: [_paintHoverHighlight],
+        onGeneralTap: _onGeneralTap,
         pageBackgroundPaintCallbacks: [
           (canvas, pageRect, page) {
             final shadowColor = _isInverted
@@ -861,6 +1025,30 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           },
         ],
       ),
+    );
+
+    viewer = GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTapDown: (details) {
+        final result = _pdfController.getPdfPageHitTestResult(
+          details.localPosition,
+          useDocumentLayoutCoordinates: false,
+        );
+        if (result != null) {
+          _selectSmartly(
+            result.page,
+            result.offset,
+            PdfViewerGeneralTapType.tap,
+          );
+        }
+      },
+      child: viewer,
+    );
+
+    viewer = MouseRegion(
+      onHover: _onHover,
+      onExit: (_) => _clearHover(),
+      child: viewer,
     );
 
     if (_isInverted) {
