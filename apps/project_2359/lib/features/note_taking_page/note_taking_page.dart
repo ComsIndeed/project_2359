@@ -40,19 +40,24 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   SourceItem? _selectedSource;
   Uint8List? _pdfBytes;
   bool _isLoadingPdf = false;
+  bool _isInverted = false;
+  late PdfViewerController _pdfController;
 
   @override
   void initState() {
     super.initState();
+    _pdfController = PdfViewerController();
     _pageController = PageController(initialPage: _selectedTabIndex);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateTitleBar();
     });
 
     final sourceService = SourceService(context.read<AppDatabase>());
-    _sourcesSub = sourceService.watchSourcesByCollectionId(widget.collectionId).listen((sources) {
-      if (mounted) setState(() => _sources = sources);
-    });
+    _sourcesSub = sourceService
+        .watchSourcesByCollectionId(widget.collectionId)
+        .listen((sources) {
+          if (mounted) setState(() => _sources = sources);
+        });
   }
 
   void _updateTitleBar() {
@@ -100,8 +105,10 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     return Scaffold(
       body: AdaptivePaneLayout(
         masterWidth: masterWidth,
-        master: (context, controller) => _buildSidePanel(context, controller, isCollapsed: false),
-        masterCollapsed: (context, controller) => _buildSidePanel(context, controller, isCollapsed: true),
+        master: (context, controller) =>
+            _buildSidePanel(context, controller, isCollapsed: false),
+        masterCollapsed: (context, controller) =>
+            _buildSidePanel(context, controller, isCollapsed: true),
         detail: (context, controller) => _buildMainContent(context),
       ),
     );
@@ -119,27 +126,35 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     );
   }
 
-  Widget _buildSidePanel(BuildContext context, AdaptivePaneController controller, {required bool isCollapsed}) {
+  Widget _buildSidePanel(
+    BuildContext context,
+    AdaptivePaneController controller, {
+    required bool isCollapsed,
+  }) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        crossAxisAlignment: isCollapsed ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+        crossAxisAlignment: isCollapsed
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: isCollapsed
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.spaceBetween,
             children: [
-              if (!isCollapsed)
-                Expanded(
-                  child: _buildTabSwitcher(),
-                ),
+              if (!isCollapsed) Expanded(child: _buildTabSwitcher()),
               if (!isCollapsed) const SizedBox(width: 8),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (!isCollapsed)
                     IconButton(
-                      onPressed: () => setState(() => _isMaximized = !_isMaximized),
-                      icon: Icon(_isMaximized ? Icons.fullscreen_exit : Icons.fullscreen),
+                      onPressed: () =>
+                          setState(() => _isMaximized = !_isMaximized),
+                      icon: Icon(
+                        _isMaximized ? Icons.fullscreen_exit : Icons.fullscreen,
+                      ),
                       tooltip: _isMaximized ? 'Restore' : 'Maximize',
                     ),
                   IconButton(
@@ -156,7 +171,8 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
             Expanded(
               child: PageView(
                 controller: _pageController,
-                onPageChanged: (index) => setState(() => _selectedTabIndex = index),
+                onPageChanged: (index) =>
+                    setState(() => _selectedTabIndex = index),
                 children: [
                   _buildTabContent('Notes Content'),
                   _buildSourcesTab(),
@@ -191,7 +207,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
               child: Container(
                 height: 32,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
+                  color: theme.colorScheme.primaryContainer.withValues(
+                    alpha: 0.4,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
@@ -220,8 +238,12 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                     child: Text(
                       label,
                       style: theme.textTheme.labelLarge?.copyWith(
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: isSelected
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -286,47 +308,51 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
         final source = _sources![i];
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: ProjectCardTile(
-            backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            title: Text(source.label),
-            subtitle: Row(
-              children: [
-                FaIcon(
-                  _getSourceIcon(source.type),
-                  size: 10,
-                  color: cs.onSurface.withValues(alpha: 0.3),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  "${source.type.name.toUpperCase()} | ${source.extractedContent?.length ?? 0} chars",
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: cs.onSurface.withValues(alpha: 0.4),
-                  ),
-                ),
-              ],
-            ),
-            leading: const WizardSourcePagePreview(),
-            onTap: () {
-              final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
-              if (isDesktop) {
-                _loadPdf(source);
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SourcePageLoader(
-                      sourceId: source.id,
-                      sourceLabel: source.label,
+          child:
+              ProjectCardTile(
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
+                    title: Text(source.label),
+                    subtitle: Row(
+                      children: [
+                        FaIcon(
+                          _getSourceIcon(source.type),
+                          size: 10,
+                          color: cs.onSurface.withValues(alpha: 0.3),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "${source.type.name.toUpperCase()} | ${source.extractedContent?.length ?? 0} chars",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: cs.onSurface.withValues(alpha: 0.4),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                );
-              }
-            },
-          )
-              .animate()
-              .fadeIn(delay: (i * 50).ms)
-              .slideY(begin: 0.1, curve: Curves.easeOutQuad),
+                    leading: const WizardSourcePagePreview(),
+                    onTap: () {
+                      final isDesktop = ResponsiveBreakpoints.of(
+                        context,
+                      ).largerThan(MOBILE);
+                      if (isDesktop) {
+                        _loadPdf(source);
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SourcePageLoader(
+                              sourceId: source.id,
+                              sourceLabel: source.label,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  )
+                  .animate()
+                  .fadeIn(delay: (i * 50).ms)
+                  .slideY(begin: 0.1, curve: Curves.easeOutQuad),
         );
       },
     );
@@ -394,9 +420,22 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                 ),
               ),
               IconButton(
+                onPressed: () => setState(() => _isInverted = !_isInverted),
+                icon: Icon(
+                  _isInverted ? Icons.light_mode : Icons.dark_mode,
+                  size: 16,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                visualDensity: VisualDensity.compact,
+                tooltip: _isInverted ? "Light Mode" : "Dark Mode (Invert)",
+              ),
+              const SizedBox(width: 8),
+              IconButton(
                 onPressed: () => setState(() {
                   _selectedSource = null;
                   _pdfBytes = null;
+                  _isInverted = false;
                 }),
                 icon: const Icon(Icons.close, size: 16),
                 padding: EdgeInsets.zero,
@@ -411,6 +450,81 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     );
   }
 
+  Widget _buildPdfViewer() {
+    final theme = Theme.of(context);
+    final originalBg = theme.colorScheme.surface;
+    // If inverted, we pre-invert the background color so the global ColorFiltered
+    // inverts it back to its original state.
+    final backgroundColor = _isInverted
+        ? Color.fromARGB(
+            255,
+            (255 - originalBg.r * 255).round().clamp(0, 255),
+            (255 - originalBg.g * 255).round().clamp(0, 255),
+            (255 - originalBg.b * 255).round().clamp(0, 255),
+          )
+        : originalBg;
+
+    Widget viewer = PdfViewer.data(
+      _pdfBytes!,
+      sourceName: _selectedSource!.label,
+      controller: _pdfController,
+      params: PdfViewerParams(
+        backgroundColor: backgroundColor,
+        boundaryMargin: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 128,
+        ),
+        textSelectionParams: const PdfTextSelectionParams(enabled: true),
+        pageBackgroundPaintCallbacks: [
+          (canvas, pageRect, page) {
+            final shadowColor = _isInverted
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.black.withValues(alpha: 0.1);
+
+            final paint = Paint()
+              ..color = shadowColor
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+
+            // Draw a subtle shadow behind the page
+            canvas.drawRect(
+              pageRect.shift(const Offset(2, 4)),
+              paint,
+            );
+          },
+        ],
+      ),
+    );
+
+    if (_isInverted) {
+      return ColorFiltered(
+        colorFilter: const ColorFilter.matrix([
+          -1,
+          0,
+          0,
+          0,
+          255,
+          0,
+          -1,
+          0,
+          0,
+          255,
+          0,
+          0,
+          -1,
+          0,
+          255,
+          0,
+          0,
+          0,
+          1,
+          0,
+        ]),
+        child: viewer,
+      );
+    }
+    return viewer;
+  }
+
   Widget _buildMainContent(BuildContext context) {
     if (_selectedSource == null) {
       return Center(
@@ -420,14 +534,18 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
             FaIcon(
               FontAwesomeIcons.filePdf,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.05),
             ),
             const SizedBox(height: 16),
             Text(
               "Select a source to view",
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                  ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.3),
+              ),
             ),
           ],
         ),
@@ -445,25 +563,8 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     return ClipRect(
       child: Stack(
         children: [
-          Positioned.fill(
-            child: PdfViewer.data(
-              _pdfBytes!,
-              sourceName: _selectedSource!.label,
-              params: PdfViewerParams(
-                backgroundColor: Theme.of(context).colorScheme.surface,
-                boundaryMargin: const EdgeInsets.only(top: 48, bottom: 16),
-                textSelectionParams: const PdfTextSelectionParams(
-                  enabled: true,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: _buildPdfHeader(),
-          ),
+          Positioned.fill(child: _buildPdfViewer()),
+          Positioned(top: 0, left: 0, right: 0, child: _buildPdfHeader()),
         ],
       ),
     );
@@ -482,9 +583,13 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           decoration: ShapeDecoration(
             color: theme.colorScheme.surface,
             shape: RoundedSuperellipseBorder(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(32),
+              ),
               side: BorderSide(
-                color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.1),
+                color: (isDark ? Colors.white : Colors.black).withValues(
+                  alpha: 0.1,
+                ),
                 width: 1,
               ),
             ),
@@ -518,7 +623,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                         const SizedBox(width: 12),
                         Text(
                           'Note Details',
-                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -531,5 +638,4 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
       },
     );
   }
-
 }
