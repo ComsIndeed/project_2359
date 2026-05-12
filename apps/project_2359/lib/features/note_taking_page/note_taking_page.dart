@@ -642,6 +642,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
         return _buildClozeFields();
       case NoteType.imageOcclusion:
         return _buildImageOcclusionFields();
+      case NoteType.custom:
+        // TODO: Implement custom field editor if needed for manual creation
+        return const Center(child: Text("Custom note type - editing not yet supported"));
     }
     return const SizedBox.shrink();
   }
@@ -1052,6 +1055,8 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
         return "Cloze";
       case NoteType.imageOcclusion:
         return "Occlusion";
+      case NoteType.custom:
+        return "Custom";
     }
   }
 
@@ -1065,6 +1070,8 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
         return "Fill-in-the-blanks card";
       case NoteType.imageOcclusion:
         return "Hide parts of an image";
+      case NoteType.custom:
+        return "Imported custom note type";
     }
   }
 
@@ -1545,6 +1552,8 @@ class _NoteTypeIcon extends StatelessWidget {
         return _ClozeIcon(color: color);
       case NoteType.imageOcclusion:
         return _ImageOcclusionIcon(color: color);
+      case NoteType.custom:
+        return Icon(FontAwesomeIcons.gears, color: color, size: 16);
     }
   }
 }
@@ -1798,6 +1807,8 @@ class _DraftTile extends StatelessWidget {
         return (val == null || val.isEmpty) ? 'No content' : val;
       case NoteType.imageOcclusion:
         return 'Image Occlusion';
+      case NoteType.custom:
+        return 'Custom Note';
     }
   }
 
@@ -1809,6 +1820,8 @@ class _DraftTile extends StatelessWidget {
       case NoteType.cloze:
       case NoteType.imageOcclusion:
         return '';
+      case NoteType.custom:
+        return 'Custom content';
     }
   }
 

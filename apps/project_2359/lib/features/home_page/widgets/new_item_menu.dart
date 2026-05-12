@@ -5,6 +5,7 @@ import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/features/note_taking_page/note_taking_page.dart';
+import 'package:project_2359/features/anki_import_page/anki_import_page.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_bloc.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:provider/provider.dart';
@@ -253,6 +254,23 @@ class _NewItemMenuState extends State<NewItemMenu> {
                 icon: FontAwesomeIcons.camera,
                 showDivider: true,
                 onTap: () {},
+                showChevron: false,
+              ),
+              ProjectListTile.simple(
+                label: "Import Anki Deck",
+                icon: FontAwesomeIcons.fileArrowDown,
+                showDivider: true,
+                onTap: () {
+                  try {
+                    ExpandableFab.of(context).close();
+                  } catch (_) {}
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AnkiImportPage(),
+                    ),
+                  );
+                },
                 showChevron: false,
               ),
               ProjectListTile.simple(

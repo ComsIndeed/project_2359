@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
 import 'package:project_2359/features/help_page/help_page.dart';
+import 'package:project_2359/features/anki_import_page/anki_import_page.dart';
 import 'package:project_2359/core/utils/navigator_utils.dart';
 import 'package:project_2359/core/widgets/desktop_title_bar_controller.dart';
 import 'package:provider/provider.dart';
@@ -103,6 +104,19 @@ class DesktopTitleBar extends StatelessWidget {
             ...controller.actions!,
             const SizedBox(width: 4),
           ],
+          // Import Anki Deck
+          TitleBarAction(
+            icon: FontAwesomeIcons.fileImport,
+            onTap: () {
+              rootNavigatorKey.currentState?.push(
+                MaterialPageRoute(
+                  builder: (context) => const AnkiImportPage(),
+                ),
+              );
+            },
+            tooltip: "Import Anki Deck",
+          ),
+          const SizedBox(width: 4),
           // Help Action
           TitleBarAction(
             icon: FontAwesomeIcons.question,

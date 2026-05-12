@@ -8,6 +8,7 @@ environment:
   sdk: ^3.10.1
 
 dependencies:
+  archive: ^4.0.7
   collection: ^1.19.1
   connectivity_plus: ^7.0.0
   drift: ^2.30.0
@@ -29,6 +30,7 @@ dependencies:
   path: ^1.9.1
   path_provider: ^2.1.5
   shared_preferences: ^2.5.4
+  sqlite3: any
   sqlite3_flutter_libs: ^0.5.41
   sqlite3_web: ^0.4.1
   supabase_flutter: ^2.12.0

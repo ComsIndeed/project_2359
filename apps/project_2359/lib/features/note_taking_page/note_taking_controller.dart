@@ -100,6 +100,16 @@ class NoteTakingController extends ChangeNotifier {
           content: Value(occlusionTitleController.text),
         );
         break;
+      case NoteType.custom:
+        note = NoteItemsCompanion.insert(
+          id: noteId,
+          deckId: Value(targetDeckId),
+          draftId: Value(draftId),
+          noteType: selectedNoteType,
+          front: Value(frontController.text),
+          back: Value(backController.text),
+        );
+        break;
     }
 
     notes.add(note);

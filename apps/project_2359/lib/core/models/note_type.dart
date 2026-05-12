@@ -3,6 +3,9 @@ enum NoteType {
   basicAndReversed,
   cloze,
   imageOcclusion,
+  // TODO: Handle rendering of custom notes in the study/card view.
+  // Content is stored as JSON: {"fields": {"FieldName": "value", ...}, "modelName": "..."}
+  custom,
 }
 
 extension NoteTypeExtension on NoteType {
@@ -16,6 +19,8 @@ extension NoteTypeExtension on NoteType {
         return 'Cloze';
       case NoteType.imageOcclusion:
         return 'Image Occlusion';
+      case NoteType.custom:
+        return 'Custom (Imported)';
     }
   }
 
@@ -29,6 +34,8 @@ extension NoteTypeExtension on NoteType {
         return ['Text'];
       case NoteType.imageOcclusion:
         return ['Image', 'Title'];
+      case NoteType.custom:
+        return ['Fields'];
     }
   }
 
@@ -41,6 +48,8 @@ extension NoteTypeExtension on NoteType {
       case NoteType.cloze:
         return ['content'];
       case NoteType.imageOcclusion:
+        return ['content'];
+      case NoteType.custom:
         return ['content'];
     }
   }
@@ -60,6 +69,8 @@ extension NoteTypeExtension on NoteType {
         return 1;
       case NoteType.imageOcclusion:
         return 1;
+      case NoteType.custom:
+        return 1;
     }
   }
 
@@ -74,6 +85,8 @@ extension NoteTypeExtension on NoteType {
         return '{{cloze:content}}';
       case NoteType.imageOcclusion:
         return '{{image}}';
+      case NoteType.custom:
+        return '{{content}}';
     }
   }
 
@@ -88,6 +101,8 @@ extension NoteTypeExtension on NoteType {
         return '{{cloze:content}}';
       case NoteType.imageOcclusion:
         return '{{image}}';
+      case NoteType.custom:
+        return '{{content}}';
     }
   }
 
