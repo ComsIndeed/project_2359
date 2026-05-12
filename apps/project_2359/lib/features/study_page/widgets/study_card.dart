@@ -60,7 +60,8 @@ class StudyCard extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(32),
-              child: Center(
+              child: Align(
+                alignment: Alignment.topCenter,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 100),
                   transitionBuilder: (Widget child, Animation<double> animation) {
@@ -90,7 +91,7 @@ class StudyCard extends StatelessWidget {
                         style: {
                           "body": Style(
                             fontSize: FontSize(24),
-                            fontWeight: isAnswerRevealed ? FontWeight.w600 : FontWeight.w500,
+                            fontWeight: FontWeight.w500,
                             color: isAnswerRevealed
                                 ? theme.colorScheme.primary.withValues(alpha: 0.9)
                                 : theme.colorScheme.onSurface,

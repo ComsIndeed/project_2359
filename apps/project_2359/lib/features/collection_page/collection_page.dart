@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/core/utils/deck_name_utils.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:project_2359/core/widgets/project_list_tile.dart';
 import 'package:project_2359/core/widgets/project_back_button.dart';
@@ -1507,10 +1508,22 @@ class _DecksList extends StatelessWidget {
                           (selectedDeckId == decks[i].id),
                       isCollapsed: isCollapsed,
                       title: Text(
-                        decks[i].name,
+                        decks[i].name.cleanDeckName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      subtitle: decks[i].name.deckParentName != null
+                          ? Text(
+                            decks[i].name.deckParentName!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.5,
+                              ),
+                            ),
+                          )
+                          : null,
                       leading: const WizardFlashcardPreview(),
                       trailing: StreamBuilder<int>(
                         stream: context
