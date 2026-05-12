@@ -48,7 +48,6 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   void initState() {
     super.initState();
     _controller = NoteTakingController();
-    _controller.addListener(_onControllerChanged);
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateTitleBar();
@@ -62,9 +61,6 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
         });
   }
 
-  void _onControllerChanged() {
-    if (mounted) setState(() {});
-  }
 
   void _updateTitleBar() {
     if (!mounted) return;
@@ -82,7 +78,6 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
 
   @override
   void dispose() {
-    _controller.removeListener(_onControllerChanged);
     _controller.dispose();
     _sourcesSub?.cancel();
     // Reset title bar when leaving the page
@@ -96,18 +91,26 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
+    return ChangeNotifierProvider.value(
+      value: _controller,
+      child: Builder(
+        builder: (context) {
+          final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
 
-    if (isDesktop) {
-      return _buildDesktopLayout(context);
-    }
+          if (isDesktop) {
+            return _buildDesktopLayout(context);
+          }
 
-    return _buildMobileLayout(context);
+          return _buildMobileLayout(context);
+        },
+      ),
+    );
   }
 
   Widget _buildDesktopLayout(BuildContext context) {
+    final controller = context.watch<NoteTakingController>();
     final screenWidth = MediaQuery.of(context).size.width;
-    final masterWidth = _controller.isMaximized ? screenWidth * 0.8 : screenWidth * 0.25;
+    final masterWidth = controller.isMaximized ? screenWidth * 0.8 : screenWidth * 0.25;
 
     return Scaffold(
       body: AdaptivePaneLayout(
@@ -366,11 +369,29 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     if (placeholder == 'Notes Content') {
       return _buildNotesTab();
     }
+    if (placeholder == 'Draft Content') {
+      return _buildDraftTab();
+    }
     return Center(
       child: Text(
         placeholder,
         style: const TextStyle(color: Colors.grey, fontSize: 16),
       ),
+    );
+  }
+
+  Widget _buildDraftTab() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      itemCount: 500,
+      itemBuilder: (context, index) {
+        // Deterministic mock types for testing
+        final type = NoteType.values[index % NoteType.values.length];
+        return _DraftTile(
+          index: index,
+          type: type,
+        );
+      },
     );
   }
 
@@ -1147,12 +1168,158 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
             _controller.clearHover();
           }
         },
-        onExit: (_) => _controller.clearHover(),
+        onExit: (_) => context.read<NoteTakingController>().clearHover(),
         child: Stack(
           children: [
             Positioned.fill(child: _buildPdfViewer()),
             Positioned(top: 0, left: 0, right: 0, child: _buildPdfHeader()),
+            _buildPreviewOverlay(context),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPreviewOverlay(BuildContext context) {
+    final controller = context.watch<NoteTakingController>();
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final previewIndex = controller.clickedDraftIndex ?? controller.hoveredDraftIndex;
+    
+    return Positioned(
+      bottom: 24,
+      left: 64,
+      right: 64,
+      child: Center(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 1),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+                reverseCurve: Curves.easeInCubic,
+              )),
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          child: (previewIndex == null)
+              ? const SizedBox.shrink()
+              : KeyedSubtree(
+                  key: const ValueKey('preview-container'),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: Container(
+                      height: 180,
+                      padding: const EdgeInsets.all(24),
+                      decoration: ShapeDecoration(
+                        color: theme.colorScheme.surface,
+                        shape: RoundedSuperellipseBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          side: BorderSide(
+                            color: cs.onSurface.withValues(alpha: 0.1),
+                            width: 1,
+                          ),
+                        ),
+                        shadows: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            blurRadius: 32,
+                            offset: const Offset(0, 12),
+                          ),
+                          BoxShadow(
+                            color: cs.primary.withValues(alpha: 0.1),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: cs.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.visibility_outlined,
+                                  size: 20,
+                                  color: cs.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Note Preview",
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Draft #$previewIndex",
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: cs.onSurface.withValues(alpha: 0.5),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+                              if (controller.clickedDraftIndex != null) ...[
+                                TextButton.icon(
+                                  onPressed: () {},
+                                  icon: const Icon(Icons.edit_note, size: 18),
+                                  label: const Text("Edit"),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                              IconButton(
+                                onPressed: () {
+                                  controller.setClickedDraftIndex(null);
+                                  controller.setHoveredDraftIndex(null);
+                                },
+                                icon: const Icon(Icons.close),
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Container(
+                            width: double.infinity,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant.withValues(alpha: 0.3),
+                                style: BorderStyle.solid,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                "Placeholder for note content preview",
+                                style: TextStyle(
+                                  color: cs.onSurface.withValues(alpha: 0.3),
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
         ),
       ),
     );
@@ -1237,7 +1404,7 @@ class _NoteTypeIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final color = isSelected ? cs.primary : cs.onSurface.withValues(alpha: 0.2);
+    final color = cs.primary;
 
     switch (type) {
       case NoteType.basic:
@@ -1258,36 +1425,27 @@ class _BasicIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            height: 2,
-            width: 16,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(1),
-            ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          height: 3,
+          width: 20,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(1.5),
           ),
-          const SizedBox(height: 4),
-          Container(
-            height: 2,
-            width: 12,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(1),
-            ),
+        ),
+        const SizedBox(height: 5),
+        Container(
+          height: 3,
+          width: 14,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(1.5),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -1298,46 +1456,15 @@ class _ReversedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 32,
-      height: 32,
-      child: Stack(
-        children: [
-          Positioned(
-            left: 2,
-            top: 2,
-            child: Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: color.withValues(alpha: 0.1)),
-              ),
-            ),
-          ),
-          Positioned(
-            right: 2,
-            bottom: 2,
-            child: Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: color.withValues(alpha: 0.3)),
-              ),
-              child: Center(
-                child: FaIcon(
-                  FontAwesomeIcons.rightLeft,
-                  size: 10,
-                  color: color.withValues(alpha: 0.6),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        FaIcon(
+          FontAwesomeIcons.rightLeft,
+          size: 18,
+          color: color.withValues(alpha: 0.8),
+        ),
+      ],
     );
   }
 }
@@ -1349,29 +1476,18 @@ class _ClozeIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 32,
-      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        color: color.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(6),
       ),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            "[...]",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 8,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-            ),
-          ),
+      child: Text(
+        "[...]",
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
         ),
       ),
     );
@@ -1384,36 +1500,274 @@ class _ImageOcclusionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          FaIcon(
-            FontAwesomeIcons.image,
-            size: 14,
-            color: color.withValues(alpha: 0.2),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        FaIcon(
+          FontAwesomeIcons.image,
+          size: 20,
+          color: color.withValues(alpha: 0.5),
+        ),
+        Positioned(
+          top: 8,
+          left: 6,
+          child: Container(
+            width: 12,
+            height: 8,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
-          Positioned(
-            top: 10,
-            left: 8,
-            child: Container(
-              width: 10,
-              height: 6,
+        ),
+      ],
+    );
+  }
+}
+
+class _DraftTile extends StatelessWidget {
+  final int index;
+  final NoteType type;
+
+  const _DraftTile({
+    required this.index,
+    required this.type,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final controller = context.watch<NoteTakingController>();
+    
+    final isHovered = controller.hoveredDraftIndex == index;
+    final isClicked = controller.clickedDraftIndex == index;
+    final isOcclusion = type == NoteType.imageOcclusion;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+      child: MouseRegion(
+        onEnter: (_) => controller.setHoveredDraftIndex(index),
+        onExit: (_) => controller.setHoveredDraftIndex(null),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => controller.setClickedDraftIndex(isClicked ? null : index),
+            borderRadius: BorderRadius.circular(16),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(2),
+                color: isClicked
+                    ? cs.primary.withValues(alpha: 0.08)
+                    : isHovered
+                        ? cs.surfaceContainerHighest.withValues(alpha: 0.5)
+                        : cs.surfaceContainerHighest.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isClicked
+                      ? cs.primary.withValues(alpha: 0.4)
+                      : isHovered
+                          ? cs.outlineVariant.withValues(alpha: 0.5)
+                          : cs.outlineVariant.withValues(alpha: 0.1),
+                  width: isClicked ? 1.5 : 1,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _buildTypeIcon(context, isClicked || isHovered),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: isOcclusion
+                            ? _buildOcclusionContent(context)
+                            : _buildTextContent(context),
+                      ),
+                    ],
+                  ),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (Widget child, Animation<double> animation) {
+                      return SizeTransition(
+                        sizeFactor: animation,
+                        axisAlignment: -1,
+                        child: FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: isClicked
+                        ? Column(
+                            key: const ValueKey('controls'),
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(height: 16),
+                              Divider(
+                                height: 1,
+                                color: cs.outlineVariant.withValues(alpha: 0.2),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton.icon(
+                                    onPressed: () {},
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      size: 18,
+                                      color: Colors.redAccent,
+                                    ),
+                                    label: const Text(
+                                      "Delete",
+                                      style: TextStyle(color: Colors.redAccent),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ElevatedButton.icon(
+                                    onPressed: () {},
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: cs.primary,
+                                      foregroundColor: cs.onPrimary,
+                                      elevation: 0,
+                                    ),
+                                    icon: const Icon(Icons.check, size: 18),
+                                    label: const Text("Finalize"),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )
+                        : const SizedBox.shrink(key: ValueKey('empty')),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildTypeIcon(BuildContext context, bool isActive) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: isActive ? 0.8 : 0.4),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Center(
+        child: Transform.scale(
+          scale: 1.1,
+          child: _NoteTypeIcon(type: type, isSelected: isActive),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextContent(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    if (type == NoteType.cloze) {
+      return Text(
+        "This is a placeholder for a Cloze note item at index $index. It should span two lines and ellipsis if it doesn't fit properly.",
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: cs.onSurface.withValues(alpha: 0.8),
+          height: 1.4,
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          "Front question for note $index",
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: cs.onSurface.withValues(alpha: 0.9),
+            fontWeight: FontWeight.w600,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Divider(
+            height: 1,
+            color: cs.onSurface.withValues(alpha: 0.15),
+          ),
+        ),
+        Text(
+          "Back answer for note $index",
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: cs.onSurface.withValues(alpha: 0.6),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOcclusionContent(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Row(
+      children: [
+        Container(
+          width: 70,
+          height: 46,
+          decoration: BoxDecoration(
+            color: cs.surface.withValues(alpha: 0.8),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.3)),
+          ),
+          child: Icon(
+            Icons.image_outlined,
+            size: 24,
+            color: cs.onSurface.withValues(alpha: 0.3),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Occlusion Title $index",
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.9),
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                "3 hidden regions",
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.5),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

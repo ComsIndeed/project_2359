@@ -17,7 +17,8 @@ class NoteTakingController extends ChangeNotifier {
   final TextEditingController backController = TextEditingController();
   final TextEditingController clozeTextController = TextEditingController();
   final TextEditingController clozeExtraController = TextEditingController();
-  final TextEditingController occlusionTitleController = TextEditingController();
+  final TextEditingController occlusionTitleController =
+      TextEditingController();
 
   NoteType selectedNoteType = NoteType.basic;
   int selectedTabIndex = 0;
@@ -28,6 +29,35 @@ class NoteTakingController extends ChangeNotifier {
   bool isQuoteExpanded = false;
   bool isQuoteFaded = false;
   Timer? _quoteFadeTimer;
+
+  int? hoveredDraftIndex;
+  int? clickedDraftIndex;
+  Timer? _previewDebounceTimer;
+
+  void setHoveredDraftIndex(int? index) {
+    if (hoveredDraftIndex == index) return;
+
+    hoveredDraftIndex = index;
+
+    if (index != null) {
+      _previewDebounceTimer?.cancel();
+      // Show instantly on hover
+      notifyListeners();
+    } else {
+      _previewDebounceTimer?.cancel();
+      // Debounce on exit to avoid flickering and bridge gaps
+      _previewDebounceTimer = Timer(const Duration(milliseconds: 400), () {
+        if (hoveredDraftIndex == null) {
+          notifyListeners();
+        }
+      });
+    }
+  }
+
+  void setClickedDraftIndex(int? index) {
+    clickedDraftIndex = index;
+    notifyListeners();
+  }
 
   int? hoveredPageNumber;
   int? hoveredCharIndex;
@@ -88,7 +118,7 @@ class NoteTakingController extends ChangeNotifier {
       selectedText = text;
       isQuoteFaded = false;
       isQuoteExpanded = false;
-      
+
       _quoteFadeTimer = Timer(const Duration(seconds: 5), () {
         isQuoteFaded = true;
         notifyListeners();
@@ -158,7 +188,10 @@ class NoteTakingController extends ChangeNotifier {
       );
       if (hit != null) {
         final pageText = await hit.page.loadStructuredText();
-        final charIndex = PdfTextBoundaryDetector.findNearestCharIndex(pageText, hit.offset);
+        final charIndex = PdfTextBoundaryDetector.findNearestCharIndex(
+          pageText,
+          hit.offset,
+        );
         if (charIndex != null) {
           _selectSmartly(pageText, charIndex, isParagraph: false);
           return;
@@ -171,7 +204,10 @@ class NoteTakingController extends ChangeNotifier {
       );
       if (hit != null) {
         final pageText = await hit.page.loadStructuredText();
-        final charIndex = PdfTextBoundaryDetector.findNearestCharIndex(pageText, hit.offset);
+        final charIndex = PdfTextBoundaryDetector.findNearestCharIndex(
+          pageText,
+          hit.offset,
+        );
         if (charIndex != null) {
           _selectSmartly(pageText, charIndex, isParagraph: true);
           return;
@@ -180,7 +216,11 @@ class NoteTakingController extends ChangeNotifier {
     }
   }
 
-  void _selectSmartly(PdfPageText pageText, int charIndex, {required bool isParagraph}) {
+  void _selectSmartly(
+    PdfPageText pageText,
+    int charIndex, {
+    required bool isParagraph,
+  }) {
     final bounds = isParagraph
         ? PdfTextBoundaryDetector.findParagraphBounds(pageText, charIndex)
         : PdfTextBoundaryDetector.findSentenceBounds(pageText, charIndex);
@@ -196,17 +236,13 @@ class NoteTakingController extends ChangeNotifier {
 
   void pasteCitation(TextEditingController fieldController) {
     if (selectedText == null) return;
-    
+
     final text = fieldController.text;
     final selection = fieldController.selection;
     final cited = selectedText!;
-    
+
     if (selection.isValid) {
-      final newText = text.replaceRange(
-        selection.start,
-        selection.end,
-        cited,
-      );
+      final newText = text.replaceRange(selection.start, selection.end, cited);
       fieldController.value = TextEditingValue(
         text: newText,
         selection: TextSelection.collapsed(
@@ -218,7 +254,12 @@ class NoteTakingController extends ChangeNotifier {
     }
   }
 
-  void paintHoverHighlight(Canvas canvas, Rect pageRect, PdfPage page, Color primaryColor) {
+  void paintHoverHighlight(
+    Canvas canvas,
+    Rect pageRect,
+    PdfPage page,
+    Color primaryColor,
+  ) {
     if (hoveredPageNumber != page.pageNumber || hoveredPageText == null) {
       return;
     }
@@ -227,10 +268,9 @@ class NoteTakingController extends ChangeNotifier {
     if (hoveredParagraphBounds != null) {
       final (start, end) = hoveredParagraphBounds!;
       final range = hoveredPageText!.getRangeFromAB(start, end - 1);
-      final paint =
-          Paint()
-            ..color = primaryColor.withValues(alpha: 0.08)
-            ..style = PaintingStyle.fill;
+      final paint = Paint()
+        ..color = primaryColor.withValues(alpha: 0.08)
+        ..style = PaintingStyle.fill;
 
       for (final rect in range.enumerateFragmentBoundingRects()) {
         final flutterRect = rect.bounds.toRectInDocument(
@@ -245,10 +285,9 @@ class NoteTakingController extends ChangeNotifier {
     if (hoveredSentenceBounds != null) {
       final (start, end) = hoveredSentenceBounds!;
       final range = hoveredPageText!.getRangeFromAB(start, end - 1);
-      final paint =
-          Paint()
-            ..color = primaryColor.withValues(alpha: 0.2)
-            ..style = PaintingStyle.fill;
+      final paint = Paint()
+        ..color = primaryColor.withValues(alpha: 0.2)
+        ..style = PaintingStyle.fill;
 
       for (final rect in range.enumerateFragmentBoundingRects()) {
         final flutterRect = rect.bounds.toRectInDocument(
