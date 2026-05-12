@@ -2,6 +2,7 @@ enum NoteType {
   basic,
   basicAndReversed,
   cloze,
+  imageOcclusion,
 }
 
 extension NoteTypeExtension on NoteType {
@@ -13,6 +14,8 @@ extension NoteTypeExtension on NoteType {
         return 'Basic (and reversed card)';
       case NoteType.cloze:
         return 'Cloze';
+      case NoteType.imageOcclusion:
+        return 'Image Occlusion';
     }
   }
 
@@ -24,6 +27,8 @@ extension NoteTypeExtension on NoteType {
         return ['Front', 'Back'];
       case NoteType.cloze:
         return ['Text'];
+      case NoteType.imageOcclusion:
+        return ['Image', 'Title'];
     }
   }
 
@@ -34,6 +39,8 @@ extension NoteTypeExtension on NoteType {
       case NoteType.basicAndReversed:
         return ['front', 'back'];
       case NoteType.cloze:
+        return ['content'];
+      case NoteType.imageOcclusion:
         return ['content'];
     }
   }
@@ -51,6 +58,8 @@ extension NoteTypeExtension on NoteType {
         return 2;
       case NoteType.cloze:
         return 1;
+      case NoteType.imageOcclusion:
+        return 1;
     }
   }
 
@@ -63,6 +72,8 @@ extension NoteTypeExtension on NoteType {
         return ordinal == 0 ? '{{front}}' : '{{back}}';
       case NoteType.cloze:
         return '{{cloze:content}}';
+      case NoteType.imageOcclusion:
+        return '{{image}}';
     }
   }
 
@@ -75,6 +86,8 @@ extension NoteTypeExtension on NoteType {
         return ordinal == 0 ? '{{back}}' : '{{front}}';
       case NoteType.cloze:
         return '{{cloze:content}}';
+      case NoteType.imageOcclusion:
+        return '{{image}}';
     }
   }
 

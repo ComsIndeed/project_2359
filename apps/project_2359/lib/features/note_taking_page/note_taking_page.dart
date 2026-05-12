@@ -6,6 +6,7 @@ import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/widgets/desktop_title_bar_controller.dart';
 import 'package:project_2359/core/widgets/adaptive_pane_layout.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
+import 'package:project_2359/core/services/draft_service.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:project_2359/features/collection_page/widgets/shared_widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -16,8 +17,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_core/shared_core.dart';
 import 'note_taking_controller.dart';
-
-enum NoteType { basic, basicReversed, cloze, imageOcclusion }
+import 'package:project_2359/core/models/note_type.dart';
 
 class NoteTakingPage extends StatefulWidget {
   final String collectionId;
@@ -47,13 +47,20 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   @override
   void initState() {
     super.initState();
-    _controller = NoteTakingController();
+    final db = context.read<AppDatabase>();
+    _controller = NoteTakingController(draftService: DraftService(db));
+    _controller.addListener(_onControllerChanged);
+    _controller.initializeDraftSession(
+      existingDraftId: widget.draftId,
+      existingDeckId: widget.deckId,
+      collectionId: widget.collectionId,
+    );
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateTitleBar();
     });
  
-    final sourceService = SourceService(context.read<AppDatabase>());
+    final sourceService = SourceService(db);
     _sourcesSub = sourceService
         .watchSourcesByCollectionId(widget.collectionId)
         .listen((sources) {
@@ -61,6 +68,10 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
         });
   }
 
+
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
+  }
 
   void _updateTitleBar() {
     if (!mounted) return;
@@ -78,6 +89,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
 
   @override
   void dispose() {
+    _controller.removeListener(_onControllerChanged);
     _controller.dispose();
     _sourcesSub?.cancel();
     // Reset title bar when leaving the page
@@ -89,28 +101,132 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _controller,
-      child: Builder(
-        builder: (context) {
-          final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
+  void _showSaveDeckDialog() {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final nameController = TextEditingController(text: 'New Deck');
 
-          if (isDesktop) {
-            return _buildDesktopLayout(context);
-          }
-
-          return _buildMobileLayout(context);
-        },
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Save Deck'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Enter a name for your new deck:'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: nameController,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Deck name...',
+                filled: true,
+                fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final name = nameController.text.trim();
+              if (name.isNotEmpty) {
+                await _controller.saveAsDeck(name);
+                if (mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Deck saved successfully!')),
+                  );
+                }
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
       ),
     );
   }
 
+  Widget _buildPreviewContent(NoteItemsCompanion draft) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final type = draft.noteType.value;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: cs.onSurface.withValues(alpha: 0.05),
+        ),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (type == NoteType.basic || type == NoteType.basicAndReversed) ...[
+              _buildPreviewField("Front", draft.front.value ?? ""),
+              const SizedBox(height: 16),
+              _buildPreviewField("Back", draft.back.value ?? ""),
+            ] else if (type == NoteType.cloze) ...[
+              _buildPreviewField("Content", draft.content.value ?? ""),
+            ] else if (type == NoteType.imageOcclusion) ...[
+              const Center(child: Text("Image Occlusion Preview Not Supported")),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPreviewField(String label, String content) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          content.isEmpty ? "No content" : content,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            height: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
+
+    return ChangeNotifierProvider.value(
+      value: _controller,
+      child: isDesktop ? _buildDesktopLayout(context) : _buildMobileLayout(context),
+    );
+  }
+
   Widget _buildDesktopLayout(BuildContext context) {
-    final controller = context.watch<NoteTakingController>();
     final screenWidth = MediaQuery.of(context).size.width;
-    final masterWidth = controller.isMaximized ? screenWidth * 0.8 : screenWidth * 0.25;
+    final masterWidth = _controller.isMaximized ? screenWidth * 0.8 : screenWidth * 0.25;
 
     return Scaffold(
       body: AdaptivePaneLayout(
@@ -182,13 +298,29 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           if (!isCollapsed) ...[
             const SizedBox(height: 24),
             Expanded(
-              child: PageView(
-                controller: _controller.pageController,
-                onPageChanged: (index) => _controller.setTabIndex(index, animate: false),
+              child: Stack(
                 children: [
-                  _buildTabContent('Notes Content'),
-                  _buildSourcesTab(),
-                  _buildTabContent('Draft Content'),
+                  PageView(
+                    controller: _controller.pageController,
+                    onPageChanged: (index) => _controller.setTabIndex(index, animate: false),
+                    children: [
+                      _buildNotesTab(),
+                      _buildSourcesTab(),
+                      _buildDraftTab(),
+                    ],
+                  ),
+                  if (_controller.selectedTabIndex == 2 && _controller.notes.isNotEmpty)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: FloatingActionButton.extended(
+                        onPressed: _showSaveDeckDialog,
+                        icon: const Icon(Icons.check_circle_rounded),
+                        label: const Text('Save Deck'),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      ).animate().scale(curve: Curves.easeOutBack, duration: const Duration(milliseconds: 400)).fadeIn(),
+                    ),
                 ],
               ),
             ),
@@ -365,31 +497,34 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     );
   }
 
-  Widget _buildTabContent(String placeholder) {
-    if (placeholder == 'Notes Content') {
-      return _buildNotesTab();
-    }
-    if (placeholder == 'Draft Content') {
-      return _buildDraftTab();
-    }
-    return Center(
-      child: Text(
-        placeholder,
-        style: const TextStyle(color: Colors.grey, fontSize: 16),
-      ),
-    );
-  }
 
   Widget _buildDraftTab() {
+    if (_controller.notes.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.note_alt_outlined, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2)),
+            const SizedBox(height: 16),
+            Text(
+              "No drafts yet",
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      itemCount: 500,
+      itemCount: _controller.notes.length,
       itemBuilder: (context, index) {
-        // Deterministic mock types for testing
-        final type = NoteType.values[index % NoteType.values.length];
+        final draft = _controller.notes[index];
+        final type = draft.noteType.value;
         return _DraftTile(
           index: index,
           type: type,
+          draft: draft,
         );
       },
     );
@@ -403,6 +538,19 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
         _buildNoteTypeSelector(),
         const SizedBox(height: 24),
         Expanded(child: SingleChildScrollView(child: _buildNoteFields())),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: FilledButton.icon(
+            onPressed: () => _controller.addDraftNote(),
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Create Note'),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -488,13 +636,14 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   Widget _buildNoteFields() {
     switch (_controller.selectedNoteType) {
       case NoteType.basic:
-      case NoteType.basicReversed:
+      case NoteType.basicAndReversed:
         return _buildBasicFields();
       case NoteType.cloze:
         return _buildClozeFields();
       case NoteType.imageOcclusion:
         return _buildImageOcclusionFields();
     }
+    return const SizedBox.shrink();
   }
 
   Widget _buildBasicFields() {
@@ -897,7 +1046,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     switch (type) {
       case NoteType.basic:
         return "Basic";
-      case NoteType.basicReversed:
+      case NoteType.basicAndReversed:
         return "Reversed";
       case NoteType.cloze:
         return "Cloze";
@@ -910,7 +1059,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     switch (type) {
       case NoteType.basic:
         return "Standard front/back card";
-      case NoteType.basicReversed:
+      case NoteType.basicAndReversed:
         return "Two-way front/back card";
       case NoteType.cloze:
         return "Fill-in-the-blanks card";
@@ -1168,7 +1317,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
             _controller.clearHover();
           }
         },
-        onExit: (_) => context.read<NoteTakingController>().clearHover(),
+        onExit: (_) => _controller.clearHover(),
         child: Stack(
           children: [
             Positioned.fill(child: _buildPdfViewer()),
@@ -1181,11 +1330,10 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   }
 
   Widget _buildPreviewOverlay(BuildContext context) {
-    final controller = context.watch<NoteTakingController>();
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final previewIndex = controller.clickedDraftIndex ?? controller.hoveredDraftIndex;
+    final previewIndex = _controller.clickedDraftIndex ?? _controller.hoveredDraftIndex;
     
     return Positioned(
       bottom: 24,
@@ -1258,25 +1406,25 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                                 ),
                               ),
                               const SizedBox(width: 16),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Note Preview",
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Note Preview",
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    "Draft #$previewIndex",
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: cs.onSurface.withValues(alpha: 0.5),
+                                    Text(
+                                      "Draft #${previewIndex + 1}",
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: cs.onSurface.withValues(alpha: 0.5),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                ),
                               const Spacer(),
-                              if (controller.clickedDraftIndex != null) ...[
+                              if (_controller.clickedDraftIndex != null) ...[
                                 TextButton.icon(
                                   onPressed: () {},
                                   icon: const Icon(Icons.edit_note, size: 18),
@@ -1286,34 +1434,16 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                               ],
                               IconButton(
                                 onPressed: () {
-                                  controller.setClickedDraftIndex(null);
-                                  controller.setHoveredDraftIndex(null);
+                                  _controller.setClickedDraftIndex(null);
+                                  _controller.setHoveredDraftIndex(null);
                                 },
                                 icon: const Icon(Icons.close),
                               ),
                             ],
                           ),
-                          const Spacer(),
-                          Container(
-                            width: double.infinity,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: cs.outlineVariant.withValues(alpha: 0.3),
-                                style: BorderStyle.solid,
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                "Placeholder for note content preview",
-                                style: TextStyle(
-                                  color: cs.onSurface.withValues(alpha: 0.3),
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ),
+                          const SizedBox(height: 24),
+                          Expanded(
+                            child: _buildPreviewContent(_controller.notes[previewIndex]),
                           ),
                         ],
                       ),
@@ -1409,7 +1539,7 @@ class _NoteTypeIcon extends StatelessWidget {
     switch (type) {
       case NoteType.basic:
         return _BasicIcon(color: color);
-      case NoteType.basicReversed:
+      case NoteType.basicAndReversed:
         return _ReversedIcon(color: color);
       case NoteType.cloze:
         return _ClozeIcon(color: color);
@@ -1528,10 +1658,12 @@ class _ImageOcclusionIcon extends StatelessWidget {
 class _DraftTile extends StatelessWidget {
   final int index;
   final NoteType type;
+  final NoteItemsCompanion draft;
 
   const _DraftTile({
     required this.index,
     required this.type,
+    required this.draft,
   });
 
   @override
@@ -1618,7 +1750,7 @@ class _DraftTile extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   TextButton.icon(
-                                    onPressed: () {},
+                                    onPressed: () => controller.removeDraftNote(index),
                                     icon: const Icon(
                                       Icons.delete_outline,
                                       size: 18,
@@ -1655,6 +1787,35 @@ class _DraftTile extends StatelessWidget {
     );
   }
 
+  String _getDraftTitle() {
+    switch (type) {
+      case NoteType.basic:
+      case NoteType.basicAndReversed:
+        final val = draft.front.value;
+        return (val == null || val.isEmpty) ? 'No front content' : val;
+      case NoteType.cloze:
+        final val = draft.content.value;
+        return (val == null || val.isEmpty) ? 'No content' : val;
+      case NoteType.imageOcclusion:
+        return 'Image Occlusion';
+    }
+  }
+
+  String _getDraftSubtitle() {
+    switch (type) {
+      case NoteType.basic:
+      case NoteType.basicAndReversed:
+        return draft.back.value ?? '';
+      case NoteType.cloze:
+      case NoteType.imageOcclusion:
+        return '';
+    }
+  }
+
+  bool _hasSecondField() {
+    return type == NoteType.basic || type == NoteType.basicAndReversed;
+  }
+
   Widget _buildTypeIcon(BuildContext context, bool isActive) {
     final cs = Theme.of(context).colorScheme;
     return Container(
@@ -1679,7 +1840,7 @@ class _DraftTile extends StatelessWidget {
 
     if (type == NoteType.cloze) {
       return Text(
-        "This is a placeholder for a Cloze note item at index $index. It should span two lines and ellipsis if it doesn't fit properly.",
+        _getDraftTitle(),
         style: theme.textTheme.bodySmall?.copyWith(
           color: cs.onSurface.withValues(alpha: 0.8),
           height: 1.4,
@@ -1694,7 +1855,7 @@ class _DraftTile extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          "Front question for note $index",
+          _getDraftTitle(),
           style: theme.textTheme.bodySmall?.copyWith(
             color: cs.onSurface.withValues(alpha: 0.9),
             fontWeight: FontWeight.w600,
@@ -1702,21 +1863,23 @@ class _DraftTile extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Divider(
-            height: 1,
-            color: cs.onSurface.withValues(alpha: 0.15),
+        if (_hasSecondField()) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Divider(
+              height: 1,
+              color: cs.onSurface.withValues(alpha: 0.15),
+            ),
           ),
-        ),
-        Text(
-          "Back answer for note $index",
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: cs.onSurface.withValues(alpha: 0.6),
+          Text(
+            _getDraftSubtitle(),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onSurface.withValues(alpha: 0.6),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        ],
       ],
     );
   }
@@ -1748,7 +1911,7 @@ class _DraftTile extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "Occlusion Title $index",
+                "Image Occlusion",
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.9),
                   fontWeight: FontWeight.bold,
@@ -1758,7 +1921,7 @@ class _DraftTile extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                "3 hidden regions",
+                "Draft Note",
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.5),
                   fontWeight: FontWeight.w500,

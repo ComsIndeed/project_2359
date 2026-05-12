@@ -2,10 +2,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:shared_core/shared_core.dart';
-import 'note_taking_page.dart';
+import 'package:project_2359/core/models/note_type.dart';
+import 'package:project_2359/core/services/draft_service.dart';
+import 'package:project_2359/app_database.dart';
+import 'package:drift/drift.dart' hide Column;
+import 'package:uuid/uuid.dart';
 
 class NoteTakingController extends ChangeNotifier {
-  NoteTakingController() {
+  final DraftService? _draftService;
+
+  NoteTakingController({DraftService? draftService}) : _draftService = draftService {
     pdfController = PdfViewerController();
     pageController = PageController(initialPage: selectedTabIndex);
   }
@@ -29,6 +35,120 @@ class NoteTakingController extends ChangeNotifier {
   bool isQuoteExpanded = false;
   bool isQuoteFaded = false;
   Timer? _quoteFadeTimer;
+
+  // Draft Session State
+  String? draftId;
+  String? targetDeckId;
+  String? collectionId;
+  final List<NoteItemsCompanion> notes = [];
+
+  void initializeDraftSession({
+    String? existingDraftId,
+    String? existingDeckId,
+    required String collectionId,
+  }) {
+    this.collectionId = collectionId;
+    draftId = existingDraftId ?? const Uuid().v4();
+    targetDeckId = existingDeckId ?? const Uuid().v4();
+    
+    if (existingDraftId != null) {
+      loadDraft();
+    }
+    notifyListeners();
+  }
+
+  Future<void> loadDraft() async {
+    if (draftId == null || _draftService == null) return;
+    
+    final draftNotes = await _draftService.getNotesByDraftId(draftId!);
+    notes.clear();
+    notes.addAll(draftNotes.map((n) => n.toCompanion(true)));
+    notifyListeners();
+  }
+
+  Future<void> addDraftNote() async {
+    final noteId = const Uuid().v4();
+    late final NoteItemsCompanion note;
+
+    switch (selectedNoteType) {
+      case NoteType.basic:
+      case NoteType.basicAndReversed:
+        note = NoteItemsCompanion.insert(
+          id: noteId,
+          deckId: Value(targetDeckId),
+          draftId: Value(draftId),
+          noteType: selectedNoteType,
+          front: Value(frontController.text),
+          back: Value(backController.text),
+        );
+        break;
+      case NoteType.cloze:
+        note = NoteItemsCompanion.insert(
+          id: noteId,
+          deckId: Value(targetDeckId),
+          draftId: Value(draftId),
+          noteType: selectedNoteType,
+          content: Value(clozeTextController.text),
+        );
+        break;
+      case NoteType.imageOcclusion:
+        note = NoteItemsCompanion.insert(
+          id: noteId,
+          deckId: Value(targetDeckId),
+          draftId: Value(draftId),
+          noteType: selectedNoteType,
+          content: Value(occlusionTitleController.text),
+        );
+        break;
+    }
+
+    notes.add(note);
+    _clearFields();
+    notifyListeners();
+    await syncDraft();
+  }
+
+  Future<void> removeDraftNote(int index) async {
+    if (index < 0 || index >= notes.length) return;
+    notes.removeAt(index);
+    notifyListeners();
+    await syncDraft();
+  }
+
+  Future<void> syncDraft() async {
+    if (_draftService == null || draftId == null) return;
+    
+    await _draftService.syncDraft(
+      draftId: draftId!,
+      collectionId: collectionId!,
+      targetDeckId: targetDeckId!,
+      notes: notes,
+    );
+  }
+
+  Future<void> saveAsDeck(String deckName) async {
+    if (_draftService == null || draftId == null) return;
+
+    await _draftService.saveDraft(
+      draftId: draftId!,
+      deckId: targetDeckId!,
+      deckName: deckName,
+      collectionId: collectionId,
+    );
+
+    // Clear session
+    notes.clear();
+    draftId = null;
+    notifyListeners();
+  }
+
+  void _clearFields() {
+    frontController.clear();
+    backController.clear();
+    clozeTextController.clear();
+    clozeExtraController.clear();
+    occlusionTitleController.clear();
+  }
 
   int? hoveredDraftIndex;
   int? clickedDraftIndex;
