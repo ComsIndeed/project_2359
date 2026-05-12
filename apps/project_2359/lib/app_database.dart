@@ -18,6 +18,7 @@ import 'package:project_2359/core/tables/study_session_events.dart';
 import 'package:project_2359/core/tables/citation_items.dart';
 import 'package:project_2359/core/tables/card_creation_draft_items.dart';
 import 'package:project_2359/core/tables/note_items.dart';
+import 'package:project_2359/core/tables/deck_config_items.dart';
 import 'package:project_2359/core/models/note_type.dart';
 import 'package:project_2359/core/utils/logger.dart';
 
@@ -35,13 +36,14 @@ part 'app_database.g.dart';
     CardCreationDraftItems,
     AssetItems,
     NoteItems,
+    DeckConfigItems,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -73,7 +75,7 @@ class AppDatabase extends _$AppDatabase {
     return driftDatabase(
       /// Rename this everytime we make schema changes until the app is fully released.
       /// We wont do migration rules for now.
-      name: 'project_2359_database_v10_20260508_2200',
+      name: 'project_2359_database_v11_20260513_0310',
       web: DriftWebOptions(
         sqlite3Wasm: Uri.parse('sqlite3.wasm'),
         driftWorker: Uri.parse('drift_worker.js'),

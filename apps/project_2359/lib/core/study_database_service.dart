@@ -195,6 +195,32 @@ class StudyDatabaseService {
     });
   }
 
+  // --- Deck Configs ---
+
+  Future<DeckConfigItem?> getDeckConfigById(String id) async {
+    return await (_db.select(_db.deckConfigItems)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+  }
+
+  Future<List<DeckConfigItem>> getAllDeckConfigs() async {
+    return await _db.select(_db.deckConfigItems).get();
+  }
+
+  Future<void> insertDeckConfig(DeckConfigItemsCompanion config) async {
+    await _db.into(_db.deckConfigItems).insert(config);
+  }
+
+  Future<void> updateDeckConfig(DeckConfigItemsCompanion config) async {
+    await (_db.update(_db.deckConfigItems)
+          ..where((t) => t.id.equals(config.id.value)))
+        .write(config);
+  }
+
+  Future<void> updateDeck(DeckItemsCompanion deck) async {
+    await (_db.update(_db.deckItems)..where((t) => t.id.equals(deck.id.value)))
+        .write(deck);
+  }
+
   // --- Cards ---
 
   Future<List<CardItem>> getCardsByDeckId(String deckId) async {

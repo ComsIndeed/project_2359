@@ -31,6 +31,8 @@ import 'package:project_2359/features/note_taking_page/note_taking_page.dart';
 import 'package:project_2359/features/study_page/study_page.dart';
 import 'package:project_2359/features/study_page/widgets/study_session_setup_sheet.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
+import 'package:project_2359/features/settings_page/deck_settings_page.dart';
+import 'package:project_2359/features/analytics_page/deck_analytics_page.dart';
 
 class CollectionPage extends StatefulWidget {
   final String collectionId;
@@ -1525,22 +1527,66 @@ class _DecksList extends StatelessWidget {
                           )
                           : null,
                       leading: const WizardFlashcardPreview(),
-                      trailing: StreamBuilder<int>(
-                        stream: context
-                            .read<AppController>()
-                            .schedulingService
-                            .watchDueCount(deckId: decks[i].id),
-                        builder: (context, snapshot) {
-                          final count = snapshot.data ?? 0;
-                          if (count == 0) return const SizedBox.shrink();
-                          return Text(
-                            count.toString(),
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: AppTheme.important,
-                              fontWeight: FontWeight.w900,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          StreamBuilder<int>(
+                            stream: context
+                                .read<AppController>()
+                                .schedulingService
+                                .watchDueCount(deckId: decks[i].id),
+                            builder: (context, snapshot) {
+                              final count = snapshot.data ?? 0;
+                              if (count == 0) return const SizedBox.shrink();
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: Text(
+                                  count.toString(),
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: AppTheme.important,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: FaIcon(
+                              FontAwesomeIcons.chartSimple,
+                              size: 14,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                             ),
-                          );
-                        },
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DeckAnalyticsPage(
+                                    deckId: decks[i].id,
+                                    deckName: decks[i].name,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: FaIcon(
+                              FontAwesomeIcons.gear,
+                              size: 14,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DeckSettingsPage(
+                                    deckId: decks[i].id,
+                                    deckName: decks[i].name,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                       onTap: isSelecting
                           ? () => onToggleSelection(decks[i].id)

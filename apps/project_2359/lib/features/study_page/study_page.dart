@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fsrs/fsrs.dart' as fsrs;
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
@@ -246,6 +247,60 @@ class _StudyPageState extends State<StudyPage> {
     );
   }
 
+  Future<void> _suspendCurrentCard() async {
+    final card = _currentCard;
+    if (card == null) return;
+
+    final schedulingService = context.read<AppController>().schedulingService;
+    await schedulingService.suspendCard(card.id, true);
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Card suspended')),
+      );
+      _advanceCard();
+    }
+  }
+
+  Future<void> _buryCurrentCard() async {
+    final card = _currentCard;
+    if (card == null) return;
+
+    final schedulingService = context.read<AppController>().schedulingService;
+    await schedulingService.buryCard(card.id);
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Card buried until tomorrow')),
+      );
+      _advanceCard();
+    }
+  }
+
+  void _advanceCard() {
+    if (widget.mode == StudySessionMode.spaced) {
+      if (_currentIndex < _cards!.length - 1) {
+        setState(() {
+          _currentIndex++;
+          _isAnswerRevealed = false;
+        });
+        _updatePreviews();
+      } else {
+        if (widget.onBack != null) {
+          widget.onBack!();
+        } else {
+          Navigator.pop(context);
+        }
+      }
+    } else {
+      // For continuous, we just skip it
+      _continuousController?.nextCard; // consume
+      setState(() {
+        _isAnswerRevealed = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -355,10 +410,43 @@ class _StudyPageState extends State<StudyPage> {
                             : "Reviewed: ${_continuousController?.totalReviews}",
                         style: theme.textTheme.labelMedium,
                       ),
+                      const SizedBox(width: 8),
+                      PopupMenuButton<String>(
+                        icon: FaIcon(
+                          FontAwesomeIcons.ellipsisVertical,
+                          size: 16,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                        ),
+                        onSelected: (val) {
+                          if (val == 'suspend') _suspendCurrentCard();
+                          if (val == 'bury') _buryCurrentCard();
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'bury',
+                            child: Row(
+                              children: [
+                                FaIcon(FontAwesomeIcons.eyeSlash, size: 14),
+                                SizedBox(width: 12),
+                                Text('Bury Card'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'suspend',
+                            child: Row(
+                              children: [
+                                FaIcon(FontAwesomeIcons.ban, size: 14),
+                                SizedBox(width: 12),
+                                Text('Suspend Card'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-
               ],
             ),
 
