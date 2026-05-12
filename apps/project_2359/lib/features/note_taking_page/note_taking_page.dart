@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
@@ -16,6 +15,7 @@ import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_core/shared_core.dart';
+import 'note_taking_controller.dart';
 
 enum NoteType { basic, basicReversed, cloze, imageOcclusion }
 
@@ -36,51 +36,34 @@ class NoteTakingPage extends StatefulWidget {
 }
 
 class _NoteTakingPageState extends State<NoteTakingPage> {
-  int _selectedTabIndex = 0;
-  late PageController _pageController;
-  bool _isMaximized = false;
+  late final NoteTakingController _controller;
   List<SourceItem>? _sources;
   StreamSubscription? _sourcesSub;
   SourceItem? _selectedSource;
   Uint8List? _pdfBytes;
   bool _isLoadingPdf = false;
-  bool _isInverted = false;
-  late PdfViewerController _pdfController;
-  NoteType _selectedNoteType = NoteType.basic;
   NoteType? _hoveredNoteType;
-
-  // Hover highlighting state
-  int? _hoveredPageNumber;
-  int? _hoveredCharIndex;
-  PdfPageText? _hoveredPageText;
-  (int, int)? _hoveredSentenceBounds;
-  (int, int)? _hoveredParagraphBounds;
-  String? _selectedText;
-  Timer? _quoteFadeTimer;
-  bool _isQuoteExpanded = false;
-  bool _isQuoteFaded = false;
-
-  final TextEditingController _frontController = TextEditingController();
-  final TextEditingController _backController = TextEditingController();
-  final TextEditingController _clozeTextController = TextEditingController();
-  final TextEditingController _clozeExtraController = TextEditingController();
-  final TextEditingController _occlusionTitleController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _pdfController = PdfViewerController();
-    _pageController = PageController(initialPage: _selectedTabIndex);
+    _controller = NoteTakingController();
+    _controller.addListener(_onControllerChanged);
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateTitleBar();
     });
-
+ 
     final sourceService = SourceService(context.read<AppDatabase>());
     _sourcesSub = sourceService
         .watchSourcesByCollectionId(widget.collectionId)
         .listen((sources) {
           if (mounted) setState(() => _sources = sources);
         });
+  }
+
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
   }
 
   void _updateTitleBar() {
@@ -99,14 +82,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _controller.removeListener(_onControllerChanged);
+    _controller.dispose();
     _sourcesSub?.cancel();
-    _quoteFadeTimer?.cancel();
-    _frontController.dispose();
-    _backController.dispose();
-    _clozeTextController.dispose();
-    _clozeExtraController.dispose();
-    _occlusionTitleController.dispose();
     // Reset title bar when leaving the page
     Future.microtask(() {
       if (mounted) {
@@ -129,7 +107,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
 
   Widget _buildDesktopLayout(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final masterWidth = _isMaximized ? screenWidth * 0.8 : screenWidth * 0.25;
+    final masterWidth = _controller.isMaximized ? screenWidth * 0.8 : screenWidth * 0.25;
 
     return Scaffold(
       body: AdaptivePaneLayout(
@@ -183,12 +161,11 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                 children: [
                   if (!isCollapsed)
                     IconButton(
-                      onPressed: () =>
-                          setState(() => _isMaximized = !_isMaximized),
+                      onPressed: () => _controller.toggleMaximize(),
                       icon: Icon(
-                        _isMaximized ? Icons.fullscreen_exit : Icons.fullscreen,
+                        _controller.isMaximized ? Icons.fullscreen_exit : Icons.fullscreen,
                       ),
-                      tooltip: _isMaximized ? 'Restore' : 'Maximize',
+                      tooltip: _controller.isMaximized ? 'Restore' : 'Maximize',
                     ),
                   IconButton(
                     onPressed: controller.toggleCollapsed,
@@ -203,9 +180,8 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
             const SizedBox(height: 24),
             Expanded(
               child: PageView(
-                controller: _pageController,
-                onPageChanged: (index) =>
-                    setState(() => _selectedTabIndex = index),
+                controller: _controller.pageController,
+                onPageChanged: (index) => _controller.setTabIndex(index),
                 children: [
                   _buildTabContent('Notes Content'),
                   _buildSourcesTab(),
@@ -234,7 +210,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           AnimatedAlign(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOutQuart,
-            alignment: Alignment(-1.0 + (_selectedTabIndex * 1.0), 0),
+            alignment: Alignment(-1.0 + (_controller.selectedTabIndex * 1.0), 0),
             child: FractionallySizedBox(
               widthFactor: 1 / 3,
               child: Container(
@@ -252,17 +228,12 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
             children: tabs.asMap().entries.map((entry) {
               final index = entry.key;
               final label = entry.value;
-              final isSelected = _selectedTabIndex == index;
+              final isSelected = _controller.selectedTabIndex == index;
 
               return Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    setState(() => _selectedTabIndex = index);
-                    _pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.easeOutQuart,
-                    );
+                    _controller.setTabIndex(index);
                   },
                   behavior: HitTestBehavior.opaque,
                   child: Container(
@@ -416,29 +387,18 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   }
 
   Widget _buildQuoteWidget() {
-    if (_selectedText == null) return const SizedBox.shrink();
+    if (_controller.selectedText == null) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _isQuoteExpanded = !_isQuoteExpanded;
-          if (_isQuoteExpanded) {
-            _isQuoteFaded = false;
-            _quoteFadeTimer?.cancel();
-          } else {
-            _quoteFadeTimer?.cancel();
-            _quoteFadeTimer = Timer(const Duration(seconds: 5), () {
-              if (mounted) setState(() => _isQuoteFaded = true);
-            });
-          }
-        });
+        _controller.setQuoteExpanded(!_controller.isQuoteExpanded);
       },
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 500),
-        opacity: _isQuoteFaded ? 0.3 : 1.0,
+        opacity: _controller.isQuoteFaded ? 0.3 : 1.0,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
@@ -469,7 +429,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                       ),
                     ),
                   ),
-                  if (_isQuoteExpanded)
+                  if (_controller.isQuoteExpanded)
                     Icon(
                       Icons.keyboard_arrow_up,
                       size: 14,
@@ -488,9 +448,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
                 child: Text(
-                  _selectedText!,
-                  maxLines: _isQuoteExpanded ? null : 2,
-                  overflow: _isQuoteExpanded ? null : TextOverflow.ellipsis,
+                  _controller.selectedText!,
+                  maxLines: _controller.isQuoteExpanded ? null : 2,
+                  overflow: _controller.isQuoteExpanded ? null : TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: cs.onSurface.withValues(alpha: 0.7),
                     height: 1.4,
@@ -505,7 +465,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   }
 
   Widget _buildNoteFields() {
-    switch (_selectedNoteType) {
+    switch (_controller.selectedNoteType) {
       case NoteType.basic:
       case NoteType.basicReversed:
         return _buildBasicFields();
@@ -523,14 +483,14 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           label: 'Front',
           hint: 'Enter question...',
           minLines: 3,
-          controller: _frontController,
+          controller: _controller.frontController,
         ),
         const SizedBox(height: 16),
         _buildTextField(
           label: 'Back',
           hint: 'Enter answer...',
           minLines: 3,
-          controller: _backController,
+          controller: _controller.backController,
         ),
       ],
     );
@@ -543,14 +503,14 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           label: 'Text',
           hint: 'Paste text here and use {{c1::...}} for clozes',
           minLines: 5,
-          controller: _clozeTextController,
+          controller: _controller.clozeTextController,
         ),
         const SizedBox(height: 16),
         _buildTextField(
           label: 'Back Extra',
           hint: 'Extra information (optional)',
           minLines: 2,
-          controller: _clozeExtraController,
+          controller: _controller.clozeExtraController,
         ),
       ],
     );
@@ -563,7 +523,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
         _buildTextField(
           label: 'Title',
           hint: 'Name this occlusion set',
-          controller: _occlusionTitleController,
+          controller: _controller.occlusionTitleController,
         ),
         const SizedBox(height: 24),
         Container(
@@ -629,29 +589,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
             _buildFieldActionButton(
               icon: Icons.format_quote_rounded,
               tooltip: 'Paste Citation',
-              onTap: _selectedText == null
+              onTap: _controller.selectedText == null
                   ? null
-                  : () {
-                      final text = controller.text;
-                      final selection = controller.selection;
-                      final cited = _selectedText!;
-                      
-                      if (selection.isValid) {
-                        final newText = text.replaceRange(
-                          selection.start,
-                          selection.end,
-                          cited,
-                        );
-                        controller.value = TextEditingValue(
-                          text: newText,
-                          selection: TextSelection.collapsed(
-                            offset: selection.start + cited.length,
-                          ),
-                        );
-                      } else {
-                        controller.text = text + cited;
-                      }
-                    },
+                  : () => _controller.pasteCitation(controller),
             ),
             const SizedBox(width: 8),
             _buildFieldActionButton(
@@ -753,7 +693,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeOutQuart,
                 alignment: Alignment(
-                  -1.0 + (_selectedNoteType.index * (2.0 / (types.length - 1))),
+                  -1.0 + (_controller.selectedNoteType.index * (2.0 / (types.length - 1))),
                   0,
                 ),
                 child: Container(
@@ -771,7 +711,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
               ),
               Row(
                 children: types.map((type) {
-                  final isSelected = _selectedNoteType == type;
+                  final isSelected = _controller.selectedNoteType == type;
                   final isHovered = _hoveredNoteType == type;
 
                   return Expanded(
@@ -781,7 +721,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          onTap: () => setState(() => _selectedNoteType = type),
+                          onTap: () => _controller.setNoteType(type),
                           borderRadius: BorderRadius.circular(12),
                           hoverColor: cs.primary.withValues(alpha: 0.04),
                           splashColor: cs.primary.withValues(alpha: 0.08),
@@ -790,11 +730,11 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                             duration: const Duration(milliseconds: 200),
                             height: 72,
                             padding: EdgeInsets.symmetric(
-                              horizontal: _isMaximized ? 12 : 0,
+                              horizontal: _controller.isMaximized ? 12 : 0,
                             ),
                             alignment: Alignment.center,
                             child: Row(
-                              mainAxisAlignment: _isMaximized
+                              mainAxisAlignment: _controller.isMaximized
                                   ? MainAxisAlignment.start
                                   : MainAxisAlignment.center,
                               children: [
@@ -822,7 +762,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                                             milliseconds: 400,
                                           ),
                                           curve: Curves.easeOutQuart,
-                                          child: _isMaximized
+                                          child: _controller.isMaximized
                                               ? Padding(
                                                   padding:
                                                       const EdgeInsets.only(
@@ -880,7 +820,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                                         milliseconds: 400,
                                       ),
                                       curve: Curves.easeOutQuart,
-                                      child: !_isMaximized
+                                      child: !_controller.isMaximized
                                           ? Column(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
@@ -972,186 +912,8 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
       setState(() {
         _pdfBytes = blob?.bytes;
         _isLoadingPdf = false;
-        _clearHover();
+        _controller.clearHover();
       });
-    }
-  }
-
-  void _onHover(PointerEvent event) async {
-    if (_pdfBytes == null) return;
-
-    final result = _pdfController.getPdfPageHitTestResult(
-      event.localPosition,
-      useDocumentLayoutCoordinates: false,
-    );
-
-    if (result != null) {
-      final page = result.page;
-      final point = result.offset; // PDF coordinates
-
-      // Load text for the page
-      final pageText = await page.loadStructuredText();
-
-      // Find character index (even between gaps)
-      final charIndex = PdfTextBoundaryDetector.findNearestCharIndex(
-        pageText,
-        point,
-      );
-
-      if (charIndex != null) {
-        if (_hoveredPageNumber != page.pageNumber ||
-            _hoveredCharIndex != charIndex) {
-          final sentenceBounds = PdfTextBoundaryDetector.findSentenceBounds(
-            pageText,
-            charIndex,
-          );
-          final paragraphBounds = PdfTextBoundaryDetector.findParagraphBounds(
-            pageText,
-            charIndex,
-          );
-
-          if (mounted) {
-            setState(() {
-              _hoveredPageNumber = page.pageNumber;
-              _hoveredCharIndex = charIndex;
-              _hoveredPageText = pageText;
-              _hoveredSentenceBounds = sentenceBounds;
-              _hoveredParagraphBounds = paragraphBounds;
-            });
-          }
-        }
-      } else {
-        _clearHover();
-      }
-    } else {
-      _clearHover();
-    }
-  }
-
-  void _clearHover() {
-    if (_hoveredCharIndex != null) {
-      setState(() {
-        _hoveredPageNumber = null;
-        _hoveredCharIndex = null;
-        _hoveredPageText = null;
-        _hoveredSentenceBounds = null;
-        _hoveredParagraphBounds = null;
-      });
-    }
-  }
-
-  void _paintHoverHighlight(Canvas canvas, Rect pageRect, PdfPage page) {
-    if (_hoveredPageNumber != page.pageNumber || _hoveredPageText == null) {
-      return;
-    }
-
-    final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
-
-    // 1. Draw Paragraph (Subtle)
-    if (_hoveredParagraphBounds != null) {
-      final (start, end) = _hoveredParagraphBounds!;
-      final range = _hoveredPageText!.getRangeFromAB(start, end - 1);
-      final paint =
-          Paint()
-            ..color = primaryColor.withValues(alpha: 0.08)
-            ..style = PaintingStyle.fill;
-
-      for (final rect in range.enumerateFragmentBoundingRects()) {
-        final flutterRect = rect.bounds.toRectInDocument(
-          page: page,
-          pageRect: pageRect,
-        );
-        canvas.drawRect(flutterRect, paint);
-      }
-    }
-
-    // 2. Draw Sentence (More Visible)
-    if (_hoveredSentenceBounds != null) {
-      final (start, end) = _hoveredSentenceBounds!;
-      final range = _hoveredPageText!.getRangeFromAB(start, end - 1);
-      final paint =
-          Paint()
-            ..color = primaryColor.withValues(alpha: 0.2)
-            ..style = PaintingStyle.fill;
-
-      for (final rect in range.enumerateFragmentBoundingRects()) {
-        final flutterRect = rect.bounds.toRectInDocument(
-          page: page,
-          pageRect: pageRect,
-        );
-        canvas.drawRect(flutterRect, paint);
-      }
-    }
-  }
-
-  bool _onGeneralTap(
-    BuildContext context,
-    PdfViewerController controller,
-    PdfViewerGeneralTapHandlerDetails details,
-  ) {
-    if (details.type == PdfViewerGeneralTapType.tap ||
-        details.type == PdfViewerGeneralTapType.doubleTap) {
-      final result = _pdfController.getPdfPageHitTestResult(
-        details.documentPosition,
-        useDocumentLayoutCoordinates: true,
-      );
-
-      if (result != null) {
-        _selectSmartly(result.page, result.offset, details.type);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  Future<void> _selectSmartly(
-    PdfPage page,
-    PdfPoint point,
-    PdfViewerGeneralTapType tapType,
-  ) async {
-    final pageText = await page.loadStructuredText();
-    final charIndex = PdfTextBoundaryDetector.findNearestCharIndex(
-      pageText,
-      point,
-    );
-    if (charIndex == null) return;
-
-    final bounds =
-        (tapType == PdfViewerGeneralTapType.doubleTap)
-            ? PdfTextBoundaryDetector.findParagraphBounds(pageText, charIndex)
-            : PdfTextBoundaryDetector.findSentenceBounds(pageText, charIndex);
-
-    final range = PdfTextSelectionRange.fromPoints(
-      PdfTextSelectionPoint(pageText, bounds.$1),
-      PdfTextSelectionPoint(pageText, bounds.$2 - 1),
-    );
-
-    _pdfController.textSelectionDelegate.setTextSelectionPointRange(range);
-  }
-
-  Future<void> _onSelectionChanged(PdfTextSelection selection) async {
-    _quoteFadeTimer?.cancel();
-    if (selection.hasSelectedText) {
-      final text = await selection.getSelectedText();
-      if (mounted) {
-        setState(() {
-          _selectedText = text;
-          _isQuoteFaded = false;
-          _isQuoteExpanded = false;
-        });
-        _quoteFadeTimer = Timer(const Duration(seconds: 5), () {
-          if (mounted) setState(() => _isQuoteFaded = true);
-        });
-      }
-    } else {
-      if (mounted) {
-        setState(() {
-          _selectedText = null;
-          _isQuoteFaded = false;
-          _isQuoteExpanded = false;
-        });
-      }
     }
   }
 
@@ -1190,22 +952,21 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                 ),
               ),
               IconButton(
-                onPressed: () => setState(() => _isInverted = !_isInverted),
+                onPressed: () => _controller.toggleInvert(),
                 icon: Icon(
-                  _isInverted ? Icons.light_mode : Icons.dark_mode,
+                  _controller.isInverted ? Icons.light_mode : Icons.dark_mode,
                   size: 16,
                 ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 visualDensity: VisualDensity.compact,
-                tooltip: _isInverted ? "Light Mode" : "Dark Mode (Invert)",
+                tooltip: _controller.isInverted ? "Light Mode" : "Dark Mode (Invert)",
               ),
               const SizedBox(width: 8),
               IconButton(
                 onPressed: () => setState(() {
                   _selectedSource = null;
                   _pdfBytes = null;
-                  _isInverted = false;
                 }),
                 icon: const Icon(Icons.close, size: 16),
                 padding: EdgeInsets.zero,
@@ -1223,9 +984,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
   Widget _buildPdfViewer() {
     final theme = Theme.of(context);
     final originalBg = theme.colorScheme.surface;
-    // If inverted, we pre-invert the background color so the global ColorFiltered
-    // inverts it back to its original state.
-    final backgroundColor = _isInverted
+    final backgroundColor = _controller.isInverted
         ? Color.fromARGB(
             255,
             (255 - originalBg.r * 255).round().clamp(0, 255),
@@ -1237,7 +996,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     Widget viewer = PdfViewer.data(
       _pdfBytes!,
       sourceName: _selectedSource!.label,
-      controller: _pdfController,
+      controller: _controller.pdfController,
       params: PdfViewerParams(
         backgroundColor: backgroundColor,
         boundaryMargin: const EdgeInsets.symmetric(
@@ -1246,7 +1005,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
         ),
         textSelectionParams: PdfTextSelectionParams(
           enabled: true,
-          onTextSelectionChange: _onSelectionChanged,
+          onTextSelectionChange: _controller.onSelectionChanged,
         ),
         buildContextMenu: (context, params) {
           if (params.contextMenuFor != PdfViewerPart.selectedText) return null;
@@ -1287,76 +1046,46 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           );
         },
         pagePaintCallbacks: [_paintHoverHighlight],
-        onGeneralTap: _onGeneralTap,
+        onGeneralTap: (context, controller, details) {
+          _controller.handleTap(details);
+          return true;
+        },
         pageBackgroundPaintCallbacks: [
           (canvas, pageRect, page) {
-            final shadowColor = _isInverted
+            final shadowColor = _controller.isInverted
                 ? Colors.white.withValues(alpha: 0.1)
                 : Colors.black.withValues(alpha: 0.1);
 
             final paint = Paint()
               ..color = shadowColor
-              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+              ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 8);
 
-            // Draw a subtle shadow behind the page
-            canvas.drawRect(pageRect.shift(const Offset(2, 4)), paint);
+            canvas.drawRect(pageRect, paint);
           },
         ],
       ),
     );
-
-    viewer = GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTapDown: (details) {
-        final result = _pdfController.getPdfPageHitTestResult(
-          details.localPosition,
-          useDocumentLayoutCoordinates: false,
-        );
-        if (result != null) {
-          _selectSmartly(
-            result.page,
-            result.offset,
-            PdfViewerGeneralTapType.tap,
-          );
-        }
-      },
-      child: viewer,
-    );
-
-    viewer = MouseRegion(
-      onHover: _onHover,
-      onExit: (_) => _clearHover(),
-      child: viewer,
-    );
-
-    if (_isInverted) {
+    if (_controller.isInverted) {
       return ColorFiltered(
         colorFilter: const ColorFilter.matrix([
-          -1,
-          0,
-          0,
-          0,
-          255,
-          0,
-          -1,
-          0,
-          0,
-          255,
-          0,
-          0,
-          -1,
-          0,
-          255,
-          0,
-          0,
-          0,
-          1,
-          0,
+          -1, 0, 0, 0, 255,
+          0, -1, 0, 0, 255,
+          0, 0, -1, 0, 255,
+          0, 0, 0, 1, 0,
         ]),
         child: viewer,
       );
     }
     return viewer;
+  }
+
+  void _paintHoverHighlight(Canvas canvas, Rect pageRect, PdfPage page) {
+    _controller.paintHoverHighlight(
+      canvas,
+      pageRect,
+      page,
+      Theme.of(context).colorScheme.primary,
+    );
   }
 
   Widget _buildMainContent(BuildContext context) {
@@ -1395,11 +1124,36 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     }
 
     return ClipRect(
-      child: Stack(
-        children: [
-          Positioned.fill(child: _buildPdfViewer()),
-          Positioned(top: 0, left: 0, right: 0, child: _buildPdfHeader()),
-        ],
+      child: MouseRegion(
+        onHover: (event) async {
+          if (_pdfBytes == null) return;
+          final result = _controller.pdfController.getPdfPageHitTestResult(
+            event.localPosition,
+            useDocumentLayoutCoordinates: false,
+          );
+
+          if (result != null) {
+            final pageText = await result.page.loadStructuredText();
+            final charIndex = PdfTextBoundaryDetector.findNearestCharIndex(
+              pageText,
+              result.offset,
+            );
+            _controller.handleHover(
+              result.page.pageNumber,
+              charIndex,
+              pageText,
+            );
+          } else {
+            _controller.clearHover();
+          }
+        },
+        onExit: (_) => _controller.clearHover(),
+        child: Stack(
+          children: [
+            Positioned.fill(child: _buildPdfViewer()),
+            Positioned(top: 0, left: 0, right: 0, child: _buildPdfHeader()),
+          ],
+        ),
       ),
     );
   }
