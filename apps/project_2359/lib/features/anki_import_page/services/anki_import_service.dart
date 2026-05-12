@@ -43,12 +43,14 @@ class _AnkiParsedModel {
   final int type; // 0 = standard, 1 = cloze
   final List<String> fieldNames;
   final int templateCount;
+  final String? css;
   const _AnkiParsedModel({
     required this.id,
     required this.name,
     required this.type,
     required this.fieldNames,
     required this.templateCount,
+    this.css,
   });
 }
 
@@ -60,6 +62,7 @@ class AnkiParsedNote {
   final String? content;
   final String modelName;
   final List<String> tags;
+  final String? css;
   const AnkiParsedNote({
     required this.ankiId,
     required this.noteType,
@@ -68,6 +71,7 @@ class AnkiParsedNote {
     this.content,
     required this.modelName,
     required this.tags,
+    this.css,
   });
 }
 
@@ -298,6 +302,7 @@ class AnkiImportService {
         'SELECT qfmt FROM templates WHERE ntid = ?',
         [row['id']],
       );
+      final css = row['css'] as String?;
       final isCloze = templates.any(
         (t) => (t['qfmt'] as String).contains('{{cloze:'),
       );
@@ -307,6 +312,7 @@ class AnkiImportService {
         type: isCloze ? 1 : 0,
         fieldNames: fieldNames,
         templateCount: templates.length,
+        css: css,
       );
     }).toList();
   }
@@ -324,6 +330,7 @@ class AnkiImportService {
         type: (model['type'] as int?) ?? 0,
         fieldNames: flds.map((f) => f['name'] as String).toList(),
         templateCount: tmpls.length,
+        css: model['css'] as String?,
       );
     }).toList();
   }
@@ -336,11 +343,18 @@ class AnkiImportService {
           "SELECT name FROM sqlite_master WHERE type='table' AND name='decks'",
         )
         .isNotEmpty;
-    if (hasDecksTable) return _parseDecksFromTable(db);
-    if (jsonBlob != null && jsonBlob.isNotEmpty) {
-      return _parseDecksFromJson(jsonBlob);
+    List<AnkiParsedDeck> result;
+    if (hasDecksTable) {
+      result = _parseDecksFromTable(db);
+    } else if (jsonBlob != null && jsonBlob.isNotEmpty) {
+      result = _parseDecksFromJson(jsonBlob);
+    } else {
+      result = [];
     }
-    return [];
+    
+    // Alphabetize decks
+    result.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return result;
   }
 
   static List<AnkiParsedDeck> _parseDecksFromTable(Database db) {
@@ -410,9 +424,13 @@ class AnkiImportService {
       return AnkiParsedNote(
         ankiId: noteId,
         noteType: NoteType.cloze,
-        content: fields.isNotEmpty ? fields[0] : '',
+        content: jsonEncode({
+          'text': fields.isNotEmpty ? fields[0] : '',
+          'css': model.css,
+        }),
         modelName: model.name,
         tags: tags,
+        css: model.css,
       );
     }
 
@@ -434,21 +452,26 @@ class AnkiImportService {
           'fields': fieldMap,
           'modelName': model.name,
           'tags': tags,
+          'css': model.css,
         }),
         modelName: model.name,
         tags: tags,
+        css: model.css,
       );
     }
 
     // Extra fields beyond 2 stored in content JSON
-    String? content;
+    final extras = <String, String>{};
     if (fields.length > 2 && model.fieldNames.length >= fields.length) {
-      final extras = <String, String>{};
       for (int i = 2; i < fields.length; i++) {
         extras[model.fieldNames[i]] = fields[i];
       }
-      content = jsonEncode(extras);
     }
+    
+    final content = jsonEncode({
+      if (extras.isNotEmpty) 'extras': extras,
+      if (model.css != null) 'css': model.css,
+    });
 
     final noteType =
         model.templateCount >= 2 ? NoteType.basicAndReversed : NoteType.basic;
@@ -461,6 +484,7 @@ class AnkiImportService {
       content: content,
       modelName: model.name,
       tags: tags,
+      css: model.css,
     );
   }
 
@@ -614,8 +638,10 @@ class AnkiImportService {
 
         final note = noteAnkiIdToNote[card.noteAnkiId];
         if (note == null) continue;
-        final frontText = _renderCardText(note, card.ord, 'front');
-        final backText = _renderCardText(note, card.ord, 'back');
+
+        final cssTag = note.css != null ? '<style>${note.css}</style>' : '';
+        final frontText = cssTag + _renderCardText(note, card.ord, 'front');
+        final backText = cssTag + _renderCardText(note, card.ord, 'back');
 
         cardCompanions.add(
           CardItemsCompanion.insert(
@@ -679,8 +705,31 @@ class AnkiImportService {
   // ── Rendering Helpers ───────────────────────────────────────────────────
 
   static String _renderCardText(AnkiParsedNote note, int ordinal, String side) {
+    String? content = note.content;
+    
+    if (content != null && content.trim().startsWith('{')) {
+      try {
+        final data = jsonDecode(content) as Map<String, dynamic>;
+        if (note.noteType == NoteType.cloze) {
+          content = data['text'] as String?;
+        } else if (note.noteType == NoteType.custom) {
+          // Fallback to fields[0]/[1] if available in the map
+          final fields = data['fields'] as Map<String, dynamic>?;
+          if (fields != null && fields.isNotEmpty) {
+             final values = fields.values.toList();
+             return side == 'front' ? values[0].toString() : (values.length > 1 ? values[1].toString() : '');
+          }
+        }
+      } catch (_) {}
+    }
+
     if (note.noteType == NoteType.cloze) {
-      return _stripHtml(_renderClozeText(note.content ?? '', ordinal, side));
+      return _renderClozeText(content ?? '', ordinal, side);
+    }
+
+    // TODO: Support image occlusion for Anki imports.
+    if (note.noteType == NoteType.imageOcclusion) {
+      return side == 'front' ? 'Image Occlusion Card' : 'Revealed Image';
     }
 
     // For Basic and Basic+Reversed, we can use front/back fields
@@ -692,12 +741,12 @@ class AnkiImportService {
       } else {
         text = side == 'front' ? (note.front ?? '') : (note.back ?? '');
       }
-      return _stripHtml(text);
+      return text;
     }
 
-    // For Custom, we'll use front/back as fallback
+    // For Custom fallback
     if (note.noteType == NoteType.custom) {
-      return _stripHtml(side == 'front' ? (note.front ?? '') : (note.back ?? ''));
+      return side == 'front' ? (note.front ?? '') : (note.back ?? '');
     }
 
     return '';
@@ -718,30 +767,13 @@ class AnkiImportService {
       // Ordinals in {{cN::...}} are 1-indexed.
       if (matchOrdinal == (ordinal + 1)) {
         if (side == 'front') {
-          return hint != null ? '[$hint]' : '[...]';
+          return hint != null ? '<span class="cloze-hint">[$hint]</span>' : '<span class="cloze-placeholder">[...]</span>';
         } else {
-          return answer;
+          return '<span class="cloze-answer">$answer</span>';
         }
       }
       return answer;
     });
-  }
-
-  static String _stripHtml(String html) {
-    // Simple HTML stripping for basic display
-    // 1. Replace <br>, <br/>, <div> with newlines
-    String text = html.replaceAll(RegExp(r'<(br|div|p)\s*/?>', caseSensitive: false), '\n');
-    // 2. Remove all other tags
-    text = text.replaceAll(RegExp(r'<[^>]*>'), '');
-    // 3. Decode some basic entities
-    text = text.replaceAll('&nbsp;', ' ')
-               .replaceAll('&lt;', '<')
-               .replaceAll('&gt;', '>')
-               .replaceAll('&amp;', '&')
-               .replaceAll('&quot;', '"')
-               .replaceAll('&#39;', "'");
-    
-    return text.trim();
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────

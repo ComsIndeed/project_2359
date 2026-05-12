@@ -5,6 +5,7 @@ import 'package:project_2359/core/app_controller.dart';
 import 'package:project_2359/features/home_page/widgets/due_cards_overview.dart';
 import 'package:project_2359/features/study_page/study_page.dart';
 import 'package:project_2359/core/widgets/project_important_tile.dart';
+import 'package:project_2359/core/utils/deck_name_utils.dart';
 
 class HomeDueCardsTile extends StatelessWidget {
   final VoidCallback? onTap;
@@ -150,7 +151,7 @@ class CollectionDueCardsTile extends StatelessWidget {
     final deckIdToName = {for (var d in decks) d.id: d.name};
 
     for (var card in cards) {
-      final deckName = deckIdToName[card.deckId] ?? "Unknown Deck";
+      final deckName = (deckIdToName[card.deckId] ?? "Unknown Deck").cleanDeckName;
       deckCounts[deckName] = (deckCounts[deckName] ?? 0) + 1;
     }
 

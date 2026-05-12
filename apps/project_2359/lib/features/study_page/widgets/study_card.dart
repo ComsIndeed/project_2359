@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:project_2359/app_database.dart';
 import 'package:project_2359/app_theme.dart';
+import 'package:project_2359/core/app_controller.dart';
+import 'package:provider/provider.dart';
 
 class StudyCard extends StatelessWidget {
   final String frontText;
@@ -38,7 +42,7 @@ class StudyCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 150),
         curve: Curves.easeInOut,
         decoration: ShapeDecoration(
           color: isAnswerRevealed ? revealedColor : frontColor,
@@ -58,7 +62,7 @@ class StudyCard extends StatelessWidget {
               padding: const EdgeInsets.all(32),
               child: Center(
                 child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
+                  duration: const Duration(milliseconds: 100),
                   transitionBuilder: (Widget child, Animation<double> animation) {
                     return FadeTransition(
                       opacity: animation,
@@ -69,30 +73,44 @@ class StudyCard extends StatelessWidget {
                     key: ValueKey<bool>(isAnswerRevealed),
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (isAnswerRevealed)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16.0),
-                          child: Text(
-                            "ANSWER",
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.primary.withValues(
-                                alpha: 0.4,
-                              ),
-                              letterSpacing: 2,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      Html(
+                        data: isAnswerRevealed ? backText : frontText,
+                        extensions: [
+                          TagExtension(
+                            tagsToExtend: {"img"},
+                            builder: (extensionContext) {
+                              final src = extensionContext.attributes['src'];
+                              if (src != null) {
+                                return _DatabaseImage(name: src);
+                              }
+                              return const SizedBox.shrink();
+                            },
                           ),
-                        ),
-                      Text(
-                        isAnswerRevealed ? backText : frontText,
-                        style: theme.textTheme.displaySmall?.copyWith(
-                          fontSize: 28, // Slightly bigger for the bigger card
-                          fontWeight: isAnswerRevealed ? FontWeight.w600 : FontWeight.w500,
-                          color: isAnswerRevealed
-                              ? theme.colorScheme.primary.withValues(alpha: 0.9)
-                              : theme.colorScheme.onSurface,
-                        ),
-                        textAlign: TextAlign.center,
+                        ],
+                        style: {
+                          "body": Style(
+                            fontSize: FontSize(24),
+                            fontWeight: isAnswerRevealed ? FontWeight.w600 : FontWeight.w500,
+                            color: isAnswerRevealed
+                                ? theme.colorScheme.primary.withValues(alpha: 0.9)
+                                : theme.colorScheme.onSurface,
+                            textAlign: TextAlign.center,
+                            margin: Margins.zero,
+                            padding: HtmlPaddings.zero,
+                          ),
+                          ".cloze-placeholder": Style(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          ".cloze-hint": Style(
+                            color: theme.colorScheme.primary.withValues(alpha: 0.7),
+                            fontStyle: FontStyle.italic,
+                          ),
+                          ".cloze-answer": Style(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        },
                       ),
                     ],
                   ),
@@ -122,6 +140,44 @@ class StudyCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _DatabaseImage extends StatelessWidget {
+  final String name;
+  const _DatabaseImage({required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    final appController = context.read<AppController>();
+    final db = appController.appDatabase;
+
+    return FutureBuilder<AssetItem?>(
+      future: (db.select(db.assetItems)..where((t) => t.name.equals(name))).getSingleOrNull(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          );
+        }
+        if (snapshot.hasData && snapshot.data != null) {
+          return Image.memory(
+            snapshot.data!.data,
+            fit: BoxFit.contain,
+          );
+        }
+        // If image not found, might be a network image or just missing
+        if (name.startsWith('http')) {
+          return Image.network(name);
+        }
+        return const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Icon(Icons.broken_image, size: 32, color: Colors.grey),
+        );
+      },
     );
   }
 }

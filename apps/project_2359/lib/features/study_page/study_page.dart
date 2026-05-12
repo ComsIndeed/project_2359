@@ -11,6 +11,7 @@ import 'package:project_2359/core/tables/study_session_events.dart';
 import 'package:project_2359/core/services/continuous_session_controller.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/features/study_page/widgets/source_preview_sheet.dart';
+import 'package:project_2359/core/utils/deck_name_utils.dart';
 import 'package:provider/provider.dart';
 
 class StudyPage extends StatefulWidget {
@@ -330,15 +331,15 @@ class _StudyPageState extends State<StudyPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.title,
+                              widget.title.cleanDeckName,
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
-                              widget.mode == StudySessionMode.spaced
+                              widget.title.deckParentName ?? (widget.mode == StudySessionMode.spaced
                                   ? "Scheduled Review"
-                                  : "Continuous Mode",
+                                  : "Continuous Mode"),
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: theme.colorScheme.onSurface.withValues(
                                   alpha: 0.5,

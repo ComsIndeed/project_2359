@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/models/note_type.dart';
 
@@ -11,16 +12,38 @@ class NoteTemplateRenderer {
         ? type.getFrontTemplate(ordinal) 
         : type.getBackTemplate(ordinal);
 
+    String? content = note.content;
+    String? css;
+    
+    // Check if content is JSON (Anki import format)
+    if (content != null && content.trim().startsWith('{')) {
+      try {
+        final data = jsonDecode(content) as Map<String, dynamic>;
+        css = data['css'] as String?;
+        if (type == NoteType.cloze) {
+          content = data['text'] as String?;
+        } else if (type == NoteType.custom) {
+          // TODO: handle custom field mapping in template
+          content = jsonEncode(data['fields'] ?? {});
+        } else {
+          content = data['extras'] != null ? jsonEncode(data['extras']) : null;
+        }
+      } catch (_) {
+        // Fallback to raw content if not valid JSON
+      }
+    }
+
     if (type == NoteType.cloze) {
-      return _renderCloze(note.content ?? '', ordinal, side);
+      final html = _renderCloze(content ?? '', ordinal, side);
+      return css != null ? '<style>$css</style>$html' : html;
     }
 
     String result = template;
     result = result.replaceAll('{{front}}', note.front ?? '');
     result = result.replaceAll('{{back}}', note.back ?? '');
-    result = result.replaceAll('{{content}}', note.content ?? '');
+    result = result.replaceAll('{{content}}', content ?? '');
     
-    return result;
+    return css != null ? '<style>$css</style>$result' : result;
   }
 
   static String _renderCloze(String content, int ordinal, String side) {
