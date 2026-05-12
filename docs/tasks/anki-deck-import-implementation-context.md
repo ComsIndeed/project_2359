@@ -494,3 +494,103 @@ values are interpreted under the same parameters they were trained on.
 - `file_picker` — opening the file explorer filtered to `.apkg`
 - `path_provider` — writing the extracted SQLite file to a temp directory before
   opening it
+
+---
+
+# What about handling different anki versions and different anki exports
+
+Good thing to cover before you build. Here's what actually varies across Anki
+versions:
+
+---
+
+## The Two Database Formats
+
+**`collection.anki2`** — the classic format, used by all Anki versions up
+through recent ones. Single SQLite file, always present in every `.apkg`.
+
+**`collection.anki21`** — introduced in Anki 2.1.x as an optional newer format.
+Some exports include _both_ files in the same `.apkg`. If `collection.anki21` is
+present, prefer it over `collection.anki2` — it's the same schema but with some
+internal improvements. Your unzip logic should just check for the newer file
+first and fall back.
+
+There is also a **`collection.anki21b`** format appearing in very recent Anki
+versions that uses zstd compression on the SQLite file internally. This is rare
+in the wild right now and extremely annoying to handle — safe to explicitly
+reject it with a "this deck was exported from a very new version of Anki, please
+re-export with compatibility mode enabled" message.
+
+---
+
+## Schema Differences Across Versions
+
+The `notes` and `cards` tables are stable across all versions — `flds`, `mid`,
+`did`, `ord`, `due`, `queue`, `data` have been consistent for years. The things
+that actually changed:
+
+**`col.models` and `col.decks`** moved in newer Anki versions. In older exports
+they're JSON blobs in the `col` table columns. In newer Anki (2.1.50+), they may
+instead be in separate `notetypes` and `decks` tables. Check for the existence
+of these tables first; if they exist, read from them directly. If they don't,
+fall back to parsing the JSON blobs from `col`. The data shape is the same
+either way.
+
+**`cards.data` FSRS field** only exists in Anki 23.10+ when the user has FSRS
+enabled. Older exports will have an empty string `""` here, or older SM-2 fields
+(`factor`, `ivl`, `reps`, `lapses`) in the main card columns instead. Those SM-2
+fields are: `ivl` (interval in days), `factor` (ease factor as integer, 2500 =
+250%), `reps`, `lapses`. If `data` is empty and `ivl > 0`, you can do a rough
+FSRS S/D approximation from SM-2 fields — but honestly just initializing fresh
+SRS state is fine for these older cards.
+
+---
+
+## Shared Deck Exports vs. Personal Collection Exports
+
+**Shared decks** (downloaded from AnkiWeb or shared between users) will have
+`cards.queue = 0` for everything (new cards, never reviewed). The `data` field
+will be empty. This is the most common import scenario for academic users
+getting premade decks — no SRS state to import, just content. Handle this
+gracefully as the default happy path.
+
+**Personal collection exports** from a user's own Anki will have real scheduling
+data, FSRS state in `data`, and a meaningful `col.crt` for due date math. This
+is the migration scenario.
+
+When exporting from Anki, users also have a checkbox: **"Include scheduling
+information"**. If they uncheck it, all cards come in as new with empty `data`.
+If they check it, full state is preserved. You can't detect this flag from the
+file itself — just handle both cases by checking whether `data` is populated.
+
+---
+
+## Media Edge Cases
+
+The `media` JSON map is sometimes an empty object `{}` even when media files are
+present (bug in older Anki exports). Also some decks embed media as
+`[sound:filename.mp3]` inside field text rather than `<img>` tags — parse both
+patterns when scanning fields for media references.
+
+Some older exports name the media file map just `media` with no extension, and
+some very old ones skip it entirely. Treat a missing `media` file as an empty
+map rather than an error.
+
+---
+
+## What to Actually Do
+
+In order of priority:
+
+1. Check for `collection.anki21` first, fall back to `collection.anki2`, reject
+   `collection.anki21b` with a clear message
+2. Check if `notetypes` and `decks` tables exist before falling back to JSON
+   blobs in `col`
+3. Parse `cards.data` defensively — empty string, missing keys, or `null` should
+   all initialize fresh SRS state
+4. Treat missing or empty `media` JSON as an empty map, not an error
+5. Scan field text for both `<img src="...">` and `[sound:...]` patterns for
+   media resolution
+
+Everything else (obscure note type variants, legacy SM-2 state, etc.) is safe to
+ignore or handle with a graceful fallback for v1.
