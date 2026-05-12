@@ -568,6 +568,7 @@ class AnkiImportService {
 
       // 2. Notes
       final noteCompanions = <NoteItemsCompanion>[];
+      final noteAnkiIdToNote = {for (final n in data.notes) n.ankiId: n};
       for (final note in data.notes) {
         final appNoteId = uuid.v4();
         noteIdMap[note.ankiId] = appNoteId;
@@ -611,12 +612,19 @@ class AnkiImportService {
         final state =
             card.queue == -1 ? 0 : (preserveFsrsState ? card.queue : 0);
 
+        final note = noteAnkiIdToNote[card.noteAnkiId];
+        if (note == null) continue;
+        final frontText = _renderCardText(note, card.ord, 'front');
+        final backText = _renderCardText(note, card.ord, 'back');
+
         cardCompanions.add(
           CardItemsCompanion.insert(
             id: uuid.v4(),
             noteId: Value(appNoteId),
             deckId: Value(appDeckId),
             templateOrdinal: Value(card.ord),
+            frontText: Value(frontText),
+            backText: Value(backText),
             spacedDue: Value(dueDate),
             spacedStability: Value(stability),
             spacedDifficulty: Value(difficulty),
@@ -666,6 +674,74 @@ class AnkiImportService {
       collectionId: collectionId,
       collectionName: collectionName,
     );
+  }
+
+  // ── Rendering Helpers ───────────────────────────────────────────────────
+
+  static String _renderCardText(AnkiParsedNote note, int ordinal, String side) {
+    if (note.noteType == NoteType.cloze) {
+      return _stripHtml(_renderClozeText(note.content ?? '', ordinal, side));
+    }
+
+    // For Basic and Basic+Reversed, we can use front/back fields
+    if (note.noteType == NoteType.basic ||
+        note.noteType == NoteType.basicAndReversed) {
+      String text = '';
+      if (note.noteType == NoteType.basicAndReversed && ordinal == 1) {
+        text = side == 'front' ? (note.back ?? '') : (note.front ?? '');
+      } else {
+        text = side == 'front' ? (note.front ?? '') : (note.back ?? '');
+      }
+      return _stripHtml(text);
+    }
+
+    // For Custom, we'll use front/back as fallback
+    if (note.noteType == NoteType.custom) {
+      return _stripHtml(side == 'front' ? (note.front ?? '') : (note.back ?? ''));
+    }
+
+    return '';
+  }
+
+  static String _renderClozeText(String content, int ordinal, String side) {
+    final clozePattern = RegExp(r'\{\{c(\d+)::(.*?)\}\}');
+
+    return content.replaceAllMapped(clozePattern, (match) {
+      final matchOrdinal = int.tryParse(match.group(1) ?? '0') ?? 1;
+      final inner = match.group(2) ?? '';
+      
+      // Anki clozes can be {{c1::answer::hint}}
+      final parts = inner.split('::');
+      final answer = parts[0];
+      final hint = parts.length > 1 ? parts[1] : null;
+
+      // Ordinals in {{cN::...}} are 1-indexed.
+      if (matchOrdinal == (ordinal + 1)) {
+        if (side == 'front') {
+          return hint != null ? '[$hint]' : '[...]';
+        } else {
+          return answer;
+        }
+      }
+      return answer;
+    });
+  }
+
+  static String _stripHtml(String html) {
+    // Simple HTML stripping for basic display
+    // 1. Replace <br>, <br/>, <div> with newlines
+    String text = html.replaceAll(RegExp(r'<(br|div|p)\s*/?>', caseSensitive: false), '\n');
+    // 2. Remove all other tags
+    text = text.replaceAll(RegExp(r'<[^>]*>'), '');
+    // 3. Decode some basic entities
+    text = text.replaceAll('&nbsp;', ' ')
+               .replaceAll('&lt;', '<')
+               .replaceAll('&gt;', '>')
+               .replaceAll('&amp;', '&')
+               .replaceAll('&quot;', '"')
+               .replaceAll('&#39;', "'");
+    
+    return text.trim();
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────
