@@ -181,7 +181,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
             Expanded(
               child: PageView(
                 controller: _controller.pageController,
-                onPageChanged: (index) => _controller.setTabIndex(index),
+                onPageChanged: (index) => _controller.setTabIndex(index, animate: false),
                 children: [
                   _buildTabContent('Notes Content'),
                   _buildSourcesTab(),

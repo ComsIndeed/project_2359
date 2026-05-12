@@ -40,14 +40,35 @@ class NoteTakingController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setTabIndex(int index) {
-    selectedTabIndex = index;
-    pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-    notifyListeners();
+  bool _isProgrammaticScroll = false;
+
+  void setTabIndex(int index, {bool animate = true}) {
+    if (selectedTabIndex == index) return;
+
+    if (animate) {
+      _isProgrammaticScroll = true;
+      selectedTabIndex = index;
+      notifyListeners();
+
+      if (pageController.hasClients) {
+        pageController
+            .animateToPage(
+              index,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            )
+            .then((_) {
+              _isProgrammaticScroll = false;
+            });
+      } else {
+        _isProgrammaticScroll = false;
+      }
+    } else {
+      if (!_isProgrammaticScroll) {
+        selectedTabIndex = index;
+        notifyListeners();
+      }
+    }
   }
 
   void toggleMaximize() {
