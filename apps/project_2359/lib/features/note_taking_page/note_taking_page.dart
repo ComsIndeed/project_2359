@@ -20,13 +20,11 @@ import 'note_taking_controller.dart';
 import 'package:project_2359/core/models/note_type.dart';
 
 class NoteTakingPage extends StatefulWidget {
-  final String collectionId;
   final String? deckId;
   final String? draftId;
 
   const NoteTakingPage({
     super.key,
-    required this.collectionId,
     this.deckId,
     this.draftId,
   });
@@ -53,19 +51,20 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     _controller.initializeDraftSession(
       existingDraftId: widget.draftId,
       existingDeckId: widget.deckId,
-      collectionId: widget.collectionId,
     );
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateTitleBar();
     });
  
-    final sourceService = SourceService(db);
-    _sourcesSub = sourceService
-        .watchSourcesByCollectionId(widget.collectionId)
-        .listen((sources) {
-          if (mounted) setState(() => _sources = sources);
-        });
+    if (widget.deckId != null) {
+      final sourceService = SourceService(db);
+      _sourcesSub = sourceService
+          .watchSourcesByDeckId(widget.deckId!)
+          .listen((sources) {
+            if (mounted) setState(() => _sources = sources);
+          });
+    }
   }
 
 
@@ -430,7 +429,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              "No sources in this collection",
+              "No sources in this deck",
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: cs.onSurface.withValues(alpha: 0.4),
               ),

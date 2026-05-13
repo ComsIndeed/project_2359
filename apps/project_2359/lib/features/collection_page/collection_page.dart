@@ -34,24 +34,24 @@ import 'package:project_2359/core/tables/study_session_events.dart';
 import 'package:project_2359/features/settings_page/deck_settings_page.dart';
 import 'package:project_2359/features/analytics_page/deck_analytics_page.dart';
 
-class CollectionPage extends StatefulWidget {
-  final String collectionId;
-  final String initialCollectionName;
+class DeckPage extends StatefulWidget {
+  final String deckId; 
+  final String initialDeckName;
   final bool isNested;
 
-  const CollectionPage({
+  const DeckPage({
     super.key,
-    required this.collectionId,
-    required this.initialCollectionName,
+    required this.deckId,
+    required this.initialDeckName,
     this.isNested = false,
   });
 
   @override
-  State<CollectionPage> createState() => _CollectionPageState();
+  State<DeckPage> createState() => _DeckPageState();
 }
 
-class _CollectionPageState extends State<CollectionPage> {
-  late String collectionName;
+class _DeckPageState extends State<DeckPage> {
+  late String deckName;
   final Set<String> _selectedDeckIds = {};
   String? _selectedDeckId;
   final StudySessionMode _currentMode = StudySessionMode.spaced;
@@ -63,7 +63,7 @@ class _CollectionPageState extends State<CollectionPage> {
   StreamSubscription? _sourcesSub;
   final PageController _pageController = PageController();
   int _currentPageIndex = 0;
-  bool _isStudyingCollection = false;
+  bool _isStudyingDeck = false;
 
   void _onPageChanged(int index) {
     if (mounted) {
@@ -176,7 +176,7 @@ class _CollectionPageState extends State<CollectionPage> {
         await sourceService.insertSource(
           SourceItemsCompanion(
             id: drift.Value(sourceId),
-            collectionId: drift.Value(widget.collectionId),
+            deckId: drift.Value(widget.deckId),
             label: drift.Value(file.name),
             type: const drift.Value(MediaType.document),
             isPinned: const drift.Value(false),
@@ -215,37 +215,37 @@ class _CollectionPageState extends State<CollectionPage> {
   @override
   void initState() {
     super.initState();
-    collectionName = widget.initialCollectionName;
+    deckName = widget.initialDeckName;
     final service = context.read<StudyDatabaseService>();
-    _decksStream = service.watchDecksByCollectionId(widget.collectionId);
+    _decksStream = service.watchSubDecks(widget.deckId);
     _deckSub = _decksStream.listen((decks) {
       if (mounted) setState(() => _allDecks = decks);
     });
 
     final draftService = context.read<AppController>().draftService;
     _draftSub = draftService
-        .watchDraftsByCollectionId(widget.collectionId)
+        .watchDraftsByDeckId(widget.deckId)
         .listen((drafts) {
           if (mounted) setState(() => _allDrafts = drafts);
         });
 
     final sourceService = context.read<SourceService>();
     _sourcesSub = sourceService
-        .watchSourcesByCollectionId(widget.collectionId)
+        .watchSourcesByDeckId(widget.deckId)
         .listen((sources) {
           if (mounted) setState(() => _currentSources = sources);
         });
   }
 
   @override
-  void didUpdateWidget(CollectionPage oldWidget) {
+  void didUpdateWidget(DeckPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.collectionId != widget.collectionId) {
+    if (oldWidget.deckId != widget.deckId) {
       _deckSub?.cancel();
       _sourcesSub?.cancel();
 
       final service = context.read<StudyDatabaseService>();
-      _decksStream = service.watchDecksByCollectionId(widget.collectionId);
+      _decksStream = service.watchSubDecks(widget.deckId);
       _deckSub = _decksStream.listen((decks) {
         if (mounted) setState(() => _allDecks = decks);
       });
@@ -253,14 +253,14 @@ class _CollectionPageState extends State<CollectionPage> {
       _draftSub?.cancel();
       final draftService = context.read<AppController>().draftService;
       _draftSub = draftService
-          .watchDraftsByCollectionId(widget.collectionId)
+          .watchDraftsByDeckId(widget.deckId)
           .listen((drafts) {
             if (mounted) setState(() => _allDrafts = drafts);
           });
 
       final sourceService = context.read<SourceService>();
       _sourcesSub = sourceService
-          .watchSourcesByCollectionId(widget.collectionId)
+          .watchSourcesByDeckId(widget.deckId)
           .listen((sources) {
             if (mounted) setState(() => _currentSources = sources);
           });
@@ -287,27 +287,27 @@ class _CollectionPageState extends State<CollectionPage> {
 
   Widget _buildContent() {
     return AdaptivePaneLayout(
-      key: ValueKey('collection_pane_${widget.collectionId}'),
+      key: ValueKey('deck_pane_${widget.deckId}'),
       isNested: widget.isNested,
       masterWidth: 350,
       master: (context, controller) => _buildMasterView(controller, false),
       masterCollapsed: (context, controller) =>
           _buildMasterView(controller, true),
       detail: (context, controller) =>
-          _isStudyingCollection
-              ? _buildCollectionStudyView()
+          _isStudyingDeck
+              ? _buildDeckStudyView()
               : (_selectedDeckId != null
                   ? _buildDetailView()
                   : _buildEmptyDetail()),
     );
   }
 
-  Widget _buildBackground(String collectionName, bool isDesktop) {
+  Widget _buildBackground(String deckName, bool isDesktop) {
     return Positioned.fill(
       child: SpecialBackgroundGenerator(
         type: SpecialBackgroundType.geometricSquares,
-        seed: GenerationSeed.fromString(collectionName),
-        label: collectionName,
+        seed: GenerationSeed.fromString(deckName),
+        label: deckName,
         icon: FontAwesomeIcons.layerGroup,
         showBorder: false,
         showShadow: false,
@@ -321,7 +321,7 @@ class _CollectionPageState extends State<CollectionPage> {
   }
 
   Widget _buildPageView({bool isCollapsed = false}) {
-    final collectionName = widget.initialCollectionName;
+    final deckName = widget.initialDeckName;
     return PageView(
       controller: _pageController,
       onPageChanged: _onPageChanged,
@@ -329,7 +329,7 @@ class _CollectionPageState extends State<CollectionPage> {
         _CardsPage(
           decks: _allDecks,
           drafts: _allDrafts,
-          collectionId: widget.collectionId,
+          deckId: widget.deckId,
           selectedIds: _selectedDeckIds,
           onToggleSelection: _toggleDeckSelection,
           isSelecting: _isSelecting,
@@ -338,7 +338,7 @@ class _CollectionPageState extends State<CollectionPage> {
           onStudyCollectionRequested: (id) {
             if (ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
               setState(() {
-                _isStudyingCollection = true;
+                _isStudyingDeck = true;
                 _selectedDeckId = null;
               });
             } else {
@@ -346,8 +346,8 @@ class _CollectionPageState extends State<CollectionPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => StudyPage(
-                    collectionId: id,
-                    title: "Collection Review",
+                    deckId: id,
+                    title: "Deck Review",
                   ),
                 ),
               );
@@ -359,14 +359,14 @@ class _CollectionPageState extends State<CollectionPage> {
             if (ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
               setState(() {
                 _selectedDeckId = id;
-                _isStudyingCollection = false;
+                _isStudyingDeck = false;
               });
               return;
             }
 
             setState(() {
               _selectedDeckId = id;
-              _isStudyingCollection = false;
+              _isStudyingDeck = false;
             });
 
             final schedulingService =
@@ -403,13 +403,13 @@ class _CollectionPageState extends State<CollectionPage> {
           },
         ),
         _SourcesPage(
-          collectionId: widget.collectionId,
+          deckId: widget.deckId,
           sources: _currentSources ?? [],
           isCollapsed: isCollapsed,
         ),
         _SettingsPage(
-          collectionId: widget.collectionId,
-          collectionName: collectionName,
+          deckId: widget.deckId,
+          deckName: deckName,
           isCollapsed: isCollapsed,
         ),
       ],
@@ -418,7 +418,7 @@ class _CollectionPageState extends State<CollectionPage> {
 
   Widget _buildMasterView(AdaptivePaneController controller, bool isCollapsed) {
     final theme = Theme.of(context);
-    final collectionName = widget.initialCollectionName;
+    final deckName = widget.initialDeckName;
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
 
     return Scaffold(
@@ -476,7 +476,7 @@ class _CollectionPageState extends State<CollectionPage> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => NoteTakingPage(
-                                    collectionId: widget.collectionId,
+                                    deckId: widget.deckId,
                                   ),
                                 ),
                               );
@@ -600,7 +600,7 @@ class _CollectionPageState extends State<CollectionPage> {
               },
               body: Stack(
                 children: [
-                  _buildBackground(collectionName, isDesktop),
+                  _buildBackground(deckName, isDesktop),
                   NestedScrollView(
                     headerSliverBuilder: (context, innerBoxIsScrolled) {
                       if (isDesktop) {
@@ -617,7 +617,7 @@ class _CollectionPageState extends State<CollectionPage> {
                                 ),
                               ),
                               child: _HeaderContent(
-                                collectionName: collectionName,
+                                deckName: deckName,
                                 currentIndex: _currentPageIndex,
                                 onPageRequested: _requestPage,
                               ),
@@ -629,7 +629,7 @@ class _CollectionPageState extends State<CollectionPage> {
                         SliverPersistentHeader(
                           pinned: true,
                           delegate: _CollapsingHeaderDelegate(
-                            collectionName: collectionName,
+                            deckName: deckName,
                             topPadding:
                                 widget.isNested
                                     ? 0
@@ -696,14 +696,14 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
-  Widget _buildCollectionStudyView() {
+  Widget _buildDeckStudyView() {
     return StudyPage(
-      key: ValueKey("collection_${widget.collectionId}"),
-      collectionId: widget.collectionId,
-      title: "Collection Review",
+      key: ValueKey("deck_recursive_${widget.deckId}"),
+      deckId: widget.deckId,
+      title: "Deck Review",
       isNested: true,
       mode: _currentMode,
-      onBack: () => setState(() => _isStudyingCollection = false),
+      onBack: () => setState(() => _isStudyingDeck = false),
     );
   }
 
@@ -732,12 +732,12 @@ class _CollectionPageState extends State<CollectionPage> {
 }
 
 class _HeaderContent extends StatelessWidget {
-  final String collectionName;
+  final String deckName;
   final int currentIndex;
   final ValueChanged<int> onPageRequested;
 
   const _HeaderContent({
-    required this.collectionName,
+    required this.deckName,
     required this.currentIndex,
     required this.onPageRequested,
   });
@@ -749,7 +749,7 @@ class _HeaderContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "COLLECTION",
+          "DECK",
           style: theme.textTheme.labelSmall?.copyWith(
             color: Colors.white.withValues(alpha: 0.4),
             fontWeight: FontWeight.w900,
@@ -772,7 +772,7 @@ class _HeaderContent extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                collectionName,
+                deckName,
                 style: theme.textTheme.displaySmall?.copyWith(
                   fontWeight: FontWeight.w900,
                   color: theme.colorScheme.onSurface,
@@ -816,14 +816,14 @@ class _HeaderContent extends StatelessWidget {
 }
 
 class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final String collectionName;
+  final String deckName;
   final double topPadding;
   final VoidCallback? onBack;
   final int currentIndex;
   final ValueChanged<int> onPageRequested;
 
   _CollapsingHeaderDelegate({
-    required this.collectionName,
+    required this.deckName,
     required this.topPadding,
     this.onBack,
     required this.currentIndex,
@@ -880,7 +880,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                 child: SingleChildScrollView(
                   physics: const NeverScrollableScrollPhysics(),
                   child: _HeaderContent(
-                    collectionName: collectionName,
+                    deckName: deckName,
                     currentIndex: currentIndex,
                     onPageRequested: onPageRequested,
                   ),
@@ -903,7 +903,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                     child: Opacity(
                       opacity: (t * 2.0 - 0.6).clamp(0.0, 1.0),
                       child: Text(
-                        collectionName,
+                        deckName,
                         style: theme.textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                           fontSize: 18,
@@ -1052,7 +1052,7 @@ class _CompactIconButton extends StatelessWidget {
 class _CardsPage extends StatelessWidget {
   final List<DeckItem> decks;
   final List<CardCreationDraftItem> drafts;
-  final String collectionId;
+  final String deckId;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
   final bool isSelecting;
@@ -1064,7 +1064,7 @@ class _CardsPage extends StatelessWidget {
   const _CardsPage({
     required this.decks,
     required this.drafts,
-    required this.collectionId,
+    required this.deckId,
     required this.selectedIds,
     required this.onToggleSelection,
     required this.isSelecting,
@@ -1088,11 +1088,11 @@ class _CardsPage extends StatelessWidget {
             isCollapsed ? CrossAxisAlignment.center : CrossAxisAlignment.start,
         children: [
           if (!isCollapsed) ...[
-            CollectionDueCardsTile(
-              collectionId: collectionId,
+            DeckDueCardsTile(
+              deckId: deckId,
               onTap:
                   onStudyCollectionRequested != null
-                      ? () => onStudyCollectionRequested!(collectionId)
+                      ? () => onStudyCollectionRequested!(deckId)
                       : null,
             ),
             const SizedBox(height: 16),
@@ -1136,7 +1136,6 @@ class _CardsPage extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => NoteTakingPage(
-                                  collectionId: collectionId,
                                   deckId: draft.deckId,
                                   draftId: draft.id,
                                 ),
@@ -1156,7 +1155,7 @@ class _CardsPage extends StatelessWidget {
           ],
           _DecksList(
             decks: decks,
-            collectionId: collectionId,
+            deckId: deckId,
             isCollapsed: isCollapsed,
             selectedIds: selectedIds,
             onToggleSelection: onToggleSelection,
@@ -1172,12 +1171,12 @@ class _CardsPage extends StatelessWidget {
 }
 
 class _SourcesPage extends StatelessWidget {
-  final String collectionId;
+  final String deckId;
   final List<SourceItem> sources;
   final bool isCollapsed;
 
   const _SourcesPage({
-    required this.collectionId,
+    required this.deckId,
     required this.sources,
     this.isCollapsed = false,
   });
@@ -1213,7 +1212,7 @@ class _SourcesPage extends StatelessWidget {
             isCollapsed ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
         children: [
           if (!isCollapsed) ...[
-            const _SectionLabel(title: "Collection Sources"),
+            const _SectionLabel(title: "Deck Sources"),
             const SizedBox(height: 12),
           ],
           if (sources.isEmpty)
@@ -1297,13 +1296,13 @@ class _SourcesPage extends StatelessWidget {
 }
 
 class _SettingsPage extends StatelessWidget {
-  final String collectionId;
-  final String collectionName;
+  final String deckId;
+  final String deckName;
   final bool isCollapsed;
 
   const _SettingsPage({
-    required this.collectionId,
-    required this.collectionName,
+    required this.deckId,
+    required this.deckName,
     this.isCollapsed = false,
   });
 
@@ -1337,13 +1336,13 @@ class _SettingsPage extends StatelessWidget {
             backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
             children: [
               ProjectListTile.simple(
-                label: "Rename Collection",
+                label: "Rename Deck",
                 icon: FontAwesomeIcons.pen,
                 showDivider: true,
                 onTap: () {},
               ).animate().fadeIn(delay: 50.ms).slideY(begin: 0.1),
               ProjectListTile.simple(
-                label: "Collection Icon & Color",
+                label: "Deck Icon & Color",
                 icon: FontAwesomeIcons.palette,
                 showDivider: true,
                 onTap: () {},
@@ -1362,7 +1361,7 @@ class _SettingsPage extends StatelessWidget {
             backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
             children: [
               ProjectListTile.simple(
-                label: "Archive Collection",
+                label: "Archive Deck",
                 icon: FontAwesomeIcons.boxArchive,
                 showDivider: true,
                 onTap: () {},
@@ -1381,7 +1380,7 @@ class _SettingsPage extends StatelessWidget {
             backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
             children: [
               ProjectListTile.simple(
-                label: "Delete Collection",
+                label: "Delete Deck",
                 icon: FontAwesomeIcons.trashCan,
                 isAlert: true,
                 onTap: () async {
@@ -1390,9 +1389,9 @@ class _SettingsPage extends StatelessWidget {
                       await showDialog<bool>(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: const Text("Delete Collection?"),
+                          title: const Text("Delete Deck?"),
                           content: const Text(
-                            "Are you sure you want to delete this collection? This action cannot be undone.",
+                            "Are you sure you want to delete this deck? This action cannot be undone.",
                           ),
                           actions: [
                             TextButton(
@@ -1412,7 +1411,7 @@ class _SettingsPage extends StatelessWidget {
                       false;
 
                   if (confirmed) {
-                    await service.deleteCollection(collectionId);
+                    await service.deleteDeck(deckId);
                     if (context.mounted) {
                       Navigator.pop(context);
                     }
@@ -1430,7 +1429,7 @@ class _SettingsPage extends StatelessWidget {
 
 class _DecksList extends StatelessWidget {
   final List<DeckItem> decks;
-  final String collectionId;
+  final String deckId;
   final Set<String> selectedIds;
   final ValueChanged<String> onToggleSelection;
   final bool isSelecting;
@@ -1440,7 +1439,7 @@ class _DecksList extends StatelessWidget {
 
   const _DecksList({
     required this.decks,
-    required this.collectionId,
+    required this.deckId,
     required this.selectedIds,
     required this.onToggleSelection,
     required this.isSelecting,
@@ -1475,7 +1474,7 @@ class _DecksList extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                "Empty Collection",
+                "Empty Deck",
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),

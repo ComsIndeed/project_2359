@@ -17,7 +17,6 @@ import 'package:provider/provider.dart';
 
 class StudyPage extends StatefulWidget {
   final String? deckId;
-  final String? collectionId;
   final String title;
   final bool isNested;
   final StudySessionMode mode;
@@ -26,7 +25,6 @@ class StudyPage extends StatefulWidget {
   const StudyPage({
     super.key,
     this.deckId,
-    this.collectionId,
     required this.title,
     this.isNested = false,
     this.mode = StudySessionMode.spaced,
@@ -69,10 +67,6 @@ class _StudyPageState extends State<StudyPage> {
       if (widget.deckId != null) {
         cards = await schedulingService
             .watchDueCards(deckId: widget.deckId!)
-            .first;
-      } else if (widget.collectionId != null) {
-        cards = await schedulingService
-            .watchDueCardItemsForCollection(collectionId: widget.collectionId!)
             .first;
       } else {
         cards = await schedulingService.watchTotalDueCardItems().first;
@@ -332,7 +326,7 @@ class _StudyPageState extends State<StudyPage> {
                     Navigator.pop(context);
                   }
                 },
-                child: const Text("Back to Collection"),
+                child: const Text("Back"),
               ),
             ],
           ),

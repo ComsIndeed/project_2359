@@ -24,17 +24,15 @@ class DebugSeeder {
     // 0. Seed the new Biology Citation Demo (180 cards + 7 PDFs)
     await BiologyCitationSeeder.seed(db);
 
-    // 1. Create a Demo Collection
-    final collectionId = uuid.v4();
+    // 1. Create a Root Deck
+    final rootDeckId = uuid.v4();
     await db
-        .into(db.studyCollectionItems)
+        .into(db.deckItems)
         .insert(
-          StudyCollectionItemsCompanion(
-            id: Value(collectionId),
+          DeckItemsCompanion(
+            id: Value(rootDeckId),
             name: const Value('Biology & Medicine (DEMO)'),
             isPinned: const Value(true),
-            createdAt: Value(DateTime.now().toIso8601String()),
-            updatedAt: Value(DateTime.now().toIso8601String()),
           ),
         );
 
@@ -65,7 +63,7 @@ class DebugSeeder {
               .insert(
                 SourceItemsCompanion(
                   id: Value(sourceId),
-                  collectionId: Value(collectionId),
+                  deckId: Value(rootDeckId),
                   label: Value(fileName),
                   type: const Value(MediaType.document),
                 ),
@@ -86,7 +84,7 @@ class DebugSeeder {
       batch.insertAll(db.deckItems, [
         DeckItemsCompanion(
           id: Value(deck1Id),
-          collectionId: Value(collectionId),
+          parentId: Value(rootDeckId),
           name: const Value('Cell Bio & Pathology'),
           description: const Value(
             'Cellular mechanisms and basic pathology hallmarks.',
@@ -94,7 +92,7 @@ class DebugSeeder {
         ),
         DeckItemsCompanion(
           id: Value(deck2Id),
-          collectionId: Value(collectionId),
+          parentId: Value(rootDeckId),
           name: const Value('High-Yield Micro'),
           description: const Value(
             'Key pathogens, virulence factors, and clinical markers.',
@@ -102,7 +100,7 @@ class DebugSeeder {
         ),
         DeckItemsCompanion(
           id: Value(deck3Id),
-          collectionId: Value(collectionId),
+          parentId: Value(rootDeckId),
           name: const Value('Master Biochemistry'),
           description: const Value(
             'Metabolic pathways, enzymes, and clinical correlations.',
@@ -110,7 +108,7 @@ class DebugSeeder {
         ),
         DeckItemsCompanion(
           id: Value(deck4Id),
-          collectionId: Value(collectionId),
+          parentId: Value(rootDeckId),
           name: const Value('Comprehensive Rapid Review'),
           description: const Value(
             'Mixed high-yield facts from Anatomy, Pharm, and Physio.',

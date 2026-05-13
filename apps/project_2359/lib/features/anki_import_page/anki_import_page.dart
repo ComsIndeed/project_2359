@@ -91,13 +91,13 @@ class _AnkiImportPageState extends State<AnkiImportPage> {
     final db = context.read<AppDatabase>();
     final service = context.read<StudyDatabaseService>();
 
-    // Build collection list for the picker
-    final allCollections = await service.getAllCollections();
+    // Build deck list for the picker
+    final allDecks = await service.getAllDecks();
     if (!mounted) return;
 
-    final picked = await showCollectionPickerDialog(
+    final picked = await showDeckPickerDialog(
       context,
-      allCollections
+      allDecks
           .map((c) => (id: c.id, name: c.name))
           .toList(),
     );
@@ -110,23 +110,21 @@ class _AnkiImportPageState extends State<AnkiImportPage> {
     });
 
     try {
-      // Create the collection if it's new (id not in existing list)
-      final existingIds = allCollections.map((c) => c.id).toSet();
+      // Create the deck if it's new (id not in existing list)
+      final existingIds = allDecks.map((c) => c.id).toSet();
       if (!existingIds.contains(picked.id)) {
-        await service.insertCollection(
-          StudyCollectionItemsCompanion.insert(
+        await service.insertDeck(
+          DeckItemsCompanion.insert(
             id: picked.id,
             name: picked.name,
-            createdAt: DateTime.now().toIso8601String(),
-            updatedAt: DateTime.now().toIso8601String(),
           ),
         );
       }
 
       final result = await AnkiImportService.commitImport(
         data: data,
-        collectionId: picked.id,
-        collectionName: picked.name,
+        parentId: picked.id,
+        parentDeckName: picked.name,
         db: db,
         preserveFsrsState: _preserveFsrsState,
         onProgress: (phase, progress) {
@@ -148,7 +146,7 @@ class _AnkiImportPageState extends State<AnkiImportPage> {
           context: context,
           builder: (_) => ImportResultDialog(
             result: result,
-            onViewCollection: () => Navigator.of(context).maybePop(),
+            onViewDeck: () => Navigator.of(context).maybePop(),
           ),
         );
       }

@@ -229,16 +229,28 @@ class SchedulingService {
     required String deckId,
     StudySessionMode mode = StudySessionMode.spaced,
   }) {
-    AppLogger.debug('Watching due cards for deck $deckId', tag: _tag);
+    AppLogger.debug('Watching due cards for deck $deckId (recursive)', tag: _tag);
     
-    // We watch all cards in the deck and filter/limit in memory for responsiveness.
-    // In a very large deck, this might be slightly slower, but for typical study decks it's fine.
     return _db.select(_db.cardItems)
         .watch()
         .asyncMap((allCards) async {
-      final deckCards = allCards.where((c) => c.deckId == deckId).toList();
+      // 1. Find all deck IDs in the hierarchy
+      final allDeckIds = await _getTransitiveDeckIds(deckId);
+      
+      // 2. Filter cards that belong to any of these decks
+      final deckCards = allCards.where((c) => allDeckIds.contains(c.deckId)).toList();
+      
       return await _applyLimitsAndFilters(deckId, deckCards, mode);
     });
+  }
+
+  Future<List<String>> _getTransitiveDeckIds(String rootId) async {
+    final ids = [rootId];
+    final subDecks = await (_db.select(_db.deckItems)..where((t) => t.parentId.equals(rootId))).get();
+    for (final sub in subDecks) {
+      ids.addAll(await _getTransitiveDeckIds(sub.id));
+    }
+    return ids;
   }
 
   Future<List<CardItem>> _applyLimitsAndFilters(String deckId, List<CardItem> cards, StudySessionMode mode) async {
@@ -341,7 +353,7 @@ class SchedulingService {
     return (newCards: newCount, reviews: reviewCount);
   }
 
-  /// Watch just the due count for a specific deck
+  /// Watch just the due count for a specific deck (recursive)
   Stream<int> watchDueCount({
     required String deckId,
     StudySessionMode mode = StudySessionMode.spaced,
@@ -349,15 +361,17 @@ class SchedulingService {
     return watchDueCards(deckId: deckId, mode: mode).map((list) => list.length);
   }
 
-  /// Direct fetch for the due count
+  /// Direct fetch for the due count (recursive)
   Future<int> getDueCount({
     required String deckId,
     StudySessionMode mode = StudySessionMode.spaced,
   }) async {
     final now = DateTime.now();
+    final allDeckIds = await _getTransitiveDeckIds(deckId);
+    
     final query = _db.selectOnly(_db.cardItems)
       ..addColumns([_db.cardItems.id.count()])
-      ..where(_db.cardItems.deckId.equals(deckId));
+      ..where(_db.cardItems.deckId.isIn(allDeckIds));
 
     if (mode == StudySessionMode.spaced) {
       query.where(_db.cardItems.spacedDue.isSmallerOrEqualValue(now));
@@ -367,34 +381,6 @@ class SchedulingService {
 
     final row = await query.getSingle();
     return row.read<int>(_db.cardItems.id.count()) ?? 0;
-  }
-
-  /// Watch due count for an entire collection (joins decks and cards)
-  Stream<int> watchDueCountForCollection({
-    required String collectionId,
-    StudySessionMode mode = StudySessionMode.spaced,
-  }) {
-    AppLogger.debug('Watching due count for collection $collectionId', tag: _tag);
-    final now = DateTime.now();
-    final count = _db.cardItems.id.count();
-
-    final query =
-        _db.selectOnly(_db.cardItems).join([
-            innerJoin(
-              _db.deckItems,
-              _db.deckItems.id.equalsExp(_db.cardItems.deckId),
-            ),
-          ])
-          ..addColumns([count])
-          ..where(_db.deckItems.collectionId.equals(collectionId));
-
-    if (mode == StudySessionMode.spaced) {
-      query.where(_db.cardItems.spacedDue.isSmallerOrEqualValue(now));
-    } else {
-      query.where(_db.cardItems.continuousDue.isSmallerOrEqualValue(now));
-    }
-
-    return query.map((row) => row.read(count) ?? 0).watchSingle();
   }
 
   /// Watch total due count across the entire app
@@ -419,35 +405,15 @@ class SchedulingService {
 
   // --- Query Support (Lists of Task/Card IDs for flexibility) ---
 
-  /// Watch due card items for an entire collection
-  Stream<List<CardItem>> watchDueCardItemsForCollection({
-    required String collectionId,
+  /// Watch due card items for a specific deck (recursive)
+  Stream<List<CardItem>> watchDueCardItems({
+    required String deckId,
     StudySessionMode mode = StudySessionMode.spaced,
   }) {
-    AppLogger.debug(
-      'Watching due card items for collection $collectionId ($mode)',
-      tag: _tag,
-    );
+    AppLogger.debug('Watching due card items for deck $deckId ($mode)', tag: _tag);
     final now = DateTime.now();
 
-    final query = _db.select(_db.cardItems).join([
-      innerJoin(
-        _db.deckItems,
-        _db.deckItems.id.equalsExp(_db.cardItems.deckId),
-      ),
-    ])..where(_db.deckItems.collectionId.equals(collectionId));
-
-    if (mode == StudySessionMode.spaced) {
-      query.where(_db.cardItems.spacedDue.isSmallerOrEqualValue(now));
-      query.orderBy([OrderingTerm.asc(_db.cardItems.spacedDue)]);
-    } else {
-      query.where(_db.cardItems.continuousDue.isSmallerOrEqualValue(now));
-      query.orderBy([OrderingTerm.asc(_db.cardItems.continuousDue)]);
-    }
-
-    return query.watch().map(
-      (rows) => rows.map((r) => r.readTable(_db.cardItems)).toList(),
-    );
+    return watchDueCards(deckId: deckId, mode: mode);
   }
 
   /// Watch total due card items across the entire app

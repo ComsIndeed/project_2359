@@ -16,44 +16,44 @@ import 'package:project_2359/features/sources_page/sources_page_bloc/sources_pag
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_state.dart';
 
-class CollectionSourcesPage extends StatefulWidget {
-  final String collectionId;
-  final String collectionName;
+class DeckSourcesPage extends StatefulWidget {
+  final String deckId;
+  final String deckName;
 
-  const CollectionSourcesPage({
+  const DeckSourcesPage({
     super.key,
-    required this.collectionId,
-    required this.collectionName,
+    required this.deckId,
+    required this.deckName,
   });
 
   static Future<void> show(
     BuildContext context,
-    String collectionId,
-    String collectionName,
+    String deckId,
+    String deckName,
   ) {
     return Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>
-            CollectionSourcesPage(collectionId: collectionId, collectionName: collectionName),
+            DeckSourcesPage(deckId: deckId, deckName: deckName),
         fullscreenDialog: true,
       ),
     );
   }
 
   @override
-  State<CollectionSourcesPage> createState() => _CollectionSourcesPageState();
+  State<DeckSourcesPage> createState() => _DeckSourcesPageState();
 }
 
-class _CollectionSourcesPageState extends State<CollectionSourcesPage> {
+class _DeckSourcesPageState extends State<DeckSourcesPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
   @override
   void initState() {
     super.initState();
-    // Load sources for this collection
+    // Load sources for this deck
     context.read<SourcesPageBloc>().add(
-      LoadSourcesEvent(collectionId: widget.collectionId),
+      LoadSourcesEvent(deckId: widget.deckId),
     );
   }
 
@@ -107,7 +107,7 @@ class _CollectionSourcesPageState extends State<CollectionSourcesPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    widget.collectionName,
+                                    widget.deckName,
                                     style: Theme.of(context)
                                         .textTheme
                                         .labelSmall
@@ -118,7 +118,7 @@ class _CollectionSourcesPageState extends State<CollectionSourcesPage> {
                                         ),
                                   ),
                                   Text(
-                                    "Collection Sources",
+                                    "Deck Sources",
                                     style: Theme.of(context)
                                         .textTheme
                                         .displaySmall
@@ -140,7 +140,7 @@ class _CollectionSourcesPageState extends State<CollectionSourcesPage> {
                       ),
                       const SizedBox(height: 24),
                       SectionHeader(
-                        title: "Import to Collection",
+                        title: "Import to Deck",
                         onViewAllTap: null,
                       ),
                       const SizedBox(height: 8),
@@ -182,7 +182,7 @@ class _CollectionSourcesPageState extends State<CollectionSourcesPage> {
                     delegate: SliverChildListDelegate([
                       const SizedBox(height: 32),
                       SectionHeader(
-                        title: "Collection Sources",
+                        title: "Deck Sources",
                         onViewAllTap: null,
                       ),
                       const SizedBox(height: 12),
@@ -227,8 +227,8 @@ class _CollectionSourcesPageState extends State<CollectionSourcesPage> {
                                 const SizedBox(height: 16),
                                 Text(
                                   _searchQuery.isNotEmpty
-                                      ? "No matching sources in collection."
-                                      : "No sources in this collection.",
+                                      ? "No matching sources in deck."
+                                      : "No sources in this deck.",
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
                                         color: cs.onSurface.withValues(
@@ -264,7 +264,7 @@ class _CollectionSourcesPageState extends State<CollectionSourcesPage> {
 
     if (context.mounted) {
       context.read<SourcesPageBloc>().add(
-        ImportDocumentsEvent(result.files, collectionId: widget.collectionId),
+        ImportDocumentsEvent(result.files, deckId: widget.deckId),
       );
     }
   }

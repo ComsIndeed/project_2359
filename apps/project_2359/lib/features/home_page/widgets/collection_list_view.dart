@@ -27,8 +27,9 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-class PinnedCollectionsSection extends StatelessWidget {
-  final Stream<List<(StudyCollectionItem, int)>> stream;
+class DeckSection extends StatelessWidget {
+  final Stream<List<DeckItem>> stream;
+  final String title;
   final String searchQuery;
   final Set<String> selectedIds;
   final Function(String) onToggleSelection;
@@ -36,12 +37,13 @@ class PinnedCollectionsSection extends StatelessWidget {
   final bool isSelecting;
   final bool isDesktop;
   final bool isCollapsed;
-  final String? activeCollectionId;
-  final Function(Offset, String, bool)? onContextMenu;
+  final String? activeDeckId;
+  final Function(Offset, String)? onContextMenu;
 
-  const PinnedCollectionsSection({
+  const DeckSection({
     super.key,
     required this.stream,
+    required this.title,
     required this.searchQuery,
     required this.selectedIds,
     required this.onToggleSelection,
@@ -49,7 +51,7 @@ class PinnedCollectionsSection extends StatelessWidget {
     required this.isSelecting,
     this.isDesktop = false,
     this.isCollapsed = false,
-    this.activeCollectionId,
+    this.activeDeckId,
     this.onContextMenu,
   });
 
@@ -57,212 +59,63 @@ class PinnedCollectionsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return StreamBuilder<List<(StudyCollectionItem, int)>>(
+    return StreamBuilder<List<DeckItem>>(
       stream: stream,
       builder: (context, snapshot) {
-        final collectionPairs = (snapshot.data ?? []).where((p) {
+        final decks = (snapshot.data ?? []).where((d) {
           if (searchQuery.isEmpty) return true;
-          return p.$1.name.toLowerCase().contains(searchQuery.toLowerCase());
+          return d.name.toLowerCase().contains(searchQuery.toLowerCase());
         }).toList();
 
-        if (collectionPairs.isEmpty) return const SizedBox.shrink();
+        if (decks.isEmpty) return const SizedBox.shrink();
 
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: isCollapsed ? CrossAxisAlignment.center : CrossAxisAlignment.start,
           children: [
-            if (!isCollapsed) const SectionHeader(title: "Pinned"),
-            for (final pair in collectionPairs)
+            if (!isCollapsed) SectionHeader(title: title),
+            for (final deck in decks)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: GestureDetector(
                   onSecondaryTapDown: (details) {
                     if (onContextMenu != null) {
-                      onContextMenu!(details.globalPosition, pair.$1.id, true);
+                      onContextMenu!(details.globalPosition, deck.id);
                     }
                   },
                   child: ProjectCardTile(
-                    backgroundColor: theme.colorScheme.surfaceContainerHighest
-                        .withValues(alpha: 0.5),
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                     isCollapsed: isCollapsed,
                     leading: FaIcon(
-                      FontAwesomeIcons.thumbtack,
+                      deck.isPinned ? FontAwesomeIcons.thumbtack : FontAwesomeIcons.folder,
                       size: 14,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: deck.isPinned ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.4),
                     ),
                     title: Text(
-                      pair.$1.name,
+                      deck.name,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    subtitle: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        FaIcon(
-                          FontAwesomeIcons.layerGroup,
-                          size: 10,
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.4,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text("${pair.$2} Card${pair.$2 == 1 ? '' : 's'}"),
-                      ],
-                    ),
-                    isSelected:
-                        selectedIds.contains(pair.$1.id) ||
-                        activeCollectionId == pair.$1.id,
+                    subtitle: Text(deck.description ?? "Study Deck"),
+                    isSelected: selectedIds.contains(deck.id) || activeDeckId == deck.id,
                     isCompact: isDesktop,
                     onTap: isSelecting
-                        ? () => onToggleSelection(pair.$1.id)
+                        ? () => onToggleSelection(deck.id)
                         : () {
                             if (isDesktop) {
-                              onSelect(pair.$1.id);
+                              onSelect(deck.id);
                             } else {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => CollectionPage(
-                                    collectionId: pair.$1.id,
-                                    initialCollectionName: pair.$1.name,
+                                  builder: (context) => DeckPage(
+                                    deckId: deck.id,
+                                    initialDeckName: deck.name,
                                   ),
                                 ),
                               );
                             }
                           },
-                    onLongTap: () => onToggleSelection(pair.$1.id),
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class CollectionList extends StatelessWidget {
-  final Stream<List<(StudyCollectionItem, int)>> stream;
-  final String searchQuery;
-  final Color? backgroundColor;
-  final Set<String> selectedIds;
-  final Function(String) onToggleSelection;
-  final Function(String) onSelect;
-  final bool isSelecting;
-  final bool isDesktop;
-  final bool isCollapsed;
-  final String? activeCollectionId;
-  final Function(Offset, String, bool)? onContextMenu;
-
-  const CollectionList({
-    super.key,
-    required this.stream,
-    required this.searchQuery,
-    this.backgroundColor,
-    required this.selectedIds,
-    required this.onToggleSelection,
-    required this.onSelect,
-    required this.isSelecting,
-    this.isDesktop = false,
-    this.isCollapsed = false,
-    this.activeCollectionId,
-    this.onContextMenu,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return StreamBuilder<List<(StudyCollectionItem, int)>>(
-      stream: stream,
-      builder: (context, snapshot) {
-        final collectionPairs = (snapshot.data ?? []).where((p) {
-          if (searchQuery.isEmpty) return true;
-          return p.$1.name.toLowerCase().contains(searchQuery.toLowerCase());
-        }).toList();
-
-        if (collectionPairs.isEmpty) {
-          if (isCollapsed) return const SizedBox.shrink();
-          final isSearching = searchQuery.isNotEmpty;
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Center(
-              child: Text(
-                isSearching
-                    ? "No matching collections found."
-                    : "No collections yet. Create one below!",
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                ),
-              ),
-            ),
-          );
-        }
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final pair in collectionPairs)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: GestureDetector(
-                  onSecondaryTapDown: (details) {
-                    if (onContextMenu != null) {
-                      onContextMenu!(details.globalPosition, pair.$1.id, true);
-                    }
-                  },
-                  child: ProjectCardTile(
-                    backgroundColor: theme.colorScheme.surfaceContainerHighest
-                        .withValues(alpha: 0.5),
-                    isCollapsed: isCollapsed,
-                    leading: FaIcon(
-                      pair.$1.isPinned
-                          ? FontAwesomeIcons.thumbtack
-                          : FontAwesomeIcons.layerGroup,
-                      size: 14,
-                      color: pair.$1.isPinned
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                    ),
-                    title: Text(
-                      pair.$1.name,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        FaIcon(
-                          FontAwesomeIcons.layerGroup,
-                          size: 10,
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.4,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text("${pair.$2} Card${pair.$2 == 1 ? '' : 's'}"),
-                      ],
-                    ),
-                    isSelected:
-                        selectedIds.contains(pair.$1.id) ||
-                        activeCollectionId == pair.$1.id,
-                    isCompact: isDesktop,
-                    onTap: isSelecting
-                        ? () => onToggleSelection(pair.$1.id)
-                        : () {
-                            if (isDesktop) {
-                              onSelect(pair.$1.id);
-                            } else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CollectionPage(
-                                    collectionId: pair.$1.id,
-                                    initialCollectionName: pair.$1.name,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                    onLongTap: () => onToggleSelection(pair.$1.id),
+                    onLongTap: () => onToggleSelection(deck.id),
                   ),
                 ),
               ),

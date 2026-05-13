@@ -12,4 +12,10 @@ extension DeckNameCleaning on String {
     final parts = split('::');
     return parts.sublist(0, parts.length - 1).join(' › ');
   }
+
+  /// Returns the root deck name (e.g. "Biology::Anatomy" -> "Biology")
+  String get rootDeckName {
+    if (!contains('::')) return this;
+    return split('::').first.trim();
+  }
 }

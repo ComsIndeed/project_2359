@@ -22,17 +22,15 @@ class BiologyCitationSeeder {
       tag: 'BiologySeeder',
     );
 
-    // 1. Create Collection
-    final collectionId = uuid.v4();
+    // 1. Create Deck
+    final deckRootId = uuid.v4();
     await db
-        .into(db.studyCollectionItems)
+        .into(db.deckItems)
         .insert(
-          StudyCollectionItemsCompanion(
-            id: Value(collectionId),
+          DeckItemsCompanion(
+            id: Value(deckRootId),
             name: const Value('Biology (CITATION DEMOs)'),
             isPinned: const Value(true),
-            createdAt: Value(DateTime.now().toIso8601String()),
-            updatedAt: Value(DateTime.now().toIso8601String()),
           ),
         );
 
@@ -76,7 +74,7 @@ class BiologyCitationSeeder {
         .insert(
           SourceItemsCompanion(
             id: Value(sourceidBioHeavyBulletsV1Pdf),
-            collectionId: Value(collectionId),
+            deckId: Value(deckRootId),
             label: const Value('bio_heavy_bullets-v1.pdf'),
             type: const Value(MediaType.document),
           ),
@@ -120,7 +118,7 @@ class BiologyCitationSeeder {
         .insert(
           SourceItemsCompanion(
             id: Value(sourceidBioWallOfTextV1Pdf),
-            collectionId: Value(collectionId),
+            deckId: Value(deckRootId),
             label: const Value('bio_wall_of_text-v1.pdf'),
             type: const Value(MediaType.document),
           ),
@@ -164,7 +162,7 @@ class BiologyCitationSeeder {
         .insert(
           SourceItemsCompanion(
             id: Value(sourceidCardiovascularDynamicsV1Pdf),
-            collectionId: Value(collectionId),
+            deckId: Value(deckRootId),
             label: const Value('cardiovascular_dynamics-v1.pdf'),
             type: const Value(MediaType.document),
           ),
@@ -208,7 +206,7 @@ class BiologyCitationSeeder {
         .insert(
           SourceItemsCompanion(
             id: Value(sourceidCellularRespirationV1Pdf),
-            collectionId: Value(collectionId),
+            deckId: Value(deckRootId),
             label: const Value('cellular_respiration-v1.pdf'),
             type: const Value(MediaType.document),
           ),
@@ -252,7 +250,7 @@ class BiologyCitationSeeder {
         .insert(
           SourceItemsCompanion(
             id: Value(sourceidImmunologyBasicsV1Pdf),
-            collectionId: Value(collectionId),
+            deckId: Value(deckRootId),
             label: const Value('immunology_basics-v1.pdf'),
             type: const Value(MediaType.document),
           ),
@@ -296,7 +294,7 @@ class BiologyCitationSeeder {
         .insert(
           SourceItemsCompanion(
             id: Value(sourceidMolecularGeneticsV1Pdf),
-            collectionId: Value(collectionId),
+            deckId: Value(deckRootId),
             label: const Value('molecular_genetics-v1.pdf'),
             type: const Value(MediaType.document),
           ),
@@ -340,7 +338,7 @@ class BiologyCitationSeeder {
         .insert(
           SourceItemsCompanion(
             id: Value(sourceidPopulationEcologyV1Pdf),
-            collectionId: Value(collectionId),
+            deckId: Value(deckRootId),
             label: const Value('population_ecology-v1.pdf'),
             type: const Value(MediaType.document),
           ),
@@ -353,7 +351,7 @@ class BiologyCitationSeeder {
         .insert(
           DeckItemsCompanion(
             id: Value(deck1Id),
-            collectionId: Value(collectionId),
+            parentId: Value(deckRootId),
             name: const Value('Cellular & Molecular Foundation'),
             description: const Value(
               'Core biology concepts with varied mastery states.',
@@ -366,7 +364,7 @@ class BiologyCitationSeeder {
         .insert(
           DeckItemsCompanion(
             id: Value(deck2Id),
-            collectionId: Value(collectionId),
+            parentId: Value(deckRootId),
             name: const Value('Systems & Ecology'),
             description: const Value(
               'Dynamics of populations and internal systems.',
@@ -379,7 +377,7 @@ class BiologyCitationSeeder {
         .insert(
           DeckItemsCompanion(
             id: Value(deck3Id),
-            collectionId: Value(collectionId),
+            parentId: Value(deckRootId),
             name: const Value('Immunology Basics'),
             description: const Value(
               'Foundational immunology for new learners.',
@@ -392,7 +390,7 @@ class BiologyCitationSeeder {
         .insert(
           DeckItemsCompanion(
             id: Value(deck4Id),
-            collectionId: Value(collectionId),
+            parentId: Value(deckRootId),
             name: const Value('Genetic Architecture'),
             description: const Value(
               'Molecular genetics and inheritance patterns.',

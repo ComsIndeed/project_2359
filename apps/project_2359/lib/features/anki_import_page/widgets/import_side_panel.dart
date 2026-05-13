@@ -205,29 +205,29 @@ class ImportSidePanel extends StatelessWidget {
   }
 }
 
-/// Shows a collection picker dialog. Returns the selected (or newly created)
-/// collection ID and name, or null if cancelled.
-Future<({String id, String name})?> showCollectionPickerDialog(
+/// Shows a deck picker dialog. Returns the selected (or newly created)
+/// deck ID and name, or null if cancelled.
+Future<({String id, String name})?> showDeckPickerDialog(
   BuildContext context,
-  List<({String id, String name})> existingCollections,
+  List<({String id, String name})> existingDecks,
 ) {
   return showDialog<({String id, String name})>(
     context: context,
     builder: (context) =>
-        _CollectionPickerDialog(existingCollections: existingCollections),
+        _DeckPickerDialog(existingDecks: existingDecks),
   );
 }
 
-class _CollectionPickerDialog extends StatefulWidget {
-  final List<({String id, String name})> existingCollections;
-  const _CollectionPickerDialog({required this.existingCollections});
+class _DeckPickerDialog extends StatefulWidget {
+  final List<({String id, String name})> existingDecks;
+  const _DeckPickerDialog({required this.existingDecks});
 
   @override
-  State<_CollectionPickerDialog> createState() =>
-      _CollectionPickerDialogState();
+  State<_DeckPickerDialog> createState() =>
+      _DeckPickerDialogState();
 }
 
-class _CollectionPickerDialogState extends State<_CollectionPickerDialog> {
+class _DeckPickerDialogState extends State<_DeckPickerDialog> {
   final _newNameController = TextEditingController();
   bool _createNew = false;
 
@@ -252,28 +252,28 @@ class _CollectionPickerDialogState extends State<_CollectionPickerDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Choose Collection',
+                'Choose Parent Deck',
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                'The imported decks will be placed inside this collection.',
+                'The imported decks will be placed inside this deck.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Existing collections
-              if (widget.existingCollections.isNotEmpty) ...[
+              // Existing decks
+              if (widget.existingDecks.isNotEmpty) ...[
                 Flexible(
                   child: ListView.builder(
                     shrinkWrap: true,
-                    itemCount: widget.existingCollections.length,
+                    itemCount: widget.existingDecks.length,
                     itemBuilder: (context, i) {
-                      final c = widget.existingCollections[i];
+                      final c = widget.existingDecks[i];
                       return ListTile(
                         contentPadding:
                             const EdgeInsets.symmetric(horizontal: 4),
@@ -306,7 +306,7 @@ class _CollectionPickerDialogState extends State<_CollectionPickerDialog> {
                 firstChild: OutlinedButton.icon(
                   onPressed: () => setState(() => _createNew = true),
                   icon: const FaIcon(FontAwesomeIcons.plus, size: 13),
-                  label: const Text('Create New Collection'),
+                  label: const Text('Create New Deck'),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 44),
                     shape: RoundedRectangleBorder(
@@ -321,7 +321,7 @@ class _CollectionPickerDialogState extends State<_CollectionPickerDialog> {
                         controller: _newNameController,
                         autofocus: true,
                         decoration: InputDecoration(
-                          hintText: 'Collection name…',
+                          hintText: 'Deck name…',
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 14,
                             vertical: 12,

@@ -12,7 +12,6 @@ import 'package:project_2359/core/tables/asset_items.dart';
 import 'package:project_2359/core/tables/source_item_blobs.dart';
 import 'package:project_2359/core/tables/source_items.dart';
 import 'package:project_2359/core/tables/deck_items.dart';
-import 'package:project_2359/core/tables/study_collection_items.dart';
 import 'package:project_2359/core/tables/card_items.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
 import 'package:project_2359/core/tables/citation_items.dart';
@@ -28,7 +27,6 @@ part 'app_database.g.dart';
   tables: [
     SourceItems,
     DeckItems,
-    StudyCollectionItems,
     SourceItemBlobs,
     CardItems,
     StudySessionEvents,
@@ -43,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -54,6 +52,11 @@ class AppDatabase extends _$AppDatabase {
       },
       onUpgrade: (m, from, to) async {
         AppLogger.info('Upgrading database from $from to $to', tag: 'Database');
+        // Total wipe for structural changes
+        for (final table in allTables) {
+          await m.deleteTable(table.actualTableName);
+        }
+        await m.createAll();
       },
       beforeOpen: (details) async {
         AppLogger.info('Database opened successfully', tag: 'Database');
@@ -75,7 +78,7 @@ class AppDatabase extends _$AppDatabase {
     return driftDatabase(
       /// Rename this everytime we make schema changes until the app is fully released.
       /// We wont do migration rules for now.
-      name: 'project_2359_database_v11_20260513_0310',
+      name: 'project_2359_database_v12_20260513_1245',
       web: DriftWebOptions(
         sqlite3Wasm: Uri.parse('sqlite3.wasm'),
         driftWorker: Uri.parse('drift_worker.js'),

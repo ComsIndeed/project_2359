@@ -39,15 +39,12 @@ class NoteTakingController extends ChangeNotifier {
   // Draft Session State
   String? draftId;
   String? targetDeckId;
-  String? collectionId;
   final List<NoteItemsCompanion> notes = [];
 
   void initializeDraftSession({
     String? existingDraftId,
     String? existingDeckId,
-    required String collectionId,
   }) {
-    this.collectionId = collectionId;
     draftId = existingDraftId ?? const Uuid().v4();
     targetDeckId = existingDeckId ?? const Uuid().v4();
     
@@ -130,7 +127,6 @@ class NoteTakingController extends ChangeNotifier {
     
     await _draftService.syncDraft(
       draftId: draftId!,
-      collectionId: collectionId!,
       targetDeckId: targetDeckId!,
       notes: notes,
     );
@@ -143,7 +139,6 @@ class NoteTakingController extends ChangeNotifier {
       draftId: draftId!,
       deckId: targetDeckId!,
       deckName: deckName,
-      collectionId: collectionId,
     );
 
     // Clear session

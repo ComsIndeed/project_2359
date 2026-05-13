@@ -3,851 +3,6 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $StudyCollectionItemsTable extends StudyCollectionItems
-    with TableInfo<$StudyCollectionItemsTable, StudyCollectionItem> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $StudyCollectionItemsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-    'name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
-  @override
-  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
-  @override
-  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
-    'updated_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _isPinnedMeta = const VerificationMeta(
-    'isPinned',
-  );
-  @override
-  late final GeneratedColumn<bool> isPinned = GeneratedColumn<bool>(
-    'is_pinned',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_pinned" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    name,
-    createdAt,
-    updatedAt,
-    isPinned,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'study_collection_items';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<StudyCollectionItem> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-        _nameMeta,
-        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
-    if (data.containsKey('updated_at')) {
-      context.handle(
-        _updatedAtMeta,
-        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_updatedAtMeta);
-    }
-    if (data.containsKey('is_pinned')) {
-      context.handle(
-        _isPinnedMeta,
-        isPinned.isAcceptableOrUnknown(data['is_pinned']!, _isPinnedMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  StudyCollectionItem map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return StudyCollectionItem(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      name: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name'],
-      )!,
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}created_at'],
-      )!,
-      updatedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}updated_at'],
-      )!,
-      isPinned: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_pinned'],
-      )!,
-    );
-  }
-
-  @override
-  $StudyCollectionItemsTable createAlias(String alias) {
-    return $StudyCollectionItemsTable(attachedDatabase, alias);
-  }
-}
-
-class StudyCollectionItem extends DataClass
-    implements Insertable<StudyCollectionItem> {
-  final String id;
-  final String name;
-  final String createdAt;
-  final String updatedAt;
-  final bool isPinned;
-  const StudyCollectionItem({
-    required this.id,
-    required this.name,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.isPinned,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['name'] = Variable<String>(name);
-    map['created_at'] = Variable<String>(createdAt);
-    map['updated_at'] = Variable<String>(updatedAt);
-    map['is_pinned'] = Variable<bool>(isPinned);
-    return map;
-  }
-
-  StudyCollectionItemsCompanion toCompanion(bool nullToAbsent) {
-    return StudyCollectionItemsCompanion(
-      id: Value(id),
-      name: Value(name),
-      createdAt: Value(createdAt),
-      updatedAt: Value(updatedAt),
-      isPinned: Value(isPinned),
-    );
-  }
-
-  factory StudyCollectionItem.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return StudyCollectionItem(
-      id: serializer.fromJson<String>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
-      createdAt: serializer.fromJson<String>(json['createdAt']),
-      updatedAt: serializer.fromJson<String>(json['updatedAt']),
-      isPinned: serializer.fromJson<bool>(json['isPinned']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'name': serializer.toJson<String>(name),
-      'createdAt': serializer.toJson<String>(createdAt),
-      'updatedAt': serializer.toJson<String>(updatedAt),
-      'isPinned': serializer.toJson<bool>(isPinned),
-    };
-  }
-
-  StudyCollectionItem copyWith({
-    String? id,
-    String? name,
-    String? createdAt,
-    String? updatedAt,
-    bool? isPinned,
-  }) => StudyCollectionItem(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    isPinned: isPinned ?? this.isPinned,
-  );
-  StudyCollectionItem copyWithCompanion(StudyCollectionItemsCompanion data) {
-    return StudyCollectionItem(
-      id: data.id.present ? data.id.value : this.id,
-      name: data.name.present ? data.name.value : this.name,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-      isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('StudyCollectionItem(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt, ')
-          ..write('isPinned: $isPinned')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, name, createdAt, updatedAt, isPinned);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is StudyCollectionItem &&
-          other.id == this.id &&
-          other.name == this.name &&
-          other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt &&
-          other.isPinned == this.isPinned);
-}
-
-class StudyCollectionItemsCompanion
-    extends UpdateCompanion<StudyCollectionItem> {
-  final Value<String> id;
-  final Value<String> name;
-  final Value<String> createdAt;
-  final Value<String> updatedAt;
-  final Value<bool> isPinned;
-  final Value<int> rowid;
-  const StudyCollectionItemsCompanion({
-    this.id = const Value.absent(),
-    this.name = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.isPinned = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  StudyCollectionItemsCompanion.insert({
-    required String id,
-    required String name,
-    required String createdAt,
-    required String updatedAt,
-    this.isPinned = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       name = Value(name),
-       createdAt = Value(createdAt),
-       updatedAt = Value(updatedAt);
-  static Insertable<StudyCollectionItem> custom({
-    Expression<String>? id,
-    Expression<String>? name,
-    Expression<String>? createdAt,
-    Expression<String>? updatedAt,
-    Expression<bool>? isPinned,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (name != null) 'name': name,
-      if (createdAt != null) 'created_at': createdAt,
-      if (updatedAt != null) 'updated_at': updatedAt,
-      if (isPinned != null) 'is_pinned': isPinned,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  StudyCollectionItemsCompanion copyWith({
-    Value<String>? id,
-    Value<String>? name,
-    Value<String>? createdAt,
-    Value<String>? updatedAt,
-    Value<bool>? isPinned,
-    Value<int>? rowid,
-  }) {
-    return StudyCollectionItemsCompanion(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      isPinned: isPinned ?? this.isPinned,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
-    }
-    if (updatedAt.present) {
-      map['updated_at'] = Variable<String>(updatedAt.value);
-    }
-    if (isPinned.present) {
-      map['is_pinned'] = Variable<bool>(isPinned.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('StudyCollectionItemsCompanion(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt, ')
-          ..write('isPinned: $isPinned, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $SourceItemsTable extends SourceItems
-    with TableInfo<$SourceItemsTable, SourceItem> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $SourceItemsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _collectionIdMeta = const VerificationMeta(
-    'collectionId',
-  );
-  @override
-  late final GeneratedColumn<String> collectionId = GeneratedColumn<String>(
-    'collection_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES study_collection_items (id)',
-    ),
-  );
-  static const VerificationMeta _labelMeta = const VerificationMeta('label');
-  @override
-  late final GeneratedColumn<String> label = GeneratedColumn<String>(
-    'label',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _pathMeta = const VerificationMeta('path');
-  @override
-  late final GeneratedColumn<String> path = GeneratedColumn<String>(
-    'path',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  @override
-  late final GeneratedColumnWithTypeConverter<MediaType, String> type =
-      GeneratedColumn<String>(
-        'type',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<MediaType>($SourceItemsTable.$convertertype);
-  static const VerificationMeta _extractedContentMeta = const VerificationMeta(
-    'extractedContent',
-  );
-  @override
-  late final GeneratedColumn<String> extractedContent = GeneratedColumn<String>(
-    'extracted_content',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _isPinnedMeta = const VerificationMeta(
-    'isPinned',
-  );
-  @override
-  late final GeneratedColumn<bool> isPinned = GeneratedColumn<bool>(
-    'is_pinned',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_pinned" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    collectionId,
-    label,
-    path,
-    type,
-    extractedContent,
-    isPinned,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'source_items';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<SourceItem> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('collection_id')) {
-      context.handle(
-        _collectionIdMeta,
-        collectionId.isAcceptableOrUnknown(
-          data['collection_id']!,
-          _collectionIdMeta,
-        ),
-      );
-    }
-    if (data.containsKey('label')) {
-      context.handle(
-        _labelMeta,
-        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_labelMeta);
-    }
-    if (data.containsKey('path')) {
-      context.handle(
-        _pathMeta,
-        path.isAcceptableOrUnknown(data['path']!, _pathMeta),
-      );
-    }
-    if (data.containsKey('extracted_content')) {
-      context.handle(
-        _extractedContentMeta,
-        extractedContent.isAcceptableOrUnknown(
-          data['extracted_content']!,
-          _extractedContentMeta,
-        ),
-      );
-    }
-    if (data.containsKey('is_pinned')) {
-      context.handle(
-        _isPinnedMeta,
-        isPinned.isAcceptableOrUnknown(data['is_pinned']!, _isPinnedMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  SourceItem map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return SourceItem(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      collectionId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}collection_id'],
-      ),
-      label: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}label'],
-      )!,
-      path: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}path'],
-      ),
-      type: $SourceItemsTable.$convertertype.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}type'],
-        )!,
-      ),
-      extractedContent: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}extracted_content'],
-      ),
-      isPinned: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_pinned'],
-      )!,
-    );
-  }
-
-  @override
-  $SourceItemsTable createAlias(String alias) {
-    return $SourceItemsTable(attachedDatabase, alias);
-  }
-
-  static JsonTypeConverter2<MediaType, String, String> $convertertype =
-      const EnumNameConverter<MediaType>(MediaType.values);
-}
-
-class SourceItem extends DataClass implements Insertable<SourceItem> {
-  final String id;
-  final String? collectionId;
-  final String label;
-  final String? path;
-  final MediaType type;
-  final String? extractedContent;
-  final bool isPinned;
-  const SourceItem({
-    required this.id,
-    this.collectionId,
-    required this.label,
-    this.path,
-    required this.type,
-    this.extractedContent,
-    required this.isPinned,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    if (!nullToAbsent || collectionId != null) {
-      map['collection_id'] = Variable<String>(collectionId);
-    }
-    map['label'] = Variable<String>(label);
-    if (!nullToAbsent || path != null) {
-      map['path'] = Variable<String>(path);
-    }
-    {
-      map['type'] = Variable<String>(
-        $SourceItemsTable.$convertertype.toSql(type),
-      );
-    }
-    if (!nullToAbsent || extractedContent != null) {
-      map['extracted_content'] = Variable<String>(extractedContent);
-    }
-    map['is_pinned'] = Variable<bool>(isPinned);
-    return map;
-  }
-
-  SourceItemsCompanion toCompanion(bool nullToAbsent) {
-    return SourceItemsCompanion(
-      id: Value(id),
-      collectionId: collectionId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(collectionId),
-      label: Value(label),
-      path: path == null && nullToAbsent ? const Value.absent() : Value(path),
-      type: Value(type),
-      extractedContent: extractedContent == null && nullToAbsent
-          ? const Value.absent()
-          : Value(extractedContent),
-      isPinned: Value(isPinned),
-    );
-  }
-
-  factory SourceItem.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return SourceItem(
-      id: serializer.fromJson<String>(json['id']),
-      collectionId: serializer.fromJson<String?>(json['collectionId']),
-      label: serializer.fromJson<String>(json['label']),
-      path: serializer.fromJson<String?>(json['path']),
-      type: $SourceItemsTable.$convertertype.fromJson(
-        serializer.fromJson<String>(json['type']),
-      ),
-      extractedContent: serializer.fromJson<String?>(json['extractedContent']),
-      isPinned: serializer.fromJson<bool>(json['isPinned']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'collectionId': serializer.toJson<String?>(collectionId),
-      'label': serializer.toJson<String>(label),
-      'path': serializer.toJson<String?>(path),
-      'type': serializer.toJson<String>(
-        $SourceItemsTable.$convertertype.toJson(type),
-      ),
-      'extractedContent': serializer.toJson<String?>(extractedContent),
-      'isPinned': serializer.toJson<bool>(isPinned),
-    };
-  }
-
-  SourceItem copyWith({
-    String? id,
-    Value<String?> collectionId = const Value.absent(),
-    String? label,
-    Value<String?> path = const Value.absent(),
-    MediaType? type,
-    Value<String?> extractedContent = const Value.absent(),
-    bool? isPinned,
-  }) => SourceItem(
-    id: id ?? this.id,
-    collectionId: collectionId.present ? collectionId.value : this.collectionId,
-    label: label ?? this.label,
-    path: path.present ? path.value : this.path,
-    type: type ?? this.type,
-    extractedContent: extractedContent.present
-        ? extractedContent.value
-        : this.extractedContent,
-    isPinned: isPinned ?? this.isPinned,
-  );
-  SourceItem copyWithCompanion(SourceItemsCompanion data) {
-    return SourceItem(
-      id: data.id.present ? data.id.value : this.id,
-      collectionId: data.collectionId.present
-          ? data.collectionId.value
-          : this.collectionId,
-      label: data.label.present ? data.label.value : this.label,
-      path: data.path.present ? data.path.value : this.path,
-      type: data.type.present ? data.type.value : this.type,
-      extractedContent: data.extractedContent.present
-          ? data.extractedContent.value
-          : this.extractedContent,
-      isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SourceItem(')
-          ..write('id: $id, ')
-          ..write('collectionId: $collectionId, ')
-          ..write('label: $label, ')
-          ..write('path: $path, ')
-          ..write('type: $type, ')
-          ..write('extractedContent: $extractedContent, ')
-          ..write('isPinned: $isPinned')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    collectionId,
-    label,
-    path,
-    type,
-    extractedContent,
-    isPinned,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is SourceItem &&
-          other.id == this.id &&
-          other.collectionId == this.collectionId &&
-          other.label == this.label &&
-          other.path == this.path &&
-          other.type == this.type &&
-          other.extractedContent == this.extractedContent &&
-          other.isPinned == this.isPinned);
-}
-
-class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
-  final Value<String> id;
-  final Value<String?> collectionId;
-  final Value<String> label;
-  final Value<String?> path;
-  final Value<MediaType> type;
-  final Value<String?> extractedContent;
-  final Value<bool> isPinned;
-  final Value<int> rowid;
-  const SourceItemsCompanion({
-    this.id = const Value.absent(),
-    this.collectionId = const Value.absent(),
-    this.label = const Value.absent(),
-    this.path = const Value.absent(),
-    this.type = const Value.absent(),
-    this.extractedContent = const Value.absent(),
-    this.isPinned = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  SourceItemsCompanion.insert({
-    required String id,
-    this.collectionId = const Value.absent(),
-    required String label,
-    this.path = const Value.absent(),
-    required MediaType type,
-    this.extractedContent = const Value.absent(),
-    this.isPinned = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       label = Value(label),
-       type = Value(type);
-  static Insertable<SourceItem> custom({
-    Expression<String>? id,
-    Expression<String>? collectionId,
-    Expression<String>? label,
-    Expression<String>? path,
-    Expression<String>? type,
-    Expression<String>? extractedContent,
-    Expression<bool>? isPinned,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (collectionId != null) 'collection_id': collectionId,
-      if (label != null) 'label': label,
-      if (path != null) 'path': path,
-      if (type != null) 'type': type,
-      if (extractedContent != null) 'extracted_content': extractedContent,
-      if (isPinned != null) 'is_pinned': isPinned,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  SourceItemsCompanion copyWith({
-    Value<String>? id,
-    Value<String?>? collectionId,
-    Value<String>? label,
-    Value<String?>? path,
-    Value<MediaType>? type,
-    Value<String?>? extractedContent,
-    Value<bool>? isPinned,
-    Value<int>? rowid,
-  }) {
-    return SourceItemsCompanion(
-      id: id ?? this.id,
-      collectionId: collectionId ?? this.collectionId,
-      label: label ?? this.label,
-      path: path ?? this.path,
-      type: type ?? this.type,
-      extractedContent: extractedContent ?? this.extractedContent,
-      isPinned: isPinned ?? this.isPinned,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (collectionId.present) {
-      map['collection_id'] = Variable<String>(collectionId.value);
-    }
-    if (label.present) {
-      map['label'] = Variable<String>(label.value);
-    }
-    if (path.present) {
-      map['path'] = Variable<String>(path.value);
-    }
-    if (type.present) {
-      map['type'] = Variable<String>(
-        $SourceItemsTable.$convertertype.toSql(type.value),
-      );
-    }
-    if (extractedContent.present) {
-      map['extracted_content'] = Variable<String>(extractedContent.value);
-    }
-    if (isPinned.present) {
-      map['is_pinned'] = Variable<bool>(isPinned.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SourceItemsCompanion(')
-          ..write('id: $id, ')
-          ..write('collectionId: $collectionId, ')
-          ..write('label: $label, ')
-          ..write('path: $path, ')
-          ..write('type: $type, ')
-          ..write('extractedContent: $extractedContent, ')
-          ..write('isPinned: $isPinned, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $DeckConfigItemsTable extends DeckConfigItems
     with TableInfo<$DeckConfigItemsTable, DeckConfigItem> {
   @override
@@ -1697,18 +852,18 @@ class $DeckItemsTable extends DeckItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _collectionIdMeta = const VerificationMeta(
-    'collectionId',
+  static const VerificationMeta _parentIdMeta = const VerificationMeta(
+    'parentId',
   );
   @override
-  late final GeneratedColumn<String> collectionId = GeneratedColumn<String>(
-    'collection_id',
+  late final GeneratedColumn<String> parentId = GeneratedColumn<String>(
+    'parent_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES study_collection_items (id)',
+      'REFERENCES deck_items (id)',
     ),
   );
   static const VerificationMeta _configIdMeta = const VerificationMeta(
@@ -1763,7 +918,7 @@ class $DeckItemsTable extends DeckItems
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    collectionId,
+    parentId,
     configId,
     name,
     description,
@@ -1786,16 +941,11 @@ class $DeckItemsTable extends DeckItems
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('collection_id')) {
+    if (data.containsKey('parent_id')) {
       context.handle(
-        _collectionIdMeta,
-        collectionId.isAcceptableOrUnknown(
-          data['collection_id']!,
-          _collectionIdMeta,
-        ),
+        _parentIdMeta,
+        parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_collectionIdMeta);
     }
     if (data.containsKey('config_id')) {
       context.handle(
@@ -1839,10 +989,10 @@ class $DeckItemsTable extends DeckItems
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
-      collectionId: attachedDatabase.typeMapping.read(
+      parentId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}collection_id'],
-      )!,
+        data['${effectivePrefix}parent_id'],
+      ),
       configId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}config_id'],
@@ -1870,14 +1020,14 @@ class $DeckItemsTable extends DeckItems
 
 class DeckItem extends DataClass implements Insertable<DeckItem> {
   final String id;
-  final String collectionId;
+  final String? parentId;
   final String? configId;
   final String name;
   final String? description;
   final bool isPinned;
   const DeckItem({
     required this.id,
-    required this.collectionId,
+    this.parentId,
     this.configId,
     required this.name,
     this.description,
@@ -1887,7 +1037,9 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['collection_id'] = Variable<String>(collectionId);
+    if (!nullToAbsent || parentId != null) {
+      map['parent_id'] = Variable<String>(parentId);
+    }
     if (!nullToAbsent || configId != null) {
       map['config_id'] = Variable<String>(configId);
     }
@@ -1902,7 +1054,9 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
   DeckItemsCompanion toCompanion(bool nullToAbsent) {
     return DeckItemsCompanion(
       id: Value(id),
-      collectionId: Value(collectionId),
+      parentId: parentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentId),
       configId: configId == null && nullToAbsent
           ? const Value.absent()
           : Value(configId),
@@ -1921,7 +1075,7 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DeckItem(
       id: serializer.fromJson<String>(json['id']),
-      collectionId: serializer.fromJson<String>(json['collectionId']),
+      parentId: serializer.fromJson<String?>(json['parentId']),
       configId: serializer.fromJson<String?>(json['configId']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
@@ -1933,7 +1087,7 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'collectionId': serializer.toJson<String>(collectionId),
+      'parentId': serializer.toJson<String?>(parentId),
       'configId': serializer.toJson<String?>(configId),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
@@ -1943,14 +1097,14 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
 
   DeckItem copyWith({
     String? id,
-    String? collectionId,
+    Value<String?> parentId = const Value.absent(),
     Value<String?> configId = const Value.absent(),
     String? name,
     Value<String?> description = const Value.absent(),
     bool? isPinned,
   }) => DeckItem(
     id: id ?? this.id,
-    collectionId: collectionId ?? this.collectionId,
+    parentId: parentId.present ? parentId.value : this.parentId,
     configId: configId.present ? configId.value : this.configId,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
@@ -1959,9 +1113,7 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
   DeckItem copyWithCompanion(DeckItemsCompanion data) {
     return DeckItem(
       id: data.id.present ? data.id.value : this.id,
-      collectionId: data.collectionId.present
-          ? data.collectionId.value
-          : this.collectionId,
+      parentId: data.parentId.present ? data.parentId.value : this.parentId,
       configId: data.configId.present ? data.configId.value : this.configId,
       name: data.name.present ? data.name.value : this.name,
       description: data.description.present
@@ -1975,7 +1127,7 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
   String toString() {
     return (StringBuffer('DeckItem(')
           ..write('id: $id, ')
-          ..write('collectionId: $collectionId, ')
+          ..write('parentId: $parentId, ')
           ..write('configId: $configId, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
@@ -1986,13 +1138,13 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
 
   @override
   int get hashCode =>
-      Object.hash(id, collectionId, configId, name, description, isPinned);
+      Object.hash(id, parentId, configId, name, description, isPinned);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is DeckItem &&
           other.id == this.id &&
-          other.collectionId == this.collectionId &&
+          other.parentId == this.parentId &&
           other.configId == this.configId &&
           other.name == this.name &&
           other.description == this.description &&
@@ -2001,7 +1153,7 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
 
 class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   final Value<String> id;
-  final Value<String> collectionId;
+  final Value<String?> parentId;
   final Value<String?> configId;
   final Value<String> name;
   final Value<String?> description;
@@ -2009,7 +1161,7 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   final Value<int> rowid;
   const DeckItemsCompanion({
     this.id = const Value.absent(),
-    this.collectionId = const Value.absent(),
+    this.parentId = const Value.absent(),
     this.configId = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
@@ -2018,18 +1170,17 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   });
   DeckItemsCompanion.insert({
     required String id,
-    required String collectionId,
+    this.parentId = const Value.absent(),
     this.configId = const Value.absent(),
     required String name,
     this.description = const Value.absent(),
     this.isPinned = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       collectionId = Value(collectionId),
        name = Value(name);
   static Insertable<DeckItem> custom({
     Expression<String>? id,
-    Expression<String>? collectionId,
+    Expression<String>? parentId,
     Expression<String>? configId,
     Expression<String>? name,
     Expression<String>? description,
@@ -2038,7 +1189,7 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (collectionId != null) 'collection_id': collectionId,
+      if (parentId != null) 'parent_id': parentId,
       if (configId != null) 'config_id': configId,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
@@ -2049,7 +1200,7 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
 
   DeckItemsCompanion copyWith({
     Value<String>? id,
-    Value<String>? collectionId,
+    Value<String?>? parentId,
     Value<String?>? configId,
     Value<String>? name,
     Value<String?>? description,
@@ -2058,7 +1209,7 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   }) {
     return DeckItemsCompanion(
       id: id ?? this.id,
-      collectionId: collectionId ?? this.collectionId,
+      parentId: parentId ?? this.parentId,
       configId: configId ?? this.configId,
       name: name ?? this.name,
       description: description ?? this.description,
@@ -2073,8 +1224,8 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (collectionId.present) {
-      map['collection_id'] = Variable<String>(collectionId.value);
+    if (parentId.present) {
+      map['parent_id'] = Variable<String>(parentId.value);
     }
     if (configId.present) {
       map['config_id'] = Variable<String>(configId.value);
@@ -2098,10 +1249,478 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   String toString() {
     return (StringBuffer('DeckItemsCompanion(')
           ..write('id: $id, ')
-          ..write('collectionId: $collectionId, ')
+          ..write('parentId: $parentId, ')
           ..write('configId: $configId, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
+          ..write('isPinned: $isPinned, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SourceItemsTable extends SourceItems
+    with TableInfo<$SourceItemsTable, SourceItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SourceItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deckIdMeta = const VerificationMeta('deckId');
+  @override
+  late final GeneratedColumn<String> deckId = GeneratedColumn<String>(
+    'deck_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES deck_items (id)',
+    ),
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pathMeta = const VerificationMeta('path');
+  @override
+  late final GeneratedColumn<String> path = GeneratedColumn<String>(
+    'path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<MediaType, String> type =
+      GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<MediaType>($SourceItemsTable.$convertertype);
+  static const VerificationMeta _extractedContentMeta = const VerificationMeta(
+    'extractedContent',
+  );
+  @override
+  late final GeneratedColumn<String> extractedContent = GeneratedColumn<String>(
+    'extracted_content',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isPinnedMeta = const VerificationMeta(
+    'isPinned',
+  );
+  @override
+  late final GeneratedColumn<bool> isPinned = GeneratedColumn<bool>(
+    'is_pinned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_pinned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    deckId,
+    label,
+    path,
+    type,
+    extractedContent,
+    isPinned,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'source_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SourceItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('deck_id')) {
+      context.handle(
+        _deckIdMeta,
+        deckId.isAcceptableOrUnknown(data['deck_id']!, _deckIdMeta),
+      );
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (data.containsKey('path')) {
+      context.handle(
+        _pathMeta,
+        path.isAcceptableOrUnknown(data['path']!, _pathMeta),
+      );
+    }
+    if (data.containsKey('extracted_content')) {
+      context.handle(
+        _extractedContentMeta,
+        extractedContent.isAcceptableOrUnknown(
+          data['extracted_content']!,
+          _extractedContentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_pinned')) {
+      context.handle(
+        _isPinnedMeta,
+        isPinned.isAcceptableOrUnknown(data['is_pinned']!, _isPinnedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SourceItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SourceItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      deckId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deck_id'],
+      ),
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      path: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}path'],
+      ),
+      type: $SourceItemsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
+      extractedContent: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}extracted_content'],
+      ),
+      isPinned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_pinned'],
+      )!,
+    );
+  }
+
+  @override
+  $SourceItemsTable createAlias(String alias) {
+    return $SourceItemsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<MediaType, String, String> $convertertype =
+      const EnumNameConverter<MediaType>(MediaType.values);
+}
+
+class SourceItem extends DataClass implements Insertable<SourceItem> {
+  final String id;
+  final String? deckId;
+  final String label;
+  final String? path;
+  final MediaType type;
+  final String? extractedContent;
+  final bool isPinned;
+  const SourceItem({
+    required this.id,
+    this.deckId,
+    required this.label,
+    this.path,
+    required this.type,
+    this.extractedContent,
+    required this.isPinned,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || deckId != null) {
+      map['deck_id'] = Variable<String>(deckId);
+    }
+    map['label'] = Variable<String>(label);
+    if (!nullToAbsent || path != null) {
+      map['path'] = Variable<String>(path);
+    }
+    {
+      map['type'] = Variable<String>(
+        $SourceItemsTable.$convertertype.toSql(type),
+      );
+    }
+    if (!nullToAbsent || extractedContent != null) {
+      map['extracted_content'] = Variable<String>(extractedContent);
+    }
+    map['is_pinned'] = Variable<bool>(isPinned);
+    return map;
+  }
+
+  SourceItemsCompanion toCompanion(bool nullToAbsent) {
+    return SourceItemsCompanion(
+      id: Value(id),
+      deckId: deckId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deckId),
+      label: Value(label),
+      path: path == null && nullToAbsent ? const Value.absent() : Value(path),
+      type: Value(type),
+      extractedContent: extractedContent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(extractedContent),
+      isPinned: Value(isPinned),
+    );
+  }
+
+  factory SourceItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SourceItem(
+      id: serializer.fromJson<String>(json['id']),
+      deckId: serializer.fromJson<String?>(json['deckId']),
+      label: serializer.fromJson<String>(json['label']),
+      path: serializer.fromJson<String?>(json['path']),
+      type: $SourceItemsTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
+      extractedContent: serializer.fromJson<String?>(json['extractedContent']),
+      isPinned: serializer.fromJson<bool>(json['isPinned']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'deckId': serializer.toJson<String?>(deckId),
+      'label': serializer.toJson<String>(label),
+      'path': serializer.toJson<String?>(path),
+      'type': serializer.toJson<String>(
+        $SourceItemsTable.$convertertype.toJson(type),
+      ),
+      'extractedContent': serializer.toJson<String?>(extractedContent),
+      'isPinned': serializer.toJson<bool>(isPinned),
+    };
+  }
+
+  SourceItem copyWith({
+    String? id,
+    Value<String?> deckId = const Value.absent(),
+    String? label,
+    Value<String?> path = const Value.absent(),
+    MediaType? type,
+    Value<String?> extractedContent = const Value.absent(),
+    bool? isPinned,
+  }) => SourceItem(
+    id: id ?? this.id,
+    deckId: deckId.present ? deckId.value : this.deckId,
+    label: label ?? this.label,
+    path: path.present ? path.value : this.path,
+    type: type ?? this.type,
+    extractedContent: extractedContent.present
+        ? extractedContent.value
+        : this.extractedContent,
+    isPinned: isPinned ?? this.isPinned,
+  );
+  SourceItem copyWithCompanion(SourceItemsCompanion data) {
+    return SourceItem(
+      id: data.id.present ? data.id.value : this.id,
+      deckId: data.deckId.present ? data.deckId.value : this.deckId,
+      label: data.label.present ? data.label.value : this.label,
+      path: data.path.present ? data.path.value : this.path,
+      type: data.type.present ? data.type.value : this.type,
+      extractedContent: data.extractedContent.present
+          ? data.extractedContent.value
+          : this.extractedContent,
+      isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SourceItem(')
+          ..write('id: $id, ')
+          ..write('deckId: $deckId, ')
+          ..write('label: $label, ')
+          ..write('path: $path, ')
+          ..write('type: $type, ')
+          ..write('extractedContent: $extractedContent, ')
+          ..write('isPinned: $isPinned')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, deckId, label, path, type, extractedContent, isPinned);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SourceItem &&
+          other.id == this.id &&
+          other.deckId == this.deckId &&
+          other.label == this.label &&
+          other.path == this.path &&
+          other.type == this.type &&
+          other.extractedContent == this.extractedContent &&
+          other.isPinned == this.isPinned);
+}
+
+class SourceItemsCompanion extends UpdateCompanion<SourceItem> {
+  final Value<String> id;
+  final Value<String?> deckId;
+  final Value<String> label;
+  final Value<String?> path;
+  final Value<MediaType> type;
+  final Value<String?> extractedContent;
+  final Value<bool> isPinned;
+  final Value<int> rowid;
+  const SourceItemsCompanion({
+    this.id = const Value.absent(),
+    this.deckId = const Value.absent(),
+    this.label = const Value.absent(),
+    this.path = const Value.absent(),
+    this.type = const Value.absent(),
+    this.extractedContent = const Value.absent(),
+    this.isPinned = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SourceItemsCompanion.insert({
+    required String id,
+    this.deckId = const Value.absent(),
+    required String label,
+    this.path = const Value.absent(),
+    required MediaType type,
+    this.extractedContent = const Value.absent(),
+    this.isPinned = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       label = Value(label),
+       type = Value(type);
+  static Insertable<SourceItem> custom({
+    Expression<String>? id,
+    Expression<String>? deckId,
+    Expression<String>? label,
+    Expression<String>? path,
+    Expression<String>? type,
+    Expression<String>? extractedContent,
+    Expression<bool>? isPinned,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (deckId != null) 'deck_id': deckId,
+      if (label != null) 'label': label,
+      if (path != null) 'path': path,
+      if (type != null) 'type': type,
+      if (extractedContent != null) 'extracted_content': extractedContent,
+      if (isPinned != null) 'is_pinned': isPinned,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SourceItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? deckId,
+    Value<String>? label,
+    Value<String?>? path,
+    Value<MediaType>? type,
+    Value<String?>? extractedContent,
+    Value<bool>? isPinned,
+    Value<int>? rowid,
+  }) {
+    return SourceItemsCompanion(
+      id: id ?? this.id,
+      deckId: deckId ?? this.deckId,
+      label: label ?? this.label,
+      path: path ?? this.path,
+      type: type ?? this.type,
+      extractedContent: extractedContent ?? this.extractedContent,
+      isPinned: isPinned ?? this.isPinned,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (deckId.present) {
+      map['deck_id'] = Variable<String>(deckId.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (path.present) {
+      map['path'] = Variable<String>(path.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(
+        $SourceItemsTable.$convertertype.toSql(type.value),
+      );
+    }
+    if (extractedContent.present) {
+      map['extracted_content'] = Variable<String>(extractedContent.value);
+    }
+    if (isPinned.present) {
+      map['is_pinned'] = Variable<bool>(isPinned.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SourceItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('deckId: $deckId, ')
+          ..write('label: $label, ')
+          ..write('path: $path, ')
+          ..write('type: $type, ')
+          ..write('extractedContent: $extractedContent, ')
           ..write('isPinned: $isPinned, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -2505,17 +2124,6 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _collectionIdMeta = const VerificationMeta(
-    'collectionId',
-  );
-  @override
-  late final GeneratedColumn<String> collectionId = GeneratedColumn<String>(
-    'collection_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _deckIdMeta = const VerificationMeta('deckId');
   @override
   late final GeneratedColumn<String> deckId = GeneratedColumn<String>(
@@ -2572,7 +2180,6 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    collectionId,
     deckId,
     createdAt,
     updatedAt,
@@ -2595,17 +2202,6 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
-    }
-    if (data.containsKey('collection_id')) {
-      context.handle(
-        _collectionIdMeta,
-        collectionId.isAcceptableOrUnknown(
-          data['collection_id']!,
-          _collectionIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_collectionIdMeta);
     }
     if (data.containsKey('deck_id')) {
       context.handle(
@@ -2662,10 +2258,6 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
-      collectionId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}collection_id'],
-      )!,
       deckId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}deck_id'],
@@ -2698,7 +2290,6 @@ class $CardCreationDraftItemsTable extends CardCreationDraftItems
 class CardCreationDraftItem extends DataClass
     implements Insertable<CardCreationDraftItem> {
   final String id;
-  final String collectionId;
   final String deckId;
   final String createdAt;
   final String updatedAt;
@@ -2706,7 +2297,6 @@ class CardCreationDraftItem extends DataClass
   final String? lastOpenedPage;
   const CardCreationDraftItem({
     required this.id,
-    required this.collectionId,
     required this.deckId,
     required this.createdAt,
     required this.updatedAt,
@@ -2717,7 +2307,6 @@ class CardCreationDraftItem extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['collection_id'] = Variable<String>(collectionId);
     map['deck_id'] = Variable<String>(deckId);
     map['created_at'] = Variable<String>(createdAt);
     map['updated_at'] = Variable<String>(updatedAt);
@@ -2733,7 +2322,6 @@ class CardCreationDraftItem extends DataClass
   CardCreationDraftItemsCompanion toCompanion(bool nullToAbsent) {
     return CardCreationDraftItemsCompanion(
       id: Value(id),
-      collectionId: Value(collectionId),
       deckId: Value(deckId),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -2753,7 +2341,6 @@ class CardCreationDraftItem extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return CardCreationDraftItem(
       id: serializer.fromJson<String>(json['id']),
-      collectionId: serializer.fromJson<String>(json['collectionId']),
       deckId: serializer.fromJson<String>(json['deckId']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
       updatedAt: serializer.fromJson<String>(json['updatedAt']),
@@ -2768,7 +2355,6 @@ class CardCreationDraftItem extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'collectionId': serializer.toJson<String>(collectionId),
       'deckId': serializer.toJson<String>(deckId),
       'createdAt': serializer.toJson<String>(createdAt),
       'updatedAt': serializer.toJson<String>(updatedAt),
@@ -2779,7 +2365,6 @@ class CardCreationDraftItem extends DataClass
 
   CardCreationDraftItem copyWith({
     String? id,
-    String? collectionId,
     String? deckId,
     String? createdAt,
     String? updatedAt,
@@ -2787,7 +2372,6 @@ class CardCreationDraftItem extends DataClass
     Value<String?> lastOpenedPage = const Value.absent(),
   }) => CardCreationDraftItem(
     id: id ?? this.id,
-    collectionId: collectionId ?? this.collectionId,
     deckId: deckId ?? this.deckId,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -2803,9 +2387,6 @@ class CardCreationDraftItem extends DataClass
   ) {
     return CardCreationDraftItem(
       id: data.id.present ? data.id.value : this.id,
-      collectionId: data.collectionId.present
-          ? data.collectionId.value
-          : this.collectionId,
       deckId: data.deckId.present ? data.deckId.value : this.deckId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -2822,7 +2403,6 @@ class CardCreationDraftItem extends DataClass
   String toString() {
     return (StringBuffer('CardCreationDraftItem(')
           ..write('id: $id, ')
-          ..write('collectionId: $collectionId, ')
           ..write('deckId: $deckId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -2835,7 +2415,6 @@ class CardCreationDraftItem extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
-    collectionId,
     deckId,
     createdAt,
     updatedAt,
@@ -2847,7 +2426,6 @@ class CardCreationDraftItem extends DataClass
       identical(this, other) ||
       (other is CardCreationDraftItem &&
           other.id == this.id &&
-          other.collectionId == this.collectionId &&
           other.deckId == this.deckId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -2858,7 +2436,6 @@ class CardCreationDraftItem extends DataClass
 class CardCreationDraftItemsCompanion
     extends UpdateCompanion<CardCreationDraftItem> {
   final Value<String> id;
-  final Value<String> collectionId;
   final Value<String> deckId;
   final Value<String> createdAt;
   final Value<String> updatedAt;
@@ -2867,7 +2444,6 @@ class CardCreationDraftItemsCompanion
   final Value<int> rowid;
   const CardCreationDraftItemsCompanion({
     this.id = const Value.absent(),
-    this.collectionId = const Value.absent(),
     this.deckId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -2877,7 +2453,6 @@ class CardCreationDraftItemsCompanion
   });
   CardCreationDraftItemsCompanion.insert({
     required String id,
-    required String collectionId,
     required String deckId,
     required String createdAt,
     required String updatedAt,
@@ -2885,13 +2460,11 @@ class CardCreationDraftItemsCompanion
     this.lastOpenedPage = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       collectionId = Value(collectionId),
        deckId = Value(deckId),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
   static Insertable<CardCreationDraftItem> custom({
     Expression<String>? id,
-    Expression<String>? collectionId,
     Expression<String>? deckId,
     Expression<String>? createdAt,
     Expression<String>? updatedAt,
@@ -2901,7 +2474,6 @@ class CardCreationDraftItemsCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (collectionId != null) 'collection_id': collectionId,
       if (deckId != null) 'deck_id': deckId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -2914,7 +2486,6 @@ class CardCreationDraftItemsCompanion
 
   CardCreationDraftItemsCompanion copyWith({
     Value<String>? id,
-    Value<String>? collectionId,
     Value<String>? deckId,
     Value<String>? createdAt,
     Value<String>? updatedAt,
@@ -2924,7 +2495,6 @@ class CardCreationDraftItemsCompanion
   }) {
     return CardCreationDraftItemsCompanion(
       id: id ?? this.id,
-      collectionId: collectionId ?? this.collectionId,
       deckId: deckId ?? this.deckId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -2939,9 +2509,6 @@ class CardCreationDraftItemsCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
-    }
-    if (collectionId.present) {
-      map['collection_id'] = Variable<String>(collectionId.value);
     }
     if (deckId.present) {
       map['deck_id'] = Variable<String>(deckId.value);
@@ -2968,7 +2535,6 @@ class CardCreationDraftItemsCompanion
   String toString() {
     return (StringBuffer('CardCreationDraftItemsCompanion(')
           ..write('id: $id, ')
-          ..write('collectionId: $collectionId, ')
           ..write('deckId: $deckId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -6668,13 +6234,11 @@ class AssetItemsCompanion extends UpdateCompanion<AssetItem> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $StudyCollectionItemsTable studyCollectionItems =
-      $StudyCollectionItemsTable(this);
-  late final $SourceItemsTable sourceItems = $SourceItemsTable(this);
   late final $DeckConfigItemsTable deckConfigItems = $DeckConfigItemsTable(
     this,
   );
   late final $DeckItemsTable deckItems = $DeckItemsTable(this);
+  late final $SourceItemsTable sourceItems = $SourceItemsTable(this);
   late final $SourceItemBlobsTable sourceItemBlobs = $SourceItemBlobsTable(
     this,
   );
@@ -6691,10 +6255,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-    studyCollectionItems,
-    sourceItems,
     deckConfigItems,
     deckItems,
+    sourceItems,
     sourceItemBlobs,
     cardCreationDraftItems,
     citationItems,
@@ -6705,790 +6268,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ];
 }
 
-typedef $$StudyCollectionItemsTableCreateCompanionBuilder =
-    StudyCollectionItemsCompanion Function({
-      required String id,
-      required String name,
-      required String createdAt,
-      required String updatedAt,
-      Value<bool> isPinned,
-      Value<int> rowid,
-    });
-typedef $$StudyCollectionItemsTableUpdateCompanionBuilder =
-    StudyCollectionItemsCompanion Function({
-      Value<String> id,
-      Value<String> name,
-      Value<String> createdAt,
-      Value<String> updatedAt,
-      Value<bool> isPinned,
-      Value<int> rowid,
-    });
-
-final class $$StudyCollectionItemsTableReferences
-    extends
-        BaseReferences<
-          _$AppDatabase,
-          $StudyCollectionItemsTable,
-          StudyCollectionItem
-        > {
-  $$StudyCollectionItemsTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static MultiTypedResultKey<$SourceItemsTable, List<SourceItem>>
-  _sourceItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.sourceItems,
-    aliasName: $_aliasNameGenerator(
-      db.studyCollectionItems.id,
-      db.sourceItems.collectionId,
-    ),
-  );
-
-  $$SourceItemsTableProcessedTableManager get sourceItemsRefs {
-    final manager = $$SourceItemsTableTableManager(
-      $_db,
-      $_db.sourceItems,
-    ).filter((f) => f.collectionId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_sourceItemsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$DeckItemsTable, List<DeckItem>>
-  _deckItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.deckItems,
-    aliasName: $_aliasNameGenerator(
-      db.studyCollectionItems.id,
-      db.deckItems.collectionId,
-    ),
-  );
-
-  $$DeckItemsTableProcessedTableManager get deckItemsRefs {
-    final manager = $$DeckItemsTableTableManager(
-      $_db,
-      $_db.deckItems,
-    ).filter((f) => f.collectionId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_deckItemsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
-class $$StudyCollectionItemsTableFilterComposer
-    extends Composer<_$AppDatabase, $StudyCollectionItemsTable> {
-  $$StudyCollectionItemsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get name => $composableBuilder(
-    column: $table.name,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get isPinned => $composableBuilder(
-    column: $table.isPinned,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  Expression<bool> sourceItemsRefs(
-    Expression<bool> Function($$SourceItemsTableFilterComposer f) f,
-  ) {
-    final $$SourceItemsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.sourceItems,
-      getReferencedColumn: (t) => t.collectionId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$SourceItemsTableFilterComposer(
-            $db: $db,
-            $table: $db.sourceItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> deckItemsRefs(
-    Expression<bool> Function($$DeckItemsTableFilterComposer f) f,
-  ) {
-    final $$DeckItemsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.deckItems,
-      getReferencedColumn: (t) => t.collectionId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$DeckItemsTableFilterComposer(
-            $db: $db,
-            $table: $db.deckItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$StudyCollectionItemsTableOrderingComposer
-    extends Composer<_$AppDatabase, $StudyCollectionItemsTable> {
-  $$StudyCollectionItemsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get name => $composableBuilder(
-    column: $table.name,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get isPinned => $composableBuilder(
-    column: $table.isPinned,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$StudyCollectionItemsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $StudyCollectionItemsTable> {
-  $$StudyCollectionItemsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
-
-  GeneratedColumn<String> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<String> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  GeneratedColumn<bool> get isPinned =>
-      $composableBuilder(column: $table.isPinned, builder: (column) => column);
-
-  Expression<T> sourceItemsRefs<T extends Object>(
-    Expression<T> Function($$SourceItemsTableAnnotationComposer a) f,
-  ) {
-    final $$SourceItemsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.sourceItems,
-      getReferencedColumn: (t) => t.collectionId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$SourceItemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.sourceItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> deckItemsRefs<T extends Object>(
-    Expression<T> Function($$DeckItemsTableAnnotationComposer a) f,
-  ) {
-    final $$DeckItemsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.deckItems,
-      getReferencedColumn: (t) => t.collectionId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$DeckItemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.deckItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$StudyCollectionItemsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $StudyCollectionItemsTable,
-          StudyCollectionItem,
-          $$StudyCollectionItemsTableFilterComposer,
-          $$StudyCollectionItemsTableOrderingComposer,
-          $$StudyCollectionItemsTableAnnotationComposer,
-          $$StudyCollectionItemsTableCreateCompanionBuilder,
-          $$StudyCollectionItemsTableUpdateCompanionBuilder,
-          (StudyCollectionItem, $$StudyCollectionItemsTableReferences),
-          StudyCollectionItem,
-          PrefetchHooks Function({bool sourceItemsRefs, bool deckItemsRefs})
-        > {
-  $$StudyCollectionItemsTableTableManager(
-    _$AppDatabase db,
-    $StudyCollectionItemsTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$StudyCollectionItemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$StudyCollectionItemsTableOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
-          createComputedFieldComposer: () =>
-              $$StudyCollectionItemsTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String> name = const Value.absent(),
-                Value<String> createdAt = const Value.absent(),
-                Value<String> updatedAt = const Value.absent(),
-                Value<bool> isPinned = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => StudyCollectionItemsCompanion(
-                id: id,
-                name: name,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
-                isPinned: isPinned,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String id,
-                required String name,
-                required String createdAt,
-                required String updatedAt,
-                Value<bool> isPinned = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => StudyCollectionItemsCompanion.insert(
-                id: id,
-                name: name,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
-                isPinned: isPinned,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$StudyCollectionItemsTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback:
-              ({sourceItemsRefs = false, deckItemsRefs = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (sourceItemsRefs) db.sourceItems,
-                    if (deckItemsRefs) db.deckItems,
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (sourceItemsRefs)
-                        await $_getPrefetchedData<
-                          StudyCollectionItem,
-                          $StudyCollectionItemsTable,
-                          SourceItem
-                        >(
-                          currentTable: table,
-                          referencedTable: $$StudyCollectionItemsTableReferences
-                              ._sourceItemsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$StudyCollectionItemsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).sourceItemsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.collectionId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (deckItemsRefs)
-                        await $_getPrefetchedData<
-                          StudyCollectionItem,
-                          $StudyCollectionItemsTable,
-                          DeckItem
-                        >(
-                          currentTable: table,
-                          referencedTable: $$StudyCollectionItemsTableReferences
-                              ._deckItemsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$StudyCollectionItemsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).deckItemsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.collectionId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
-        ),
-      );
-}
-
-typedef $$StudyCollectionItemsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $StudyCollectionItemsTable,
-      StudyCollectionItem,
-      $$StudyCollectionItemsTableFilterComposer,
-      $$StudyCollectionItemsTableOrderingComposer,
-      $$StudyCollectionItemsTableAnnotationComposer,
-      $$StudyCollectionItemsTableCreateCompanionBuilder,
-      $$StudyCollectionItemsTableUpdateCompanionBuilder,
-      (StudyCollectionItem, $$StudyCollectionItemsTableReferences),
-      StudyCollectionItem,
-      PrefetchHooks Function({bool sourceItemsRefs, bool deckItemsRefs})
-    >;
-typedef $$SourceItemsTableCreateCompanionBuilder =
-    SourceItemsCompanion Function({
-      required String id,
-      Value<String?> collectionId,
-      required String label,
-      Value<String?> path,
-      required MediaType type,
-      Value<String?> extractedContent,
-      Value<bool> isPinned,
-      Value<int> rowid,
-    });
-typedef $$SourceItemsTableUpdateCompanionBuilder =
-    SourceItemsCompanion Function({
-      Value<String> id,
-      Value<String?> collectionId,
-      Value<String> label,
-      Value<String?> path,
-      Value<MediaType> type,
-      Value<String?> extractedContent,
-      Value<bool> isPinned,
-      Value<int> rowid,
-    });
-
-final class $$SourceItemsTableReferences
-    extends BaseReferences<_$AppDatabase, $SourceItemsTable, SourceItem> {
-  $$SourceItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $StudyCollectionItemsTable _collectionIdTable(_$AppDatabase db) =>
-      db.studyCollectionItems.createAlias(
-        $_aliasNameGenerator(
-          db.sourceItems.collectionId,
-          db.studyCollectionItems.id,
-        ),
-      );
-
-  $$StudyCollectionItemsTableProcessedTableManager? get collectionId {
-    final $_column = $_itemColumn<String>('collection_id');
-    if ($_column == null) return null;
-    final manager = $$StudyCollectionItemsTableTableManager(
-      $_db,
-      $_db.studyCollectionItems,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_collectionIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
-class $$SourceItemsTableFilterComposer
-    extends Composer<_$AppDatabase, $SourceItemsTable> {
-  $$SourceItemsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get label => $composableBuilder(
-    column: $table.label,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get path => $composableBuilder(
-    column: $table.path,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<MediaType, MediaType, String> get type =>
-      $composableBuilder(
-        column: $table.type,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-
-  ColumnFilters<String> get extractedContent => $composableBuilder(
-    column: $table.extractedContent,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get isPinned => $composableBuilder(
-    column: $table.isPinned,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  $$StudyCollectionItemsTableFilterComposer get collectionId {
-    final $$StudyCollectionItemsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.collectionId,
-      referencedTable: $db.studyCollectionItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$StudyCollectionItemsTableFilterComposer(
-            $db: $db,
-            $table: $db.studyCollectionItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$SourceItemsTableOrderingComposer
-    extends Composer<_$AppDatabase, $SourceItemsTable> {
-  $$SourceItemsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get label => $composableBuilder(
-    column: $table.label,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get path => $composableBuilder(
-    column: $table.path,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get type => $composableBuilder(
-    column: $table.type,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get extractedContent => $composableBuilder(
-    column: $table.extractedContent,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get isPinned => $composableBuilder(
-    column: $table.isPinned,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  $$StudyCollectionItemsTableOrderingComposer get collectionId {
-    final $$StudyCollectionItemsTableOrderingComposer composer =
-        $composerBuilder(
-          composer: this,
-          getCurrentColumn: (t) => t.collectionId,
-          referencedTable: $db.studyCollectionItems,
-          getReferencedColumn: (t) => t.id,
-          builder:
-              (
-                joinBuilder, {
-                $addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer,
-              }) => $$StudyCollectionItemsTableOrderingComposer(
-                $db: $db,
-                $table: $db.studyCollectionItems,
-                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                joinBuilder: joinBuilder,
-                $removeJoinBuilderFromRootComposer:
-                    $removeJoinBuilderFromRootComposer,
-              ),
-        );
-    return composer;
-  }
-}
-
-class $$SourceItemsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $SourceItemsTable> {
-  $$SourceItemsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get label =>
-      $composableBuilder(column: $table.label, builder: (column) => column);
-
-  GeneratedColumn<String> get path =>
-      $composableBuilder(column: $table.path, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<MediaType, String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
-
-  GeneratedColumn<String> get extractedContent => $composableBuilder(
-    column: $table.extractedContent,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get isPinned =>
-      $composableBuilder(column: $table.isPinned, builder: (column) => column);
-
-  $$StudyCollectionItemsTableAnnotationComposer get collectionId {
-    final $$StudyCollectionItemsTableAnnotationComposer composer =
-        $composerBuilder(
-          composer: this,
-          getCurrentColumn: (t) => t.collectionId,
-          referencedTable: $db.studyCollectionItems,
-          getReferencedColumn: (t) => t.id,
-          builder:
-              (
-                joinBuilder, {
-                $addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer,
-              }) => $$StudyCollectionItemsTableAnnotationComposer(
-                $db: $db,
-                $table: $db.studyCollectionItems,
-                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                joinBuilder: joinBuilder,
-                $removeJoinBuilderFromRootComposer:
-                    $removeJoinBuilderFromRootComposer,
-              ),
-        );
-    return composer;
-  }
-}
-
-class $$SourceItemsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $SourceItemsTable,
-          SourceItem,
-          $$SourceItemsTableFilterComposer,
-          $$SourceItemsTableOrderingComposer,
-          $$SourceItemsTableAnnotationComposer,
-          $$SourceItemsTableCreateCompanionBuilder,
-          $$SourceItemsTableUpdateCompanionBuilder,
-          (SourceItem, $$SourceItemsTableReferences),
-          SourceItem,
-          PrefetchHooks Function({bool collectionId})
-        > {
-  $$SourceItemsTableTableManager(_$AppDatabase db, $SourceItemsTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$SourceItemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$SourceItemsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$SourceItemsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String?> collectionId = const Value.absent(),
-                Value<String> label = const Value.absent(),
-                Value<String?> path = const Value.absent(),
-                Value<MediaType> type = const Value.absent(),
-                Value<String?> extractedContent = const Value.absent(),
-                Value<bool> isPinned = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => SourceItemsCompanion(
-                id: id,
-                collectionId: collectionId,
-                label: label,
-                path: path,
-                type: type,
-                extractedContent: extractedContent,
-                isPinned: isPinned,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String id,
-                Value<String?> collectionId = const Value.absent(),
-                required String label,
-                Value<String?> path = const Value.absent(),
-                required MediaType type,
-                Value<String?> extractedContent = const Value.absent(),
-                Value<bool> isPinned = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => SourceItemsCompanion.insert(
-                id: id,
-                collectionId: collectionId,
-                label: label,
-                path: path,
-                type: type,
-                extractedContent: extractedContent,
-                isPinned: isPinned,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$SourceItemsTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback: ({collectionId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (collectionId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.collectionId,
-                                referencedTable: $$SourceItemsTableReferences
-                                    ._collectionIdTable(db),
-                                referencedColumn: $$SourceItemsTableReferences
-                                    ._collectionIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
-        ),
-      );
-}
-
-typedef $$SourceItemsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $SourceItemsTable,
-      SourceItem,
-      $$SourceItemsTableFilterComposer,
-      $$SourceItemsTableOrderingComposer,
-      $$SourceItemsTableAnnotationComposer,
-      $$SourceItemsTableCreateCompanionBuilder,
-      $$SourceItemsTableUpdateCompanionBuilder,
-      (SourceItem, $$SourceItemsTableReferences),
-      SourceItem,
-      PrefetchHooks Function({bool collectionId})
-    >;
 typedef $$DeckConfigItemsTableCreateCompanionBuilder =
     DeckConfigItemsCompanion Function({
       required String id,
@@ -7998,7 +6777,7 @@ typedef $$DeckConfigItemsTableProcessedTableManager =
 typedef $$DeckItemsTableCreateCompanionBuilder =
     DeckItemsCompanion Function({
       required String id,
-      required String collectionId,
+      Value<String?> parentId,
       Value<String?> configId,
       required String name,
       Value<String?> description,
@@ -8008,7 +6787,7 @@ typedef $$DeckItemsTableCreateCompanionBuilder =
 typedef $$DeckItemsTableUpdateCompanionBuilder =
     DeckItemsCompanion Function({
       Value<String> id,
-      Value<String> collectionId,
+      Value<String?> parentId,
       Value<String?> configId,
       Value<String> name,
       Value<String?> description,
@@ -8020,22 +6799,19 @@ final class $$DeckItemsTableReferences
     extends BaseReferences<_$AppDatabase, $DeckItemsTable, DeckItem> {
   $$DeckItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $StudyCollectionItemsTable _collectionIdTable(_$AppDatabase db) =>
-      db.studyCollectionItems.createAlias(
-        $_aliasNameGenerator(
-          db.deckItems.collectionId,
-          db.studyCollectionItems.id,
-        ),
+  static $DeckItemsTable _parentIdTable(_$AppDatabase db) =>
+      db.deckItems.createAlias(
+        $_aliasNameGenerator(db.deckItems.parentId, db.deckItems.id),
       );
 
-  $$StudyCollectionItemsTableProcessedTableManager get collectionId {
-    final $_column = $_itemColumn<String>('collection_id')!;
-
-    final manager = $$StudyCollectionItemsTableTableManager(
+  $$DeckItemsTableProcessedTableManager? get parentId {
+    final $_column = $_itemColumn<String>('parent_id');
+    if ($_column == null) return null;
+    final manager = $$DeckItemsTableTableManager(
       $_db,
-      $_db.studyCollectionItems,
+      $_db.deckItems,
     ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_collectionIdTable($_db));
+    final item = $_typedResult.readTableOrNull(_parentIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -8058,6 +6834,24 @@ final class $$DeckItemsTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$SourceItemsTable, List<SourceItem>>
+  _sourceItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.sourceItems,
+    aliasName: $_aliasNameGenerator(db.deckItems.id, db.sourceItems.deckId),
+  );
+
+  $$SourceItemsTableProcessedTableManager get sourceItemsRefs {
+    final manager = $$SourceItemsTableTableManager(
+      $_db,
+      $_db.sourceItems,
+    ).filter((f) => f.deckId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_sourceItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 
@@ -8127,20 +6921,20 @@ class $$DeckItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  $$StudyCollectionItemsTableFilterComposer get collectionId {
-    final $$StudyCollectionItemsTableFilterComposer composer = $composerBuilder(
+  $$DeckItemsTableFilterComposer get parentId {
+    final $$DeckItemsTableFilterComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.collectionId,
-      referencedTable: $db.studyCollectionItems,
+      getCurrentColumn: (t) => t.parentId,
+      referencedTable: $db.deckItems,
       getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$StudyCollectionItemsTableFilterComposer(
+          }) => $$DeckItemsTableFilterComposer(
             $db: $db,
-            $table: $db.studyCollectionItems,
+            $table: $db.deckItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -8171,6 +6965,31 @@ class $$DeckItemsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> sourceItemsRefs(
+    Expression<bool> Function($$SourceItemsTableFilterComposer f) f,
+  ) {
+    final $$SourceItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sourceItems,
+      getReferencedColumn: (t) => t.deckId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SourceItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.sourceItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 
   Expression<bool> noteItemsRefs(
@@ -8253,27 +7072,26 @@ class $$DeckItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  $$StudyCollectionItemsTableOrderingComposer get collectionId {
-    final $$StudyCollectionItemsTableOrderingComposer composer =
-        $composerBuilder(
-          composer: this,
-          getCurrentColumn: (t) => t.collectionId,
-          referencedTable: $db.studyCollectionItems,
-          getReferencedColumn: (t) => t.id,
-          builder:
-              (
-                joinBuilder, {
-                $addJoinBuilderToRootComposer,
+  $$DeckItemsTableOrderingComposer get parentId {
+    final $$DeckItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentId,
+      referencedTable: $db.deckItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DeckItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.deckItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
                 $removeJoinBuilderFromRootComposer,
-              }) => $$StudyCollectionItemsTableOrderingComposer(
-                $db: $db,
-                $table: $db.studyCollectionItems,
-                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                joinBuilder: joinBuilder,
-                $removeJoinBuilderFromRootComposer:
-                    $removeJoinBuilderFromRootComposer,
-              ),
-        );
+          ),
+    );
     return composer;
   }
 
@@ -8324,27 +7142,26 @@ class $$DeckItemsTableAnnotationComposer
   GeneratedColumn<bool> get isPinned =>
       $composableBuilder(column: $table.isPinned, builder: (column) => column);
 
-  $$StudyCollectionItemsTableAnnotationComposer get collectionId {
-    final $$StudyCollectionItemsTableAnnotationComposer composer =
-        $composerBuilder(
-          composer: this,
-          getCurrentColumn: (t) => t.collectionId,
-          referencedTable: $db.studyCollectionItems,
-          getReferencedColumn: (t) => t.id,
-          builder:
-              (
-                joinBuilder, {
-                $addJoinBuilderToRootComposer,
+  $$DeckItemsTableAnnotationComposer get parentId {
+    final $$DeckItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentId,
+      referencedTable: $db.deckItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DeckItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.deckItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
                 $removeJoinBuilderFromRootComposer,
-              }) => $$StudyCollectionItemsTableAnnotationComposer(
-                $db: $db,
-                $table: $db.studyCollectionItems,
-                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                joinBuilder: joinBuilder,
-                $removeJoinBuilderFromRootComposer:
-                    $removeJoinBuilderFromRootComposer,
-              ),
-        );
+          ),
+    );
     return composer;
   }
 
@@ -8369,6 +7186,31 @@ class $$DeckItemsTableAnnotationComposer
           ),
     );
     return composer;
+  }
+
+  Expression<T> sourceItemsRefs<T extends Object>(
+    Expression<T> Function($$SourceItemsTableAnnotationComposer a) f,
+  ) {
+    final $$SourceItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sourceItems,
+      getReferencedColumn: (t) => t.deckId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SourceItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sourceItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 
   Expression<T> noteItemsRefs<T extends Object>(
@@ -8436,8 +7278,9 @@ class $$DeckItemsTableTableManager
           (DeckItem, $$DeckItemsTableReferences),
           DeckItem,
           PrefetchHooks Function({
-            bool collectionId,
+            bool parentId,
             bool configId,
+            bool sourceItemsRefs,
             bool noteItemsRefs,
             bool cardItemsRefs,
           })
@@ -8456,7 +7299,7 @@ class $$DeckItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> collectionId = const Value.absent(),
+                Value<String?> parentId = const Value.absent(),
                 Value<String?> configId = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
@@ -8464,7 +7307,7 @@ class $$DeckItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => DeckItemsCompanion(
                 id: id,
-                collectionId: collectionId,
+                parentId: parentId,
                 configId: configId,
                 name: name,
                 description: description,
@@ -8474,7 +7317,7 @@ class $$DeckItemsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String collectionId,
+                Value<String?> parentId = const Value.absent(),
                 Value<String?> configId = const Value.absent(),
                 required String name,
                 Value<String?> description = const Value.absent(),
@@ -8482,7 +7325,7 @@ class $$DeckItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => DeckItemsCompanion.insert(
                 id: id,
-                collectionId: collectionId,
+                parentId: parentId,
                 configId: configId,
                 name: name,
                 description: description,
@@ -8499,14 +7342,16 @@ class $$DeckItemsTableTableManager
               .toList(),
           prefetchHooksCallback:
               ({
-                collectionId = false,
+                parentId = false,
                 configId = false,
+                sourceItemsRefs = false,
                 noteItemsRefs = false,
                 cardItemsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
+                    if (sourceItemsRefs) db.sourceItems,
                     if (noteItemsRefs) db.noteItems,
                     if (cardItemsRefs) db.cardItems,
                   ],
@@ -8526,15 +7371,15 @@ class $$DeckItemsTableTableManager
                           dynamic
                         >
                       >(state) {
-                        if (collectionId) {
+                        if (parentId) {
                           state =
                               state.withJoin(
                                     currentTable: table,
-                                    currentColumn: table.collectionId,
+                                    currentColumn: table.parentId,
                                     referencedTable: $$DeckItemsTableReferences
-                                        ._collectionIdTable(db),
+                                        ._parentIdTable(db),
                                     referencedColumn: $$DeckItemsTableReferences
-                                        ._collectionIdTable(db)
+                                        ._parentIdTable(db)
                                         .id,
                                   )
                                   as T;
@@ -8557,6 +7402,27 @@ class $$DeckItemsTableTableManager
                       },
                   getPrefetchedDataCallback: (items) async {
                     return [
+                      if (sourceItemsRefs)
+                        await $_getPrefetchedData<
+                          DeckItem,
+                          $DeckItemsTable,
+                          SourceItem
+                        >(
+                          currentTable: table,
+                          referencedTable: $$DeckItemsTableReferences
+                              ._sourceItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$DeckItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).sourceItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.deckId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                       if (noteItemsRefs)
                         await $_getPrefetchedData<
                           DeckItem,
@@ -8620,11 +7486,372 @@ typedef $$DeckItemsTableProcessedTableManager =
       (DeckItem, $$DeckItemsTableReferences),
       DeckItem,
       PrefetchHooks Function({
-        bool collectionId,
+        bool parentId,
         bool configId,
+        bool sourceItemsRefs,
         bool noteItemsRefs,
         bool cardItemsRefs,
       })
+    >;
+typedef $$SourceItemsTableCreateCompanionBuilder =
+    SourceItemsCompanion Function({
+      required String id,
+      Value<String?> deckId,
+      required String label,
+      Value<String?> path,
+      required MediaType type,
+      Value<String?> extractedContent,
+      Value<bool> isPinned,
+      Value<int> rowid,
+    });
+typedef $$SourceItemsTableUpdateCompanionBuilder =
+    SourceItemsCompanion Function({
+      Value<String> id,
+      Value<String?> deckId,
+      Value<String> label,
+      Value<String?> path,
+      Value<MediaType> type,
+      Value<String?> extractedContent,
+      Value<bool> isPinned,
+      Value<int> rowid,
+    });
+
+final class $$SourceItemsTableReferences
+    extends BaseReferences<_$AppDatabase, $SourceItemsTable, SourceItem> {
+  $$SourceItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $DeckItemsTable _deckIdTable(_$AppDatabase db) =>
+      db.deckItems.createAlias(
+        $_aliasNameGenerator(db.sourceItems.deckId, db.deckItems.id),
+      );
+
+  $$DeckItemsTableProcessedTableManager? get deckId {
+    final $_column = $_itemColumn<String>('deck_id');
+    if ($_column == null) return null;
+    final manager = $$DeckItemsTableTableManager(
+      $_db,
+      $_db.deckItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_deckIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$SourceItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $SourceItemsTable> {
+  $$SourceItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<MediaType, MediaType, String> get type =>
+      $composableBuilder(
+        column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get extractedContent => $composableBuilder(
+    column: $table.extractedContent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$DeckItemsTableFilterComposer get deckId {
+    final $$DeckItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.deckId,
+      referencedTable: $db.deckItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DeckItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.deckItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SourceItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SourceItemsTable> {
+  $$SourceItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get extractedContent => $composableBuilder(
+    column: $table.extractedContent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$DeckItemsTableOrderingComposer get deckId {
+    final $$DeckItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.deckId,
+      referencedTable: $db.deckItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DeckItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.deckItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SourceItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SourceItemsTable> {
+  $$SourceItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<String> get path =>
+      $composableBuilder(column: $table.path, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<MediaType, String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get extractedContent => $composableBuilder(
+    column: $table.extractedContent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isPinned =>
+      $composableBuilder(column: $table.isPinned, builder: (column) => column);
+
+  $$DeckItemsTableAnnotationComposer get deckId {
+    final $$DeckItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.deckId,
+      referencedTable: $db.deckItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DeckItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.deckItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SourceItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SourceItemsTable,
+          SourceItem,
+          $$SourceItemsTableFilterComposer,
+          $$SourceItemsTableOrderingComposer,
+          $$SourceItemsTableAnnotationComposer,
+          $$SourceItemsTableCreateCompanionBuilder,
+          $$SourceItemsTableUpdateCompanionBuilder,
+          (SourceItem, $$SourceItemsTableReferences),
+          SourceItem,
+          PrefetchHooks Function({bool deckId})
+        > {
+  $$SourceItemsTableTableManager(_$AppDatabase db, $SourceItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SourceItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SourceItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SourceItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> deckId = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<String?> path = const Value.absent(),
+                Value<MediaType> type = const Value.absent(),
+                Value<String?> extractedContent = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SourceItemsCompanion(
+                id: id,
+                deckId: deckId,
+                label: label,
+                path: path,
+                type: type,
+                extractedContent: extractedContent,
+                isPinned: isPinned,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> deckId = const Value.absent(),
+                required String label,
+                Value<String?> path = const Value.absent(),
+                required MediaType type,
+                Value<String?> extractedContent = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SourceItemsCompanion.insert(
+                id: id,
+                deckId: deckId,
+                label: label,
+                path: path,
+                type: type,
+                extractedContent: extractedContent,
+                isPinned: isPinned,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$SourceItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({deckId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (deckId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.deckId,
+                                referencedTable: $$SourceItemsTableReferences
+                                    ._deckIdTable(db),
+                                referencedColumn: $$SourceItemsTableReferences
+                                    ._deckIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$SourceItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SourceItemsTable,
+      SourceItem,
+      $$SourceItemsTableFilterComposer,
+      $$SourceItemsTableOrderingComposer,
+      $$SourceItemsTableAnnotationComposer,
+      $$SourceItemsTableCreateCompanionBuilder,
+      $$SourceItemsTableUpdateCompanionBuilder,
+      (SourceItem, $$SourceItemsTableReferences),
+      SourceItem,
+      PrefetchHooks Function({bool deckId})
     >;
 typedef $$SourceItemBlobsTableCreateCompanionBuilder =
     SourceItemBlobsCompanion Function({
@@ -8840,7 +8067,6 @@ typedef $$SourceItemBlobsTableProcessedTableManager =
 typedef $$CardCreationDraftItemsTableCreateCompanionBuilder =
     CardCreationDraftItemsCompanion Function({
       required String id,
-      required String collectionId,
       required String deckId,
       required String createdAt,
       required String updatedAt,
@@ -8851,7 +8077,6 @@ typedef $$CardCreationDraftItemsTableCreateCompanionBuilder =
 typedef $$CardCreationDraftItemsTableUpdateCompanionBuilder =
     CardCreationDraftItemsCompanion Function({
       Value<String> id,
-      Value<String> collectionId,
       Value<String> deckId,
       Value<String> createdAt,
       Value<String> updatedAt,
@@ -8927,11 +8152,6 @@ class $$CardCreationDraftItemsTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get collectionId => $composableBuilder(
-    column: $table.collectionId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9025,11 +8245,6 @@ class $$CardCreationDraftItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get collectionId => $composableBuilder(
-    column: $table.collectionId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get deckId => $composableBuilder(
     column: $table.deckId,
     builder: (column) => ColumnOrderings(column),
@@ -9067,11 +8282,6 @@ class $$CardCreationDraftItemsTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get collectionId => $composableBuilder(
-    column: $table.collectionId,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<String> get deckId =>
       $composableBuilder(column: $table.deckId, builder: (column) => column);
@@ -9183,7 +8393,6 @@ class $$CardCreationDraftItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> collectionId = const Value.absent(),
                 Value<String> deckId = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
                 Value<String> updatedAt = const Value.absent(),
@@ -9192,7 +8401,6 @@ class $$CardCreationDraftItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => CardCreationDraftItemsCompanion(
                 id: id,
-                collectionId: collectionId,
                 deckId: deckId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -9203,7 +8411,6 @@ class $$CardCreationDraftItemsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String collectionId,
                 required String deckId,
                 required String createdAt,
                 required String updatedAt,
@@ -9212,7 +8419,6 @@ class $$CardCreationDraftItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => CardCreationDraftItemsCompanion.insert(
                 id: id,
-                collectionId: collectionId,
                 deckId: deckId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -12038,14 +11244,12 @@ typedef $$AssetItemsTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$StudyCollectionItemsTableTableManager get studyCollectionItems =>
-      $$StudyCollectionItemsTableTableManager(_db, _db.studyCollectionItems);
-  $$SourceItemsTableTableManager get sourceItems =>
-      $$SourceItemsTableTableManager(_db, _db.sourceItems);
   $$DeckConfigItemsTableTableManager get deckConfigItems =>
       $$DeckConfigItemsTableTableManager(_db, _db.deckConfigItems);
   $$DeckItemsTableTableManager get deckItems =>
       $$DeckItemsTableTableManager(_db, _db.deckItems);
+  $$SourceItemsTableTableManager get sourceItems =>
+      $$SourceItemsTableTableManager(_db, _db.sourceItems);
   $$SourceItemBlobsTableTableManager get sourceItemBlobs =>
       $$SourceItemBlobsTableTableManager(_db, _db.sourceItemBlobs);
   $$CardCreationDraftItemsTableTableManager get cardCreationDraftItems =>

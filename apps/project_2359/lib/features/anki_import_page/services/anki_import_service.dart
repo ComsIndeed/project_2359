@@ -145,16 +145,16 @@ class AnkiImportResult {
   final int cardCount;
   final int mediaCount;
   final List<String> warnings;
-  final String collectionId;
-  final String collectionName;
+  final String deckId;
+  final String deckName;
   const AnkiImportResult({
     required this.deckCount,
     required this.noteCount,
     required this.cardCount,
     required this.mediaCount,
     required this.warnings,
-    required this.collectionId,
-    required this.collectionName,
+    required this.deckId,
+    required this.deckName,
   });
 }
 
@@ -550,11 +550,11 @@ class AnkiImportService {
 
   // ── Commit ───────────────────────────────────────────────────────────────
 
-  /// Writes the parsed [data] into the app's Drift [db] under [collectionId].
+  /// Writes the parsed [data] into the app's Drift [db] under [parentId].
   static Future<AnkiImportResult> commitImport({
     required AnkiImportData data,
-    required String collectionId,
-    required String collectionName,
+    required String parentId,
+    required String parentDeckName,
     required AppDatabase db,
     bool preserveFsrsState = true,
     void Function(String phase, double progress)? onProgress,
@@ -582,7 +582,7 @@ class AnkiImportService {
         await db.into(db.deckItems).insert(
           DeckItemsCompanion.insert(
             id: appDeckId,
-            collectionId: collectionId,
+            parentId: Value(parentId),
             name: ankiDeck.name,
           ),
         );
@@ -697,8 +697,8 @@ class AnkiImportService {
           )
           .length,
       warnings: warnings,
-      collectionId: collectionId,
-      collectionName: collectionName,
+      deckId: parentId,
+      deckName: parentDeckName,
     );
   }
 

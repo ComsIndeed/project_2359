@@ -7,7 +7,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/services/debug_seeder.dart';
 import 'package:project_2359/features/study_page/study_page.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import 'package:project_2359/app_theme.dart';
@@ -34,14 +33,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final Set<String> _selectedCollectionIds = {};
   final Set<String> _selectedDeckIds = {};
-  List<StudyCollectionItem> _allCollections = [];
-  StreamSubscription? _collectionSub;
+  List<DeckItem> _allDecks = [];
   StreamSubscription? _deckSub;
 
-  // New state for responsive desktop layout
-  String? _selectedCollectionId;
   String? _selectedDeckId;
   String? _selectedDeckName;
   MainContentType _mainContentType = MainContentType.empty;
@@ -49,31 +44,26 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
-  bool get _isSelecting =>
-      _selectedCollectionIds.isNotEmpty || _selectedDeckIds.isNotEmpty;
+  bool get _isSelecting => _selectedDeckIds.isNotEmpty;
 
-  void _toggleCollectionSelection(String id) {
+  void _toggleDeckSelection(String id) {
     setState(() {
-      if (_selectedCollectionIds.contains(id)) {
-        _selectedCollectionIds.remove(id);
+      if (_selectedDeckIds.contains(id)) {
+        _selectedDeckIds.remove(id);
       } else {
-        _selectedCollectionIds.add(id);
+        _selectedDeckIds.add(id);
       }
     });
   }
 
   void _clearSelection() {
     setState(() {
-      _selectedCollectionIds.clear();
       _selectedDeckIds.clear();
     });
   }
 
   Future<void> _handlePinSelected({required bool pin}) async {
     final service = context.read<StudyDatabaseService>();
-    for (final id in _selectedCollectionIds) {
-      await service.toggleCollectionPin(id, pin);
-    }
     for (final id in _selectedDeckIds) {
       await service.toggleDeckPin(id, pin);
     }
@@ -81,17 +71,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _handleDeleteSelected() async {
-    final count = _selectedCollectionIds.length + _selectedDeckIds.length;
+    final count = _selectedDeckIds.length;
     if (count == 0) return;
 
     final confirmed = await _showDeleteConfirmation(context, count: count);
     if (!confirmed || !mounted) return;
 
     final service = context.read<StudyDatabaseService>();
-    for (final id in _selectedCollectionIds) {
-      await service.deleteCollection(id);
-    }
-    // TODO: handle decks if we ever allow multiselecting them on home
     for (final id in _selectedDeckIds) {
       await service.deleteDeck(id);
     }
@@ -127,25 +113,22 @@ class _HomePageState extends State<HomePage> {
         false;
   }
 
-  late Stream<List<(StudyCollectionItem, int)>> _collectionsStream;
-  late Stream<List<(StudyCollectionItem, int)>> _pinnedCollectionsStream;
+  late Stream<List<DeckItem>> _rootDecksStream;
 
   @override
   void initState() {
     super.initState();
     AppLogger.info('Initializing HomePage...', tag: 'HomePage');
     final service = context.read<StudyDatabaseService>();
-    _collectionsStream = service.watchUnpinnedCollectionsWithStats();
-    _pinnedCollectionsStream = service.watchPinnedCollectionsWithStats();
+    _rootDecksStream = service.watchRootDecks();
 
-    _collectionSub = service.watchAllCollections().listen((collections) {
-      if (mounted) setState(() => _allCollections = collections);
+    _deckSub = _rootDecksStream.listen((decks) {
+      if (mounted) setState(() => _allDecks = decks);
     });
   }
 
   @override
   void dispose() {
-    _collectionSub?.cancel();
     _deckSub?.cancel();
     _searchController.dispose();
     super.dispose();
@@ -160,7 +143,7 @@ class _HomePageState extends State<HomePage> {
         master: (context, controller) => _buildMasterView(controller, false),
         masterCollapsed: (context, controller) => _buildMasterView(controller, true),
         detail: (context, controller) => _buildDetailView(),
-        wrapDetail: _selectedCollectionId == null,
+        wrapDetail: _selectedDeckId == null,
         padding: const EdgeInsets.all(12),
       ),
     );
@@ -178,10 +161,8 @@ class _HomePageState extends State<HomePage> {
               ExpandableFab(
                 collapsedBuilder: (context, isOpen, expand, close) {
                   if (_isSelecting) {
-                    final selectedCount =
-                        _selectedCollectionIds.length + _selectedDeckIds.length;
                     return SelectionActionBar(
-                      selectedCount: selectedCount,
+                      selectedCount: _selectedDeckIds.length,
                       onClose: _clearSelection,
                       onPin: () => _handlePinSelected(pin: true),
                       onUnpin: () => _handlePinSelected(pin: false),
@@ -229,48 +210,32 @@ class _HomePageState extends State<HomePage> {
                           const SizedBox(height: 16),
                           HomeDueCardsTile(onTap: _handleStudyGlobal),
                           const SizedBox(height: 32),
-                          PinnedCollectionsSection(
-                            stream: _pinnedCollectionsStream,
+                          DeckSection(
+                            stream: _rootDecksStream.map((list) => list.where((d) => d.isPinned).toList()),
+                            title: "Pinned",
                             searchQuery: _searchQuery,
-                            selectedIds: _selectedCollectionIds,
-                            onToggleSelection: _toggleCollectionSelection,
-                            onSelect: _handleCollectionSelect,
-                            activeCollectionId: _selectedCollectionId,
+                            selectedIds: _selectedDeckIds,
+                            onToggleSelection: _toggleDeckSelection,
+                            onSelect: _handleDeckSelect,
+                            activeDeckId: _selectedDeckId,
                             isCollapsed: isCollapsed,
-                            isDesktop: ResponsiveBreakpoints.of(
-                              context,
-                            ).largerThan(MOBILE),
+                            isDesktop: ResponsiveBreakpoints.of(context).largerThan(MOBILE),
                             isSelecting: _isSelecting,
-                            onContextMenu: (pos, id, isC) =>
-                                _showCoolContextMenu(
-                                  context,
-                                  pos,
-                                  id,
-                                  isCollection: isC,
-                                ),
+                            onContextMenu: (pos, id) => _showCoolContextMenu(context, pos, id),
                           ),
                           const SizedBox(height: 24),
-                          const SectionHeader(title: "Collections"),
-                          const SizedBox(height: 8),
-                          CollectionList(
-                            stream: _collectionsStream,
+                          DeckSection(
+                            stream: _rootDecksStream.map((list) => list.where((d) => !d.isPinned).toList()),
+                            title: "Decks",
                             searchQuery: _searchQuery,
-                            selectedIds: _selectedCollectionIds,
-                            onToggleSelection: _toggleCollectionSelection,
-                            onSelect: _handleCollectionSelect,
-                            activeCollectionId: _selectedCollectionId,
+                            selectedIds: _selectedDeckIds,
+                            onToggleSelection: _toggleDeckSelection,
+                            onSelect: _handleDeckSelect,
+                            activeDeckId: _selectedDeckId,
                             isCollapsed: isCollapsed,
-                            isDesktop: ResponsiveBreakpoints.of(
-                              context,
-                            ).largerThan(MOBILE),
+                            isDesktop: ResponsiveBreakpoints.of(context).largerThan(MOBILE),
                             isSelecting: _isSelecting,
-                            onContextMenu: (pos, id, isC) =>
-                                _showCoolContextMenu(
-                                  context,
-                                  pos,
-                                  id,
-                                  isCollection: isC,
-                                ),
+                            onContextMenu: (pos, id) => _showCoolContextMenu(context, pos, id),
                           ),
                           const SizedBox(height: 48),
                           const _DevInjectionTile(),
@@ -293,46 +258,32 @@ class _HomePageState extends State<HomePage> {
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           sliver: SliverList(
                             delegate: SliverChildListDelegate([
-                              PinnedCollectionsSection(
-                                stream: _pinnedCollectionsStream,
+                              DeckSection(
+                                stream: _rootDecksStream.map((list) => list.where((d) => d.isPinned).toList()),
+                                title: "Pinned",
                                 searchQuery: _searchQuery,
-                                selectedIds: _selectedCollectionIds,
-                                onToggleSelection: _toggleCollectionSelection,
-                                onSelect: _handleCollectionSelect,
-                                activeCollectionId: _selectedCollectionId,
+                                selectedIds: _selectedDeckIds,
+                                onToggleSelection: _toggleDeckSelection,
+                                onSelect: _handleDeckSelect,
+                                activeDeckId: _selectedDeckId,
                                 isCollapsed: isCollapsed,
-                                isDesktop: ResponsiveBreakpoints.of(
-                                  context,
-                                ).largerThan(MOBILE),
+                                isDesktop: ResponsiveBreakpoints.of(context).largerThan(MOBILE),
                                 isSelecting: _isSelecting,
-                                onContextMenu: (pos, id, isC) =>
-                                    _showCoolContextMenu(
-                                      context,
-                                      pos,
-                                      id,
-                                      isCollection: isC,
-                                    ),
+                                onContextMenu: (pos, id) => _showCoolContextMenu(context, pos, id),
                               ),
                               const SizedBox(height: 12),
-                              CollectionList(
-                                stream: _collectionsStream,
+                              DeckSection(
+                                stream: _rootDecksStream.map((list) => list.where((d) => !d.isPinned).toList()),
+                                title: "Decks",
                                 searchQuery: _searchQuery,
-                                selectedIds: _selectedCollectionIds,
-                                onToggleSelection: _toggleCollectionSelection,
-                                onSelect: _handleCollectionSelect,
-                                activeCollectionId: _selectedCollectionId,
+                                selectedIds: _selectedDeckIds,
+                                onToggleSelection: _toggleDeckSelection,
+                                onSelect: _handleDeckSelect,
+                                activeDeckId: _selectedDeckId,
                                 isCollapsed: isCollapsed,
-                                isDesktop: ResponsiveBreakpoints.of(
-                                  context,
-                                ).largerThan(MOBILE),
+                                isDesktop: ResponsiveBreakpoints.of(context).largerThan(MOBILE),
                                 isSelecting: _isSelecting,
-                                onContextMenu: (pos, id, isC) =>
-                                    _showCoolContextMenu(
-                                      context,
-                                      pos,
-                                      id,
-                                      isCollection: isC,
-                                    ),
+                                onContextMenu: (pos, id) => _showCoolContextMenu(context, pos, id),
                               ),
                             ]),
                           ),
@@ -344,10 +295,7 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.all(16.0),
                     child: IconButton(
                       onPressed: controller.toggleCollapsed,
-                      icon: const FaIcon(
-                        FontAwesomeIcons.chevronRight,
-                        size: 16,
-                      ),
+                      icon: const FaIcon(FontAwesomeIcons.chevronRight, size: 16),
                       style: IconButton.styleFrom(
                         backgroundColor: theme.colorScheme.surfaceContainer,
                       ),
@@ -355,8 +303,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
-            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE) &&
-                !isCollapsed)
+            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE) && !isCollapsed)
               Positioned(
                 bottom: 16,
                 right: 16,
@@ -376,48 +323,30 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildDetailView() {
     if (_mainContentType == MainContentType.study) {
-      if (_selectedDeckId != null) {
-        return StudyPage(
-          key: ValueKey('study_deck_$_selectedDeckId'),
-          deckId: _selectedDeckId!,
-          title: _selectedDeckName ?? "Study",
-          isNested: true,
-          onBack: () {
-            setState(() {
-              _mainContentType = MainContentType.empty;
-              _selectedDeckId = null;
-            });
-          },
-        );
-      } else {
-        return StudyPage(
-          key: ValueKey(_selectedCollectionId ?? 'global_study'),
-          collectionId: _selectedCollectionId,
-          title:
-              _selectedCollectionId != null
-                  ? "Collection Review"
-                  : "Global Review",
-          isNested: true,
-          onBack: () {
-            setState(() {
-              _mainContentType = MainContentType.empty;
-            });
-          },
-        );
-      }
+      return StudyPage(
+        key: ValueKey(_selectedDeckId ?? 'global_study'),
+        deckId: _selectedDeckId,
+        title: _selectedDeckName ?? "Global Review",
+        isNested: true,
+        onBack: () {
+          setState(() {
+            _mainContentType = MainContentType.empty;
+            _selectedDeckId = null;
+          });
+        },
+      );
     }
 
-    if (_selectedCollectionId != null) {
-      final collection =
-          _allCollections.any((f) => f.id == _selectedCollectionId)
-              ? _allCollections.firstWhere((f) => f.id == _selectedCollectionId)
-              : null;
+    if (_selectedDeckId != null) {
+      final deck = _allDecks.any((d) => d.id == _selectedDeckId)
+          ? _allDecks.firstWhere((d) => d.id == _selectedDeckId)
+          : null;
 
-      if (collection != null) {
-        return CollectionPage(
-          key: ValueKey(_selectedCollectionId),
-          collectionId: _selectedCollectionId!,
-          initialCollectionName: collection.name,
+      if (deck != null) {
+        return DeckPage(
+          key: ValueKey(_selectedDeckId),
+          deckId: _selectedDeckId!,
+          initialDeckName: deck.name,
           isNested: true,
         );
       }
@@ -443,7 +372,7 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 24),
           Text(
-            "Select a Collection to View Contents",
+            "Select a Deck to View Contents",
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
             ),
@@ -463,30 +392,28 @@ class _HomePageState extends State<HomePage> {
       );
     } else {
       setState(() {
-        _selectedCollectionId = null;
-        _mainContentType = MainContentType.study;
         _selectedDeckId = null;
+        _mainContentType = MainContentType.study;
       });
     }
   }
 
-  void _handleCollectionSelect(String id) {
+  void _handleDeckSelect(String id) {
     if (!ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
-      final collection = _allCollections.firstWhere((f) => f.id == id);
+      final deck = _allDecks.firstWhere((d) => d.id == id);
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => CollectionPage(
-            collectionId: id,
-            initialCollectionName: collection.name,
+          builder: (context) => DeckPage(
+            deckId: id,
+            initialDeckName: deck.name,
           ),
         ),
       );
     } else {
       setState(() {
-        _selectedCollectionId = id;
+        _selectedDeckId = id;
         _mainContentType = MainContentType.empty;
-        _selectedDeckId = null;
       });
     }
   }
@@ -497,7 +424,7 @@ class _HomePageState extends State<HomePage> {
       controller: _searchController,
       onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
       decoration: InputDecoration(
-        hintText: "Search collections...",
+        hintText: "Search decks...",
         prefixIcon: Container(
           padding: const EdgeInsets.all(12),
           child: FaIcon(
@@ -510,12 +437,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showCoolContextMenu(
-    BuildContext context,
-    Offset position,
-    String id, {
-    bool isCollection = false,
-  }) {
+  void _showCoolContextMenu(BuildContext context, Offset position, String id) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
@@ -558,17 +480,7 @@ class _HomePageState extends State<HomePage> {
                             label: "Multi-select",
                             onTap: () {
                               Navigator.pop(context);
-                              if (isCollection) {
-                                _toggleCollectionSelection(id);
-                              } else {
-                                setState(() {
-                                  if (_selectedDeckIds.contains(id)) {
-                                    _selectedDeckIds.remove(id);
-                                  } else {
-                                    _selectedDeckIds.add(id);
-                                  }
-                                });
-                              }
+                              _toggleDeckSelection(id);
                             },
                           ),
                           _buildMenuItem(
@@ -704,15 +616,11 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
       try {
         await DebugSeeder.seed(context.read<AppDatabase>());
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('INJECTION_SUCCESSFUL')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('INJECTION_SUCCESSFUL')));
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('INJECTION_FAILED: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('INJECTION_FAILED: $e')));
         }
       } finally {
         if (mounted) setState(() => _isSeeding = false);
@@ -758,9 +666,7 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
                         _isSeeding ? FontAwesomeIcons.gear : FontAwesomeIcons.bug,
                         color: theme.colorScheme.primary,
                         size: 16,
-                      ).animate(
-                        onPlay: (c) => _isSeeding ? c.repeat() : null,
-                      ).rotate(duration: 2.seconds),
+                      ).animate(onPlay: (c) => _isSeeding ? c.repeat() : null).rotate(duration: 2.seconds),
                     ),
                     const SizedBox(width: 16),
                     Expanded(

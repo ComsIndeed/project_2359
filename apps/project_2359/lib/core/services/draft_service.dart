@@ -23,7 +23,6 @@ class DraftService {
   /// The [draftId] and [targetDeckId] should be generated and managed by the UI.
   Future<void> syncDraft({
     required String draftId,
-    required String collectionId,
     required String targetDeckId,
     required List<NoteItemsCompanion> notes,
   }) async {
@@ -40,7 +39,6 @@ class DraftService {
           .insertOnConflictUpdate(
             CardCreationDraftItemsCompanion.insert(
               id: draftId,
-              collectionId: collectionId,
               deckId: targetDeckId,
               createdAt: createdAt,
               updatedAt: now,
@@ -82,7 +80,6 @@ class DraftService {
     required String draftId,
     required String deckId,
     String? deckName,
-    String? collectionId,
   }) async {
     AppLogger.info('Promoting draft $draftId to deck $deckId', tag: _tag);
 
@@ -113,19 +110,17 @@ class DraftService {
             .insert(
               DeckItemsCompanion.insert(
                 id: deckId,
-                collectionId: collectionId ?? draft.collectionId,
                 name:
                     deckName ??
                     'New Deck ${DateTime.now().toIso8601String().substring(0, 10)}',
               ),
             );
-      } else if (deckName != null || collectionId != null) {
+      } else if (deckName != null) {
         await (_db.update(
           _db.deckItems,
         )..where((t) => t.id.equals(deckId))).write(
           DeckItemsCompanion(
             name: deckName != null ? Value(deckName) : const Value.absent(),
-            collectionId: collectionId != null ? Value(collectionId) : const Value.absent(),
           ),
         );
       }
@@ -207,10 +202,10 @@ class DraftService {
     )..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])).watch();
   }
 
-  /// Watches all active draft sessions for a specific collection.
-  Stream<List<CardCreationDraftItem>> watchDraftsByCollectionId(String collectionId) {
+  /// Watches all active draft sessions for a specific deck.
+  Stream<List<CardCreationDraftItem>> watchDraftsByDeckId(String deckId) {
     return (_db.select(_db.cardCreationDraftItems)
-          ..where((t) => t.collectionId.equals(collectionId))
+          ..where((t) => t.deckId.equals(deckId))
           ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
         .watch();
   }

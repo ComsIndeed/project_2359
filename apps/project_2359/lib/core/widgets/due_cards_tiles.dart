@@ -13,7 +13,6 @@ class HomeDueCardsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final appController = context.watch<AppController>();
     final schedulingService = appController.schedulingService;
     final database = context.read<AppDatabase>();
@@ -25,10 +24,10 @@ class HomeDueCardsTile extends StatelessWidget {
         if (cards.isEmpty) return const SizedBox.shrink();
 
         return FutureBuilder<Map<String, int>>(
-          future: _groupCardsByCollection(database, cards),
-          builder: (context, collectionSnapshot) {
-            final collectionCounts = collectionSnapshot.data ?? {};
-            if (collectionCounts.isEmpty) return const SizedBox.shrink();
+          future: _groupCardsByRootDeck(database, cards),
+          builder: (context, deckSnapshot) {
+            final rootDeckCounts = deckSnapshot.data ?? {};
+            if (rootDeckCounts.isEmpty) return const SizedBox.shrink();
 
             return ProjectImportantTile(
               onTap: onTap ??
@@ -44,7 +43,7 @@ class HomeDueCardsTile extends StatelessWidget {
                   },
               child: DueCardsOverview(
                 totalDue: cards.length,
-                items: collectionCounts,
+                items: rootDeckCounts,
               ),
             );
           },
@@ -53,63 +52,60 @@ class HomeDueCardsTile extends StatelessWidget {
     );
   }
 
-  Future<Map<String, int>> _groupCardsByCollection(
+  Future<Map<String, int>> _groupCardsByRootDeck(
     AppDatabase db,
     List<CardItem> cards,
   ) async {
-    final Map<String, int> collectionCounts = {};
+    final Map<String, int> rootCounts = {};
     final deckIds = cards.map((c) => c.deckId).whereType<String>().toSet();
 
-    if (deckIds.isEmpty) return collectionCounts;
+    if (deckIds.isEmpty) return rootCounts;
 
-    final decks = await (db.select(
-      db.deckItems,
-    )..where((t) => t.id.isIn(deckIds))).get();
-    final deckToCollection = {for (var d in decks) d.id: d.collectionId};
-
-    final collectionIds = deckToCollection.values.toSet();
-    final collections = await (db.select(
-      db.studyCollectionItems,
-    )..where((t) => t.id.isIn(collectionIds))).get();
-    final collectionIdToName = {for (var f in collections) f.id: f.name};
+    // Fetch all involved decks
+    final decks = await (db.select(db.deckItems)..where((t) => t.id.isIn(deckIds))).get();
+    final deckMap = {for (var d in decks) d.id: d};
 
     for (var card in cards) {
-      final collectionId = deckToCollection[card.deckId];
-      final collectionName = collectionIdToName[collectionId] ?? "Unknown Collection";
-      collectionCounts[collectionName] = (collectionCounts[collectionName] ?? 0) + 1;
+      final deck = deckMap[card.deckId];
+      if (deck == null) continue;
+
+      // Find the root deck name
+      // If we use parentId hierarchy, we'd need to traverse up.
+      // For now, let's assume names might still have Anki-style hierarchy or we use root name.
+      final rootName = deck.name.rootDeckName;
+      rootCounts[rootName] = (rootCounts[rootName] ?? 0) + 1;
     }
 
-    return collectionCounts;
+    return rootCounts;
   }
 }
 
-class CollectionDueCardsTile extends StatelessWidget {
-  final String collectionId;
+class DeckDueCardsTile extends StatelessWidget {
+  final String deckId;
   final VoidCallback? onTap;
-  const CollectionDueCardsTile({
+  const DeckDueCardsTile({
     super.key,
-    required this.collectionId,
+    required this.deckId,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final appController = context.watch<AppController>();
     final schedulingService = appController.schedulingService;
     final database = context.read<AppDatabase>();
 
     return StreamBuilder<List<CardItem>>(
-      stream: schedulingService.watchDueCardItemsForCollection(collectionId: collectionId),
+      stream: schedulingService.watchDueCardItems(deckId: deckId),
       builder: (context, snapshot) {
         final cards = snapshot.data ?? [];
         if (cards.isEmpty) return const SizedBox.shrink();
 
         return FutureBuilder<Map<String, int>>(
-          future: _groupCardsByDeck(database, cards),
-          builder: (context, deckSnapshot) {
-            final deckCounts = deckSnapshot.data ?? {};
-            if (deckCounts.isEmpty) return const SizedBox.shrink();
+          future: _groupCardsBySubDecks(database, deckId, cards),
+          builder: (context, subDeckSnapshot) {
+            final subCounts = subDeckSnapshot.data ?? {};
+            if (subCounts.isEmpty) return const SizedBox.shrink();
 
             return ProjectImportantTile(
               onTap: onTap ??
@@ -118,15 +114,15 @@ class CollectionDueCardsTile extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => StudyPage(
-                          collectionId: collectionId,
-                          title: "Collection Review",
+                          deckId: deckId,
+                          title: "Deck Review",
                         ),
                       ),
                     );
                   },
               child: DueCardsOverview(
                 totalDue: cards.length,
-                items: deckCounts,
+                items: subCounts,
                 isCollectionPage: true,
               ),
             );
@@ -136,25 +132,50 @@ class CollectionDueCardsTile extends StatelessWidget {
     );
   }
 
-  Future<Map<String, int>> _groupCardsByDeck(
+  Future<Map<String, int>> _groupCardsBySubDecks(
     AppDatabase db,
+    String parentDeckId,
     List<CardItem> cards,
   ) async {
-    final Map<String, int> deckCounts = {};
+    final Map<String, int> groupCounts = {};
+    
+    // We want to group by immediate sub-decks of parentDeckId.
+    // If a card is in parentDeckId, group it under "Current Deck" or its own name.
+    // If a card is in a sub-deck, group it under that immediate sub-deck's name.
+
     final deckIds = cards.map((c) => c.deckId).whereType<String>().toSet();
+    if (deckIds.isEmpty) return groupCounts;
 
-    if (deckIds.isEmpty) return deckCounts;
-
-    final decks = await (db.select(
-      db.deckItems,
-    )..where((t) => t.id.isIn(deckIds))).get();
-    final deckIdToName = {for (var d in decks) d.id: d.name};
+    // Fetch all decks involved in these cards
+    final decks = await (db.select(db.deckItems)..where((t) => t.id.isIn(deckIds))).get();
+    final deckMap = {for (var d in decks) d.id: d};
+    
+    final parentDeck = await (db.select(db.deckItems)..where((t) => t.id.equals(parentDeckId))).getSingleOrNull();
+    final parentName = parentDeck?.name ?? "Current Deck";
 
     for (var card in cards) {
-      final deckName = (deckIdToName[card.deckId] ?? "Unknown Deck").cleanDeckName;
-      deckCounts[deckName] = (deckCounts[deckName] ?? 0) + 1;
+      final deck = deckMap[card.deckId];
+      if (deck == null) continue;
+
+      if (deck.id == parentDeckId) {
+        groupCounts[parentName.cleanDeckName] = (groupCounts[parentName.cleanDeckName] ?? 0) + 1;
+      } else {
+        // Find which immediate child of parentDeckId this deck belongs to
+        // This is a bit complex without recursive traversal in memory, but let's approximate
+        // by looking at the Anki name if available, or just use the deck's own name cleaned.
+        final relativeName = deck.name;
+        // Simple heuristic: if name is "Parent::Child::Grandchild", and we are at "Parent",
+        // we want to group under "Child".
+        if (relativeName.startsWith("${parentDeck?.name}::")) {
+          final suffix = relativeName.substring(parentDeck!.name.length + 2);
+          final firstSub = suffix.split('::').first;
+          groupCounts[firstSub] = (groupCounts[firstSub] ?? 0) + 1;
+        } else {
+          groupCounts[deck.name.cleanDeckName] = (groupCounts[deck.name.cleanDeckName] ?? 0) + 1;
+        }
+      }
     }
 
-    return deckCounts;
+    return groupCounts;
   }
 }

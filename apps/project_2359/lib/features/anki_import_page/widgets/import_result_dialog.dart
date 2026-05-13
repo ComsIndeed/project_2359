@@ -4,12 +4,12 @@ import 'package:project_2359/features/anki_import_page/services/anki_import_serv
 
 class ImportResultDialog extends StatelessWidget {
   final AnkiImportResult result;
-  final VoidCallback? onViewCollection;
+  final VoidCallback? onViewDeck;
 
   const ImportResultDialog({
     super.key,
     required this.result,
-    this.onViewCollection,
+    this.onViewDeck,
   });
 
   @override
@@ -53,7 +53,7 @@ class ImportResultDialog extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'Added to "${result.collectionName}"',
+                'Added to "${result.deckName}"',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.55),
                 ),
@@ -112,15 +112,15 @@ class ImportResultDialog extends StatelessWidget {
                     onPressed: () => Navigator.of(context).pop(),
                     child: const Text('Close'),
                   ),
-                  if (onViewCollection != null) ...[
+                  if (onViewDeck != null) ...[
                     const SizedBox(width: 8),
                     FilledButton.icon(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        onViewCollection!();
+                        onViewDeck!();
                       },
                       icon: const FaIcon(FontAwesomeIcons.layerGroup, size: 13),
-                      label: const Text('View Collection'),
+                      label: const Text('View Deck'),
                     ),
                   ],
                 ],

@@ -5,14 +5,14 @@ abstract class SourcesPageEvent {
 }
 
 class LoadSourcesEvent extends SourcesPageEvent {
-  final String? collectionId;
-  const LoadSourcesEvent({this.collectionId});
+  final String? deckId;
+  const LoadSourcesEvent({this.deckId});
 }
 
 class ImportDocumentsEvent extends SourcesPageEvent {
   final List<PlatformFile> files;
-  final String? collectionId;
-  const ImportDocumentsEvent(this.files, {this.collectionId});
+  final String? deckId;
+  const ImportDocumentsEvent(this.files, {this.deckId});
 }
 
 class DeleteSourceEvent extends SourcesPageEvent {

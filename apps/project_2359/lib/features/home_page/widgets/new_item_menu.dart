@@ -10,48 +10,49 @@ import 'package:project_2359/features/sources_page/sources_page_bloc/sources_pag
 import 'package:project_2359/features/sources_page/sources_page_bloc/sources_page_event.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:uuid/uuid.dart';
+import 'package:drift/drift.dart' show Value;
 
 class NewItemMenu extends StatefulWidget {
   final VoidCallback? onActionCompleted;
-  final String? activeCollectionId;
+  final String? activeDeckId;
 
-  const NewItemMenu({super.key, this.onActionCompleted, this.activeCollectionId});
+  const NewItemMenu({super.key, this.onActionCompleted, this.activeDeckId});
 
   @override
   State<NewItemMenu> createState() => _NewItemMenuState();
 }
 
 class _NewItemMenuState extends State<NewItemMenu> {
-  final TextEditingController collectionNameController = TextEditingController();
-  bool isCreatingCollection = false;
+  final TextEditingController deckNameController = TextEditingController();
+  bool isCreatingDeck = false;
 
   @override
   void initState() {
     super.initState();
-    collectionNameController.addListener(() {
+    deckNameController.addListener(() {
       setState(() {}); // Trigger rebuild to show/hide the button
     });
   }
 
-  Future<void> createCollection() async {
-    final name = collectionNameController.text.trim();
+  Future<void> createDeck() async {
+    final name = deckNameController.text.trim();
     if (name.isEmpty) return;
 
-    setState(() => isCreatingCollection = true);
+    setState(() => isCreatingDeck = true);
     try {
       final service = context.read<StudyDatabaseService>();
-      final id = DateTime.now().millisecondsSinceEpoch.toString();
-      await service.insertCollection(
-        StudyCollectionItemsCompanion.insert(
+      final id = const Uuid().v4();
+      await service.insertDeck(
+        DeckItemsCompanion.insert(
           id: id,
           name: name,
-          createdAt: DateTime.now().toIso8601String(),
-          updatedAt: DateTime.now().toIso8601String(),
+          parentId: Value(widget.activeDeckId),
         ),
       );
 
       if (mounted) {
-        collectionNameController.clear();
+        deckNameController.clear();
         if (widget.onActionCompleted != null) {
           widget.onActionCompleted!();
         } else {
@@ -64,7 +65,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => isCreatingCollection = false);
+        setState(() => isCreatingDeck = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Error: $e"),
@@ -77,7 +78,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
 
   @override
   void dispose() {
-    collectionNameController.dispose();
+    deckNameController.dispose();
     super.dispose();
   }
 
@@ -100,7 +101,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "NEW COLLECTION",
+                  "NEW DECK",
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: cs.primary,
@@ -112,7 +113,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
                   children: [
                     Expanded(
                       child: TextField(
-                        controller: collectionNameController,
+                        controller: deckNameController,
                         decoration: InputDecoration(
                           hintText: "Enter Name...",
                           hintStyle: TextStyle(
@@ -149,20 +150,20 @@ class _NewItemMenuState extends State<NewItemMenu> {
                             ),
                           ),
                         ),
-                        onSubmitted: (_) => createCollection(),
+                        onSubmitted: (_) => createDeck(),
                       ),
                     ),
                     AnimatedSize(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOutCubic,
-                      child: collectionNameController.text.isNotEmpty
+                      child: deckNameController.text.isNotEmpty
                           ? Padding(
                               padding: const EdgeInsets.only(left: 10),
                               child: IconButton(
-                                onPressed: isCreatingCollection
+                                onPressed: isCreatingDeck
                                     ? null
-                                    : createCollection,
-                                icon: isCreatingCollection
+                                    : createDeck,
+                                icon: isCreatingDeck
                                     ? const SizedBox(
                                         height: 18,
                                         width: 18,
@@ -235,7 +236,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => NoteTakingPage(
-                        collectionId: widget.activeCollectionId ?? "default",
+                        deckId: widget.activeDeckId,
                       ),
                     ),
                   );
@@ -290,7 +291,7 @@ class _NewItemMenuState extends State<NewItemMenu> {
                   context.read<SourcesPageBloc>().add(
                     ImportDocumentsEvent(
                       result.files,
-                      collectionId: widget.activeCollectionId,
+                      deckId: widget.activeDeckId,
                     ),
                   );
 
