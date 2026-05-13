@@ -231,26 +231,71 @@ class SchedulingService {
   }) {
     AppLogger.debug('Watching due cards for deck $deckId (recursive)', tag: _tag);
     
-    return _db.select(_db.cardItems)
-        .watch()
-        .asyncMap((allCards) async {
-      // 1. Find all deck IDs in the hierarchy
-      final allDeckIds = await _getTransitiveDeckIds(deckId);
-      
-      // 2. Filter cards that belong to any of these decks
-      final deckCards = allCards.where((c) => allDeckIds.contains(c.deckId)).toList();
-      
-      return await _applyLimitsAndFilters(deckId, deckCards, mode);
+    return Stream.fromFuture(_getTransitiveDeckIds(deckId)).asyncExpand((allDeckIds) {
+      final now = DateTime.now();
+      final query = _db.select(_db.cardItems)
+        ..where((t) => t.deckId.isIn(allDeckIds));
+
+      if (mode == StudySessionMode.spaced) {
+        query.where((t) => t.spacedDue.isSmallerOrEqualValue(now));
+      } else {
+        query.where((t) => t.continuousDue.isSmallerOrEqualValue(now));
+      }
+
+      // Order by due date early in SQL
+      if (mode == StudySessionMode.spaced) {
+        query.orderBy([(t) => OrderingTerm.asc(t.spacedDue)]);
+      }
+
+      return query.watch().asyncMap((deckCards) async {
+        return await _applyLimitsAndFilters(deckId, deckCards, mode);
+      });
     });
   }
 
+  final Map<String, List<String>> _transitiveDeckIdsCache = {};
+  DateTime? _lastDeckCacheUpdate;
+
   Future<List<String>> _getTransitiveDeckIds(String rootId) async {
-    final ids = [rootId];
-    final subDecks = await (_db.select(_db.deckItems)..where((t) => t.parentId.equals(rootId))).get();
-    for (final sub in subDecks) {
-      ids.addAll(await _getTransitiveDeckIds(sub.id));
+    final now = DateTime.now();
+    // Cache for 5 seconds to avoid storming during batch updates
+    if (_lastDeckCacheUpdate != null && 
+        now.difference(_lastDeckCacheUpdate!).inSeconds < 5 &&
+        _transitiveDeckIdsCache.containsKey(rootId)) {
+      return _transitiveDeckIdsCache[rootId]!;
     }
-    return ids;
+
+    // 1. Fetch all decks once
+    final allDecks = await _db.select(_db.deckItems).get();
+    
+    // 2. Build map of parent -> children
+    final childrenMap = <String, List<String>>{};
+    for (final deck in allDecks) {
+      if (deck.parentId != null) {
+        childrenMap.putIfAbsent(deck.parentId!, () => []).add(deck.id);
+      }
+    }
+    
+    // 3. Helper to build transitive list for a specific ID
+    List<String> buildList(String id) {
+      final list = [id];
+      final children = childrenMap[id];
+      if (children != null) {
+        for (final childId in children) {
+          list.addAll(buildList(childId));
+        }
+      }
+      return list;
+    }
+
+    // 4. Update cache for ALL decks while we're at it
+    _transitiveDeckIdsCache.clear();
+    for (final deck in allDecks) {
+      _transitiveDeckIdsCache[deck.id] = buildList(deck.id);
+    }
+    
+    _lastDeckCacheUpdate = now;
+    return _transitiveDeckIdsCache[rootId] ?? [rootId];
   }
 
   Future<List<CardItem>> _applyLimitsAndFilters(String deckId, List<CardItem> cards, StudySessionMode mode) async {
@@ -358,7 +403,22 @@ class SchedulingService {
     required String deckId,
     StudySessionMode mode = StudySessionMode.spaced,
   }) {
-    return watchDueCards(deckId: deckId, mode: mode).map((list) => list.length);
+    // Avoid watchDueCards (which pulls all cards) for simple badges.
+    // We still watch the table but do a lightweight count query.
+    return Stream.fromFuture(_getTransitiveDeckIds(deckId)).asyncExpand((allDeckIds) {
+      final now = DateTime.now();
+      final query = _db.selectOnly(_db.cardItems)
+        ..addColumns([_db.cardItems.id.count()])
+        ..where(_db.cardItems.deckId.isIn(allDeckIds));
+
+      if (mode == StudySessionMode.spaced) {
+        query.where(_db.cardItems.spacedDue.isSmallerOrEqualValue(now));
+      } else {
+        query.where(_db.cardItems.continuousDue.isSmallerOrEqualValue(now));
+      }
+
+      return query.map((row) => row.read<int>(_db.cardItems.id.count()) ?? 0).watchSingle();
+    });
   }
 
   /// Direct fetch for the due count (recursive)
