@@ -1494,124 +1494,96 @@ class _DecksList extends StatelessWidget {
       );
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var i = 0; i < decks.length; i++)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child:
-                ProjectCardTile(
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest
-                          .withValues(alpha: 0.5),
-                      isSelected:
-                          selectedIds.contains(decks[i].id) ||
-                          (selectedDeckId == decks[i].id),
-                      isCollapsed: isCollapsed,
-                      title: Text(
-                        decks[i].name.cleanDeckName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: decks.length,
+      itemBuilder: (context, i) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: ProjectCardTile(
+            backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            isSelected: selectedIds.contains(decks[i].id) || (selectedDeckId == decks[i].id),
+            isCollapsed: isCollapsed,
+            title: Text(
+              decks[i].name.cleanDeckName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: decks[i].name.deckParentName != null
+                ? Text(
+                    decks[i].name.deckParentName!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                  )
+                : null,
+            leading: const WizardFlashcardPreview(),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: FaIcon(
+                    FontAwesomeIcons.chartSimple,
+                    size: 14,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DeckAnalyticsPage(
+                          deckId: decks[i].id,
+                          deckName: decks[i].name,
+                        ),
                       ),
-                      subtitle: decks[i].name.deckParentName != null
-                          ? Text(
-                            decks[i].name.deckParentName!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(
-                                alpha: 0.5,
-                              ),
-                            ),
-                          )
-                          : null,
-                      leading: const WizardFlashcardPreview(),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          StreamBuilder<int>(
-                            stream: context
-                                .read<AppController>()
-                                .schedulingService
-                                .watchDueCount(deckId: decks[i].id),
-                            builder: (context, snapshot) {
-                              final count = snapshot.data ?? 0;
-                              if (count == 0) return const SizedBox.shrink();
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: Text(
-                                  count.toString(),
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: AppTheme.important,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: FaIcon(
-                              FontAwesomeIcons.chartSimple,
-                              size: 14,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DeckAnalyticsPage(
-                                    deckId: decks[i].id,
-                                    deckName: decks[i].name,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: FaIcon(
-                              FontAwesomeIcons.gear,
-                              size: 14,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DeckSettingsPage(
-                                    deckId: decks[i].id,
-                                    deckName: decks[i].name,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: FaIcon(
+                    FontAwesomeIcons.gear,
+                    size: 14,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DeckSettingsPage(
+                          deckId: decks[i].id,
+                          deckName: decks[i].name,
+                        ),
                       ),
-                      onTap: isSelecting
-                          ? () => onToggleSelection(decks[i].id)
-                          : () {
-                              if (onDeckTap != null) {
-                                onDeckTap!(decks[i].id);
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => StudyPage(
-                                      deckId: decks[i].id,
-                                      title: decks[i].name,
-                                      mode: StudySessionMode.spaced,
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                      onLongTap: () => onToggleSelection(decks[i].id),
-                    )
-                    .animate()
-                    .fadeIn(delay: (i * 50).ms)
-                    .slideY(begin: 0.1, curve: Curves.easeOutQuad),
+                    );
+                  },
+                ),
+              ],
+            ),
+            onTap: isSelecting
+                ? () => onToggleSelection(decks[i].id)
+                : () {
+                    if (onDeckTap != null) {
+                      onDeckTap!(decks[i].id);
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StudyPage(
+                            deckId: decks[i].id,
+                            title: decks[i].name,
+                            mode: StudySessionMode.spaced,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+            onLongTap: () => onToggleSelection(decks[i].id),
           ),
-      ],
+        );
+      },
     );
   }
 }

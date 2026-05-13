@@ -74,51 +74,58 @@ class DeckSection extends StatelessWidget {
           crossAxisAlignment: isCollapsed ? CrossAxisAlignment.center : CrossAxisAlignment.start,
           children: [
             if (!isCollapsed) SectionHeader(title: title),
-            for (final deck in decks)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: GestureDetector(
-                  onSecondaryTapDown: (details) {
-                    if (onContextMenu != null) {
-                      onContextMenu!(details.globalPosition, deck.id);
-                    }
-                  },
-                  child: ProjectCardTile(
-                    backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                    isCollapsed: isCollapsed,
-                    leading: FaIcon(
-                      deck.isPinned ? FontAwesomeIcons.thumbtack : FontAwesomeIcons.folder,
-                      size: 14,
-                      color: deck.isPinned ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                    ),
-                    title: Text(
-                      deck.name,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Text(deck.description ?? "Study Deck"),
-                    isSelected: selectedIds.contains(deck.id) || activeDeckId == deck.id,
-                    isCompact: isDesktop,
-                    onTap: isSelecting
-                        ? () => onToggleSelection(deck.id)
-                        : () {
-                            if (isDesktop) {
-                              onSelect(deck.id);
-                            } else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DeckPage(
-                                    deckId: deck.id,
-                                    initialDeckName: deck.name,
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: decks.length,
+              itemBuilder: (context, i) {
+                final deck = decks[i];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: GestureDetector(
+                    onSecondaryTapDown: (details) {
+                      if (onContextMenu != null) {
+                        onContextMenu!(details.globalPosition, deck.id);
+                      }
+                    },
+                    child: ProjectCardTile(
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      isCollapsed: isCollapsed,
+                      leading: FaIcon(
+                        deck.isPinned ? FontAwesomeIcons.thumbtack : FontAwesomeIcons.folder,
+                        size: 14,
+                        color: deck.isPinned ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                      ),
+                      title: Text(
+                        deck.name,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(deck.description ?? "Study Deck"),
+                      isSelected: selectedIds.contains(deck.id) || activeDeckId == deck.id,
+                      isCompact: isDesktop,
+                      onTap: isSelecting
+                          ? () => onToggleSelection(deck.id)
+                          : () {
+                              if (isDesktop) {
+                                onSelect(deck.id);
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DeckPage(
+                                      deckId: deck.id,
+                                      initialDeckName: deck.name,
+                                    ),
                                   ),
-                                ),
-                              );
-                            }
-                          },
-                    onLongTap: () => onToggleSelection(deck.id),
+                                );
+                              }
+                            },
+                      onLongTap: () => onToggleSelection(deck.id),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
+            ),
           ],
         );
       },

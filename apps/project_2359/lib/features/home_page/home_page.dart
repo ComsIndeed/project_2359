@@ -207,8 +207,6 @@ class _HomePageState extends State<HomePage> {
                         delegate: SliverChildListDelegate([
                           const SizedBox(height: 16),
                           _buildSearchBar(),
-                          const SizedBox(height: 16),
-                          HomeDueCardsTile(onTap: _handleStudyGlobal),
                           const SizedBox(height: 32),
                           DeckSection(
                             stream: _rootDecksStream.map((list) => list.where((d) => d.isPinned).toList()),
