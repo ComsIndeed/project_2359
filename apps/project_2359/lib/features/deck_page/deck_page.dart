@@ -4,8 +4,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/study_database_service.dart';
-import 'package:project_2359/core/widgets/card_button.dart';
-import 'package:project_2359/core/widgets/special_background_generator.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
 import 'package:provider/provider.dart';
@@ -298,25 +296,6 @@ class _DeckPageState extends State<DeckPage> {
     );
   }
 
-  Widget _buildBackground(String deckName, bool isDesktop) {
-    return Positioned.fill(
-      child: SpecialBackgroundGenerator(
-        type: SpecialBackgroundType.geometricSquares,
-        seed: GenerationSeed.fromString(deckName),
-        label: deckName,
-        icon: FontAwesomeIcons.layerGroup,
-        showBorder: false,
-        showShadow: false,
-        backgroundColor: isDesktop
-            ? Theme.of(context).colorScheme.surface
-            : null,
-        borderRadius: 0,
-        isAnimated: !isDesktop,
-        showPattern: !isDesktop,
-        child: const SizedBox.expand(),
-      ),
-    );
-  }
 
   Widget _buildPageView({bool isCollapsed = false}) {
     final deckName = widget.initialDeckName;
@@ -599,10 +578,7 @@ class _DeckPageState extends State<DeckPage> {
                   ),
                 );
               },
-              body: Stack(
-                children: [
-                  _buildBackground(deckName, isDesktop),
-                  NestedScrollView(
+              body: NestedScrollView(
                     headerSliverBuilder: (context, innerBoxIsScrolled) {
                       if (isDesktop) {
                         return [
@@ -651,9 +627,7 @@ class _DeckPageState extends State<DeckPage> {
                     },
                     body: _buildPageView(isCollapsed: false),
                   ),
-                ],
-              ),
-            ),
+                ),
           if (isCollapsed)
             Column(
               children: [
@@ -755,7 +729,7 @@ class _HeaderContent extends StatelessWidget {
         Text(
           "DECK",
           style: theme.textTheme.labelSmall?.copyWith(
-            color: Colors.white.withValues(alpha: 0.4),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
             fontWeight: FontWeight.w900,
             letterSpacing: 2.0,
             fontSize: 9,
@@ -865,7 +839,7 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
         color: bgColor,
         border: Border(
           bottom: BorderSide(
-            color: Colors.white.withValues(alpha: 0.08),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
             width: 1,
           ),
         ),
