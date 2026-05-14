@@ -120,7 +120,7 @@ class DraftService {
           _db.deckItems,
         )..where((t) => t.id.equals(deckId))).write(
           DeckItemsCompanion(
-            name: deckName != null ? Value(deckName) : const Value.absent(),
+            name: Value(deckName),
           ),
         );
       }

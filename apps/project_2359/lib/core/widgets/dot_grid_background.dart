@@ -17,7 +17,7 @@ class DotGridBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dotColor = (isDark ? Colors.white : Colors.black).withOpacity(0.2);
+    final dotColor = (isDark ? Colors.white : Colors.black).withValues(alpha: 0.2);
 
     final primaryBg =
         backgroundColor ??

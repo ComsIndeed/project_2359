@@ -27,111 +27,29 @@ class SchedulingService {
     );
 
     await _db.transaction(() async {
-      // 1. Fetch current card and its deck/config
-      final card = await (_db.select(_db.cardItems)
-            ..where((t) => t.id.equals(cardId)))
-          .getSingle();
+      // 1. Fetch current card
+      final card = await (_db.select(
+        _db.cardItems,
+      )..where((t) => t.id.equals(cardId))).getSingle();
 
-      final deck = await (_db.select(_db.deckItems)
-            ..where((t) => t.id.equals(card.deckId ?? '')))
-          .getSingleOrNull();
-
-      DeckConfigItem? config;
-      if (deck?.configId != null) {
-        config = await (_db.select(_db.deckConfigItems)
-              ..where((t) => t.id.equals(deck!.configId!)))
-            .getSingleOrNull();
-      }
-
-      // 2. Map row data to FSRS Card object
+      // 2. Map row data to FSRS Card object based on mode
+      // NOTE: For Continuous mode, we don't actually call this from SchedulingService
+      // if we follow the in-memory only rule. But we keep it for backward compatibility
+      // with existing DB columns if needed.
       final fsrsCard = _toFsrsCard(card, mode);
 
-      // 3. Compute next state (Custom Checkpoint Logic for New/Learning cards)
-      DateTime nextDue;
-      fsrs.Card nextFsrsCard;
-      int nextStep = card.spacedStep ?? 0;
-      int nextState = card.spacedState ?? 0;
-
-      final learningSteps = (config?.learningSteps ?? '1,10')
-          .split(',')
-          .map((e) => int.tryParse(e.trim()) ?? 1)
-          .toList();
-
-      if (mode == StudySessionMode.spaced &&
-          (card.spacedState == 0 ||
-              fsrsCard.state == fsrs.State.learning)) {
-        // --- Anki-style Checkpoint Logic ---
-        if (rating == fsrs.Rating.again) {
-          nextStep = 0;
-          nextDue = now.add(Duration(minutes: learningSteps[0]));
-          nextState = fsrs.State.learning.index;
-          nextFsrsCard = fsrsCard.copyWith(
-            due: nextDue,
-            state: fsrs.State.learning,
-            step: nextStep,
-          );
-        } else if (rating == fsrs.Rating.easy) {
-          // Immediate graduation
-          final result = _scheduler.reviewCard(fsrsCard, rating);
-          nextFsrsCard = result.card;
-          nextDue = nextFsrsCard.due;
-          nextState = nextFsrsCard.state.index;
-          nextStep = 0;
-        } else {
-          // Good or Hard
-          nextStep++;
-          if (nextStep >= learningSteps.length) {
-            // Graduate!
-            final result = _scheduler.reviewCard(fsrsCard, rating);
-            nextFsrsCard = result.card;
-            nextDue = nextFsrsCard.due;
-            nextState = nextFsrsCard.state.index;
-            nextStep = 0;
-          } else {
-            // Stay in learning steps
-            nextDue = now.add(Duration(minutes: learningSteps[nextStep]));
-            nextState = fsrs.State.learning.index;
-            nextFsrsCard = fsrsCard.copyWith(
-              due: nextDue,
-              state: fsrs.State.learning,
-              step: nextStep,
-            );
-          }
-        }
-      } else {
-        // --- Standard FSRS for Review/Relearning ---
-        final result = _scheduler.reviewCard(fsrsCard, rating);
-        nextFsrsCard = result.card;
-        nextDue = nextFsrsCard.due;
-        nextState = nextFsrsCard.state.index;
-        nextStep = nextFsrsCard.step ?? 0;
-      }
+      // 3. Compute next state
+      final result = _scheduler.reviewCard(fsrsCard, rating);
+      final nextFsrsCard = result.card;
 
       // 4. Update the card record
-      final companion = _toCompanion(nextFsrsCard, mode).copyWith(
-        spacedStep: Value(nextStep),
-        spacedState: Value(nextState),
-      );
-      
-      await (_db.update(_db.cardItems)..where((t) => t.id.equals(cardId)))
-          .write(companion);
+      final companion = _toCompanion(nextFsrsCard, mode);
+      await (_db.update(
+        _db.cardItems,
+      )..where((t) => t.id.equals(cardId))).write(companion);
 
-      // 5. Automatic Sibling Burying
-      if (config?.burySiblings ?? true) {
-        if (card.noteId != null) {
-          final tomorrow = DateTime(now.year, now.month, now.day + 1);
-          await (_db.update(_db.cardItems)
-                ..where((t) => t.noteId.equals(card.noteId!))
-                ..where((t) => t.id.equals(cardId).not()))
-              .write(CardItemsCompanion(
-            isBuried: const Value(true),
-            buriedUntil: Value(tomorrow),
-          ));
-        }
-      }
-
-      // 6. Log the session event
-      final scheduledDays = nextDue.difference(now).inDays;
+      // 5. Log the session event
+      final scheduledDays = nextFsrsCard.due.difference(now).inDays;
 
       await _db
           .into(_db.studySessionEvents)
@@ -225,177 +143,25 @@ class SchedulingService {
 
   // --- Query Support ---
 
+  /// Returns cards that are due right now for a specific deck and mode.
   Stream<List<CardItem>> watchDueCards({
     required String deckId,
     StudySessionMode mode = StudySessionMode.spaced,
   }) {
-    AppLogger.debug('Watching due cards for deck $deckId (recursive)', tag: _tag);
-    
-    return Stream.fromFuture(_getTransitiveDeckIds(deckId)).asyncExpand((allDeckIds) {
-      final now = DateTime.now();
-      final query = _db.select(_db.cardItems)
-        ..where((t) => t.deckId.isIn(allDeckIds));
-
-      if (mode == StudySessionMode.spaced) {
-        query.where((t) => t.spacedDue.isSmallerOrEqualValue(now));
-      } else {
-        query.where((t) => t.continuousDue.isSmallerOrEqualValue(now));
-      }
-
-      // Order by due date early in SQL
-      if (mode == StudySessionMode.spaced) {
-        query.orderBy([(t) => OrderingTerm.asc(t.spacedDue)]);
-      }
-
-      return query.watch().asyncMap((deckCards) async {
-        return await _applyLimitsAndFilters(deckId, deckCards, mode);
-      });
-    });
-  }
-
-  final Map<String, List<String>> _transitiveDeckIdsCache = {};
-  DateTime? _lastDeckCacheUpdate;
-
-  Future<List<String>> _getTransitiveDeckIds(String rootId) async {
+    AppLogger.debug('Watching due cards for deck $deckId', tag: _tag);
     final now = DateTime.now();
-    // Cache for 5 seconds to avoid storming during batch updates
-    if (_lastDeckCacheUpdate != null && 
-        now.difference(_lastDeckCacheUpdate!).inSeconds < 5 &&
-        _transitiveDeckIdsCache.containsKey(rootId)) {
-      return _transitiveDeckIdsCache[rootId]!;
-    }
-
-    // 1. Fetch all decks once
-    final allDecks = await _db.select(_db.deckItems).get();
-    
-    // 2. Build map of parent -> children
-    final childrenMap = <String, List<String>>{};
-    for (final deck in allDecks) {
-      if (deck.parentId != null) {
-        childrenMap.putIfAbsent(deck.parentId!, () => []).add(deck.id);
-      }
-    }
-    
-    // 3. Helper to build transitive list for a specific ID
-    List<String> buildList(String id) {
-      final list = [id];
-      final children = childrenMap[id];
-      if (children != null) {
-        for (final childId in children) {
-          list.addAll(buildList(childId));
-        }
-      }
-      return list;
-    }
-
-    // 4. Update cache for ALL decks while we're at it
-    _transitiveDeckIdsCache.clear();
-    for (final deck in allDecks) {
-      _transitiveDeckIdsCache[deck.id] = buildList(deck.id);
-    }
-    
-    _lastDeckCacheUpdate = now;
-    return _transitiveDeckIdsCache[rootId] ?? [rootId];
-  }
-
-  Future<List<CardItem>> _applyLimitsAndFilters(String deckId, List<CardItem> cards, StudySessionMode mode) async {
-    final now = DateTime.now();
-    
-    // 1. Fetch deck and config
-    final deck = await (_db.select(_db.deckItems)..where((t) => t.id.equals(deckId))).getSingleOrNull();
-    DeckConfigItem? config;
-    if (deck?.configId != null) {
-      config = await (_db.select(_db.deckConfigItems)..where((t) => t.id.equals(deck!.configId!))).getSingleOrNull();
-    }
-    
-    final newLimit = config?.newCardsPerDay ?? 20;
-    final reviewLimit = config?.reviewsPerDay ?? 200;
-
-    // 2. Count today's stats
-    final stats = await getTodayStats(deckId);
-    final remainingNew = (newLimit - stats.newCards).clamp(0, newLimit);
-    final remainingReviews = (reviewLimit - stats.reviews).clamp(0, reviewLimit);
-
-    // 3. Filter cards
-    final filtered = cards.where((t) {
-      if (t.isSuspended) return false;
-      if (t.isBuried && t.buriedUntil != null && t.buriedUntil!.isAfter(now)) return false;
-      
-      if (mode == StudySessionMode.spaced) {
-        return (t.spacedDue ?? now).isBefore(now) || (t.spacedDue ?? now).isAtSameMomentAs(now);
-      } else {
-        return (t.continuousDue ?? now).isBefore(now) || (t.continuousDue ?? now).isAtSameMomentAs(now);
-      }
-    }).toList();
+    final query = _db.select(_db.cardItems)
+      ..where((t) => t.deckId.equals(deckId));
 
     if (mode == StudySessionMode.spaced) {
-      // Separate new from reviews
-      // A card is 'new' if it has never been reviewed in spaced mode
-      final newCards = filtered.where((c) => c.spacedLastReview == null).toList();
-      final reviewCards = filtered.where((c) => c.spacedLastReview != null).toList();
-
-      // Apply limits
-      final limitedNew = newCards.take(remainingNew).toList();
-      final limitedReviews = reviewCards.take(remainingReviews).toList();
-
-      final result = [...limitedReviews, ...limitedNew];
-      
-      // Order
-      if (config?.reviewOrder == 1) { // Random
-        result.shuffle();
-      } else {
-        result.sort((a, b) => (a.spacedDue ?? now).compareTo(b.spacedDue ?? now));
-      }
-      
-      return result;
+      query.where((t) => t.spacedDue.isSmallerOrEqualValue(now));
+      query.orderBy([(t) => OrderingTerm.asc(t.spacedDue)]);
     } else {
-      return filtered;
+      query.where((t) => t.continuousDue.isSmallerOrEqualValue(now));
+      query.orderBy([(t) => OrderingTerm.asc(t.continuousDue)]);
     }
-  }
 
-  Future<({int newCards, int reviews})> getTodayStats(String deckId) async {
-    final now = DateTime.now();
-    final todayStart = DateTime(now.year, now.month, now.day).toIso8601String();
-    
-    final query = _db.select(_db.studySessionEvents)
-      ..where((t) => t.deckId.equals(deckId))
-      ..where((t) => t.reviewedAt.isBiggerOrEqualValue(todayStart));
-    
-    final events = await query.get();
-    if (events.isEmpty) return (newCards: 0, reviews: 0);
-
-    final cardIds = events.map((e) => e.cardId).toSet().toList();
-    
-    // Find which of these cards were reviewed BEFORE today
-    final previouslyReviewed = await (_db.selectOnly(_db.studySessionEvents)
-          ..addColumns([_db.studySessionEvents.cardId])
-          ..where(_db.studySessionEvents.cardId.isIn(cardIds))
-          ..where(_db.studySessionEvents.reviewedAt.isSmallerThanValue(todayStart)))
-        .map((row) => row.read(_db.studySessionEvents.cardId))
-        .get();
-    
-    final previouslyReviewedSet = previouslyReviewed.toSet();
-    
-    int newCount = 0;
-    int reviewCount = 0;
-    
-    final countedAsNew = <String>{};
-    for (final event in events) {
-      if (previouslyReviewedSet.contains(event.cardId)) {
-        reviewCount++;
-      } else {
-        // If it's the first time we see this card today AND it was never reviewed before today
-        if (!countedAsNew.contains(event.cardId)) {
-          newCount++;
-          countedAsNew.add(event.cardId);
-        } else {
-          // It was a new card intro today, but this is a subsequent review of the same card today
-          reviewCount++;
-        }
-      }
-    }
-    
-    return (newCards: newCount, reviews: reviewCount);
+    return query.watch();
   }
 
   /// Watch just the due count for a specific deck (recursive)
@@ -403,13 +169,11 @@ class SchedulingService {
     required String deckId,
     StudySessionMode mode = StudySessionMode.spaced,
   }) {
-    // Avoid watchDueCards (which pulls all cards) for simple badges.
-    // We still watch the table but do a lightweight count query.
-    return Stream.fromFuture(_getTransitiveDeckIds(deckId)).asyncExpand((allDeckIds) {
+    return Stream.fromFuture(_getTransitiveDeckIds(deckId)).asyncExpand((allIds) {
       final now = DateTime.now();
       final query = _db.selectOnly(_db.cardItems)
         ..addColumns([_db.cardItems.id.count()])
-        ..where(_db.cardItems.deckId.isIn(allDeckIds));
+        ..where(_db.cardItems.deckId.isIn(allIds));
 
       if (mode == StudySessionMode.spaced) {
         query.where(_db.cardItems.spacedDue.isSmallerOrEqualValue(now));
@@ -428,7 +192,7 @@ class SchedulingService {
   }) async {
     final now = DateTime.now();
     final allDeckIds = await _getTransitiveDeckIds(deckId);
-    
+
     final query = _db.selectOnly(_db.cardItems)
       ..addColumns([_db.cardItems.id.count()])
       ..where(_db.cardItems.deckId.isIn(allDeckIds));
@@ -470,9 +234,10 @@ class SchedulingService {
     required String deckId,
     StudySessionMode mode = StudySessionMode.spaced,
   }) {
-    AppLogger.debug('Watching due card items for deck $deckId ($mode)', tag: _tag);
-    final now = DateTime.now();
-
+    AppLogger.debug(
+      'Watching due card items for deck $deckId ($mode)',
+      tag: _tag,
+    );
     return watchDueCards(deckId: deckId, mode: mode);
   }
 
@@ -500,21 +265,29 @@ class SchedulingService {
 
   /// Fetches all cards for a specific deck.
   Future<List<CardItem>> getAllCardsForDeck(String deckId) async {
-    return await (_db.select(_db.cardItems)..where((t) => t.deckId.equals(deckId))).get();
+    return await (_db.select(
+      _db.cardItems,
+    )..where((t) => t.deckId.equals(deckId))).get();
   }
 
-  Future<void> suspendCard(String cardId, bool suspend) async {
-    await (_db.update(_db.cardItems)..where((t) => t.id.equals(cardId)))
-        .write(CardItemsCompanion(isSuspended: Value(suspend)));
-  }
+  /// Recursively fetches all deck IDs under a root deck (including the root itself).
+  Future<List<String>> _getTransitiveDeckIds(String rootId) async {
+    final ids = <String>{rootId};
+    final toProcess = [rootId];
 
-  Future<void> buryCard(String cardId) async {
-    final now = DateTime.now();
-    final tomorrow = DateTime(now.year, now.month, now.day + 1);
-    await (_db.update(_db.cardItems)..where((t) => t.id.equals(cardId)))
-        .write(CardItemsCompanion(
-      isBuried: const Value(true),
-      buriedUntil: Value(tomorrow),
-    ));
+    while (toProcess.isNotEmpty) {
+      final currentId = toProcess.removeLast();
+      final children = await (_db.select(_db.deckItems)
+            ..where((t) => t.parentId.equals(currentId)))
+          .get();
+
+      for (final child in children) {
+        if (!ids.contains(child.id)) {
+          ids.add(child.id);
+          toProcess.add(child.id);
+        }
+      }
+    }
+    return ids.toList();
   }
 }

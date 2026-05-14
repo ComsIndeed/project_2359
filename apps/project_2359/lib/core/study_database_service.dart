@@ -14,19 +14,26 @@ class StudyDatabaseService {
 
   Future<DeckItem?> getDeckById(String id) async {
     AppLogger.debug('Fetching deck by ID: $id', tag: _tag);
-    return await (_db.select(_db.deckItems)..where((t) => t.id.equals(id))).getSingleOrNull();
+    return await (_db.select(
+      _db.deckItems,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
   Future<List<DeckItem>> getRootDecks() async {
     AppLogger.debug('Fetching root decks', tag: _tag);
-    return await (_db.select(_db.deckItems)..where((t) => t.parentId.isNull())).get();
+    return await (_db.select(
+      _db.deckItems,
+    )..where((t) => t.parentId.isNull())).get();
   }
 
   Stream<List<DeckItem>> watchRootDecks() {
     AppLogger.debug('Watching root decks', tag: _tag);
     return (_db.select(_db.deckItems)
           ..where((t) => t.parentId.isNull())
-          ..orderBy([(t) => OrderingTerm.desc(t.isPinned), (t) => OrderingTerm.asc(t.name)]))
+          ..orderBy([
+            (t) => OrderingTerm.desc(t.isPinned),
+            (t) => OrderingTerm.asc(t.name),
+          ]))
         .watch();
   }
 
@@ -40,7 +47,9 @@ class StudyDatabaseService {
 
   Stream<List<DeckItem>> watchPinnedDecks() {
     AppLogger.debug('Watching pinned decks', tag: _tag);
-    return (_db.select(_db.deckItems)..where((t) => t.isPinned.equals(true))).watch();
+    return (_db.select(
+      _db.deckItems,
+    )..where((t) => t.isPinned.equals(true))).watch();
   }
 
   Stream<List<DeckItem>> watchAllDecks() {
@@ -54,7 +63,10 @@ class StudyDatabaseService {
   }
 
   Future<void> toggleDeckPin(String id, bool isPinned) async {
-    AppLogger.info('${isPinned ? 'Pinning' : 'Unpinning'} deck: $id', tag: _tag);
+    AppLogger.info(
+      '${isPinned ? 'Pinning' : 'Unpinning'} deck: $id',
+      tag: _tag,
+    );
     await (_db.update(_db.deckItems)..where((t) => t.id.equals(id))).write(
       DeckItemsCompanion(isPinned: Value(isPinned)),
     );
@@ -67,57 +79,49 @@ class StudyDatabaseService {
 
   Future<void> updateDeck(DeckItemsCompanion deck) async {
     AppLogger.info('Updating deck: ${deck.id.value}', tag: _tag);
-    await (_db.update(_db.deckItems)..where((t) => t.id.equals(deck.id.value))).write(deck);
+    await (_db.update(
+      _db.deckItems,
+    )..where((t) => t.id.equals(deck.id.value))).write(deck);
   }
 
   Future<void> deleteDeck(String id) async {
     AppLogger.warning('Deleting deck and all sub-contents: $id', tag: _tag);
     await _db.transaction(() async {
       // Recursive delete logic
-      final subDecks = await (_db.select(_db.deckItems)..where((t) => t.parentId.equals(id))).get();
+      final subDecks = await (_db.select(
+        _db.deckItems,
+      )..where((t) => t.parentId.equals(id))).get();
       for (final sub in subDecks) {
         await deleteDeck(sub.id);
       }
 
       // Delete cards in this deck
       await (_db.delete(_db.cardItems)..where((t) => t.deckId.equals(id))).go();
-      
+
       // Delete sources in this deck
-      await (_db.delete(_db.sourceItems)..where((t) => t.deckId.equals(id))).go();
+      await (_db.delete(
+        _db.sourceItems,
+      )..where((t) => t.deckId.equals(id))).go();
 
       // Finally delete the deck itself
       await (_db.delete(_db.deckItems)..where((t) => t.id.equals(id))).go();
     });
   }
 
-  // --- Deck Configs ---
-
-  Future<DeckConfigItem?> getDeckConfigById(String id) async {
-    return await (_db.select(_db.deckConfigItems)..where((t) => t.id.equals(id))).getSingleOrNull();
-  }
-
-  Future<List<DeckConfigItem>> getAllDeckConfigs() async {
-    return await _db.select(_db.deckConfigItems).get();
-  }
-
-  Future<void> insertDeckConfig(DeckConfigItemsCompanion config) async {
-    await _db.into(_db.deckConfigItems).insert(config);
-  }
-
-  Future<void> updateDeckConfig(DeckConfigItemsCompanion config) async {
-    await (_db.update(_db.deckConfigItems)..where((t) => t.id.equals(config.id.value))).write(config);
-  }
-
   // --- Cards ---
 
   Future<List<CardItem>> getCardsByDeckId(String deckId) async {
     AppLogger.debug('Fetching cards for deck: $deckId', tag: _tag);
-    return await (_db.select(_db.cardItems)..where((t) => t.deckId.equals(deckId))).get();
+    return await (_db.select(
+      _db.cardItems,
+    )..where((t) => t.deckId.equals(deckId))).get();
   }
 
   Stream<List<CardItem>> watchCardsByDeckId(String deckId) {
     AppLogger.debug('Watching cards for deck: $deckId', tag: _tag);
-    return (_db.select(_db.cardItems)..where((t) => t.deckId.equals(deckId))).watch();
+    return (_db.select(
+      _db.cardItems,
+    )..where((t) => t.deckId.equals(deckId))).watch();
   }
 
   Future<void> insertCard(CardItemsCompanion card) async {
@@ -143,7 +147,10 @@ class StudyDatabaseService {
     required DeckItemsCompanion deck,
     required List<CardItemsCompanion> cards,
   }) async {
-    AppLogger.info('Creating deck "${deck.name.value}" with ${cards.length} cards', tag: _tag);
+    AppLogger.info(
+      'Creating deck "${deck.name.value}" with ${cards.length} cards',
+      tag: _tag,
+    );
     await _db.transaction(() async {
       await _db.into(_db.deckItems).insert(deck);
       await _db.batch((batch) {
@@ -155,22 +162,29 @@ class StudyDatabaseService {
   // --- Citations ---
 
   Future<CitationItem?> getCitationById(String id) async {
-    return await (_db.select(_db.citationItems)..where((t) => t.id.equals(id))).getSingleOrNull();
+    return await (_db.select(
+      _db.citationItems,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
   // --- Sources ---
 
   Future<List<SourceItem>> getSourcesByDeckId(String deckId) async {
-    return await (_db.select(_db.sourceItems)..where((t) => t.deckId.equals(deckId))).get();
+    return await (_db.select(
+      _db.sourceItems,
+    )..where((t) => t.deckId.equals(deckId))).get();
   }
 
   Stream<List<SourceItem>> watchSourcesByDeckId(String deckId) {
-    return (_db.select(_db.sourceItems)..where((t) => t.deckId.equals(deckId))).watch();
+    return (_db.select(
+      _db.sourceItems,
+    )..where((t) => t.deckId.equals(deckId))).watch();
   }
 
   Stream<bool> watchHasMockData() {
-    return _db.select(_db.deckItems).watch().map(
-      (decks) => decks.any((f) => f.name.contains('(DEMO)')),
-    );
+    return _db
+        .select(_db.deckItems)
+        .watch()
+        .map((decks) => decks.any((f) => f.name.contains('(DEMO)')));
   }
 }

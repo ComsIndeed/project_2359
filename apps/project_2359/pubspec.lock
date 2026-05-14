@@ -1252,22 +1252,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.12.0"
-  syncfusion_flutter_charts:
-    dependency: "direct main"
-    description:
-      name: syncfusion_flutter_charts
-      sha256: a7b7be133602bcffd6d6c13020a2869f2f5d0232835b1a15164a5bb57aab3868
-      url: "https://pub.dev"
-    source: hosted
-    version: "32.2.9"
   syncfusion_flutter_core:
     dependency: "direct main"
     description:
       name: syncfusion_flutter_core
-      sha256: "7699e129fc48dfdbb6ad7f8396eaddf5b8f06c649c5bfabdeee5a73dbaca845c"
+      sha256: a7cc6eaed797806890de86b208b2094e66f61e278457867677a29b040ed56879
       url: "https://pub.dev"
     source: hosted
-    version: "32.2.9"
+    version: "32.2.7"
   syncfusion_flutter_pdf:
     dependency: "direct main"
     description:

@@ -48,12 +48,6 @@ class CardItems extends Table {
   IntColumn get templateOrdinal =>
       integer().nullable().withDefault(const Constant(0))();
 
-  // --- Management ---
-  BoolColumn get isSuspended => boolean().withDefault(const Constant(false))();
-  BoolColumn get isBuried => boolean().withDefault(const Constant(false))();
-  DateTimeColumn get buriedUntil => dateTime().nullable()();
-  IntColumn get lapseCount => integer().withDefault(const Constant(0))();
-
   DateTimeColumn get createdAt =>
       dateTime().nullable().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt =>

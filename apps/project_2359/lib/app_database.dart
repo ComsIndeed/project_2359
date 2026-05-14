@@ -17,7 +17,6 @@ import 'package:project_2359/core/tables/study_session_events.dart';
 import 'package:project_2359/core/tables/citation_items.dart';
 import 'package:project_2359/core/tables/card_creation_draft_items.dart';
 import 'package:project_2359/core/tables/note_items.dart';
-import 'package:project_2359/core/tables/deck_config_items.dart';
 import 'package:project_2359/core/models/note_type.dart';
 import 'package:project_2359/core/utils/logger.dart';
 
@@ -34,7 +33,6 @@ part 'app_database.g.dart';
     CardCreationDraftItems,
     AssetItems,
     NoteItems,
-    DeckConfigItems,
   ],
 )
 class AppDatabase extends _$AppDatabase {

@@ -3,840 +3,6 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $DeckConfigItemsTable extends DeckConfigItems
-    with TableInfo<$DeckConfigItemsTable, DeckConfigItem> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $DeckConfigItemsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-    'name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('Default Config'),
-  );
-  static const VerificationMeta _newCardsPerDayMeta = const VerificationMeta(
-    'newCardsPerDay',
-  );
-  @override
-  late final GeneratedColumn<int> newCardsPerDay = GeneratedColumn<int>(
-    'new_cards_per_day',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(20),
-  );
-  static const VerificationMeta _newCardOrderMeta = const VerificationMeta(
-    'newCardOrder',
-  );
-  @override
-  late final GeneratedColumn<int> newCardOrder = GeneratedColumn<int>(
-    'new_card_order',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _reviewsPerDayMeta = const VerificationMeta(
-    'reviewsPerDay',
-  );
-  @override
-  late final GeneratedColumn<int> reviewsPerDay = GeneratedColumn<int>(
-    'reviews_per_day',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(200),
-  );
-  static const VerificationMeta _reviewOrderMeta = const VerificationMeta(
-    'reviewOrder',
-  );
-  @override
-  late final GeneratedColumn<int> reviewOrder = GeneratedColumn<int>(
-    'review_order',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _learningStepsMeta = const VerificationMeta(
-    'learningSteps',
-  );
-  @override
-  late final GeneratedColumn<String> learningSteps = GeneratedColumn<String>(
-    'learning_steps',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('1,10'),
-  );
-  static const VerificationMeta _relearningStepsMeta = const VerificationMeta(
-    'relearningSteps',
-  );
-  @override
-  late final GeneratedColumn<String> relearningSteps = GeneratedColumn<String>(
-    'relearning_steps',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('10'),
-  );
-  static const VerificationMeta _graduatingIntervalMeta =
-      const VerificationMeta('graduatingInterval');
-  @override
-  late final GeneratedColumn<int> graduatingInterval = GeneratedColumn<int>(
-    'graduating_interval',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(1),
-  );
-  static const VerificationMeta _easyIntervalMeta = const VerificationMeta(
-    'easyInterval',
-  );
-  @override
-  late final GeneratedColumn<int> easyInterval = GeneratedColumn<int>(
-    'easy_interval',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(4),
-  );
-  static const VerificationMeta _maxIntervalMeta = const VerificationMeta(
-    'maxInterval',
-  );
-  @override
-  late final GeneratedColumn<int> maxInterval = GeneratedColumn<int>(
-    'max_interval',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(36500),
-  );
-  static const VerificationMeta _desiredRetentionMeta = const VerificationMeta(
-    'desiredRetention',
-  );
-  @override
-  late final GeneratedColumn<double> desiredRetention = GeneratedColumn<double>(
-    'desired_retention',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0.9),
-  );
-  static const VerificationMeta _burySiblingsMeta = const VerificationMeta(
-    'burySiblings',
-  );
-  @override
-  late final GeneratedColumn<bool> burySiblings = GeneratedColumn<bool>(
-    'bury_siblings',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("bury_siblings" IN (0, 1))',
-    ),
-    defaultValue: const Constant(true),
-  );
-  static const VerificationMeta _leechThresholdMeta = const VerificationMeta(
-    'leechThreshold',
-  );
-  @override
-  late final GeneratedColumn<int> leechThreshold = GeneratedColumn<int>(
-    'leech_threshold',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(8),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    name,
-    newCardsPerDay,
-    newCardOrder,
-    reviewsPerDay,
-    reviewOrder,
-    learningSteps,
-    relearningSteps,
-    graduatingInterval,
-    easyInterval,
-    maxInterval,
-    desiredRetention,
-    burySiblings,
-    leechThreshold,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'deck_config_items';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<DeckConfigItem> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-        _nameMeta,
-        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
-      );
-    }
-    if (data.containsKey('new_cards_per_day')) {
-      context.handle(
-        _newCardsPerDayMeta,
-        newCardsPerDay.isAcceptableOrUnknown(
-          data['new_cards_per_day']!,
-          _newCardsPerDayMeta,
-        ),
-      );
-    }
-    if (data.containsKey('new_card_order')) {
-      context.handle(
-        _newCardOrderMeta,
-        newCardOrder.isAcceptableOrUnknown(
-          data['new_card_order']!,
-          _newCardOrderMeta,
-        ),
-      );
-    }
-    if (data.containsKey('reviews_per_day')) {
-      context.handle(
-        _reviewsPerDayMeta,
-        reviewsPerDay.isAcceptableOrUnknown(
-          data['reviews_per_day']!,
-          _reviewsPerDayMeta,
-        ),
-      );
-    }
-    if (data.containsKey('review_order')) {
-      context.handle(
-        _reviewOrderMeta,
-        reviewOrder.isAcceptableOrUnknown(
-          data['review_order']!,
-          _reviewOrderMeta,
-        ),
-      );
-    }
-    if (data.containsKey('learning_steps')) {
-      context.handle(
-        _learningStepsMeta,
-        learningSteps.isAcceptableOrUnknown(
-          data['learning_steps']!,
-          _learningStepsMeta,
-        ),
-      );
-    }
-    if (data.containsKey('relearning_steps')) {
-      context.handle(
-        _relearningStepsMeta,
-        relearningSteps.isAcceptableOrUnknown(
-          data['relearning_steps']!,
-          _relearningStepsMeta,
-        ),
-      );
-    }
-    if (data.containsKey('graduating_interval')) {
-      context.handle(
-        _graduatingIntervalMeta,
-        graduatingInterval.isAcceptableOrUnknown(
-          data['graduating_interval']!,
-          _graduatingIntervalMeta,
-        ),
-      );
-    }
-    if (data.containsKey('easy_interval')) {
-      context.handle(
-        _easyIntervalMeta,
-        easyInterval.isAcceptableOrUnknown(
-          data['easy_interval']!,
-          _easyIntervalMeta,
-        ),
-      );
-    }
-    if (data.containsKey('max_interval')) {
-      context.handle(
-        _maxIntervalMeta,
-        maxInterval.isAcceptableOrUnknown(
-          data['max_interval']!,
-          _maxIntervalMeta,
-        ),
-      );
-    }
-    if (data.containsKey('desired_retention')) {
-      context.handle(
-        _desiredRetentionMeta,
-        desiredRetention.isAcceptableOrUnknown(
-          data['desired_retention']!,
-          _desiredRetentionMeta,
-        ),
-      );
-    }
-    if (data.containsKey('bury_siblings')) {
-      context.handle(
-        _burySiblingsMeta,
-        burySiblings.isAcceptableOrUnknown(
-          data['bury_siblings']!,
-          _burySiblingsMeta,
-        ),
-      );
-    }
-    if (data.containsKey('leech_threshold')) {
-      context.handle(
-        _leechThresholdMeta,
-        leechThreshold.isAcceptableOrUnknown(
-          data['leech_threshold']!,
-          _leechThresholdMeta,
-        ),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  DeckConfigItem map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return DeckConfigItem(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      name: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name'],
-      )!,
-      newCardsPerDay: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}new_cards_per_day'],
-      )!,
-      newCardOrder: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}new_card_order'],
-      )!,
-      reviewsPerDay: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}reviews_per_day'],
-      )!,
-      reviewOrder: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}review_order'],
-      )!,
-      learningSteps: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}learning_steps'],
-      )!,
-      relearningSteps: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}relearning_steps'],
-      )!,
-      graduatingInterval: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}graduating_interval'],
-      )!,
-      easyInterval: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}easy_interval'],
-      )!,
-      maxInterval: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}max_interval'],
-      )!,
-      desiredRetention: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}desired_retention'],
-      )!,
-      burySiblings: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}bury_siblings'],
-      )!,
-      leechThreshold: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}leech_threshold'],
-      )!,
-    );
-  }
-
-  @override
-  $DeckConfigItemsTable createAlias(String alias) {
-    return $DeckConfigItemsTable(attachedDatabase, alias);
-  }
-}
-
-class DeckConfigItem extends DataClass implements Insertable<DeckConfigItem> {
-  final String id;
-  final String name;
-  final int newCardsPerDay;
-  final int newCardOrder;
-  final int reviewsPerDay;
-  final int reviewOrder;
-  final String learningSteps;
-  final String relearningSteps;
-  final int graduatingInterval;
-  final int easyInterval;
-  final int maxInterval;
-  final double desiredRetention;
-  final bool burySiblings;
-  final int leechThreshold;
-  const DeckConfigItem({
-    required this.id,
-    required this.name,
-    required this.newCardsPerDay,
-    required this.newCardOrder,
-    required this.reviewsPerDay,
-    required this.reviewOrder,
-    required this.learningSteps,
-    required this.relearningSteps,
-    required this.graduatingInterval,
-    required this.easyInterval,
-    required this.maxInterval,
-    required this.desiredRetention,
-    required this.burySiblings,
-    required this.leechThreshold,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['name'] = Variable<String>(name);
-    map['new_cards_per_day'] = Variable<int>(newCardsPerDay);
-    map['new_card_order'] = Variable<int>(newCardOrder);
-    map['reviews_per_day'] = Variable<int>(reviewsPerDay);
-    map['review_order'] = Variable<int>(reviewOrder);
-    map['learning_steps'] = Variable<String>(learningSteps);
-    map['relearning_steps'] = Variable<String>(relearningSteps);
-    map['graduating_interval'] = Variable<int>(graduatingInterval);
-    map['easy_interval'] = Variable<int>(easyInterval);
-    map['max_interval'] = Variable<int>(maxInterval);
-    map['desired_retention'] = Variable<double>(desiredRetention);
-    map['bury_siblings'] = Variable<bool>(burySiblings);
-    map['leech_threshold'] = Variable<int>(leechThreshold);
-    return map;
-  }
-
-  DeckConfigItemsCompanion toCompanion(bool nullToAbsent) {
-    return DeckConfigItemsCompanion(
-      id: Value(id),
-      name: Value(name),
-      newCardsPerDay: Value(newCardsPerDay),
-      newCardOrder: Value(newCardOrder),
-      reviewsPerDay: Value(reviewsPerDay),
-      reviewOrder: Value(reviewOrder),
-      learningSteps: Value(learningSteps),
-      relearningSteps: Value(relearningSteps),
-      graduatingInterval: Value(graduatingInterval),
-      easyInterval: Value(easyInterval),
-      maxInterval: Value(maxInterval),
-      desiredRetention: Value(desiredRetention),
-      burySiblings: Value(burySiblings),
-      leechThreshold: Value(leechThreshold),
-    );
-  }
-
-  factory DeckConfigItem.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return DeckConfigItem(
-      id: serializer.fromJson<String>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
-      newCardsPerDay: serializer.fromJson<int>(json['newCardsPerDay']),
-      newCardOrder: serializer.fromJson<int>(json['newCardOrder']),
-      reviewsPerDay: serializer.fromJson<int>(json['reviewsPerDay']),
-      reviewOrder: serializer.fromJson<int>(json['reviewOrder']),
-      learningSteps: serializer.fromJson<String>(json['learningSteps']),
-      relearningSteps: serializer.fromJson<String>(json['relearningSteps']),
-      graduatingInterval: serializer.fromJson<int>(json['graduatingInterval']),
-      easyInterval: serializer.fromJson<int>(json['easyInterval']),
-      maxInterval: serializer.fromJson<int>(json['maxInterval']),
-      desiredRetention: serializer.fromJson<double>(json['desiredRetention']),
-      burySiblings: serializer.fromJson<bool>(json['burySiblings']),
-      leechThreshold: serializer.fromJson<int>(json['leechThreshold']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'name': serializer.toJson<String>(name),
-      'newCardsPerDay': serializer.toJson<int>(newCardsPerDay),
-      'newCardOrder': serializer.toJson<int>(newCardOrder),
-      'reviewsPerDay': serializer.toJson<int>(reviewsPerDay),
-      'reviewOrder': serializer.toJson<int>(reviewOrder),
-      'learningSteps': serializer.toJson<String>(learningSteps),
-      'relearningSteps': serializer.toJson<String>(relearningSteps),
-      'graduatingInterval': serializer.toJson<int>(graduatingInterval),
-      'easyInterval': serializer.toJson<int>(easyInterval),
-      'maxInterval': serializer.toJson<int>(maxInterval),
-      'desiredRetention': serializer.toJson<double>(desiredRetention),
-      'burySiblings': serializer.toJson<bool>(burySiblings),
-      'leechThreshold': serializer.toJson<int>(leechThreshold),
-    };
-  }
-
-  DeckConfigItem copyWith({
-    String? id,
-    String? name,
-    int? newCardsPerDay,
-    int? newCardOrder,
-    int? reviewsPerDay,
-    int? reviewOrder,
-    String? learningSteps,
-    String? relearningSteps,
-    int? graduatingInterval,
-    int? easyInterval,
-    int? maxInterval,
-    double? desiredRetention,
-    bool? burySiblings,
-    int? leechThreshold,
-  }) => DeckConfigItem(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    newCardsPerDay: newCardsPerDay ?? this.newCardsPerDay,
-    newCardOrder: newCardOrder ?? this.newCardOrder,
-    reviewsPerDay: reviewsPerDay ?? this.reviewsPerDay,
-    reviewOrder: reviewOrder ?? this.reviewOrder,
-    learningSteps: learningSteps ?? this.learningSteps,
-    relearningSteps: relearningSteps ?? this.relearningSteps,
-    graduatingInterval: graduatingInterval ?? this.graduatingInterval,
-    easyInterval: easyInterval ?? this.easyInterval,
-    maxInterval: maxInterval ?? this.maxInterval,
-    desiredRetention: desiredRetention ?? this.desiredRetention,
-    burySiblings: burySiblings ?? this.burySiblings,
-    leechThreshold: leechThreshold ?? this.leechThreshold,
-  );
-  DeckConfigItem copyWithCompanion(DeckConfigItemsCompanion data) {
-    return DeckConfigItem(
-      id: data.id.present ? data.id.value : this.id,
-      name: data.name.present ? data.name.value : this.name,
-      newCardsPerDay: data.newCardsPerDay.present
-          ? data.newCardsPerDay.value
-          : this.newCardsPerDay,
-      newCardOrder: data.newCardOrder.present
-          ? data.newCardOrder.value
-          : this.newCardOrder,
-      reviewsPerDay: data.reviewsPerDay.present
-          ? data.reviewsPerDay.value
-          : this.reviewsPerDay,
-      reviewOrder: data.reviewOrder.present
-          ? data.reviewOrder.value
-          : this.reviewOrder,
-      learningSteps: data.learningSteps.present
-          ? data.learningSteps.value
-          : this.learningSteps,
-      relearningSteps: data.relearningSteps.present
-          ? data.relearningSteps.value
-          : this.relearningSteps,
-      graduatingInterval: data.graduatingInterval.present
-          ? data.graduatingInterval.value
-          : this.graduatingInterval,
-      easyInterval: data.easyInterval.present
-          ? data.easyInterval.value
-          : this.easyInterval,
-      maxInterval: data.maxInterval.present
-          ? data.maxInterval.value
-          : this.maxInterval,
-      desiredRetention: data.desiredRetention.present
-          ? data.desiredRetention.value
-          : this.desiredRetention,
-      burySiblings: data.burySiblings.present
-          ? data.burySiblings.value
-          : this.burySiblings,
-      leechThreshold: data.leechThreshold.present
-          ? data.leechThreshold.value
-          : this.leechThreshold,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('DeckConfigItem(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('newCardsPerDay: $newCardsPerDay, ')
-          ..write('newCardOrder: $newCardOrder, ')
-          ..write('reviewsPerDay: $reviewsPerDay, ')
-          ..write('reviewOrder: $reviewOrder, ')
-          ..write('learningSteps: $learningSteps, ')
-          ..write('relearningSteps: $relearningSteps, ')
-          ..write('graduatingInterval: $graduatingInterval, ')
-          ..write('easyInterval: $easyInterval, ')
-          ..write('maxInterval: $maxInterval, ')
-          ..write('desiredRetention: $desiredRetention, ')
-          ..write('burySiblings: $burySiblings, ')
-          ..write('leechThreshold: $leechThreshold')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    name,
-    newCardsPerDay,
-    newCardOrder,
-    reviewsPerDay,
-    reviewOrder,
-    learningSteps,
-    relearningSteps,
-    graduatingInterval,
-    easyInterval,
-    maxInterval,
-    desiredRetention,
-    burySiblings,
-    leechThreshold,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is DeckConfigItem &&
-          other.id == this.id &&
-          other.name == this.name &&
-          other.newCardsPerDay == this.newCardsPerDay &&
-          other.newCardOrder == this.newCardOrder &&
-          other.reviewsPerDay == this.reviewsPerDay &&
-          other.reviewOrder == this.reviewOrder &&
-          other.learningSteps == this.learningSteps &&
-          other.relearningSteps == this.relearningSteps &&
-          other.graduatingInterval == this.graduatingInterval &&
-          other.easyInterval == this.easyInterval &&
-          other.maxInterval == this.maxInterval &&
-          other.desiredRetention == this.desiredRetention &&
-          other.burySiblings == this.burySiblings &&
-          other.leechThreshold == this.leechThreshold);
-}
-
-class DeckConfigItemsCompanion extends UpdateCompanion<DeckConfigItem> {
-  final Value<String> id;
-  final Value<String> name;
-  final Value<int> newCardsPerDay;
-  final Value<int> newCardOrder;
-  final Value<int> reviewsPerDay;
-  final Value<int> reviewOrder;
-  final Value<String> learningSteps;
-  final Value<String> relearningSteps;
-  final Value<int> graduatingInterval;
-  final Value<int> easyInterval;
-  final Value<int> maxInterval;
-  final Value<double> desiredRetention;
-  final Value<bool> burySiblings;
-  final Value<int> leechThreshold;
-  final Value<int> rowid;
-  const DeckConfigItemsCompanion({
-    this.id = const Value.absent(),
-    this.name = const Value.absent(),
-    this.newCardsPerDay = const Value.absent(),
-    this.newCardOrder = const Value.absent(),
-    this.reviewsPerDay = const Value.absent(),
-    this.reviewOrder = const Value.absent(),
-    this.learningSteps = const Value.absent(),
-    this.relearningSteps = const Value.absent(),
-    this.graduatingInterval = const Value.absent(),
-    this.easyInterval = const Value.absent(),
-    this.maxInterval = const Value.absent(),
-    this.desiredRetention = const Value.absent(),
-    this.burySiblings = const Value.absent(),
-    this.leechThreshold = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  DeckConfigItemsCompanion.insert({
-    required String id,
-    this.name = const Value.absent(),
-    this.newCardsPerDay = const Value.absent(),
-    this.newCardOrder = const Value.absent(),
-    this.reviewsPerDay = const Value.absent(),
-    this.reviewOrder = const Value.absent(),
-    this.learningSteps = const Value.absent(),
-    this.relearningSteps = const Value.absent(),
-    this.graduatingInterval = const Value.absent(),
-    this.easyInterval = const Value.absent(),
-    this.maxInterval = const Value.absent(),
-    this.desiredRetention = const Value.absent(),
-    this.burySiblings = const Value.absent(),
-    this.leechThreshold = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : id = Value(id);
-  static Insertable<DeckConfigItem> custom({
-    Expression<String>? id,
-    Expression<String>? name,
-    Expression<int>? newCardsPerDay,
-    Expression<int>? newCardOrder,
-    Expression<int>? reviewsPerDay,
-    Expression<int>? reviewOrder,
-    Expression<String>? learningSteps,
-    Expression<String>? relearningSteps,
-    Expression<int>? graduatingInterval,
-    Expression<int>? easyInterval,
-    Expression<int>? maxInterval,
-    Expression<double>? desiredRetention,
-    Expression<bool>? burySiblings,
-    Expression<int>? leechThreshold,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (name != null) 'name': name,
-      if (newCardsPerDay != null) 'new_cards_per_day': newCardsPerDay,
-      if (newCardOrder != null) 'new_card_order': newCardOrder,
-      if (reviewsPerDay != null) 'reviews_per_day': reviewsPerDay,
-      if (reviewOrder != null) 'review_order': reviewOrder,
-      if (learningSteps != null) 'learning_steps': learningSteps,
-      if (relearningSteps != null) 'relearning_steps': relearningSteps,
-      if (graduatingInterval != null) 'graduating_interval': graduatingInterval,
-      if (easyInterval != null) 'easy_interval': easyInterval,
-      if (maxInterval != null) 'max_interval': maxInterval,
-      if (desiredRetention != null) 'desired_retention': desiredRetention,
-      if (burySiblings != null) 'bury_siblings': burySiblings,
-      if (leechThreshold != null) 'leech_threshold': leechThreshold,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  DeckConfigItemsCompanion copyWith({
-    Value<String>? id,
-    Value<String>? name,
-    Value<int>? newCardsPerDay,
-    Value<int>? newCardOrder,
-    Value<int>? reviewsPerDay,
-    Value<int>? reviewOrder,
-    Value<String>? learningSteps,
-    Value<String>? relearningSteps,
-    Value<int>? graduatingInterval,
-    Value<int>? easyInterval,
-    Value<int>? maxInterval,
-    Value<double>? desiredRetention,
-    Value<bool>? burySiblings,
-    Value<int>? leechThreshold,
-    Value<int>? rowid,
-  }) {
-    return DeckConfigItemsCompanion(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      newCardsPerDay: newCardsPerDay ?? this.newCardsPerDay,
-      newCardOrder: newCardOrder ?? this.newCardOrder,
-      reviewsPerDay: reviewsPerDay ?? this.reviewsPerDay,
-      reviewOrder: reviewOrder ?? this.reviewOrder,
-      learningSteps: learningSteps ?? this.learningSteps,
-      relearningSteps: relearningSteps ?? this.relearningSteps,
-      graduatingInterval: graduatingInterval ?? this.graduatingInterval,
-      easyInterval: easyInterval ?? this.easyInterval,
-      maxInterval: maxInterval ?? this.maxInterval,
-      desiredRetention: desiredRetention ?? this.desiredRetention,
-      burySiblings: burySiblings ?? this.burySiblings,
-      leechThreshold: leechThreshold ?? this.leechThreshold,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (newCardsPerDay.present) {
-      map['new_cards_per_day'] = Variable<int>(newCardsPerDay.value);
-    }
-    if (newCardOrder.present) {
-      map['new_card_order'] = Variable<int>(newCardOrder.value);
-    }
-    if (reviewsPerDay.present) {
-      map['reviews_per_day'] = Variable<int>(reviewsPerDay.value);
-    }
-    if (reviewOrder.present) {
-      map['review_order'] = Variable<int>(reviewOrder.value);
-    }
-    if (learningSteps.present) {
-      map['learning_steps'] = Variable<String>(learningSteps.value);
-    }
-    if (relearningSteps.present) {
-      map['relearning_steps'] = Variable<String>(relearningSteps.value);
-    }
-    if (graduatingInterval.present) {
-      map['graduating_interval'] = Variable<int>(graduatingInterval.value);
-    }
-    if (easyInterval.present) {
-      map['easy_interval'] = Variable<int>(easyInterval.value);
-    }
-    if (maxInterval.present) {
-      map['max_interval'] = Variable<int>(maxInterval.value);
-    }
-    if (desiredRetention.present) {
-      map['desired_retention'] = Variable<double>(desiredRetention.value);
-    }
-    if (burySiblings.present) {
-      map['bury_siblings'] = Variable<bool>(burySiblings.value);
-    }
-    if (leechThreshold.present) {
-      map['leech_threshold'] = Variable<int>(leechThreshold.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('DeckConfigItemsCompanion(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('newCardsPerDay: $newCardsPerDay, ')
-          ..write('newCardOrder: $newCardOrder, ')
-          ..write('reviewsPerDay: $reviewsPerDay, ')
-          ..write('reviewOrder: $reviewOrder, ')
-          ..write('learningSteps: $learningSteps, ')
-          ..write('relearningSteps: $relearningSteps, ')
-          ..write('graduatingInterval: $graduatingInterval, ')
-          ..write('easyInterval: $easyInterval, ')
-          ..write('maxInterval: $maxInterval, ')
-          ..write('desiredRetention: $desiredRetention, ')
-          ..write('burySiblings: $burySiblings, ')
-          ..write('leechThreshold: $leechThreshold, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $DeckItemsTable extends DeckItems
     with TableInfo<$DeckItemsTable, DeckItem> {
   @override
@@ -864,20 +30,6 @@ class $DeckItemsTable extends DeckItems
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES deck_items (id)',
-    ),
-  );
-  static const VerificationMeta _configIdMeta = const VerificationMeta(
-    'configId',
-  );
-  @override
-  late final GeneratedColumn<String> configId = GeneratedColumn<String>(
-    'config_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES deck_config_items (id)',
     ),
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
@@ -919,7 +71,6 @@ class $DeckItemsTable extends DeckItems
   List<GeneratedColumn> get $columns => [
     id,
     parentId,
-    configId,
     name,
     description,
     isPinned,
@@ -945,12 +96,6 @@ class $DeckItemsTable extends DeckItems
       context.handle(
         _parentIdMeta,
         parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta),
-      );
-    }
-    if (data.containsKey('config_id')) {
-      context.handle(
-        _configIdMeta,
-        configId.isAcceptableOrUnknown(data['config_id']!, _configIdMeta),
       );
     }
     if (data.containsKey('name')) {
@@ -993,10 +138,6 @@ class $DeckItemsTable extends DeckItems
         DriftSqlType.string,
         data['${effectivePrefix}parent_id'],
       ),
-      configId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}config_id'],
-      ),
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name'],
@@ -1021,14 +162,12 @@ class $DeckItemsTable extends DeckItems
 class DeckItem extends DataClass implements Insertable<DeckItem> {
   final String id;
   final String? parentId;
-  final String? configId;
   final String name;
   final String? description;
   final bool isPinned;
   const DeckItem({
     required this.id,
     this.parentId,
-    this.configId,
     required this.name,
     this.description,
     required this.isPinned,
@@ -1039,9 +178,6 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
     map['id'] = Variable<String>(id);
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = Variable<String>(parentId);
-    }
-    if (!nullToAbsent || configId != null) {
-      map['config_id'] = Variable<String>(configId);
     }
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || description != null) {
@@ -1057,9 +193,6 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
       parentId: parentId == null && nullToAbsent
           ? const Value.absent()
           : Value(parentId),
-      configId: configId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(configId),
       name: Value(name),
       description: description == null && nullToAbsent
           ? const Value.absent()
@@ -1076,7 +209,6 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
     return DeckItem(
       id: serializer.fromJson<String>(json['id']),
       parentId: serializer.fromJson<String?>(json['parentId']),
-      configId: serializer.fromJson<String?>(json['configId']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
       isPinned: serializer.fromJson<bool>(json['isPinned']),
@@ -1088,7 +220,6 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'parentId': serializer.toJson<String?>(parentId),
-      'configId': serializer.toJson<String?>(configId),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
       'isPinned': serializer.toJson<bool>(isPinned),
@@ -1098,14 +229,12 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
   DeckItem copyWith({
     String? id,
     Value<String?> parentId = const Value.absent(),
-    Value<String?> configId = const Value.absent(),
     String? name,
     Value<String?> description = const Value.absent(),
     bool? isPinned,
   }) => DeckItem(
     id: id ?? this.id,
     parentId: parentId.present ? parentId.value : this.parentId,
-    configId: configId.present ? configId.value : this.configId,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
     isPinned: isPinned ?? this.isPinned,
@@ -1114,7 +243,6 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
     return DeckItem(
       id: data.id.present ? data.id.value : this.id,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
-      configId: data.configId.present ? data.configId.value : this.configId,
       name: data.name.present ? data.name.value : this.name,
       description: data.description.present
           ? data.description.value
@@ -1128,7 +256,6 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
     return (StringBuffer('DeckItem(')
           ..write('id: $id, ')
           ..write('parentId: $parentId, ')
-          ..write('configId: $configId, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('isPinned: $isPinned')
@@ -1137,15 +264,13 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, parentId, configId, name, description, isPinned);
+  int get hashCode => Object.hash(id, parentId, name, description, isPinned);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is DeckItem &&
           other.id == this.id &&
           other.parentId == this.parentId &&
-          other.configId == this.configId &&
           other.name == this.name &&
           other.description == this.description &&
           other.isPinned == this.isPinned);
@@ -1154,7 +279,6 @@ class DeckItem extends DataClass implements Insertable<DeckItem> {
 class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   final Value<String> id;
   final Value<String?> parentId;
-  final Value<String?> configId;
   final Value<String> name;
   final Value<String?> description;
   final Value<bool> isPinned;
@@ -1162,7 +286,6 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   const DeckItemsCompanion({
     this.id = const Value.absent(),
     this.parentId = const Value.absent(),
-    this.configId = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
     this.isPinned = const Value.absent(),
@@ -1171,7 +294,6 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   DeckItemsCompanion.insert({
     required String id,
     this.parentId = const Value.absent(),
-    this.configId = const Value.absent(),
     required String name,
     this.description = const Value.absent(),
     this.isPinned = const Value.absent(),
@@ -1181,7 +303,6 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   static Insertable<DeckItem> custom({
     Expression<String>? id,
     Expression<String>? parentId,
-    Expression<String>? configId,
     Expression<String>? name,
     Expression<String>? description,
     Expression<bool>? isPinned,
@@ -1190,7 +311,6 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (parentId != null) 'parent_id': parentId,
-      if (configId != null) 'config_id': configId,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
       if (isPinned != null) 'is_pinned': isPinned,
@@ -1201,7 +321,6 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
   DeckItemsCompanion copyWith({
     Value<String>? id,
     Value<String?>? parentId,
-    Value<String?>? configId,
     Value<String>? name,
     Value<String?>? description,
     Value<bool>? isPinned,
@@ -1210,7 +329,6 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
     return DeckItemsCompanion(
       id: id ?? this.id,
       parentId: parentId ?? this.parentId,
-      configId: configId ?? this.configId,
       name: name ?? this.name,
       description: description ?? this.description,
       isPinned: isPinned ?? this.isPinned,
@@ -1226,9 +344,6 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
     }
     if (parentId.present) {
       map['parent_id'] = Variable<String>(parentId.value);
-    }
-    if (configId.present) {
-      map['config_id'] = Variable<String>(configId.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -1250,7 +365,6 @@ class DeckItemsCompanion extends UpdateCompanion<DeckItem> {
     return (StringBuffer('DeckItemsCompanion(')
           ..write('id: $id, ')
           ..write('parentId: $parentId, ')
-          ..write('configId: $configId, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('isPinned: $isPinned, ')
@@ -3887,59 +3001,6 @@ class $CardItemsTable extends CardItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _isSuspendedMeta = const VerificationMeta(
-    'isSuspended',
-  );
-  @override
-  late final GeneratedColumn<bool> isSuspended = GeneratedColumn<bool>(
-    'is_suspended',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_suspended" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _isBuriedMeta = const VerificationMeta(
-    'isBuried',
-  );
-  @override
-  late final GeneratedColumn<bool> isBuried = GeneratedColumn<bool>(
-    'is_buried',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_buried" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _buriedUntilMeta = const VerificationMeta(
-    'buriedUntil',
-  );
-  @override
-  late final GeneratedColumn<DateTime> buriedUntil = GeneratedColumn<DateTime>(
-    'buried_until',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _lapseCountMeta = const VerificationMeta(
-    'lapseCount',
-  );
-  @override
-  late final GeneratedColumn<int> lapseCount = GeneratedColumn<int>(
-    'lapse_count',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3989,10 +3050,6 @@ class $CardItemsTable extends CardItems
     citationId,
     noteId,
     templateOrdinal,
-    isSuspended,
-    isBuried,
-    buriedUntil,
-    lapseCount,
     createdAt,
     updatedAt,
   ];
@@ -4178,36 +3235,6 @@ class $CardItemsTable extends CardItems
         ),
       );
     }
-    if (data.containsKey('is_suspended')) {
-      context.handle(
-        _isSuspendedMeta,
-        isSuspended.isAcceptableOrUnknown(
-          data['is_suspended']!,
-          _isSuspendedMeta,
-        ),
-      );
-    }
-    if (data.containsKey('is_buried')) {
-      context.handle(
-        _isBuriedMeta,
-        isBuried.isAcceptableOrUnknown(data['is_buried']!, _isBuriedMeta),
-      );
-    }
-    if (data.containsKey('buried_until')) {
-      context.handle(
-        _buriedUntilMeta,
-        buriedUntil.isAcceptableOrUnknown(
-          data['buried_until']!,
-          _buriedUntilMeta,
-        ),
-      );
-    }
-    if (data.containsKey('lapse_count')) {
-      context.handle(
-        _lapseCountMeta,
-        lapseCount.isAcceptableOrUnknown(data['lapse_count']!, _lapseCountMeta),
-      );
-    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -4323,22 +3350,6 @@ class $CardItemsTable extends CardItems
         DriftSqlType.int,
         data['${effectivePrefix}template_ordinal'],
       ),
-      isSuspended: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_suspended'],
-      )!,
-      isBuried: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_buried'],
-      )!,
-      buriedUntil: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}buried_until'],
-      ),
-      lapseCount: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}lapse_count'],
-      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -4385,10 +3396,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
   final String? citationId;
   final String? noteId;
   final int? templateOrdinal;
-  final bool isSuspended;
-  final bool isBuried;
-  final DateTime? buriedUntil;
-  final int lapseCount;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   const CardItem({
@@ -4415,10 +3422,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     this.citationId,
     this.noteId,
     this.templateOrdinal,
-    required this.isSuspended,
-    required this.isBuried,
-    this.buriedUntil,
-    required this.lapseCount,
     this.createdAt,
     this.updatedAt,
   });
@@ -4494,12 +3497,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     if (!nullToAbsent || templateOrdinal != null) {
       map['template_ordinal'] = Variable<int>(templateOrdinal);
     }
-    map['is_suspended'] = Variable<bool>(isSuspended);
-    map['is_buried'] = Variable<bool>(isBuried);
-    if (!nullToAbsent || buriedUntil != null) {
-      map['buried_until'] = Variable<DateTime>(buriedUntil);
-    }
-    map['lapse_count'] = Variable<int>(lapseCount);
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<DateTime>(createdAt);
     }
@@ -4578,12 +3575,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       templateOrdinal: templateOrdinal == null && nullToAbsent
           ? const Value.absent()
           : Value(templateOrdinal),
-      isSuspended: Value(isSuspended),
-      isBuried: Value(isBuried),
-      buriedUntil: buriedUntil == null && nullToAbsent
-          ? const Value.absent()
-          : Value(buriedUntil),
-      lapseCount: Value(lapseCount),
       createdAt: createdAt == null && nullToAbsent
           ? const Value.absent()
           : Value(createdAt),
@@ -4630,10 +3621,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       citationId: serializer.fromJson<String?>(json['citationId']),
       noteId: serializer.fromJson<String?>(json['noteId']),
       templateOrdinal: serializer.fromJson<int?>(json['templateOrdinal']),
-      isSuspended: serializer.fromJson<bool>(json['isSuspended']),
-      isBuried: serializer.fromJson<bool>(json['isBuried']),
-      buriedUntil: serializer.fromJson<DateTime?>(json['buriedUntil']),
-      lapseCount: serializer.fromJson<int>(json['lapseCount']),
       createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
     );
@@ -4667,10 +3654,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       'citationId': serializer.toJson<String?>(citationId),
       'noteId': serializer.toJson<String?>(noteId),
       'templateOrdinal': serializer.toJson<int?>(templateOrdinal),
-      'isSuspended': serializer.toJson<bool>(isSuspended),
-      'isBuried': serializer.toJson<bool>(isBuried),
-      'buriedUntil': serializer.toJson<DateTime?>(buriedUntil),
-      'lapseCount': serializer.toJson<int>(lapseCount),
       'createdAt': serializer.toJson<DateTime?>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
     };
@@ -4700,10 +3683,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     Value<String?> citationId = const Value.absent(),
     Value<String?> noteId = const Value.absent(),
     Value<int?> templateOrdinal = const Value.absent(),
-    bool? isSuspended,
-    bool? isBuried,
-    Value<DateTime?> buriedUntil = const Value.absent(),
-    int? lapseCount,
     Value<DateTime?> createdAt = const Value.absent(),
     Value<DateTime?> updatedAt = const Value.absent(),
   }) => CardItem(
@@ -4752,10 +3731,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     templateOrdinal: templateOrdinal.present
         ? templateOrdinal.value
         : this.templateOrdinal,
-    isSuspended: isSuspended ?? this.isSuspended,
-    isBuried: isBuried ?? this.isBuried,
-    buriedUntil: buriedUntil.present ? buriedUntil.value : this.buriedUntil,
-    lapseCount: lapseCount ?? this.lapseCount,
     createdAt: createdAt.present ? createdAt.value : this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
   );
@@ -4816,16 +3791,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
       templateOrdinal: data.templateOrdinal.present
           ? data.templateOrdinal.value
           : this.templateOrdinal,
-      isSuspended: data.isSuspended.present
-          ? data.isSuspended.value
-          : this.isSuspended,
-      isBuried: data.isBuried.present ? data.isBuried.value : this.isBuried,
-      buriedUntil: data.buriedUntil.present
-          ? data.buriedUntil.value
-          : this.buriedUntil,
-      lapseCount: data.lapseCount.present
-          ? data.lapseCount.value
-          : this.lapseCount,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -4857,10 +3822,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           ..write('citationId: $citationId, ')
           ..write('noteId: $noteId, ')
           ..write('templateOrdinal: $templateOrdinal, ')
-          ..write('isSuspended: $isSuspended, ')
-          ..write('isBuried: $isBuried, ')
-          ..write('buriedUntil: $buriedUntil, ')
-          ..write('lapseCount: $lapseCount, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -4892,10 +3853,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
     citationId,
     noteId,
     templateOrdinal,
-    isSuspended,
-    isBuried,
-    buriedUntil,
-    lapseCount,
     createdAt,
     updatedAt,
   ]);
@@ -4926,10 +3883,6 @@ class CardItem extends DataClass implements Insertable<CardItem> {
           other.citationId == this.citationId &&
           other.noteId == this.noteId &&
           other.templateOrdinal == this.templateOrdinal &&
-          other.isSuspended == this.isSuspended &&
-          other.isBuried == this.isBuried &&
-          other.buriedUntil == this.buriedUntil &&
-          other.lapseCount == this.lapseCount &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -4958,10 +3911,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
   final Value<String?> citationId;
   final Value<String?> noteId;
   final Value<int?> templateOrdinal;
-  final Value<bool> isSuspended;
-  final Value<bool> isBuried;
-  final Value<DateTime?> buriedUntil;
-  final Value<int> lapseCount;
   final Value<DateTime?> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<int> rowid;
@@ -4989,10 +3938,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     this.citationId = const Value.absent(),
     this.noteId = const Value.absent(),
     this.templateOrdinal = const Value.absent(),
-    this.isSuspended = const Value.absent(),
-    this.isBuried = const Value.absent(),
-    this.buriedUntil = const Value.absent(),
-    this.lapseCount = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -5021,10 +3966,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     this.citationId = const Value.absent(),
     this.noteId = const Value.absent(),
     this.templateOrdinal = const Value.absent(),
-    this.isSuspended = const Value.absent(),
-    this.isBuried = const Value.absent(),
-    this.buriedUntil = const Value.absent(),
-    this.lapseCount = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -5053,10 +3994,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Expression<String>? citationId,
     Expression<String>? noteId,
     Expression<int>? templateOrdinal,
-    Expression<bool>? isSuspended,
-    Expression<bool>? isBuried,
-    Expression<DateTime>? buriedUntil,
-    Expression<int>? lapseCount,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -5088,10 +4025,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
       if (citationId != null) 'citation_id': citationId,
       if (noteId != null) 'note_id': noteId,
       if (templateOrdinal != null) 'template_ordinal': templateOrdinal,
-      if (isSuspended != null) 'is_suspended': isSuspended,
-      if (isBuried != null) 'is_buried': isBuried,
-      if (buriedUntil != null) 'buried_until': buriedUntil,
-      if (lapseCount != null) 'lapse_count': lapseCount,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -5122,10 +4055,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     Value<String?>? citationId,
     Value<String?>? noteId,
     Value<int?>? templateOrdinal,
-    Value<bool>? isSuspended,
-    Value<bool>? isBuried,
-    Value<DateTime?>? buriedUntil,
-    Value<int>? lapseCount,
     Value<DateTime?>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<int>? rowid,
@@ -5154,10 +4083,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
       citationId: citationId ?? this.citationId,
       noteId: noteId ?? this.noteId,
       templateOrdinal: templateOrdinal ?? this.templateOrdinal,
-      isSuspended: isSuspended ?? this.isSuspended,
-      isBuried: isBuried ?? this.isBuried,
-      buriedUntil: buriedUntil ?? this.buriedUntil,
-      lapseCount: lapseCount ?? this.lapseCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -5242,18 +4167,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
     if (templateOrdinal.present) {
       map['template_ordinal'] = Variable<int>(templateOrdinal.value);
     }
-    if (isSuspended.present) {
-      map['is_suspended'] = Variable<bool>(isSuspended.value);
-    }
-    if (isBuried.present) {
-      map['is_buried'] = Variable<bool>(isBuried.value);
-    }
-    if (buriedUntil.present) {
-      map['buried_until'] = Variable<DateTime>(buriedUntil.value);
-    }
-    if (lapseCount.present) {
-      map['lapse_count'] = Variable<int>(lapseCount.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -5292,10 +4205,6 @@ class CardItemsCompanion extends UpdateCompanion<CardItem> {
           ..write('citationId: $citationId, ')
           ..write('noteId: $noteId, ')
           ..write('templateOrdinal: $templateOrdinal, ')
-          ..write('isSuspended: $isSuspended, ')
-          ..write('isBuried: $isBuried, ')
-          ..write('buriedUntil: $buriedUntil, ')
-          ..write('lapseCount: $lapseCount, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -6234,9 +5143,6 @@ class AssetItemsCompanion extends UpdateCompanion<AssetItem> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $DeckConfigItemsTable deckConfigItems = $DeckConfigItemsTable(
-    this,
-  );
   late final $DeckItemsTable deckItems = $DeckItemsTable(this);
   late final $SourceItemsTable sourceItems = $SourceItemsTable(this);
   late final $SourceItemBlobsTable sourceItemBlobs = $SourceItemBlobsTable(
@@ -6255,7 +5161,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-    deckConfigItems,
     deckItems,
     sourceItems,
     sourceItemBlobs,
@@ -6268,517 +5173,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ];
 }
 
-typedef $$DeckConfigItemsTableCreateCompanionBuilder =
-    DeckConfigItemsCompanion Function({
-      required String id,
-      Value<String> name,
-      Value<int> newCardsPerDay,
-      Value<int> newCardOrder,
-      Value<int> reviewsPerDay,
-      Value<int> reviewOrder,
-      Value<String> learningSteps,
-      Value<String> relearningSteps,
-      Value<int> graduatingInterval,
-      Value<int> easyInterval,
-      Value<int> maxInterval,
-      Value<double> desiredRetention,
-      Value<bool> burySiblings,
-      Value<int> leechThreshold,
-      Value<int> rowid,
-    });
-typedef $$DeckConfigItemsTableUpdateCompanionBuilder =
-    DeckConfigItemsCompanion Function({
-      Value<String> id,
-      Value<String> name,
-      Value<int> newCardsPerDay,
-      Value<int> newCardOrder,
-      Value<int> reviewsPerDay,
-      Value<int> reviewOrder,
-      Value<String> learningSteps,
-      Value<String> relearningSteps,
-      Value<int> graduatingInterval,
-      Value<int> easyInterval,
-      Value<int> maxInterval,
-      Value<double> desiredRetention,
-      Value<bool> burySiblings,
-      Value<int> leechThreshold,
-      Value<int> rowid,
-    });
-
-final class $$DeckConfigItemsTableReferences
-    extends
-        BaseReferences<_$AppDatabase, $DeckConfigItemsTable, DeckConfigItem> {
-  $$DeckConfigItemsTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static MultiTypedResultKey<$DeckItemsTable, List<DeckItem>>
-  _deckItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.deckItems,
-    aliasName: $_aliasNameGenerator(
-      db.deckConfigItems.id,
-      db.deckItems.configId,
-    ),
-  );
-
-  $$DeckItemsTableProcessedTableManager get deckItemsRefs {
-    final manager = $$DeckItemsTableTableManager(
-      $_db,
-      $_db.deckItems,
-    ).filter((f) => f.configId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_deckItemsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
-class $$DeckConfigItemsTableFilterComposer
-    extends Composer<_$AppDatabase, $DeckConfigItemsTable> {
-  $$DeckConfigItemsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get name => $composableBuilder(
-    column: $table.name,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get newCardsPerDay => $composableBuilder(
-    column: $table.newCardsPerDay,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get newCardOrder => $composableBuilder(
-    column: $table.newCardOrder,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get reviewsPerDay => $composableBuilder(
-    column: $table.reviewsPerDay,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get reviewOrder => $composableBuilder(
-    column: $table.reviewOrder,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get learningSteps => $composableBuilder(
-    column: $table.learningSteps,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get relearningSteps => $composableBuilder(
-    column: $table.relearningSteps,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get graduatingInterval => $composableBuilder(
-    column: $table.graduatingInterval,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get easyInterval => $composableBuilder(
-    column: $table.easyInterval,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get maxInterval => $composableBuilder(
-    column: $table.maxInterval,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get desiredRetention => $composableBuilder(
-    column: $table.desiredRetention,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get burySiblings => $composableBuilder(
-    column: $table.burySiblings,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get leechThreshold => $composableBuilder(
-    column: $table.leechThreshold,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  Expression<bool> deckItemsRefs(
-    Expression<bool> Function($$DeckItemsTableFilterComposer f) f,
-  ) {
-    final $$DeckItemsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.deckItems,
-      getReferencedColumn: (t) => t.configId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$DeckItemsTableFilterComposer(
-            $db: $db,
-            $table: $db.deckItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$DeckConfigItemsTableOrderingComposer
-    extends Composer<_$AppDatabase, $DeckConfigItemsTable> {
-  $$DeckConfigItemsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get name => $composableBuilder(
-    column: $table.name,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get newCardsPerDay => $composableBuilder(
-    column: $table.newCardsPerDay,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get newCardOrder => $composableBuilder(
-    column: $table.newCardOrder,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get reviewsPerDay => $composableBuilder(
-    column: $table.reviewsPerDay,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get reviewOrder => $composableBuilder(
-    column: $table.reviewOrder,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get learningSteps => $composableBuilder(
-    column: $table.learningSteps,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get relearningSteps => $composableBuilder(
-    column: $table.relearningSteps,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get graduatingInterval => $composableBuilder(
-    column: $table.graduatingInterval,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get easyInterval => $composableBuilder(
-    column: $table.easyInterval,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get maxInterval => $composableBuilder(
-    column: $table.maxInterval,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get desiredRetention => $composableBuilder(
-    column: $table.desiredRetention,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get burySiblings => $composableBuilder(
-    column: $table.burySiblings,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get leechThreshold => $composableBuilder(
-    column: $table.leechThreshold,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$DeckConfigItemsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $DeckConfigItemsTable> {
-  $$DeckConfigItemsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
-
-  GeneratedColumn<int> get newCardsPerDay => $composableBuilder(
-    column: $table.newCardsPerDay,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get newCardOrder => $composableBuilder(
-    column: $table.newCardOrder,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get reviewsPerDay => $composableBuilder(
-    column: $table.reviewsPerDay,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get reviewOrder => $composableBuilder(
-    column: $table.reviewOrder,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get learningSteps => $composableBuilder(
-    column: $table.learningSteps,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get relearningSteps => $composableBuilder(
-    column: $table.relearningSteps,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get graduatingInterval => $composableBuilder(
-    column: $table.graduatingInterval,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get easyInterval => $composableBuilder(
-    column: $table.easyInterval,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get maxInterval => $composableBuilder(
-    column: $table.maxInterval,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get desiredRetention => $composableBuilder(
-    column: $table.desiredRetention,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get burySiblings => $composableBuilder(
-    column: $table.burySiblings,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get leechThreshold => $composableBuilder(
-    column: $table.leechThreshold,
-    builder: (column) => column,
-  );
-
-  Expression<T> deckItemsRefs<T extends Object>(
-    Expression<T> Function($$DeckItemsTableAnnotationComposer a) f,
-  ) {
-    final $$DeckItemsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.deckItems,
-      getReferencedColumn: (t) => t.configId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$DeckItemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.deckItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$DeckConfigItemsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $DeckConfigItemsTable,
-          DeckConfigItem,
-          $$DeckConfigItemsTableFilterComposer,
-          $$DeckConfigItemsTableOrderingComposer,
-          $$DeckConfigItemsTableAnnotationComposer,
-          $$DeckConfigItemsTableCreateCompanionBuilder,
-          $$DeckConfigItemsTableUpdateCompanionBuilder,
-          (DeckConfigItem, $$DeckConfigItemsTableReferences),
-          DeckConfigItem,
-          PrefetchHooks Function({bool deckItemsRefs})
-        > {
-  $$DeckConfigItemsTableTableManager(
-    _$AppDatabase db,
-    $DeckConfigItemsTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$DeckConfigItemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$DeckConfigItemsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$DeckConfigItemsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String> name = const Value.absent(),
-                Value<int> newCardsPerDay = const Value.absent(),
-                Value<int> newCardOrder = const Value.absent(),
-                Value<int> reviewsPerDay = const Value.absent(),
-                Value<int> reviewOrder = const Value.absent(),
-                Value<String> learningSteps = const Value.absent(),
-                Value<String> relearningSteps = const Value.absent(),
-                Value<int> graduatingInterval = const Value.absent(),
-                Value<int> easyInterval = const Value.absent(),
-                Value<int> maxInterval = const Value.absent(),
-                Value<double> desiredRetention = const Value.absent(),
-                Value<bool> burySiblings = const Value.absent(),
-                Value<int> leechThreshold = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => DeckConfigItemsCompanion(
-                id: id,
-                name: name,
-                newCardsPerDay: newCardsPerDay,
-                newCardOrder: newCardOrder,
-                reviewsPerDay: reviewsPerDay,
-                reviewOrder: reviewOrder,
-                learningSteps: learningSteps,
-                relearningSteps: relearningSteps,
-                graduatingInterval: graduatingInterval,
-                easyInterval: easyInterval,
-                maxInterval: maxInterval,
-                desiredRetention: desiredRetention,
-                burySiblings: burySiblings,
-                leechThreshold: leechThreshold,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String id,
-                Value<String> name = const Value.absent(),
-                Value<int> newCardsPerDay = const Value.absent(),
-                Value<int> newCardOrder = const Value.absent(),
-                Value<int> reviewsPerDay = const Value.absent(),
-                Value<int> reviewOrder = const Value.absent(),
-                Value<String> learningSteps = const Value.absent(),
-                Value<String> relearningSteps = const Value.absent(),
-                Value<int> graduatingInterval = const Value.absent(),
-                Value<int> easyInterval = const Value.absent(),
-                Value<int> maxInterval = const Value.absent(),
-                Value<double> desiredRetention = const Value.absent(),
-                Value<bool> burySiblings = const Value.absent(),
-                Value<int> leechThreshold = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => DeckConfigItemsCompanion.insert(
-                id: id,
-                name: name,
-                newCardsPerDay: newCardsPerDay,
-                newCardOrder: newCardOrder,
-                reviewsPerDay: reviewsPerDay,
-                reviewOrder: reviewOrder,
-                learningSteps: learningSteps,
-                relearningSteps: relearningSteps,
-                graduatingInterval: graduatingInterval,
-                easyInterval: easyInterval,
-                maxInterval: maxInterval,
-                desiredRetention: desiredRetention,
-                burySiblings: burySiblings,
-                leechThreshold: leechThreshold,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$DeckConfigItemsTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback: ({deckItemsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (deckItemsRefs) db.deckItems],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (deckItemsRefs)
-                    await $_getPrefetchedData<
-                      DeckConfigItem,
-                      $DeckConfigItemsTable,
-                      DeckItem
-                    >(
-                      currentTable: table,
-                      referencedTable: $$DeckConfigItemsTableReferences
-                          ._deckItemsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$DeckConfigItemsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).deckItemsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.configId == item.id),
-                      typedResults: items,
-                    ),
-                ];
-              },
-            );
-          },
-        ),
-      );
-}
-
-typedef $$DeckConfigItemsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $DeckConfigItemsTable,
-      DeckConfigItem,
-      $$DeckConfigItemsTableFilterComposer,
-      $$DeckConfigItemsTableOrderingComposer,
-      $$DeckConfigItemsTableAnnotationComposer,
-      $$DeckConfigItemsTableCreateCompanionBuilder,
-      $$DeckConfigItemsTableUpdateCompanionBuilder,
-      (DeckConfigItem, $$DeckConfigItemsTableReferences),
-      DeckConfigItem,
-      PrefetchHooks Function({bool deckItemsRefs})
-    >;
 typedef $$DeckItemsTableCreateCompanionBuilder =
     DeckItemsCompanion Function({
       required String id,
       Value<String?> parentId,
-      Value<String?> configId,
       required String name,
       Value<String?> description,
       Value<bool> isPinned,
@@ -6788,7 +5186,6 @@ typedef $$DeckItemsTableUpdateCompanionBuilder =
     DeckItemsCompanion Function({
       Value<String> id,
       Value<String?> parentId,
-      Value<String?> configId,
       Value<String> name,
       Value<String?> description,
       Value<bool> isPinned,
@@ -6812,25 +5209,6 @@ final class $$DeckItemsTableReferences
       $_db.deckItems,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_parentIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static $DeckConfigItemsTable _configIdTable(_$AppDatabase db) =>
-      db.deckConfigItems.createAlias(
-        $_aliasNameGenerator(db.deckItems.configId, db.deckConfigItems.id),
-      );
-
-  $$DeckConfigItemsTableProcessedTableManager? get configId {
-    final $_column = $_itemColumn<String>('config_id');
-    if ($_column == null) return null;
-    final manager = $$DeckConfigItemsTableTableManager(
-      $_db,
-      $_db.deckConfigItems,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_configIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -6935,29 +5313,6 @@ class $$DeckItemsTableFilterComposer
           }) => $$DeckItemsTableFilterComposer(
             $db: $db,
             $table: $db.deckItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$DeckConfigItemsTableFilterComposer get configId {
-    final $$DeckConfigItemsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.configId,
-      referencedTable: $db.deckConfigItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$DeckConfigItemsTableFilterComposer(
-            $db: $db,
-            $table: $db.deckConfigItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -7094,29 +5449,6 @@ class $$DeckItemsTableOrderingComposer
     );
     return composer;
   }
-
-  $$DeckConfigItemsTableOrderingComposer get configId {
-    final $$DeckConfigItemsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.configId,
-      referencedTable: $db.deckConfigItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$DeckConfigItemsTableOrderingComposer(
-            $db: $db,
-            $table: $db.deckConfigItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$DeckItemsTableAnnotationComposer
@@ -7156,29 +5488,6 @@ class $$DeckItemsTableAnnotationComposer
           }) => $$DeckItemsTableAnnotationComposer(
             $db: $db,
             $table: $db.deckItems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$DeckConfigItemsTableAnnotationComposer get configId {
-    final $$DeckConfigItemsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.configId,
-      referencedTable: $db.deckConfigItems,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$DeckConfigItemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.deckConfigItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -7279,7 +5588,6 @@ class $$DeckItemsTableTableManager
           DeckItem,
           PrefetchHooks Function({
             bool parentId,
-            bool configId,
             bool sourceItemsRefs,
             bool noteItemsRefs,
             bool cardItemsRefs,
@@ -7300,7 +5608,6 @@ class $$DeckItemsTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
-                Value<String?> configId = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<bool> isPinned = const Value.absent(),
@@ -7308,7 +5615,6 @@ class $$DeckItemsTableTableManager
               }) => DeckItemsCompanion(
                 id: id,
                 parentId: parentId,
-                configId: configId,
                 name: name,
                 description: description,
                 isPinned: isPinned,
@@ -7318,7 +5624,6 @@ class $$DeckItemsTableTableManager
               ({
                 required String id,
                 Value<String?> parentId = const Value.absent(),
-                Value<String?> configId = const Value.absent(),
                 required String name,
                 Value<String?> description = const Value.absent(),
                 Value<bool> isPinned = const Value.absent(),
@@ -7326,7 +5631,6 @@ class $$DeckItemsTableTableManager
               }) => DeckItemsCompanion.insert(
                 id: id,
                 parentId: parentId,
-                configId: configId,
                 name: name,
                 description: description,
                 isPinned: isPinned,
@@ -7343,7 +5647,6 @@ class $$DeckItemsTableTableManager
           prefetchHooksCallback:
               ({
                 parentId = false,
-                configId = false,
                 sourceItemsRefs = false,
                 noteItemsRefs = false,
                 cardItemsRefs = false,
@@ -7380,19 +5683,6 @@ class $$DeckItemsTableTableManager
                                         ._parentIdTable(db),
                                     referencedColumn: $$DeckItemsTableReferences
                                         ._parentIdTable(db)
-                                        .id,
-                                  )
-                                  as T;
-                        }
-                        if (configId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.configId,
-                                    referencedTable: $$DeckItemsTableReferences
-                                        ._configIdTable(db),
-                                    referencedColumn: $$DeckItemsTableReferences
-                                        ._configIdTable(db)
                                         .id,
                                   )
                                   as T;
@@ -7487,7 +5777,6 @@ typedef $$DeckItemsTableProcessedTableManager =
       DeckItem,
       PrefetchHooks Function({
         bool parentId,
-        bool configId,
         bool sourceItemsRefs,
         bool noteItemsRefs,
         bool cardItemsRefs,
@@ -9678,10 +7967,6 @@ typedef $$CardItemsTableCreateCompanionBuilder =
       Value<String?> citationId,
       Value<String?> noteId,
       Value<int?> templateOrdinal,
-      Value<bool> isSuspended,
-      Value<bool> isBuried,
-      Value<DateTime?> buriedUntil,
-      Value<int> lapseCount,
       Value<DateTime?> createdAt,
       Value<DateTime?> updatedAt,
       Value<int> rowid,
@@ -9711,10 +7996,6 @@ typedef $$CardItemsTableUpdateCompanionBuilder =
       Value<String?> citationId,
       Value<String?> noteId,
       Value<int?> templateOrdinal,
-      Value<bool> isSuspended,
-      Value<bool> isBuried,
-      Value<DateTime?> buriedUntil,
-      Value<int> lapseCount,
       Value<DateTime?> createdAt,
       Value<DateTime?> updatedAt,
       Value<int> rowid,
@@ -9902,26 +8183,6 @@ class $$CardItemsTableFilterComposer
 
   ColumnFilters<int> get templateOrdinal => $composableBuilder(
     column: $table.templateOrdinal,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get isSuspended => $composableBuilder(
-    column: $table.isSuspended,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get isBuried => $composableBuilder(
-    column: $table.isBuried,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get buriedUntil => $composableBuilder(
-    column: $table.buriedUntil,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get lapseCount => $composableBuilder(
-    column: $table.lapseCount,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10133,26 +8394,6 @@ class $$CardItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get isSuspended => $composableBuilder(
-    column: $table.isSuspended,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get isBuried => $composableBuilder(
-    column: $table.isBuried,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get buriedUntil => $composableBuilder(
-    column: $table.buriedUntil,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get lapseCount => $composableBuilder(
-    column: $table.lapseCount,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -10354,24 +8595,6 @@ class $$CardItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get isSuspended => $composableBuilder(
-    column: $table.isSuspended,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get isBuried =>
-      $composableBuilder(column: $table.isBuried, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get buriedUntil => $composableBuilder(
-    column: $table.buriedUntil,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get lapseCount => $composableBuilder(
-    column: $table.lapseCount,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -10528,10 +8751,6 @@ class $$CardItemsTableTableManager
                 Value<String?> citationId = const Value.absent(),
                 Value<String?> noteId = const Value.absent(),
                 Value<int?> templateOrdinal = const Value.absent(),
-                Value<bool> isSuspended = const Value.absent(),
-                Value<bool> isBuried = const Value.absent(),
-                Value<DateTime?> buriedUntil = const Value.absent(),
-                Value<int> lapseCount = const Value.absent(),
                 Value<DateTime?> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -10559,10 +8778,6 @@ class $$CardItemsTableTableManager
                 citationId: citationId,
                 noteId: noteId,
                 templateOrdinal: templateOrdinal,
-                isSuspended: isSuspended,
-                isBuried: isBuried,
-                buriedUntil: buriedUntil,
-                lapseCount: lapseCount,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -10592,10 +8807,6 @@ class $$CardItemsTableTableManager
                 Value<String?> citationId = const Value.absent(),
                 Value<String?> noteId = const Value.absent(),
                 Value<int?> templateOrdinal = const Value.absent(),
-                Value<bool> isSuspended = const Value.absent(),
-                Value<bool> isBuried = const Value.absent(),
-                Value<DateTime?> buriedUntil = const Value.absent(),
-                Value<int> lapseCount = const Value.absent(),
                 Value<DateTime?> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -10623,10 +8834,6 @@ class $$CardItemsTableTableManager
                 citationId: citationId,
                 noteId: noteId,
                 templateOrdinal: templateOrdinal,
-                isSuspended: isSuspended,
-                isBuried: isBuried,
-                buriedUntil: buriedUntil,
-                lapseCount: lapseCount,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -11244,8 +9451,6 @@ typedef $$AssetItemsTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$DeckConfigItemsTableTableManager get deckConfigItems =>
-      $$DeckConfigItemsTableTableManager(_db, _db.deckConfigItems);
   $$DeckItemsTableTableManager get deckItems =>
       $$DeckItemsTableTableManager(_db, _db.deckItems);
   $$SourceItemsTableTableManager get sourceItems =>

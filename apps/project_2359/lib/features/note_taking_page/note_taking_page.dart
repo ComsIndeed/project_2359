@@ -8,7 +8,7 @@ import 'package:project_2359/core/widgets/adaptive_pane_layout.dart';
 import 'package:project_2359/features/sources_page/source_service.dart';
 import 'package:project_2359/core/services/draft_service.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
-import 'package:project_2359/features/collection_page/widgets/shared_widgets.dart';
+import 'package:project_2359/features/deck_page/widgets/shared_widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/core/enums/media_type.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -23,11 +23,7 @@ class NoteTakingPage extends StatefulWidget {
   final String? deckId;
   final String? draftId;
 
-  const NoteTakingPage({
-    super.key,
-    this.deckId,
-    this.draftId,
-  });
+  const NoteTakingPage({super.key, this.deckId, this.draftId});
 
   @override
   State<NoteTakingPage> createState() => _NoteTakingPageState();
@@ -52,21 +48,20 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
       existingDraftId: widget.draftId,
       existingDeckId: widget.deckId,
     );
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateTitleBar();
     });
- 
+
     if (widget.deckId != null) {
       final sourceService = SourceService(db);
-      _sourcesSub = sourceService
-          .watchSourcesByDeckId(widget.deckId!)
-          .listen((sources) {
-            if (mounted) setState(() => _sources = sources);
-          });
+      _sourcesSub = sourceService.watchSourcesByDeckId(widget.deckId!).listen((
+        sources,
+      ) {
+        if (mounted) setState(() => _sources = sources);
+      });
     }
   }
-
 
   void _onControllerChanged() {
     if (mounted) setState(() {});
@@ -140,7 +135,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
               final name = nameController.text.trim();
               if (name.isNotEmpty) {
                 await _controller.saveAsDeck(name);
-                if (mounted) {
+                if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Deck saved successfully!')),
@@ -166,22 +161,23 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: cs.onSurface.withValues(alpha: 0.05),
-        ),
+        border: Border.all(color: cs.onSurface.withValues(alpha: 0.05)),
       ),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (type == NoteType.basic || type == NoteType.basicAndReversed) ...[
+            if (type == NoteType.basic ||
+                type == NoteType.basicAndReversed) ...[
               _buildPreviewField("Front", draft.front.value ?? ""),
               const SizedBox(height: 16),
               _buildPreviewField("Back", draft.back.value ?? ""),
             ] else if (type == NoteType.cloze) ...[
               _buildPreviewField("Content", draft.content.value ?? ""),
             ] else if (type == NoteType.imageOcclusion) ...[
-              const Center(child: Text("Image Occlusion Preview Not Supported")),
+              const Center(
+                child: Text("Image Occlusion Preview Not Supported"),
+              ),
             ],
           ],
         ),
@@ -205,9 +201,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
         const SizedBox(height: 4),
         Text(
           content.isEmpty ? "No content" : content,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            height: 1.5,
-          ),
+          style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
         ),
       ],
     );
@@ -219,13 +213,17 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
 
     return ChangeNotifierProvider.value(
       value: _controller,
-      child: isDesktop ? _buildDesktopLayout(context) : _buildMobileLayout(context),
+      child: isDesktop
+          ? _buildDesktopLayout(context)
+          : _buildMobileLayout(context),
     );
   }
 
   Widget _buildDesktopLayout(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final masterWidth = _controller.isMaximized ? screenWidth * 0.8 : screenWidth * 0.25;
+    final masterWidth = _controller.isMaximized
+        ? screenWidth * 0.8
+        : screenWidth * 0.25;
 
     return Scaffold(
       body: AdaptivePaneLayout(
@@ -281,7 +279,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                     IconButton(
                       onPressed: () => _controller.toggleMaximize(),
                       icon: Icon(
-                        _controller.isMaximized ? Icons.fullscreen_exit : Icons.fullscreen,
+                        _controller.isMaximized
+                            ? Icons.fullscreen_exit
+                            : Icons.fullscreen,
                       ),
                       tooltip: _controller.isMaximized ? 'Restore' : 'Maximize',
                     ),
@@ -301,24 +301,37 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                 children: [
                   PageView(
                     controller: _controller.pageController,
-                    onPageChanged: (index) => _controller.setTabIndex(index, animate: false),
+                    onPageChanged: (index) =>
+                        _controller.setTabIndex(index, animate: false),
                     children: [
                       _buildNotesTab(),
                       _buildSourcesTab(),
                       _buildDraftTab(),
                     ],
                   ),
-                  if (_controller.selectedTabIndex == 2 && _controller.notes.isNotEmpty)
+                  if (_controller.selectedTabIndex == 2 &&
+                      _controller.notes.isNotEmpty)
                     Positioned(
                       bottom: 0,
                       right: 0,
-                      child: FloatingActionButton.extended(
-                        onPressed: _showSaveDeckDialog,
-                        icon: const Icon(Icons.check_circle_rounded),
-                        label: const Text('Save Deck'),
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                      ).animate().scale(curve: Curves.easeOutBack, duration: const Duration(milliseconds: 400)).fadeIn(),
+                      child:
+                          FloatingActionButton.extended(
+                                onPressed: _showSaveDeckDialog,
+                                icon: const Icon(Icons.check_circle_rounded),
+                                label: const Text('Save Deck'),
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
+                                foregroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimary,
+                              )
+                              .animate()
+                              .scale(
+                                curve: Curves.easeOutBack,
+                                duration: const Duration(milliseconds: 400),
+                              )
+                              .fadeIn(),
                     ),
                 ],
               ),
@@ -344,7 +357,10 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           AnimatedAlign(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOutQuart,
-            alignment: Alignment(-1.0 + (_controller.selectedTabIndex * 1.0), 0),
+            alignment: Alignment(
+              -1.0 + (_controller.selectedTabIndex * 1.0),
+              0,
+            ),
             child: FractionallySizedBox(
               widthFactor: 1 / 3,
               child: Container(
@@ -496,18 +512,27 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     );
   }
 
-
   Widget _buildDraftTab() {
     if (_controller.notes.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.note_alt_outlined, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2)),
+            Icon(
+              Icons.note_alt_outlined,
+              size: 48,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.2),
+            ),
             const SizedBox(height: 16),
             Text(
               "No drafts yet",
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
             ),
           ],
         ),
@@ -520,11 +545,7 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
       itemBuilder: (context, index) {
         final draft = _controller.notes[index];
         final type = draft.noteType.value;
-        return _DraftTile(
-          index: index,
-          type: type,
-          draft: draft,
-        );
+        return _DraftTile(index: index, type: type, draft: draft);
       },
     );
   }
@@ -546,7 +567,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
             icon: const Icon(Icons.add_rounded),
             label: const Text('Create Note'),
             style: FilledButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ),
@@ -618,7 +641,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                 child: Text(
                   _controller.selectedText!,
                   maxLines: _controller.isQuoteExpanded ? null : 2,
-                  overflow: _controller.isQuoteExpanded ? null : TextOverflow.ellipsis,
+                  overflow: _controller.isQuoteExpanded
+                      ? null
+                      : TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: cs.onSurface.withValues(alpha: 0.7),
                     height: 1.4,
@@ -643,9 +668,10 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
         return _buildImageOcclusionFields();
       case NoteType.custom:
         // TODO: Implement custom field editor if needed for manual creation
-        return const Center(child: Text("Custom note type - editing not yet supported"));
+        return const Center(
+          child: Text("Custom note type - editing not yet supported"),
+        );
     }
-    return const SizedBox.shrink();
   }
 
   Widget _buildBasicFields() {
@@ -865,7 +891,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeOutQuart,
                 alignment: Alignment(
-                  -1.0 + (_controller.selectedNoteType.index * (2.0 / (types.length - 1))),
+                  -1.0 +
+                      (_controller.selectedNoteType.index *
+                          (2.0 / (types.length - 1))),
                   0,
                 ),
                 child: Container(
@@ -1136,7 +1164,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 visualDensity: VisualDensity.compact,
-                tooltip: _controller.isInverted ? "Light Mode" : "Dark Mode (Invert)",
+                tooltip: _controller.isInverted
+                    ? "Light Mode"
+                    : "Dark Mode (Invert)",
               ),
               const SizedBox(width: 8),
               IconButton(
@@ -1244,10 +1274,26 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     if (_controller.isInverted) {
       return ColorFiltered(
         colorFilter: const ColorFilter.matrix([
-          -1, 0, 0, 0, 255,
-          0, -1, 0, 0, 255,
-          0, 0, -1, 0, 255,
-          0, 0, 0, 1, 0,
+          -1,
+          0,
+          0,
+          0,
+          255,
+          0,
+          -1,
+          0,
+          0,
+          255,
+          0,
+          0,
+          -1,
+          0,
+          255,
+          0,
+          0,
+          0,
+          1,
+          0,
         ]),
         child: viewer,
       );
@@ -1339,8 +1385,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final previewIndex = _controller.clickedDraftIndex ?? _controller.hoveredDraftIndex;
-    
+    final previewIndex =
+        _controller.clickedDraftIndex ?? _controller.hoveredDraftIndex;
+
     return Positioned(
       bottom: 24,
       left: 64,
@@ -1350,18 +1397,18 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
           duration: const Duration(milliseconds: 200),
           transitionBuilder: (Widget child, Animation<double> animation) {
             return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 1),
-                end: Offset.zero,
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-                reverseCurve: Curves.easeInCubic,
-              )),
-              child: FadeTransition(
-                opacity: animation,
-                child: child,
-              ),
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                      reverseCurve: Curves.easeInCubic,
+                    ),
+                  ),
+              child: FadeTransition(opacity: animation, child: child),
             );
           },
           child: (previewIndex == null)
@@ -1412,23 +1459,24 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                                 ),
                               ),
                               const SizedBox(width: 16),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Note Preview",
-                                      style: theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Note Preview",
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    "Draft #${previewIndex + 1}",
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: cs.onSurface.withValues(
+                                        alpha: 0.5,
                                       ),
                                     ),
-                                    Text(
-                                      "Draft #${previewIndex + 1}",
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: cs.onSurface.withValues(alpha: 0.5),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
+                              ),
                               const Spacer(),
                               if (_controller.clickedDraftIndex != null) ...[
                                 TextButton.icon(
@@ -1449,7 +1497,9 @@ class _NoteTakingPageState extends State<NoteTakingPage> {
                           ),
                           const SizedBox(height: 24),
                           Expanded(
-                            child: _buildPreviewContent(_controller.notes[previewIndex]),
+                            child: _buildPreviewContent(
+                              _controller.notes[previewIndex],
+                            ),
                           ),
                         ],
                       ),
@@ -1679,7 +1729,7 @@ class _DraftTile extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final controller = context.watch<NoteTakingController>();
-    
+
     final isHovered = controller.hoveredDraftIndex == index;
     final isClicked = controller.clickedDraftIndex == index;
     final isOcclusion = type == NoteType.imageOcclusion;
@@ -1692,7 +1742,8 @@ class _DraftTile extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => controller.setClickedDraftIndex(isClicked ? null : index),
+            onTap: () =>
+                controller.setClickedDraftIndex(isClicked ? null : index),
             borderRadius: BorderRadius.circular(16),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 250),
@@ -1702,15 +1753,15 @@ class _DraftTile extends StatelessWidget {
                 color: isClicked
                     ? cs.primary.withValues(alpha: 0.08)
                     : isHovered
-                        ? cs.surfaceContainerHighest.withValues(alpha: 0.5)
-                        : cs.surfaceContainerHighest.withValues(alpha: 0.2),
+                    ? cs.surfaceContainerHighest.withValues(alpha: 0.5)
+                    : cs.surfaceContainerHighest.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isClicked
                       ? cs.primary.withValues(alpha: 0.4)
                       : isHovered
-                          ? cs.outlineVariant.withValues(alpha: 0.5)
-                          : cs.outlineVariant.withValues(alpha: 0.1),
+                      ? cs.outlineVariant.withValues(alpha: 0.5)
+                      : cs.outlineVariant.withValues(alpha: 0.1),
                   width: isClicked ? 1.5 : 1,
                 ),
               ),
@@ -1733,16 +1784,17 @@ class _DraftTile extends StatelessWidget {
                     duration: const Duration(milliseconds: 300),
                     switchInCurve: Curves.easeOutCubic,
                     switchOutCurve: Curves.easeInCubic,
-                    transitionBuilder: (Widget child, Animation<double> animation) {
-                      return SizeTransition(
-                        sizeFactor: animation,
-                        axisAlignment: -1,
-                        child: FadeTransition(
-                          opacity: animation,
-                          child: child,
-                        ),
-                      );
-                    },
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                          return SizeTransition(
+                            sizeFactor: animation,
+                            axisAlignment: -1,
+                            child: FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            ),
+                          );
+                        },
                     child: isClicked
                         ? Column(
                             key: const ValueKey('controls'),
@@ -1758,7 +1810,8 @@ class _DraftTile extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   TextButton.icon(
-                                    onPressed: () => controller.removeDraftNote(index),
+                                    onPressed: () =>
+                                        controller.removeDraftNote(index),
                                     icon: const Icon(
                                       Icons.delete_outline,
                                       size: 18,
@@ -1834,7 +1887,9 @@ class _DraftTile extends StatelessWidget {
       width: 42,
       height: 42,
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest.withValues(alpha: isActive ? 0.8 : 0.4),
+        color: cs.surfaceContainerHighest.withValues(
+          alpha: isActive ? 0.8 : 0.4,
+        ),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(

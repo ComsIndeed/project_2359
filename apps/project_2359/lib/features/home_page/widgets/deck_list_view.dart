@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/widgets/project_card_tile.dart';
-import 'package:project_2359/features/collection_page/collection_page.dart';
+import 'package:project_2359/features/deck_page/deck_page.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -71,7 +71,9 @@ class DeckSection extends StatelessWidget {
 
         return Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: isCollapsed ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+          crossAxisAlignment: isCollapsed
+              ? CrossAxisAlignment.center
+              : CrossAxisAlignment.start,
           children: [
             if (!isCollapsed) SectionHeader(title: title),
             ListView.builder(
@@ -89,19 +91,25 @@ class DeckSection extends StatelessWidget {
                       }
                     },
                     child: ProjectCardTile(
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.5),
                       isCollapsed: isCollapsed,
                       leading: FaIcon(
-                        deck.isPinned ? FontAwesomeIcons.thumbtack : FontAwesomeIcons.folder,
+                        deck.isPinned
+                            ? FontAwesomeIcons.thumbtack
+                            : FontAwesomeIcons.folder,
                         size: 14,
-                        color: deck.isPinned ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                        color: deck.isPinned
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface.withValues(
+                                alpha: 0.4,
+                              ),
                       ),
-                      title: Text(
-                        deck.name,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      title: Text(deck.name, overflow: TextOverflow.ellipsis),
                       subtitle: Text(deck.description ?? "Study Deck"),
-                      isSelected: selectedIds.contains(deck.id) || activeDeckId == deck.id,
+                      isSelected:
+                          selectedIds.contains(deck.id) ||
+                          activeDeckId == deck.id,
                       isCompact: isDesktop,
                       onTap: isSelecting
                           ? () => onToggleSelection(deck.id)

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:project_2359/core/app_controller.dart';
-import 'package:project_2359/app_theme.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import 'package:project_2359/app_database.dart';
@@ -20,7 +19,7 @@ import 'package:project_2359/core/widgets/project_back_button.dart';
 import 'package:project_2359/core/widgets/due_cards_tiles.dart';
 import 'package:project_2359/core/widgets/selection_action_bar.dart';
 import 'package:project_2359/core/widgets/adaptive_pane_layout.dart';
-import 'package:project_2359/features/collection_page/widgets/shared_widgets.dart';
+import 'package:project_2359/features/deck_page/widgets/shared_widgets.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -31,11 +30,9 @@ import 'package:project_2359/features/note_taking_page/note_taking_page.dart';
 import 'package:project_2359/features/study_page/study_page.dart';
 import 'package:project_2359/features/study_page/widgets/study_session_setup_sheet.dart';
 import 'package:project_2359/core/tables/study_session_events.dart';
-import 'package:project_2359/features/settings_page/deck_settings_page.dart';
-import 'package:project_2359/features/analytics_page/deck_analytics_page.dart';
 
 class DeckPage extends StatefulWidget {
-  final String deckId; 
+  final String deckId;
   final String initialDeckName;
   final bool isNested;
 
@@ -223,18 +220,18 @@ class _DeckPageState extends State<DeckPage> {
     });
 
     final draftService = context.read<AppController>().draftService;
-    _draftSub = draftService
-        .watchDraftsByDeckId(widget.deckId)
-        .listen((drafts) {
-          if (mounted) setState(() => _allDrafts = drafts);
-        });
+    _draftSub = draftService.watchDraftsByDeckId(widget.deckId).listen((
+      drafts,
+    ) {
+      if (mounted) setState(() => _allDrafts = drafts);
+    });
 
     final sourceService = context.read<SourceService>();
-    _sourcesSub = sourceService
-        .watchSourcesByDeckId(widget.deckId)
-        .listen((sources) {
-          if (mounted) setState(() => _currentSources = sources);
-        });
+    _sourcesSub = sourceService.watchSourcesByDeckId(widget.deckId).listen((
+      sources,
+    ) {
+      if (mounted) setState(() => _currentSources = sources);
+    });
   }
 
   @override
@@ -252,18 +249,18 @@ class _DeckPageState extends State<DeckPage> {
 
       _draftSub?.cancel();
       final draftService = context.read<AppController>().draftService;
-      _draftSub = draftService
-          .watchDraftsByDeckId(widget.deckId)
-          .listen((drafts) {
-            if (mounted) setState(() => _allDrafts = drafts);
-          });
+      _draftSub = draftService.watchDraftsByDeckId(widget.deckId).listen((
+        drafts,
+      ) {
+        if (mounted) setState(() => _allDrafts = drafts);
+      });
 
       final sourceService = context.read<SourceService>();
-      _sourcesSub = sourceService
-          .watchSourcesByDeckId(widget.deckId)
-          .listen((sources) {
-            if (mounted) setState(() => _currentSources = sources);
-          });
+      _sourcesSub = sourceService.watchSourcesByDeckId(widget.deckId).listen((
+        sources,
+      ) {
+        if (mounted) setState(() => _currentSources = sources);
+      });
     }
   }
 
@@ -293,12 +290,11 @@ class _DeckPageState extends State<DeckPage> {
       master: (context, controller) => _buildMasterView(controller, false),
       masterCollapsed: (context, controller) =>
           _buildMasterView(controller, true),
-      detail: (context, controller) =>
-          _isStudyingDeck
-              ? _buildDeckStudyView()
-              : (_selectedDeckId != null
-                  ? _buildDetailView()
-                  : _buildEmptyDetail()),
+      detail: (context, controller) => _isStudyingDeck
+          ? _buildDeckStudyView()
+          : (_selectedDeckId != null
+                ? _buildDetailView()
+                : _buildEmptyDetail()),
     );
   }
 
@@ -311,7 +307,9 @@ class _DeckPageState extends State<DeckPage> {
         icon: FontAwesomeIcons.layerGroup,
         showBorder: false,
         showShadow: false,
-        backgroundColor: isDesktop ? Theme.of(context).colorScheme.surface : null,
+        backgroundColor: isDesktop
+            ? Theme.of(context).colorScheme.surface
+            : null,
         borderRadius: 0,
         isAnimated: !isDesktop,
         showPattern: !isDesktop,
@@ -345,10 +343,8 @@ class _DeckPageState extends State<DeckPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => StudyPage(
-                    deckId: id,
-                    title: "Deck Review",
-                  ),
+                  builder: (context) =>
+                      StudyPage(deckId: id, title: "Deck Review"),
                 ),
               );
             }
@@ -369,8 +365,9 @@ class _DeckPageState extends State<DeckPage> {
               _isStudyingDeck = false;
             });
 
-            final schedulingService =
-                context.read<AppController>().schedulingService;
+            final schedulingService = context
+                .read<AppController>()
+                .schedulingService;
 
             // Get counts for the setup sheet
             final dueCount = await schedulingService.getDueCount(deckId: id);
@@ -390,11 +387,8 @@ class _DeckPageState extends State<DeckPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => StudyPage(
-                        deckId: id,
-                        title: deck.name,
-                        mode: mode,
-                      ),
+                      builder: (context) =>
+                          StudyPage(deckId: id, title: deck.name, mode: mode),
                     ),
                   );
                 },
@@ -454,12 +448,12 @@ class _DeckPageState extends State<DeckPage> {
                 }
 
                 final isSources = _currentPageIndex == 1;
-                final String title =
-                    isSources ? "Import Sources" : "Create Cards";
-                final IconData mainIcon =
-                    isSources
-                        ? FontAwesomeIcons.layerGroup
-                        : FontAwesomeIcons.plus;
+                final String title = isSources
+                    ? "Import Sources"
+                    : "Create Cards";
+                final IconData mainIcon = isSources
+                    ? FontAwesomeIcons.layerGroup
+                    : FontAwesomeIcons.plus;
 
                 return IntrinsicHeight(
                   child: Row(
@@ -475,9 +469,8 @@ class _DeckPageState extends State<DeckPage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => NoteTakingPage(
-                                    deckId: widget.deckId,
-                                  ),
+                                  builder: (context) =>
+                                      NoteTakingPage(deckId: widget.deckId),
                                 ),
                               );
                             }
@@ -507,7 +500,9 @@ class _DeckPageState extends State<DeckPage> {
                       Container(
                         width: 1,
                         margin: const EdgeInsets.symmetric(vertical: 12),
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.1,
+                        ),
                       ),
                       Material(
                         color: Colors.transparent,
@@ -525,7 +520,9 @@ class _DeckPageState extends State<DeckPage> {
                             child: FaIcon(
                               FontAwesomeIcons.chevronUp,
                               size: 14,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.54,
+                              ),
                             ),
                           ),
                         ),
@@ -552,7 +549,9 @@ class _DeckPageState extends State<DeckPage> {
                               isSources ? "IMPORT OPTIONS" : "CREATION TOOLS",
                               style: theme.textTheme.labelSmall?.copyWith(
                                 fontWeight: FontWeight.w900,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                                color: theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.4,
+                                ),
                                 letterSpacing: 1.5,
                               ),
                             ),
@@ -563,7 +562,9 @@ class _DeckPageState extends State<DeckPage> {
                                 size: 16,
                               ),
                               onPressed: close,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.24),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.24,
+                              ),
                             ),
                           ],
                         ),
@@ -607,11 +608,17 @@ class _DeckPageState extends State<DeckPage> {
                         return [
                           SliverToBoxAdapter(
                             child: Container(
-                              padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                              padding: const EdgeInsets.fromLTRB(
+                                20,
+                                24,
+                                20,
+                                24,
+                              ),
                               decoration: BoxDecoration(
                                 border: Border(
                                   bottom: BorderSide(
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+                                    color: theme.colorScheme.onSurface
+                                        .withValues(alpha: 0.08),
                                     width: 1,
                                   ),
                                 ),
@@ -630,14 +637,12 @@ class _DeckPageState extends State<DeckPage> {
                           pinned: true,
                           delegate: _CollapsingHeaderDelegate(
                             deckName: deckName,
-                            topPadding:
-                                widget.isNested
-                                    ? 0
-                                    : MediaQuery.of(context).padding.top,
-                            onBack:
-                                widget.isNested
-                                    ? null
-                                    : () => Navigator.pop(context),
+                            topPadding: widget.isNested
+                                ? 0
+                                : MediaQuery.of(context).padding.top,
+                            onBack: widget.isNested
+                                ? null
+                                : () => Navigator.pop(context),
                             currentIndex: _currentPageIndex,
                             onPageRequested: _requestPage,
                           ),
@@ -682,7 +687,6 @@ class _DeckPageState extends State<DeckPage> {
       ),
     );
   }
-
 
   Widget _buildDetailView() {
     final deck = _allDecks.firstWhere((d) => d.id == _selectedDeckId);
@@ -947,7 +951,6 @@ class _CollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-
 class _HeaderCircleAction extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -1000,7 +1003,9 @@ class _HeaderCircleAction extends StatelessWidget {
               child: FaIcon(
                 icon,
                 size: 16,
-                color: isActive ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+                color: isActive
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -1048,7 +1053,6 @@ class _CompactIconButton extends StatelessWidget {
   }
 }
 
-
 class _CardsPage extends StatelessWidget {
   final List<DeckItem> decks;
   final List<CardCreationDraftItem> drafts;
@@ -1084,16 +1088,16 @@ class _CardsPage extends StatelessWidget {
         vertical: 12,
       ),
       child: Column(
-        crossAxisAlignment:
-            isCollapsed ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+        crossAxisAlignment: isCollapsed
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
         children: [
           if (!isCollapsed) ...[
             DeckDueCardsTile(
               deckId: deckId,
-              onTap:
-                  onStudyCollectionRequested != null
-                      ? () => onStudyCollectionRequested!(deckId)
-                      : null,
+              onTap: onStudyCollectionRequested != null
+                  ? () => onStudyCollectionRequested!(deckId)
+                  : null,
             ),
             const SizedBox(height: 16),
             if (drafts.isNotEmpty) ...[
@@ -1111,10 +1115,9 @@ class _CardsPage extends StatelessWidget {
                       child: SizedBox(
                         width: 240,
                         child: ProjectCardTile(
-                          backgroundColor:
-                              Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerHighest,
                           title: Text(
                             "New Draft ${draft.createdAt.split('T')[0]}",
                             style: const TextStyle(
@@ -1129,7 +1132,9 @@ class _CardsPage extends StatelessWidget {
                           leading: FaIcon(
                             FontAwesomeIcons.penToSquare,
                             size: 16,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.38,
+                            ),
                           ),
                           onTap: () {
                             Navigator.push(
@@ -1208,8 +1213,9 @@ class _SourcesPage extends StatelessWidget {
         vertical: 12,
       ),
       child: Column(
-        crossAxisAlignment:
-            isCollapsed ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
+        crossAxisAlignment: isCollapsed
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.stretch,
         children: [
           if (!isCollapsed) ...[
             const _SectionLabel(title: "Deck Sources"),
@@ -1246,45 +1252,50 @@ class _SourcesPage extends StatelessWidget {
                 for (var i = 0; i < sources.length; i++)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: ProjectCardTile(
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest
-                          .withValues(alpha: 0.5),
-                      isCollapsed: isCollapsed,
-                      minHeight: isCollapsed ? null : 100,
-                      title: Text(sources[i].label),
-                      subtitle: Row(
-                        children: [
-                          FaIcon(
-                            _getSourceIcon(sources[i].type),
-                            size: 10,
-                            color: cs.onSurface.withValues(alpha: 0.3),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            "${sources[i].type.name.toUpperCase()} | ${sources[i].extractedContent?.length ?? 0} chars",
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: cs.onSurface.withValues(alpha: 0.4),
-                            ),
-                          ),
-                        ],
-                      ),
-                      leading: const WizardSourcePagePreview(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SourcePageLoader(
-                              sourceId: sources[i].id,
-                              sourceLabel: sources[i].label,
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                        .animate()
-                        .fadeIn(delay: (i * 50).ms)
-                        .slideY(begin: 0.1, curve: Curves.easeOutQuad),
+                    child:
+                        ProjectCardTile(
+                              backgroundColor: theme
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withValues(alpha: 0.5),
+                              isCollapsed: isCollapsed,
+                              minHeight: isCollapsed ? null : 100,
+                              title: Text(sources[i].label),
+                              subtitle: Row(
+                                children: [
+                                  FaIcon(
+                                    _getSourceIcon(sources[i].type),
+                                    size: 10,
+                                    color: cs.onSurface.withValues(alpha: 0.3),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "${sources[i].type.name.toUpperCase()} | ${sources[i].extractedContent?.length ?? 0} chars",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: cs.onSurface.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              leading: const WizardSourcePagePreview(),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SourcePageLoader(
+                                      sourceId: sources[i].id,
+                                      sourceLabel: sources[i].label,
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                            .animate()
+                            .fadeIn(delay: (i * 50).ms)
+                            .slideY(begin: 0.1, curve: Curves.easeOutQuad),
                   ),
               ],
             ),
@@ -1333,7 +1344,9 @@ class _SettingsPage extends StatelessWidget {
           const _SectionLabel(title: "General"),
           const SizedBox(height: 12),
           ProjectListGroup(
-            backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+            backgroundColor: theme.colorScheme.onSurface.withValues(
+              alpha: 0.05,
+            ),
             children: [
               ProjectListTile.simple(
                 label: "Rename Deck",
@@ -1358,7 +1371,9 @@ class _SettingsPage extends StatelessWidget {
           const _SectionLabel(title: "Content & Data"),
           const SizedBox(height: 12),
           ProjectListGroup(
-            backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+            backgroundColor: theme.colorScheme.onSurface.withValues(
+              alpha: 0.05,
+            ),
             children: [
               ProjectListTile.simple(
                 label: "Archive Deck",
@@ -1377,7 +1392,9 @@ class _SettingsPage extends StatelessWidget {
           const _SectionLabel(title: "Danger Zone"),
           const SizedBox(height: 12),
           ProjectListGroup(
-            backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+            backgroundColor: theme.colorScheme.onSurface.withValues(
+              alpha: 0.05,
+            ),
             children: [
               ProjectListTile.simple(
                 label: "Delete Deck",
@@ -1502,8 +1519,11 @@ class _DecksList extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: ProjectCardTile(
-            backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            isSelected: selectedIds.contains(decks[i].id) || (selectedDeckId == decks[i].id),
+            backgroundColor: theme.colorScheme.surfaceContainerHighest
+                .withValues(alpha: 0.5),
+            isSelected:
+                selectedIds.contains(decks[i].id) ||
+                (selectedDeckId == decks[i].id),
             isCollapsed: isCollapsed,
             title: Text(
               decks[i].name.cleanDeckName,
@@ -1521,47 +1541,7 @@ class _DecksList extends StatelessWidget {
                   )
                 : null,
             leading: const WizardFlashcardPreview(),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: FaIcon(
-                    FontAwesomeIcons.chartSimple,
-                    size: 14,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DeckAnalyticsPage(
-                          deckId: decks[i].id,
-                          deckName: decks[i].name,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: FaIcon(
-                    FontAwesomeIcons.gear,
-                    size: 14,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DeckSettingsPage(
-                          deckId: decks[i].id,
-                          deckName: decks[i].name,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+            trailing: null,
             onTap: isSelecting
                 ? () => onToggleSelection(decks[i].id)
                 : () {

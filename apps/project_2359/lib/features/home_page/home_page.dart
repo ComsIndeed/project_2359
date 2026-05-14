@@ -14,14 +14,13 @@ import 'package:project_2359/app_database.dart';
 import 'package:project_2359/core/study_database_service.dart';
 import 'package:project_2359/core/utils/logger.dart';
 import 'package:project_2359/core/widgets/expandable_fab.dart';
-import 'package:project_2359/features/home_page/widgets/collection_list_view.dart';
+import 'package:project_2359/features/home_page/widgets/deck_list_view.dart';
 import 'package:project_2359/core/widgets/selection_action_bar.dart';
 import 'package:project_2359/features/home_page/widgets/home_header.dart';
 import 'package:project_2359/features/home_page/widgets/new_item_menu.dart';
 import 'package:project_2359/core/widgets/adaptive_pane_layout.dart';
-import 'package:project_2359/features/collection_page/collection_page.dart';
+import 'package:project_2359/features/deck_page/deck_page.dart';
 import 'package:project_2359/features/settings_page/settings_page.dart';
-import 'package:project_2359/core/widgets/due_cards_tiles.dart';
 
 enum MainContentType { empty, study, sourceDetail, settings }
 
@@ -141,7 +140,8 @@ class _HomePageState extends State<HomePage> {
         key: const ValueKey('home_pane_layout'),
         masterWidth: 350,
         master: (context, controller) => _buildMasterView(controller, false),
-        masterCollapsed: (context, controller) => _buildMasterView(controller, true),
+        masterCollapsed: (context, controller) =>
+            _buildMasterView(controller, true),
         detail: (context, controller) => _buildDetailView(),
         wrapDetail: _selectedDeckId == null,
         padding: const EdgeInsets.all(12),
@@ -209,7 +209,9 @@ class _HomePageState extends State<HomePage> {
                           _buildSearchBar(),
                           const SizedBox(height: 32),
                           DeckSection(
-                            stream: _rootDecksStream.map((list) => list.where((d) => d.isPinned).toList()),
+                            stream: _rootDecksStream.map(
+                              (list) => list.where((d) => d.isPinned).toList(),
+                            ),
                             title: "Pinned",
                             searchQuery: _searchQuery,
                             selectedIds: _selectedDeckIds,
@@ -217,13 +219,18 @@ class _HomePageState extends State<HomePage> {
                             onSelect: _handleDeckSelect,
                             activeDeckId: _selectedDeckId,
                             isCollapsed: isCollapsed,
-                            isDesktop: ResponsiveBreakpoints.of(context).largerThan(MOBILE),
+                            isDesktop: ResponsiveBreakpoints.of(
+                              context,
+                            ).largerThan(MOBILE),
                             isSelecting: _isSelecting,
-                            onContextMenu: (pos, id) => _showCoolContextMenu(context, pos, id),
+                            onContextMenu: (pos, id) =>
+                                _showCoolContextMenu(context, pos, id),
                           ),
                           const SizedBox(height: 24),
                           DeckSection(
-                            stream: _rootDecksStream.map((list) => list.where((d) => !d.isPinned).toList()),
+                            stream: _rootDecksStream.map(
+                              (list) => list.where((d) => !d.isPinned).toList(),
+                            ),
                             title: "Decks",
                             searchQuery: _searchQuery,
                             selectedIds: _selectedDeckIds,
@@ -231,9 +238,12 @@ class _HomePageState extends State<HomePage> {
                             onSelect: _handleDeckSelect,
                             activeDeckId: _selectedDeckId,
                             isCollapsed: isCollapsed,
-                            isDesktop: ResponsiveBreakpoints.of(context).largerThan(MOBILE),
+                            isDesktop: ResponsiveBreakpoints.of(
+                              context,
+                            ).largerThan(MOBILE),
                             isSelecting: _isSelecting,
-                            onContextMenu: (pos, id) => _showCoolContextMenu(context, pos, id),
+                            onContextMenu: (pos, id) =>
+                                _showCoolContextMenu(context, pos, id),
                           ),
                           const SizedBox(height: 48),
                           const _DevInjectionTile(),
@@ -257,7 +267,10 @@ class _HomePageState extends State<HomePage> {
                           sliver: SliverList(
                             delegate: SliverChildListDelegate([
                               DeckSection(
-                                stream: _rootDecksStream.map((list) => list.where((d) => d.isPinned).toList()),
+                                stream: _rootDecksStream.map(
+                                  (list) =>
+                                      list.where((d) => d.isPinned).toList(),
+                                ),
                                 title: "Pinned",
                                 searchQuery: _searchQuery,
                                 selectedIds: _selectedDeckIds,
@@ -265,13 +278,19 @@ class _HomePageState extends State<HomePage> {
                                 onSelect: _handleDeckSelect,
                                 activeDeckId: _selectedDeckId,
                                 isCollapsed: isCollapsed,
-                                isDesktop: ResponsiveBreakpoints.of(context).largerThan(MOBILE),
+                                isDesktop: ResponsiveBreakpoints.of(
+                                  context,
+                                ).largerThan(MOBILE),
                                 isSelecting: _isSelecting,
-                                onContextMenu: (pos, id) => _showCoolContextMenu(context, pos, id),
+                                onContextMenu: (pos, id) =>
+                                    _showCoolContextMenu(context, pos, id),
                               ),
                               const SizedBox(height: 12),
                               DeckSection(
-                                stream: _rootDecksStream.map((list) => list.where((d) => !d.isPinned).toList()),
+                                stream: _rootDecksStream.map(
+                                  (list) =>
+                                      list.where((d) => !d.isPinned).toList(),
+                                ),
                                 title: "Decks",
                                 searchQuery: _searchQuery,
                                 selectedIds: _selectedDeckIds,
@@ -279,9 +298,12 @@ class _HomePageState extends State<HomePage> {
                                 onSelect: _handleDeckSelect,
                                 activeDeckId: _selectedDeckId,
                                 isCollapsed: isCollapsed,
-                                isDesktop: ResponsiveBreakpoints.of(context).largerThan(MOBILE),
+                                isDesktop: ResponsiveBreakpoints.of(
+                                  context,
+                                ).largerThan(MOBILE),
                                 isSelecting: _isSelecting,
-                                onContextMenu: (pos, id) => _showCoolContextMenu(context, pos, id),
+                                onContextMenu: (pos, id) =>
+                                    _showCoolContextMenu(context, pos, id),
                               ),
                             ]),
                           ),
@@ -293,7 +315,10 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.all(16.0),
                     child: IconButton(
                       onPressed: controller.toggleCollapsed,
-                      icon: const FaIcon(FontAwesomeIcons.chevronRight, size: 16),
+                      icon: const FaIcon(
+                        FontAwesomeIcons.chevronRight,
+                        size: 16,
+                      ),
                       style: IconButton.styleFrom(
                         backgroundColor: theme.colorScheme.surfaceContainer,
                       ),
@@ -301,7 +326,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
-            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE) && !isCollapsed)
+            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE) &&
+                !isCollapsed)
               Positioned(
                 bottom: 16,
                 right: 16,
@@ -380,32 +406,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _handleStudyGlobal() {
-    if (!ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const StudyPage(title: "Global Review"),
-        ),
-      );
-    } else {
-      setState(() {
-        _selectedDeckId = null;
-        _mainContentType = MainContentType.study;
-      });
-    }
-  }
-
   void _handleDeckSelect(String id) {
     if (!ResponsiveBreakpoints.of(context).largerThan(MOBILE)) {
       final deck = _allDecks.firstWhere((d) => d.id == id);
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => DeckPage(
-            deckId: id,
-            initialDeckName: deck.name,
-          ),
+          builder: (context) =>
+              DeckPage(deckId: id, initialDeckName: deck.name),
         ),
       );
     } else {
@@ -538,9 +546,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(width: 12),
             Text(
               label,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: color,
-              ),
+              style: theme.textTheme.labelLarge?.copyWith(color: color),
             ),
           ],
         ),
@@ -567,7 +573,11 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
         shape: AppTheme.cardShape,
         title: Row(
           children: [
-            Icon(FontAwesomeIcons.terminal, color: theme.colorScheme.primary, size: 18),
+            Icon(
+              FontAwesomeIcons.terminal,
+              color: theme.colorScheme.primary,
+              size: 18,
+            ),
             const SizedBox(width: 12),
             Text(
               'DEVELOPER_INJECTION',
@@ -579,9 +589,7 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
         ),
         content: Text(
           'INJECTION_REQUESTED: This will download ~16MB of study materials from GitHub.\n\nPROCEED?',
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontFamily: 'Courier',
-          ),
+          style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'Courier'),
         ),
         actions: [
           TextButton(
@@ -614,11 +622,15 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
       try {
         await DebugSeeder.seed(context.read<AppDatabase>());
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('INJECTION_SUCCESSFUL')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('INJECTION_SUCCESSFUL')));
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('INJECTION_FAILED: $e')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('INJECTION_FAILED: $e')));
         }
       } finally {
         if (mounted) setState(() => _isSeeding = false);
@@ -645,7 +657,9 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.1,
+                ),
                 border: Border.all(
                   color: theme.colorScheme.primary.withValues(alpha: 0.2),
                 ),
@@ -660,11 +674,18 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
                         color: theme.colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(
-                        _isSeeding ? FontAwesomeIcons.gear : FontAwesomeIcons.bug,
-                        color: theme.colorScheme.primary,
-                        size: 16,
-                      ).animate(onPlay: (c) => _isSeeding ? c.repeat() : null).rotate(duration: 2.seconds),
+                      child:
+                          Icon(
+                                _isSeeding
+                                    ? FontAwesomeIcons.gear
+                                    : FontAwesomeIcons.bug,
+                                color: theme.colorScheme.primary,
+                                size: 16,
+                              )
+                              .animate(
+                                onPlay: (c) => _isSeeding ? c.repeat() : null,
+                              )
+                              .rotate(duration: 2.seconds),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -672,7 +693,9 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _isSeeding ? 'INJECTING_PAYLOAD...' : 'INJECT_MOCK_DATA',
+                            _isSeeding
+                                ? 'INJECTING_PAYLOAD...'
+                                : 'INJECT_MOCK_DATA',
                             style: theme.textTheme.labelLarge?.copyWith(
                               color: theme.colorScheme.primary,
                               fontWeight: FontWeight.bold,
@@ -684,7 +707,9 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
                           Text(
                             'Internal tool: Seed ~16MB of cards',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.4,
+                              ),
                               fontFamily: 'Courier',
                             ),
                           ),
@@ -697,14 +722,18 @@ class _DevInjectionTileState extends State<_DevInjectionTile> {
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
+                          valueColor: AlwaysStoppedAnimation(
+                            theme.colorScheme.primary,
+                          ),
                         ),
                       )
                     else
                       Icon(
                         FontAwesomeIcons.chevronRight,
                         size: 12,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.2,
+                        ),
                       ),
                   ],
                 ),
